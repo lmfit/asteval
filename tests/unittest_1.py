@@ -7,6 +7,44 @@ import numpy as np
 class TestEval(TestCase):
     '''testing of asteval'''
 
+    def test_dict_index(self):
+        '''dictionary indexing'''
+        self.interp("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
+        self.istrue("a_dict['a'] == 1")
+        self.istrue("a_dict['d'] == 4")
+
+    def test_list_index(self):
+        '''list indexing'''
+        self.interp("a_list = ['a', 'b', 'c', 'd', 'o']")
+        self.istrue("a_list[0] == 'a'")
+        self.istrue("a_list[1] == 'b'")
+        self.istrue("a_list[2] == 'c'")
+
+    def test_tuple_index(self):
+        '''tuple indexing'''
+        self.interp("a_tuple = (5, 'a', 'x')")
+        self.istrue("a_tuple[0] == 5")
+        self.istrue("a_tuple[2] == 'x'")
+
+    def test_string_index(self):
+        '''string indexing'''
+        self.interp("a_string = 'hello world'")
+        self.istrue("a_string[0] == 'h'")
+        self.istrue("a_string[6] == 'w'")
+        self.istrue("a_string[-1] == 'd'")
+        self.istrue("a_string[-2] == 'l'")
+
+    def test_ndarray_index(self):
+        '''nd array indexing'''
+        self.interp("a_ndarray = 5*arange(20)")
+        self.istrue("a_ndarray[2] == 10")
+        self.istrue("a_ndarray[4] == 20")
+
+    def test_ndarrayslice(self):
+        '''array slicing'''
+        self.interp("a_ndarray = arange(200).reshape(10, 20)")
+        self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
+
     def test_while(self):
         '''while loops'''
         self.interp("""
@@ -106,21 +144,21 @@ a = arange(7)''')
         self.interp('n = 5')
         self.isvalue("n",  5)
 
-    def test_function_call(self):
+    def test_ndarrays(self):
         '''simple ndarrays'''
         self.interp('n = array([11, 10, 9])')
-
         self.istrue("isinstance(n, ndarray)")
         self.istrue("len(n) == 3")
         self.isvalue("n", np.array([11, 10, 9]))
 
     def test_convenience_imports(self):
-        '''convenience imports
-
-        imported functions like math.sqrt into the top level?'''
-
+        '''builtin math functions'''
         self.interp('n = sqrt(4)')
         self.istrue('n == 2')
+        self.istrue('abs(sin(pi/2) - 1) < 1.e-7')
+        self.istrue('abs(cos(pi/2) - 0) < 1.e-7')
+        self.istrue('exp(0) == 1')
+        self.istrue('abs(exp(1) - e) < 1.e-7')
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):

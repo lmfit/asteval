@@ -31,8 +31,14 @@ class TestCase(unittest.TestCase):
 
     def istrue(self, expr):
         '''assert that an expression evaluates to True'''
-        return self.assertTrue(self.interp(expr))
+        val = self.interp(expr)
+        if isinstance(val, np.ndarray):
+            val = np.all(val)
+        return self.assertTrue(val)
 
     def isfalse(self, expr):
         '''assert that an expression evaluates to False'''
-        return self.assertFalse(self.interp(expr))
+        val = self.interp(expr)
+        if isinstance(val, np.ndarray):
+            val = np.all(val)
+        return self.assertFalse(val)
