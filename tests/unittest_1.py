@@ -277,7 +277,17 @@ a = arange(7)''')
         self.interp("myx = n.shape")
         self.interp("n.shape = (4, 5)")
         self.istrue("n.shape == (4, 5)")
-        self.interp("del = n.shape")
+
+        # self.interp("del = n.shape")
+        self.interp("a = arange(20)")
+        self.interp("gg = a[1:13:3]")
+        self.isvalue('gg', np.array([1, 4, 7, 10]))
+
+        self.interp("gg[:2] = array([0,2])")
+        self.isvalue('gg', np.array([0, 2, 7, 10]))
+        self.interp('a, b, c, d = gg')
+        self.isvalue('c', 7)
+        self.istrue('(a, b, d) == (0, 2, 10)')
 
     def test_binop(self):
         '''test binary ops'''

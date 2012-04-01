@@ -304,9 +304,9 @@ class Interpreter:
             sym    = self.run(node.value)
             xslice = self.run(node.slice)
             if isinstance(node.slice, ast.Index):
-                sym.__setitem__(xslice, val)
+                sym[xslice] = val
             elif isinstance(node.slice, ast.Slice):
-                sym.__setslice__(xslice.start, xslice.stop, val)
+                sym[slice(xslice.start, xslice.stop)] = val
             elif isinstance(node.slice, ast.ExtSlice):
                 sym[(xslice)] = val
         elif node.__class__ in (ast.Tuple, ast.List):
@@ -356,6 +356,7 @@ class Interpreter:
         return slice(self.run(node.lower),
                      self.run(node.upper),
                      self.run(node.step))
+
 
     def on_extslice(self, node):    # ():('dims',)
         "extended slice"
