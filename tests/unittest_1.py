@@ -55,6 +55,28 @@ while n < 8:
 """)
         self.isvalue('n',  8)
 
+        self.interp("""
+n=0
+while n < 8:
+    n += 1
+    if n > 3:
+        break
+else:
+    n = -1
+""")
+        self.isvalue('n',  4)
+
+
+        self.interp("""
+n=0
+while n < 8:
+    n += 1
+else:
+    n = -1
+""")
+        self.isvalue('n',  -1)
+
+
     def test_for(self):
         '''for loops'''
         self.interp('''
@@ -63,6 +85,27 @@ for i in arange(10):
     n += i
 ''')
         self.isvalue('n', 45)
+
+        self.interp('''
+n=0
+for i in arange(10):
+    n += i
+else:
+    n = -1
+''')
+        self.isvalue('n', -1)
+
+        self.interp('''
+n=0
+for i in arange(10):
+    n += i
+    if n > 2:
+        break
+else:
+    n = -1
+''')
+        self.isvalue('n', 3)
+
 
     def test_if(self):
         '''runtime errors test'''
@@ -209,7 +252,9 @@ a = arange(7)''')
                               ('x = zero + nonexistent', 'NameError'),
                               ('x = zero + astr', 'TypeError'),
                               ('x = astr * atup', 'TypeError'),
-                              ('arr.shapx = 4', 'AttributeError')):
+                              ('x = arr.shapx', 'AttributeError'),
+                              ('arr.shapx = 4', 'AttributeError'),
+                              ('del arr.shapx', 'KeyError')):
             failed, errtype, errmsg = False, None, None
             try:
                 self.interp(expr, show_errors=False)
@@ -229,9 +274,10 @@ a = arange(7)''')
         self.interp('n = arange(20).reshape(5, 4)')
         self.istrue("isinstance(n, ndarray)")
         self.istrue("n.shape == (5, 4)")
-
+        self.interp("myx = n.shape")
         self.interp("n.shape = (4, 5)")
         self.istrue("n.shape == (4, 5)")
+        self.interp("del = n.shape")
 
     def test_binop(self):
         '''test binary ops'''
@@ -284,6 +330,19 @@ a = arange(7)''')
         self.assertTrue('z' in nf.names)
         self.assertTrue('cos' in nf.names)
 
+    def test_list_comprehension(self):
+        "test list comprehension"
+        self.interp('x = [i*i for i in range(4)]')
+        self.isvalue('x', [0, 1, 4, 9])
+
+    def test_ifexp(self):
+        "test if expressions"
+        self.interp('x = 2')
+        self.interp('y = 4 if x > 0 else -1')
+        self.interp('z = 4 if x > 3 else -1')
+        self.isvalue('y', 4)
+        self.isvalue('z', -1)
+
     def test_index_assignment(self):
         "test indexing / subscripting on assignment"
         self.interp('x = arange(10)')
@@ -299,10 +358,31 @@ a = arange(7)''')
         self.interp('x[0:2] = [9,-9]')
         self.isvalue('x', np.array([9,-9,2,3,4,5,6,7,8,9]))
 
-    def test_simple_function(self):
+    def test_raise(self):
+        "test raise"
+        self.interp("raise NameError('bob')")
+        errtype, errmsg = self.interp.error[0].get_error()
+        errmsgs = errmsg.split('\n')
+        self.assertTrue(errtype == 'NameError')
+        self.assertTrue(errmsgs[1].startswith('bob'))
+
+
+    def test_tryexcept(self):
+        "test try/except"
+        self.interp("""
+x = 5
+try:
+    x = x/0
+except ZeroDivsionError:
+    print 'Error Seen!'
+    x = -999
+""")
+        self.isvalue('x', -999)
+
+    def test_function1(self):
         "test function definition and running"
         self.interp("""
-def fcn(x, scale=2, **kws):
+def fcn(x, scale=2):
     'test function'
     out = sqrt(x)
     if scale > 1:
@@ -321,7 +401,101 @@ def fcn(x, scale=2, **kws):
         self.assert_('test func' in out[1])
 
         self.interp("a = fcn()")
+        errtype, errmsg = self.interp.error[0].get_error()
+        errmsg0, errmsg1 = errmsg.split('\n')
 
+        self.assertTrue(errtype == 'TypeError')
+        self.assertTrue(errmsg1.startswith('not enough arg'))
+
+        self.interp("a = fcn(x, bogus=3)")
+        errtype, errmsg = self.interp.error[0].get_error()
+        errmsgs = errmsg.split('\n')
+        self.assertTrue(errtype == 'NameError')
+
+    def test_function_vararg(self):
+        "test function with var args"
+        self.interp("""
+def fcn(*args):
+    'test varargs function'
+    out = 0
+    for i in args:
+        out = out + i*i
+    return out
+""")
+        self.interp("o = fcn(1,2,3)")
+        self.isvalue('o', 14)
+
+    def test_function_kwargs(self):
+        "test function with kw args, no **kws"
+        self.interp("""
+def fcn(square=False, x=0, y=0, z=0, t=0):
+    'test varargs function'
+    out = 0
+    for i in (x, y, z, t):
+        if square:
+            out = out + i*i
+        else:
+            out = out + i
+    return out
+""")
+        self.interp("o = fcn(x=1, y=2, z=3, square=False)")
+        self.isvalue('o', 6)
+
+        self.interp("o = fcn(x=1, y=2, z=3, square=True)")
+        self.isvalue('o', 14)
+
+        self.interp("o = fcn(x=1, y=2, z=3, t=-2)")
+
+        self.isvalue('o', 4)
+
+        self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
+        errtype, errmsg = self.interp.error[0].get_error()
+        self.assertTrue(errtype == 'TypeError')
+        errmsg0, errmsg1 = errmsg.split('\n')
+        self.assertTrue(errmsg1.startswith('extra keyword arg'))
+
+    def test_function_kwargs1(self):
+        "test function with **kws arg"
+        self.interp("""
+def fcn(square=False, **kws):
+    'test varargs function'
+    out = 0
+    for i in kws.values():
+        if square:
+            out = out + i*i
+        else:
+            out = out + i
+    return out
+""")
+        self.interp("o = fcn(x=1, y=2, z=3, square=False)")
+        self.isvalue('o', 6)
+
+        self.interp("o = fcn(x=1, y=2, z=3, square=True)")
+        self.isvalue('o', 14)
+
+
+    def test_function_kwargs2(self):
+        "test function with positional and **kws args"
+
+        self.interp("""
+def fcn(x, y):
+    'test function'
+    return x + y**2
+""")
+        self.interp("o = -1")
+        self.interp("o = fcn(2, 1)")
+        self.isvalue('o', 3)
+
+        self.interp("o = fcn(x=1, y=2)")
+        self.isvalue('o', 5)
+
+        self.interp("o = fcn(y=2, x=7)")
+        self.isvalue('o', 11)
+
+        self.interp("o = fcn(1, y=2)")
+        self.isvalue('o', 5)
+
+        self.interp("o = fcn(1, x=2)")
         errtype, errmsg = self.interp.error[0].get_error()
         self.assertTrue(errtype == 'TypeError')
 

@@ -125,7 +125,7 @@ class Interpreter:
             self.raise_exception(None, exc=SyntaxError,
                                  msg='Syntax Error', expr=text)
 
-    def run(self, node, expr=None, lineno=None):
+    def run(self, node, expr=None, lineno=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
@@ -153,9 +153,9 @@ class Interpreter:
             if isinstance(ret, enumerate):
                 ret = list(ret)
             return ret
-
         except:
-            self.raise_exception(node, expr=expr)
+            if with_raise:
+                self.raise_exception(node, expr=expr)
 
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
@@ -512,9 +512,9 @@ class Interpreter:
         "try/except blocks"
         no_errors = True
         for tnode in node.body:
-            self.run(tnode)
+            self.run(tnode, with_raise=False)
             no_errors = no_errors and len(self.error) == 0
-            if self.error:
+            if len(self.error) > 0:
                 e_type, e_value, e_tback = self.error[-1].exc_info
                 for hnd in node.handlers:
                     htype = None
@@ -534,9 +534,12 @@ class Interpreter:
 
     def on_raise(self, node):    # ('type', 'inst', 'tback')
         "raise statement"
-        msg = "%s: %s" % (self.run(node.type).__name__,
-                          self.run(node.inst))
-        self.raise_exception(node.type, msg=msg)
+        out = self.run(node.type)
+        msg = ' '.join(out.args)
+        inst_out = self.run(node.inst)
+        if inst_out not in (None, 'None'):
+            msg = "%s: %s" % (msg, inst_out)
+        self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
 
     def on_call(self, node):
         "function execution"
@@ -635,27 +638,36 @@ class Procedure(object):
         args = list(args)
         n_args = len(args)
         n_names = len(self.argnames)
+        n_kws = len(kwargs)
+
+        # may need to move kwargs to args if names align!
+        if (n_args < n_names) and n_kws > 0:
+            for name in self.argnames[n_args:]:
+                if name in kwargs:
+                    args.append(kwargs.pop(name))
+            n_args = len(args)
+            n_names = len(self.argnames)
+            n_kws = len(kwargs)
+
+        if len(self.argnames) > 0 and kwargs is not None:
+            msg = "got multiple values for keyword argument '%s' in Procedure %s"
+
+            for targ in self.argnames:
+                if targ in kwargs:
+                    self.raise_exc(None, exc=TypeError,
+                                   msg=msg % (targ, self.name),
+                                   lineno=self.lineno)
+
         if n_args != n_names:
             msg = None
-            msg = "too many arguments for Procedure %s" % self.name
             if n_args < n_names:
                 msg = 'not enough arguments for Procedure %s()' % self.name
-            msg = '%s (expected %i, got %i)'% (msg, n_names, n_args)
+                msg = '%s (expected %i, got %i)'% (msg, n_names, n_args)
+                self.raise_exc(None, exc=TypeError, msg=msg)
 
-            self.raise_exc(None, exc=TypeError, msg=msg)
 
         for argname in self.argnames:
             symlocals[argname] = args.pop(0)
-
-        if len(args) > 0 and self.kwargs is not None:
-            msg = "got multiple values for keyword argument '%s' Procedure %s"
-            for t_a, t_kw in zip(args, self.kwargs):
-                if t_kw[0] in kwargs:
-                    msg = msg % (t_kw[0], self.name)
-                    self.raise_exc(None, msg=msg, expr='<>',
-                                   lineno=self.lineno)
-                else:
-                    kwargs[t_a] = t_kw[1]
 
         try:
             if self.vararg is not None:
@@ -672,14 +684,13 @@ class Procedure(object):
             elif len(kwargs) > 0:
                 msg = 'extra keyword arguments for Procedure %s (%s)'
                 msg = msg % (self.name, ','.join(list(kwargs.keys())))
-                self.raise_exc(None, msg=msg, expr='<>',
+                self.raise_exc(None, msg=msg, exc=TypeError,
                                lineno=self.lineno)
 
         except (ValueError, LookupError, TypeError,
                 NameError, AttributeError):
             msg = 'incorrect arguments for Procedure %s' % self.name
-            self.raise_exc(None, msg=msg, expr='<>',
-                           lineno=self.lineno)
+            self.raise_exc(None, msg=msg, lineno=self.lineno)
 
         save_symtable = self.interpreter.symtable.copy()
         self.interpreter.symtable.update(symlocals)
