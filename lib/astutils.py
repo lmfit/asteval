@@ -191,42 +191,38 @@ def op2func(op):
 
 class ExceptionHolder(object):
     "basic exception handler"
-    def __init__(self, node, msg='', expr=None,
-                 py_exc=(None, None)):
+    def __init__(self, node, exc=None, msg='', expr=None):
         self.node   = node
         self.expr   = expr
         self.msg    = msg
-        self.py_exc = py_exc
+        self.exc    = exc
         self.exc_info = sys.exc_info()
+        if self.exc is None and self.exc_info[0] is not None:
+            self.exc = self.exc_info[0]
+        if self.msg is '' and self.exc_info[1] is not None:
+            self.msg = self.exc_info[1]
 
     def get_error(self):
         "retrieve error data"
-        node = self.node
-        node_col_offset = 0
-
-        if node is not None:
+        col_offset = -1
+        if self.node is not None:
             try:
-                node_col_offset = self.node.col_offset
+                col_offset = self.node.col_offset
             except AttributeError:
                 pass
 
-        exc_text = str(self.exc_info[1])
-        if exc_text in (None, 'None'):
-            exc_text = ''
-        expr = self.expr
+        try:
+            exc_name = self.exc.__name__
+        except AttributeError:
+            exc_name = str(self.exc)
+        if exc_name in (None, 'None'):
+            exc_name = 'UnknownError'
 
-        out = []
-        if len(exc_text) > 0:
-            out.append(exc_text)
-        else:
-            py_etype, py_eval = self.py_exc
-            if py_etype is not None and py_eval is not None:
-                out.append("%s: %s" % (py_etype, py_eval))
-
-        out.append("    %s" % expr)
-        if node_col_offset > 0:
-            out.append("    %s^^^" % ((node_col_offset)*' '))
-        return (self.msg, '\n'.join(out))
+        out = ["   %s" % self.expr]
+        if col_offset > 0:
+            out.append("    %s^^^" % ((col_offset)*' '))
+        out.append(str(self.msg))
+        return (exc_name, '\n'.join(out))
 
 class NameFinder(ast.NodeVisitor):
     """find all symbol names used by a parsed node"""

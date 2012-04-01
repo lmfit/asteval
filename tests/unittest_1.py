@@ -157,19 +157,53 @@ a = arange(7)''')
         self.interp('nx = 1')
         self.interp('nx1 = 1')
 
-        failed = False
-        try:
-            self.interp('class = 1', show_errors=False)
-        except RuntimeError:
-            failed = True
-        self.assertTrue(failed)
+    def test_syntaxerrors_1(self):
+        '''assignment syntax errors test'''
+        for expr in ('class = 1', 'for = 1', 'if = 1', 'raise = 1',
+                     '1x = 1', '1.x = 1', '1_x = 1'):
+            failed, errtype, errmsg = False, None, None
+            try:
+                self.interp(expr, show_errors=False)
+            except RuntimeError:
+                failed = True
+                errtype, errmsg = self.interp.error[0].get_error()
 
-        failed = False
-        try:
-            self.interp('1x = 1', show_errors=False)
-        except:
-            failed=True
-        self.assertTrue(failed)
+            self.assertTrue(failed)
+            self.assertTrue(errtype == 'SyntaxError')
+            #self.assertTrue(errmsg.startswith('invalid syntax'))
+
+    def test_syntaxerrors_2(self):
+        '''syntax errors test'''
+        for expr in ('x = (1/*)', 'x = 1.A', 'x = A.2'):
+
+            failed, errtype, errmsg = False, None, None
+            try:
+                self.interp(expr, show_errors=False)
+            except RuntimeError:
+                failed = True
+                errtype, errmsg = self.interp.error[0].get_error()
+            self.assertTrue(failed)
+            self.assertTrue(errtype == 'SyntaxError')
+            #self.assertTrue(errmsg.startswith('invalid syntax'))
+
+    def test_runtimeerrors_1(self):
+        '''runtime errors test'''
+        self.interp("zero = 0")
+        self.interp("astr ='a string'")
+        self.interp("atup = ('a', 'b', 11021)")
+        for expr, errname in (('x = 1/zero', 'ZeroDivisionError'),
+                              ('x = zero + nonexistent', 'NameError'),
+                              ('x = zero + astr', 'TypeError'),
+                              ('x = astr * atup', 'TypeError') ):
+            failed, errtype, errmsg = False, None, None
+            try:
+                self.interp(expr, show_errors=False)
+            except:
+                failed = True
+                errtype, errmsg = self.interp.error[0].get_error()
+            self.assertTrue(failed)
+            self.assertTrue(errtype == errname)
+            #self.assertTrue(errmsg.startswith('invalid syntax'))
 
     def test_ndarrays(self):
         '''simple ndarrays'''
@@ -185,10 +219,19 @@ a = arange(7)''')
         '''test binary ops'''
         self.interp('a = 10.0')
         self.interp('b = 6.0')
+
         self.istrue("a+b == 16.0")
         self.isnear("a-b", 4.0)
         self.istrue("a/(b-1) == 2.0")
         self.istrue("a*b     == 60.0")
+
+    def test_unaryop(self):
+        '''test binary ops'''
+        self.interp('a = -10.0')
+        self.interp('b = -6.0')
+
+        self.isnear("a", -10.0)
+        self.isnear("b", -6.0)
 
     def test_math1(self):
         '''builtin math functions'''

@@ -98,7 +98,7 @@ class Interpreter:
         self.raise_exception(node,
                              "'%s' not supported" % (node.__class__.__name__))
 
-    def raise_exception(self, node, msg='', expr=None):
+    def raise_exception(self, node, exc=None, msg='', expr=None):
         "add an exception"
         if self.error is None:
             self.error = []
@@ -106,10 +106,7 @@ class Interpreter:
             expr  = self.expr
         if len(self.error) > 0 and not isinstance(node, ast.Module):
             msg = '%s' % msg
-
-        etype, evalue, tback = sys.exc_info()
-        err = ExceptionHolder(node, msg=msg, expr= expr,
-                              py_exc=(etype, evalue))
+        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr)
         self._interrupt = ast.Break()
         self.error.append(err)
         raise RuntimeError
@@ -124,7 +121,8 @@ class Interpreter:
         try:
             return ast.parse(text)
         except:
-            self.raise_exception(None, msg='Syntax Error', expr=text)
+            self.raise_exception(None, exc=SyntaxError,
+                                 msg='Syntax Error', expr=text)
 
     def run(self, node, expr=None, lineno=None):
         """executes parsed Ast representation for an expression"""
@@ -156,7 +154,7 @@ class Interpreter:
             return ret
 
         except:
-            self.raise_exception(node, msg='Runtime Error', expr=expr)
+            self.raise_exception(node, expr=expr)
 
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
@@ -281,8 +279,8 @@ class Interpreter:
             if node.id in self.symtable:
                 return self.symtable[node.id]
             else:
-                errmsg = "cannot find symbol '%s'" % node.id
-                self.raise_exception(node, errmsg)
+                msg = "name '%s' is not defined" % node.id
+                self.raise_exception(node, exc=NameError, msg=msg)
 
     def node_assign(self, node, val):
         """here we assign a value (not the node.value object) to a node
@@ -292,13 +290,13 @@ class Interpreter:
             return
         if node.__class__ == ast.Name:
             if not valid_symbol_name(node.id):
-                errmsg = "invalid symbol name (reserved word? %s" % node.id
-                self.raise_exception(node, errmsg)
+                errmsg = "invalid symbol name (reserved word?) %s" % node.id
+                self.raise_exception(node, exc=NameError, msg=errmsg)
             sym = self.symtable[node.id] = val
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__  == ast.Load:
-                errmsg = "cannot assign to attribute %s" % node.attr
-                self.raise_exception(node, errmsg)
+                msg = "cannot assign to attribute %s" % node.attr
+                self.raise_exception(node, exc=AttributeError, msg=msg)
 
             setattr(self.run(node.value), node.attr, val)
 
@@ -329,13 +327,13 @@ class Interpreter:
                 obj = self.run(node.value)
                 fmt = "%s does not have attribute '%s'"
                 msg = fmt % (obj, node.attr)
-                self.raise_exception(node, msg=msg)
+                self.raise_exception(node, exc=AttributeError, msg=msg)
 
         elif ctx == ast.Del:
             return delattr(sym, node.attr)
         elif ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
-            self.raise_exception(node, msg=msg)
+            self.raise_exception(node, exc=RuntimeError, msg=msg)
 
     def on_assign(self, node):    # ('targets', 'value')
         "simple assignment"
@@ -517,7 +515,7 @@ class Interpreter:
             self.run(tnode)
             no_errors = no_errors and len(self.error) == 0
             if self.error:
-                e_type, e_value = self.error[-1].py_exc
+                e_type, e_value, e_tback = self.error[-1].exc_info
                 for hnd in node.handlers:
                     htype = None
                     if hnd.type is not None:
