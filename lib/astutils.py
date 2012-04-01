@@ -191,11 +191,12 @@ def op2func(op):
 
 class ExceptionHolder(object):
     "basic exception handler"
-    def __init__(self, node, exc=None, msg='', expr=None):
+    def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
         self.node   = node
         self.expr   = expr
         self.msg    = msg
         self.exc    = exc
+        self.lineno = lineno
         self.exc_info = sys.exc_info()
         if self.exc is None and self.exc_info[0] is not None:
             self.exc = self.exc_info[0]

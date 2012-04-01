@@ -98,7 +98,8 @@ class Interpreter:
         self.raise_exception(node,
                              "'%s' not supported" % (node.__class__.__name__))
 
-    def raise_exception(self, node, exc=None, msg='', expr=None):
+    def raise_exception(self, node, exc=None, msg='', expr=None,
+                        lineno=None):
         "add an exception"
         if self.error is None:
             self.error = []
@@ -106,7 +107,7 @@ class Interpreter:
             expr  = self.expr
         if len(self.error) > 0 and not isinstance(node, ast.Module):
             msg = '%s' % msg
-        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr)
+        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
         self._interrupt = ast.Break()
         self.error.append(err)
         raise RuntimeError
@@ -163,7 +164,6 @@ class Interpreter:
         """evaluates a single statement"""
         self.lineno = lineno
         self.error = []
-
         try:
             node = self.parse(expr)
         except RuntimeError:
@@ -563,7 +563,7 @@ class Interpreter:
         try:
             return func(*args, **keywords)
         except:
-            self.raise_exception(node, msg = "Error running %s" % (func))
+            self.raise_exception(node, exc=RuntimeError, msg = "Error running %s" % (func))
 
     def on_functiondef(self, node):
         "define procedures"
@@ -635,15 +635,14 @@ class Procedure(object):
         args = list(args)
         n_args = len(args)
         n_names = len(self.argnames)
-
         if n_args != n_names:
             msg = None
-            if n_args < n_names:
-                msg = 'not enough arguments for Procedure %s' % self.name
-                msg = '%s (expected %i, got %i)'% (msg, n_names, n_args)
-                self.raise_exc(None, msg=msg, expr='<>',
-                               lineno=self.lineno)
             msg = "too many arguments for Procedure %s" % self.name
+            if n_args < n_names:
+                msg = 'not enough arguments for Procedure %s()' % self.name
+            msg = '%s (expected %i, got %i)'% (msg, n_names, n_args)
+
+            self.raise_exc(None, exc=TypeError, msg=msg)
 
         for argname in self.argnames:
             symlocals[argname] = args.pop(0)

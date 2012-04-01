@@ -320,6 +320,11 @@ def fcn(x, scale=2, **kws):
         self.assert_(out[0].startswith('<Procedure fcn(x, scale='))
         self.assert_('test func' in out[1])
 
+        self.interp("a = fcn()")
+
+        errtype, errmsg = self.interp.error[0].get_error()
+        self.assertTrue(errtype == 'TypeError')
+
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):
         suite = unittest.TestLoader().loadTestsFromTestCase(suite)
