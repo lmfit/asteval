@@ -147,8 +147,10 @@ a = arange(7)''')
         self.isvalue("s1",  "a string")
         self.interp('b = (1,2,3)')
         self.isvalue("b",  (1,2,3))
-        self.interp('a = arange(10)')
+        self.interp('a = 1.*arange(10)')
         self.isvalue("a", np.arange(10) )
+        self.interp('a[1:5] = 1 + 0.5 * arange(4)')
+        self.isnear("a", np.array([ 0. ,  1. ,  1.5,  2. ,  2.5,  5. ,  6. ,  7. ,  8. ,  9. ]))
 
     def test_names(self):
         '''names test'''
@@ -184,7 +186,7 @@ a = arange(7)''')
         self.interp('a = 10.0')
         self.interp('b = 6.0')
         self.istrue("a+b == 16.0")
-        self.istrue("(abs(a-b) - 6.0) < 1.e-9")
+        self.isnear("a-b", 4.0)
         self.istrue("a/(b-1) == 2.0")
         self.istrue("a*b     == 60.0")
 
@@ -192,10 +194,10 @@ a = arange(7)''')
         '''builtin math functions'''
         self.interp('n = sqrt(4)')
         self.istrue('n == 2')
-        self.istrue('abs(sin(pi/2) - 1) < 1.e-9')
-        self.istrue('abs(cos(pi/2) - 0) < 1.e-9')
+        self.isnear('sin(pi/2)', 1)
+        self.isnear('cos(pi/2)', 0)
         self.istrue('exp(0) == 1')
-        self.istrue('abs(exp(1) - e) < 1.e-9')
+        self.isnear('exp(1)', np.e)
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):

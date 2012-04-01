@@ -29,6 +29,15 @@ class TestCase(unittest.TestCase):
         else:
             return self.assertTrue(self.interp.symtable[sym]==val)
 
+    def isnear(self, expr, val, places=7):
+        '''assert that a symboltable symbol is near a particular value'''
+        oval = self.interp(expr)
+        if isinstance(val, np.ndarray):
+            for x, y in zip(oval, val):
+                self.assertAlmostEqual(x, y, places=places)
+        else:
+            return self.assertAlmostEqual(oval, val, places=places)
+
     def istrue(self, expr):
         '''assert that an expression evaluates to True'''
         val = self.interp(expr)
