@@ -16,7 +16,8 @@ import ast
 import math
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY,
-                       NUMPY_RENAMES, op2func, ExceptionHolder)
+                       NUMPY_RENAMES, op2func, ExceptionHolder,
+                       valid_symbol_name)
 try:
     import numpy
     HAS_NUMPY = True
@@ -25,20 +26,6 @@ except ImportError:
     print("Warning: numpy not available... functionality will be limited.")
 
 __version__ = '0.3'
-
-class NameFinder(ast.NodeVisitor):
-    """find all symbol names used by a parsed node"""
-    def __init__(self):
-        self.names = []
-        ast.NodeVisitor.__init__(self)
-
-    def generic_visit(self, node):
-        nodename = node.__class__.__name__.lower()
-        if nodename == 'name':
-            if (node.ctx.__class__ == ast.Load and
-                node.id not in self.names):
-                self.names.append(node.id)
-        ast.NodeVisitor.generic_visit(self, node)
 
 class Interpreter:
     """mathematical expression compiler and interpreter.
@@ -179,18 +166,27 @@ class Interpreter:
         self.lineno = lineno
         self.error = []
 
-        node = self.parse(expr)
+        try:
+            node = self.parse(expr)
+        except RuntimeError:
+            errmsg = sys.exc_info()[1]
+            if len(self.error) > 0:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                raise RuntimeError(errmsg)
+            print(errmsg, file=self.writer)
+            return
         out = None
-        if len(self.error) > 0:
-            self.raise_exception(node, msg='Syntax Error', expr=expr)
-
-        else:
-            try:
-                return self.run(node, expr=expr, lineno=lineno)
-            except RuntimeError:
-                if show_errors and len(self.error) > 0:
-                    print("\n".join(self.error[0].get_error()),
-                          file=self.writer)
+        try:
+            return self.run(node, expr=expr, lineno=lineno)
+        except RuntimeError:
+            errmsg = sys.exc_info()[1]
+            if len(self.error) > 0:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                raise RuntimeError(errmsg)
+            print(errmsg, file=self.writer)
+            return
 
     def dump(self, node, **kw):
         "simple ast dumper"
@@ -295,6 +291,9 @@ class Interpreter:
         if len(self.error) > 0:
             return
         if node.__class__ == ast.Name:
+            if not valid_symbol_name(node.id):
+                errmsg = "invalid symbol name (reserved word? %s" % node.id
+                self.raise_exception(node, errmsg)
             sym = self.symtable[node.id] = val
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__  == ast.Load:

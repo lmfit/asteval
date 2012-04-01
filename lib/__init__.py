@@ -20,6 +20,7 @@
 """
 __version__ = '0.3'
 
-from .asteval import Interpreter, NameFinder
+from .asteval import Interpreter
+from .astutils import NameFinder
 
 __all__ = [Interpreter, NameFinder]

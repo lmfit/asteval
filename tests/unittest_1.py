@@ -139,10 +139,35 @@ a = arange(7)''')
         self.istrue("dict(y=1)")
         self.isfalse("{}")
 
-    def test_assign(self):
-        '''variables assignment?'''
+    def test_assignment(self):
+        '''variables assignment'''
         self.interp('n = 5')
         self.isvalue("n",  5)
+        self.interp('s1 = "a string"')
+        self.isvalue("s1",  "a string")
+        self.interp('b = (1,2,3)')
+        self.isvalue("b",  (1,2,3))
+        self.interp('a = arange(10)')
+        self.isvalue("a", np.arange(10) )
+
+    def test_names(self):
+        '''names test'''
+        self.interp('nx = 1')
+        self.interp('nx1 = 1')
+
+        failed = False
+        try:
+            self.interp('class = 1', show_errors=False)
+        except RuntimeError:
+            failed = True
+        self.assertTrue(failed)
+
+        failed = False
+        try:
+            self.interp('1x = 1', show_errors=False)
+        except:
+            failed=True
+        self.assertTrue(failed)
 
     def test_ndarrays(self):
         '''simple ndarrays'''
@@ -150,15 +175,27 @@ a = arange(7)''')
         self.istrue("isinstance(n, ndarray)")
         self.istrue("len(n) == 3")
         self.isvalue("n", np.array([11, 10, 9]))
+        self.interp('n = arange(20).reshape(5, 4)')
+        self.istrue("isinstance(n, ndarray)")
+        self.istrue("n.shape == (5, 4)")
 
-    def test_convenience_imports(self):
+    def test_binop(self):
+        '''test binary ops'''
+        self.interp('a = 10.0')
+        self.interp('b = 6.0')
+        self.istrue("a+b == 16.0")
+        self.istrue("(abs(a-b) - 6.0) < 1.e-9")
+        self.istrue("a/(b-1) == 2.0")
+        self.istrue("a*b     == 60.0")
+
+    def test_math1(self):
         '''builtin math functions'''
         self.interp('n = sqrt(4)')
         self.istrue('n == 2')
-        self.istrue('abs(sin(pi/2) - 1) < 1.e-7')
-        self.istrue('abs(cos(pi/2) - 0) < 1.e-7')
+        self.istrue('abs(sin(pi/2) - 1) < 1.e-9')
+        self.istrue('abs(cos(pi/2) - 0) < 1.e-9')
         self.istrue('exp(0) == 1')
-        self.istrue('abs(exp(1) - e) < 1.e-7')
+        self.istrue('abs(exp(1) - e) < 1.e-9')
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):

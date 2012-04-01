@@ -8,12 +8,14 @@ import ast
 import sys
 import re
 
-RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'continue', 'def', 'del',
-                  'elif', 'else', 'except', 'finally', 'for', 'from', 'if',
-                  'import', 'in', 'is', 'not', 'or', 'pass', 'print',
-                  'raise', 'return', 'try', 'while', 'group', 'end',
-                  'endwhile', 'endif', 'endfor', 'endtry', 'enddef',
-                  'True', 'False', 'None')
+
+
+RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
+                  'def', 'del', 'elif', 'else', 'except', 'exec',
+                  'finally', 'for', 'from', 'global', 'if', 'import', 'in',
+                  'is', 'lambda', 'not', 'or', 'pass', 'print', 'raise',
+                  'return', 'try', 'while', 'with', 'True', 'False',
+                  'None')
 
 NAME_MATCH = re.compile(r"[a-z_][a-z0-9_]*$").match
 
@@ -225,3 +227,17 @@ class ExceptionHolder(object):
         if node_col_offset > 0:
             out.append("    %s^^^" % ((node_col_offset)*' '))
         return (self.msg, '\n'.join(out))
+
+class NameFinder(ast.NodeVisitor):
+    """find all symbol names used by a parsed node"""
+    def __init__(self):
+        self.names = []
+        ast.NodeVisitor.__init__(self)
+
+    def generic_visit(self, node):
+        nodename = node.__class__.__name__.lower()
+        if nodename == 'name':
+            if (node.ctx.__class__ == ast.Load and
+                node.id not in self.names):
+                self.names.append(node.id)
+        ast.NodeVisitor.generic_visit(self, node)

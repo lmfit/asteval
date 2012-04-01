@@ -1,6 +1,7 @@
 *.pyc
 *~
 *#
+.coverage
 NonGit/
 doc/_build
 doc/*.pdf
