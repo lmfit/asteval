@@ -12,10 +12,21 @@ from asteval import Interpreter
 class TestCase(unittest.TestCase):
     '''testing of asteval'''
     def setUp(self):
+        self.interp = Interpreter()
+        self.symtable = self.interp.symtable
+        self.set_stdout()
+
+    def set_stdout(self):
         self.stdout = tempfile.NamedTemporaryFile(delete=False,
                                                   prefix='asteval')
-        self.interp = Interpreter(writer=self.stdout)
-        self.symtable = self.interp.symtable
+        self.interp.writer = self.stdout
+
+    def read_stdout(self):
+        self.stdout.close()
+        with open(self.stdout.name) as inp:
+            out = inp.read()
+        self.set_stdout()
+        return out
 
     def tearDown(self):
         if not self.stdout.closed:

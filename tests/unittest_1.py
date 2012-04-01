@@ -3,6 +3,7 @@
 import unittest
 from unittest_utils import TestCase
 import numpy as np
+from asteval import NameFinder
 
 class TestEval(TestCase):
     '''testing of asteval'''
@@ -61,18 +62,30 @@ n=0
 for i in arange(10):
     n += i
 ''')
-
         self.isvalue('n', 45)
+
+    def test_if(self):
+        '''runtime errors test'''
+        self.interp("""zero = 0
+if zero == 0:
+    x = 1
+if zero != 100:
+    x = x+1
+if zero > 2:
+    x = x + 1
+else:
+    y = 33
+""")
+        self.isvalue('x',  2)
+        self.isvalue('y', 33)
+
 
     def test_print(self):
         '''print a string'''
 
         self.interp("print 1")
-
-        self.stdout.close()
-
-        with open(self.stdout.name) as inf:
-            self.assert_(inf.read() == '1\n')
+        out = self.read_stdout()
+        self.assert_(out== '1\n')
 
     def test_cmp(self):
         '''numeric comparisons'''
@@ -191,10 +204,12 @@ a = arange(7)''')
         self.interp("zero = 0")
         self.interp("astr ='a string'")
         self.interp("atup = ('a', 'b', 11021)")
+        self.interp("arr  = arange(20)")
         for expr, errname in (('x = 1/zero', 'ZeroDivisionError'),
                               ('x = zero + nonexistent', 'NameError'),
                               ('x = zero + astr', 'TypeError'),
-                              ('x = astr * atup', 'TypeError') ):
+                              ('x = astr * atup', 'TypeError'),
+                              ('arr.shapx = 4', 'AttributeError')):
             failed, errtype, errmsg = False, None, None
             try:
                 self.interp(expr, show_errors=False)
@@ -215,6 +230,9 @@ a = arange(7)''')
         self.istrue("isinstance(n, ndarray)")
         self.istrue("n.shape == (5, 4)")
 
+        self.interp("n.shape = (4, 5)")
+        self.istrue("n.shape == (4, 5)")
+
     def test_binop(self):
         '''test binary ops'''
         self.interp('a = 10.0')
@@ -233,6 +251,20 @@ a = arange(7)''')
         self.isnear("a", -10.0)
         self.isnear("b", -6.0)
 
+    def test_del(self):
+        '''test del function'''
+        self.interp('a = -10.0')
+        self.interp('b = -6.0')
+
+        self.assertTrue('a' in self.symtable)
+        self.assertTrue('b' in self.symtable)
+
+        self.interp("del a")
+        self.interp("del b")
+
+        self.assertFalse('a' in self.symtable)
+        self.assertFalse('b' in self.symtable)
+
     def test_math1(self):
         '''builtin math functions'''
         self.interp('n = sqrt(4)')
@@ -241,6 +273,52 @@ a = arange(7)''')
         self.isnear('cos(pi/2)', 0)
         self.istrue('exp(0) == 1')
         self.isnear('exp(1)', np.e)
+
+    def test_namefinder(self):
+        'test namefinder'
+        ast = self.interp.parse('x+y+cos(z)')
+        nf = NameFinder()
+        nf.generic_visit(ast)
+        self.assertTrue('x' in nf.names)
+        self.assertTrue('y' in nf.names)
+        self.assertTrue('z' in nf.names)
+        self.assertTrue('cos' in nf.names)
+
+    def test_index_assignment(self):
+        "test indexing / subscripting on assignment"
+        self.interp('x = arange(10)')
+        self.interp('l = [1,2,3,4,5]')
+        self.interp('l[0] = 0')
+        self.interp('l[3] = -1')
+        self.isvalue('l', [0,2,3,-1,5])
+        self.interp('l[0:2] = [-1, -2]')
+        self.isvalue('l', [-1,-2,3,-1,5])
+
+        self.interp('x[1] = 99')
+        self.isvalue('x', np.array([0,99,2,3,4,5,6,7,8,9]))
+        self.interp('x[0:2] = [9,-9]')
+        self.isvalue('x', np.array([9,-9,2,3,4,5,6,7,8,9]))
+
+    def test_simple_function(self):
+        "test function definition and running"
+        self.interp("""
+def fcn(x, scale=2, **kws):
+    'test function'
+    out = sqrt(x)
+    if scale > 1:
+        out = out * scale
+    return out
+""")
+        self.interp("a = fcn(4, scale=9)")
+        self.isvalue("a", 18)
+        self.interp("a = fcn(9, scale=0)")
+        self.isvalue("a", 3)
+
+        self.interp("print fcn")
+        out = self.read_stdout()
+        out = out.split('\n')
+        self.assert_(out[0].startswith('<Procedure fcn(x, scale='))
+        self.assert_('test func' in out[1])
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):
