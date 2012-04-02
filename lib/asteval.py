@@ -95,8 +95,8 @@ class Interpreter:
 
     def unimplemented(self, node):
         "unimplemented nodes"
-        self.raise_exception(node,
-                             "'%s' not supported" % (node.__class__.__name__))
+        self.raise_exception(node, exc=NotImplementedError,
+                             msg="'%s' not supported" % (node.__class__.__name__))
 
     def raise_exception(self, node, exc=None, msg='', expr=None,
                         lineno=None):
@@ -244,7 +244,7 @@ class Interpreter:
     def on_assert(self, node):    # ('test', 'msg')
         "assert statement"
         if not self.run(node.test):
-            raise AssertionError(self.run(node.msg()))
+            self.raise_exception(node, exc=AssertionError, msg=node.msg)
         return True
 
     def on_list(self, node):    # ('elt', 'ctx')
@@ -286,8 +286,6 @@ class Interpreter:
         """here we assign a value (not the node.value object) to a node
         this is used by on_assign, but also by for, list comprehension, etc.
         """
-        if len(self.error) > 0:
-            return
         if node.__class__ == ast.Name:
             if not valid_symbol_name(node.id):
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
@@ -338,8 +336,6 @@ class Interpreter:
     def on_assign(self, node):    # ('targets', 'value')
         "simple assignment"
         val = self.run(node.value)
-        if len(self.error) > 0:
-            return
         for tnode in node.targets:
             self.node_assign(tnode, val)
         return # return val
@@ -473,13 +469,9 @@ class Interpreter:
         "for blocks"
         for val in self.run(node.iter):
             self.node_assign(node.target, val)
-            if len(self.error) > 0:
-                return
             self._interrupt = None
             for tnode in node.body:
                 self.run(tnode)
-                if len(self.error) > 0:
-                    return
                 if self._interrupt is not None:
                     break
             if isinstance(self._interrupt, ast.Break):
@@ -496,8 +488,6 @@ class Interpreter:
             if tnode.__class__ == ast.comprehension:
                 for val in self.run(tnode.iter):
                     self.node_assign(tnode.target, val)
-                    if len(self.error) > 0:
-                        return
                     add = True
                     for cond in tnode.ifs:
                         add = add and self.run(cond)
@@ -546,9 +536,9 @@ class Interpreter:
         "function execution"
         #  ('func', 'args', 'keywords', 'starargs', 'kwargs')
         func = self.run(node.func)
-        if not hasattr(func, '__call__') and not hasattr(func, '__init__'):
+        if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "'%s' is not callable!!" % (func)
-            self.raise_exception(node, msg=msg)
+            self.raise_exception(node, exc=TypeError, msg=msg)
 
         args = [self.run(targ) for targ in node.args]
         if node.starargs is not None:

@@ -76,6 +76,29 @@ else:
 """)
         self.isvalue('n',  -1)
 
+        self.interp("""
+n=0
+while n < 10:
+    n += 1
+    if n < 3:
+        continue
+    n += 1
+    print ' n = ', n
+    if n > 5:
+        break
+print 'finish: n = ', n
+""")
+        self.isvalue('n', 6)
+
+    def test_assert(self):
+        'test assert statements'
+        self.interp('n=6')
+        self.interp('assert n==6')
+        self.assertTrue(self.interp.error == [])
+        self.interp('assert n==7')
+        errtype, errmsg = self.interp.error[0].get_error()
+        print 'ASSERT ', errtype
+        self.assertTrue(errtype == 'AssertionError')
 
     def test_for(self):
         '''for loops'''
@@ -228,6 +251,20 @@ a = arange(7)''')
             self.assertTrue(errtype == 'SyntaxError')
             #self.assertTrue(errmsg.startswith('invalid syntax'))
 
+    def test_unsupportednodes(self):
+        '''unsupported nodes'''
+
+        for expr in ('f = lambda x: x*x', 'yield 10'):
+            failed, errtype, errmsg = False, None, None
+            try:
+                self.interp(expr, show_errors=False)
+            except:
+                failed = True
+                errtype, errmsg = self.interp.error[0].get_error()
+            self.assertTrue(failed)
+            self.assertTrue(errtype == 'NotImplementedError')
+
+
     def test_syntaxerrors_2(self):
         '''syntax errors test'''
         for expr in ('x = (1/*)', 'x = 1.A', 'x = A.2'):
@@ -251,6 +288,7 @@ a = arange(7)''')
         for expr, errname in (('x = 1/zero', 'ZeroDivisionError'),
                               ('x = zero + nonexistent', 'NameError'),
                               ('x = zero + astr', 'TypeError'),
+                              ('x = zero()', 'TypeError'),
                               ('x = astr * atup', 'TypeError'),
                               ('x = arr.shapx', 'AttributeError'),
                               ('arr.shapx = 4', 'AttributeError'),
@@ -434,6 +472,10 @@ def fcn(*args):
 """)
         self.interp("o = fcn(1,2,3)")
         self.isvalue('o', 14)
+        self.interp("print fcn")
+        out = self.read_stdout()
+        out = out.split('\n')
+        self.assert_(out[0].startswith('<Procedure fcn('))
 
     def test_function_kwargs(self):
         "test function with kw args, no **kws"
@@ -448,6 +490,11 @@ def fcn(square=False, x=0, y=0, z=0, t=0):
             out = out + i
     return out
 """)
+        self.interp("print fcn")
+        out = self.read_stdout()
+        out = out.split('\n')
+        self.assert_(out[0].startswith('<Procedure fcn(square'))
+
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
         self.isvalue('o', 6)
 
@@ -477,6 +524,11 @@ def fcn(square=False, **kws):
             out = out + i
     return out
 """)
+        self.interp("print fcn")
+        out = self.read_stdout()
+        out = out.split('\n')
+        self.assert_(out[0].startswith('<Procedure fcn(square'))
+
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
         self.isvalue('o', 6)
 
@@ -492,6 +544,11 @@ def fcn(x, y):
     'test function'
     return x + y**2
 """)
+        self.interp("print fcn")
+        out = self.read_stdout()
+        out = out.split('\n')
+        self.assert_(out[0].startswith('<Procedure fcn(x,'))
+
         self.interp("o = -1")
         self.interp("o = fcn(2, 1)")
         self.isvalue('o', 3)
