@@ -5,17 +5,15 @@ utility functions for asteval
    The University of Chicago
 """
 import ast
-import sys
+from sys import exc_info
 import re
-
-
 
 RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'def', 'del', 'elif', 'else', 'except', 'exec',
                   'finally', 'for', 'from', 'global', 'if', 'import', 'in',
                   'is', 'lambda', 'not', 'or', 'pass', 'print', 'raise',
                   'return', 'try', 'while', 'with', 'True', 'False',
-                  'None')
+                  'None', '__import__', '__package__')
 
 NAME_MATCH = re.compile(r"[a-z_][a-z0-9_]*$").match
 
@@ -197,7 +195,7 @@ class ExceptionHolder(object):
         self.msg    = msg
         self.exc    = exc
         self.lineno = lineno
-        self.exc_info = sys.exc_info()
+        self.exc_info = exc_info()
         if self.exc is None and self.exc_info[0] is not None:
             self.exc = self.exc_info[0]
         if self.msg is '' and self.exc_info[1] is not None:

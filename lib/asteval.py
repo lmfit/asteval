@@ -11,7 +11,7 @@ later, using the current values in the
 """
 
 from __future__ import division, print_function
-import sys
+from sys import exc_info, stdout
 import ast
 import math
 
@@ -64,7 +64,7 @@ class Interpreter:
                        'unaryop', 'while')
 
     def __init__(self, symtable=None, writer=None):
-        self.writer = writer or sys.stdout
+        self.writer = writer or stdout
 
         if symtable is None:
             symtable = {}
@@ -167,7 +167,7 @@ class Interpreter:
         try:
             node = self.parse(expr)
         except RuntimeError:
-            errmsg = sys.exc_info()[1]
+            errmsg = exc_info()[1]
             if len(self.error) > 0:
                 errmsg = "\n".join(self.error[0].get_error())
             if not show_errors:
@@ -178,7 +178,7 @@ class Interpreter:
         try:
             return self.run(node, expr=expr, lineno=lineno)
         except RuntimeError:
-            errmsg = sys.exc_info()[1]
+            errmsg = exc_info()[1]
             if len(self.error) > 0:
                 errmsg = "\n".join(self.error[0].get_error())
             if not show_errors:

@@ -34,4 +34,5 @@ define classes or import modules, the language is decidedly limited.
    :maxdepth: 2
 
    installation
-
+   basics
+   motivation
