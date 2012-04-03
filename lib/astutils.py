@@ -13,7 +13,7 @@ RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'finally', 'for', 'from', 'global', 'if', 'import', 'in',
                   'is', 'lambda', 'not', 'or', 'pass', 'print', 'raise',
                   'return', 'try', 'while', 'with', 'True', 'False',
-                  'None', '__import__', '__package__')
+                  'None', 'eval', 'execfile', '__import__', '__package__')
 
 NAME_MATCH = re.compile(r"[a-z_][a-z0-9_]*$").match
 
