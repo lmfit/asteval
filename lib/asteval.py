@@ -75,6 +75,7 @@ class Interpreter:
         self.retval     = None
         self.lineno    = 0
 
+        symtable['print'] = self._printer
         for sym in FROM_PY:
             if sym in __builtins__:
                 symtable[sym] = __builtins__[sym]
@@ -433,8 +434,19 @@ class Interpreter:
             end = '\n'
         out = [self.run(tnode) for tnode in node.values]
         if out and len(self.error)==0:
-            print(*out, file=dest, end=end)
+            self._printer(*out, file=dest, end=end)
 
+    def _printer(self, *out, **kws): 
+        "generic print function"
+        flush = kws.pop('flush', True)
+        file = kws.pop('file', self.writer)
+        sep = kws.pop('sep', ' ')
+        end = kws.pop('sep', '\n')
+
+        print(*out, file=file, sep=sep, end=end)
+        if flush:
+            file.flush()
+    
     def on_if(self, node):    # ('test', 'body', 'orelse')
         "regular if-then-else statement"
         block = node.body

@@ -209,7 +209,6 @@ class ExceptionHolder(object):
                 col_offset = self.node.col_offset
             except AttributeError:
                 pass
-
         try:
             exc_name = self.exc.__name__
         except AttributeError:
