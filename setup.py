@@ -3,7 +3,7 @@ from distutils.core import setup
 import lib as asteval
 
 import numpy
-import scipy
+# import scipy
 
 setup(name = 'asteval',
       version = asteval.__version__,

@@ -37,5 +37,4 @@ domain-specific language for mathematical applications.
 
 There is no claim of speed in asteval.  Clearly, evaluating the ast tree
 involves a lot of function calls, and will likely be slower than Python.
-
-
+In preliminary tests, it's about 4x slower than Python.

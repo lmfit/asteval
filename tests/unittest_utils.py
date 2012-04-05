@@ -3,9 +3,10 @@
 Base TestCase for asteval
 """
 import unittest
+import time
 import numpy as np
 import os
-import tempfile
+from tempfile import NamedTemporaryFile
 
 from asteval import Interpreter
 
@@ -17,21 +18,27 @@ class TestCase(unittest.TestCase):
         self.set_stdout()
 
     def set_stdout(self):
-        self.stdout = tempfile.NamedTemporaryFile(delete=False,
-                                                  prefix='asteval')
+        self.stdout = NamedTemporaryFile('w', delete=False,
+                                         prefix='astevaltest')
         self.interp.writer = self.stdout
 
     def read_stdout(self):
         self.stdout.close()
+        time.sleep(0.1)
+        fname = self.stdout.name
         with open(self.stdout.name) as inp:
             out = inp.read()
         self.set_stdout()
+        os.unlink(fname)
         return out
 
     def tearDown(self):
         if not self.stdout.closed:
             self.stdout.close()
-        os.unlink(self.stdout.name)
+        try:
+            os.unlink(self.stdout.name)
+        except:
+            pass
 
     def isvalue(self, sym, val):
         '''assert that a symboltable symbol has a particular value'''
