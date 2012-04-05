@@ -63,7 +63,7 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'tryexcept', 'tuple',
                        'unaryop', 'while')
 
-    def __init__(self, symtable=None, writer=None):
+    def __init__(self, symtable=None, writer=None, use_numpy=True):
         self.writer = writer or stdout
 
         if symtable is None:
@@ -74,6 +74,9 @@ class Interpreter:
         self.expr       = None
         self.retval     = None
         self.lineno    = 0
+
+        if not use_numpy:
+            HAS_NUMPY = False
 
         for sym in FROM_PY:
             if sym in __builtins__:
