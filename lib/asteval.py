@@ -56,12 +56,12 @@ class Interpreter:
     supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
                        'binop', 'boolop', 'break', 'call', 'compare',
                        'continue', 'delete', 'dict', 'ellipsis',
-                       'excepthandler', 'expr', 'expression', 'extslice',
-                       'for', 'functiondef', 'if', 'ifexp', 'index',
-                       'interrupt', 'list', 'listcomp', 'module', 'name',
-                       'num', 'pass', 'print', 'raise', 'repr', 'return',
-                       'slice', 'str', 'subscript', 'tryexcept', 'tuple',
-                       'unaryop', 'while')
+                       'excepthandler', 'expr', 'extslice', 'for',
+                       'functiondef', 'if', 'ifexp', 'index', 'interrupt',
+                       'list', 'listcomp', 'module', 'name', 'num', 'pass',
+                       'print', 'raise', 'repr', 'return', 'slice', 'str',
+                       'subscript', 'tryexcept', 'tuple', 'unaryop',
+                       'while')
 
     def __init__(self, symtable=None, writer=None, use_numpy=True):
         self.writer = writer or stdout
@@ -218,10 +218,6 @@ class Interpreter:
         for tnode in node.body:
             out = self.run(tnode)
         return out
-
-    def on_expression(self, node):
-        "basic expression"
-        return self.on_module(node) # ():('body',)
 
     def on_pass(self, node):
         "pass statement"

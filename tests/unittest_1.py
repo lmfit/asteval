@@ -1,10 +1,15 @@
 #!/usr/bin/env python
 """ Base Test Case """
 import unittest
-from unittest_utils import TestCase
-import numpy as np
-from asteval import NameFinder
 import time
+import ast
+import numpy as np
+from sys import version_info
+
+from unittest_utils import TestCase
+
+
+from asteval import NameFinder
 
 
 class TestEval(TestCase):
@@ -47,6 +52,12 @@ class TestEval(TestCase):
         '''array slicing'''
         self.interp("a_ndarray = arange(200).reshape(10, 20)")
         self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
+        self.interp("y = arange(20).reshape(4, 5)")
+        self.istrue("y[:,3]  == array([3, 8, 13, 18])")
+        self.istrue("y[...,1]  == array([1, 6, 11, 16])")
+        self.interp("y[...,1] = array([2, 2, 2, 2])")
+        self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
+        # print(self.interp.symtable["y"])
 
     def test_while(self):
         '''while loops'''
@@ -381,10 +392,14 @@ a = arange(7)''')
         self.assertTrue('z' in nf.names)
         self.assertTrue('cos' in nf.names)
 
+
     def test_list_comprehension(self):
         "test list comprehension"
         self.interp('x = [i*i for i in range(4)]')
         self.isvalue('x', [0, 1, 4, 9])
+
+        self.interp('x = [i*i for i in range(6) if i > 1]')
+        self.isvalue('x', [4, 9, 16, 25])
 
     def test_ifexp(self):
         "test if expressions"
@@ -409,6 +424,30 @@ a = arange(7)''')
         self.interp('x[0:2] = [9,-9]')
         self.isvalue('x', np.array([9,-9,2,3,4,5,6,7,8,9]))
 
+    def test_eservedwords(self):
+        "test reserved words"
+        for w in ('and', 'as', 'while', 'raise', 'else',
+                  'class', 'del', 'def', 'import', 'None'):
+            self.interp.error= []
+            self.interp("%s= 2" % w)
+            errtype, errmsg = self.interp.error[0].get_error()
+            self.assertTrue(errtype=='SyntaxError')
+
+        for w in ('True', 'False'):
+            self.interp.error= []
+            self.interp("%s= 2" % w)
+            errtype, errmsg = self.interp.error[0].get_error()
+            if version_info[0] == 3:
+                self.assertTrue(errtype=='SyntaxError')
+            else:
+                self.assertTrue(errtype=='NameError')
+                
+        for w in ('eval', '__import__'):
+            self.interp.error= []
+            self.interp("%s= 2" % w)
+            errtype, errmsg = self.interp.error[0].get_error()
+            self.assertTrue(errtype=='NameError')
+            
     def test_raise(self):
         "test raise"
         self.interp("raise NameError('bob')")
@@ -570,6 +609,18 @@ def fcn(x, y):
         self.interp("o = fcn(1, x=2)")
         errtype, errmsg = self.interp.error[0].get_error()
         self.assertTrue(errtype == 'TypeError')
+
+    def test_astdump(self):
+        "test ast parsing and dumping"
+        astnode = self.interp.parse('x = 1')
+        self.assertTrue(isinstance(astnode, ast.Module))
+        self.assertTrue(isinstance(astnode.body[0], ast.Assign))
+        self.assertTrue(isinstance(astnode.body[0].targets[0], ast.Name))
+        self.assertTrue(isinstance(astnode.body[0].value, ast.Num))
+        self.assertTrue(astnode.body[0].targets[0].id == 'x')
+        self.assertTrue(astnode.body[0].value.n == 1)
+        dumped = self.interp.dump(astnode.body[0])
+        self.assertTrue(dumped.startswith('Assign'))
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):
