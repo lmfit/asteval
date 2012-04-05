@@ -4,6 +4,7 @@ utility functions for asteval
    Matthew Newville <newville@cars.uchicago.edu>,
    The University of Chicago
 """
+from __future__ import division, print_function
 import ast
 from sys import exc_info
 import re
@@ -15,12 +16,11 @@ RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'return', 'try', 'while', 'with', 'True', 'False',
                   'None', 'eval', 'execfile', '__import__', '__package__')
 
-NAME_MATCH = re.compile(r"[a-z_][a-z0-9_]*$").match
+NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
 def valid_symbol_name(name):
     "input is a valid name"
-    lname = name[:].lower()
-    if lname in RESERVED_WORDS:
+    if name in RESERVED_WORDS:
         return False
     return NAME_MATCH(lname) is not None
 
@@ -148,11 +148,9 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'absolute', 'add', 'alen', 'all',
               'version', 'void', 'void0', 'vsplit', 'vstack', 'where',
               'who', 'zeros', 'zeros_like')
 
-
 NUMPY_RENAMES = {'ln':'log', 'asin':'arcsin', 'acos':'arccos',
                  'atan':'arctan', 'atan2':'arctan2', 'atanh':'arctanh',
                  'acosh':'arccosh', 'asinh':'arcsinh'}
-
 
 OPERATORS = {ast.Is:     lambda a, b: a is b,
              ast.IsNot:  lambda a, b: a is not b,
