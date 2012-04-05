@@ -10,26 +10,26 @@ import time
 class TestEval(TestCase):
     '''testing of asteval'''
 
-    def xtest_dict_index(self):
+    def test_dict_index(self):
         '''dictionary indexing'''
         self.interp("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
         self.istrue("a_dict['a'] == 1")
         self.istrue("a_dict['d'] == 4")
 
-    def xtest_list_index(self):
+    def test_list_index(self):
         '''list indexing'''
         self.interp("a_list = ['a', 'b', 'c', 'd', 'o']")
         self.istrue("a_list[0] == 'a'")
         self.istrue("a_list[1] == 'b'")
         self.istrue("a_list[2] == 'c'")
 
-    def xtest_tuple_index(self):
+    def test_tuple_index(self):
         '''tuple indexing'''
         self.interp("a_tuple = (5, 'a', 'x')")
         self.istrue("a_tuple[0] == 5")
         self.istrue("a_tuple[2] == 'x'")
 
-    def xtest_string_index(self):
+    def test_string_index(self):
         '''string indexing'''
         self.interp("a_string = 'hello world'")
         self.istrue("a_string[0] == 'h'")
@@ -37,13 +37,13 @@ class TestEval(TestCase):
         self.istrue("a_string[-1] == 'd'")
         self.istrue("a_string[-2] == 'l'")
 
-    def xtest_ndarray_index(self):
+    def test_ndarray_index(self):
         '''nd array indexing'''
         self.interp("a_ndarray = 5*arange(20)")
         self.istrue("a_ndarray[2] == 10")
         self.istrue("a_ndarray[4] == 20")
 
-    def xtest_ndarrayslice(self):
+    def test_ndarrayslice(self):
         '''array slicing'''
         self.interp("a_ndarray = arange(200).reshape(10, 20)")
         self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
@@ -91,8 +91,8 @@ while n < 10:
 print( 'finish: n = ', n)
 """)
         self.isvalue('n',  6)
-        
-    def xtest_assert(self):
+
+    def test_assert(self):
         'test assert statements'
         self.interp.error = []
         self.interp('n=6')
@@ -102,7 +102,7 @@ print( 'finish: n = ', n)
         errtype, errmsg = self.interp.error[0].get_error()
         self.assertTrue(errtype == 'AssertionError')
 
-    def xtest_for(self):
+    def test_for(self):
         '''for loops'''
         self.interp('''
 n=0
@@ -132,7 +132,7 @@ else:
         self.isvalue('n', 3)
 
 
-    def xtest_if(self):
+    def test_if(self):
         '''runtime errors test'''
         self.interp("""zero = 0
 if zero == 0:
@@ -148,7 +148,7 @@ else:
         self.isvalue('y', 33)
 
 
-    def xtest_print(self):
+    def test_print(self):
         '''print a string'''
         self.interp("print(31)")
         # self.interp.writer.flush()
@@ -156,7 +156,7 @@ else:
         out = self.read_stdout()
         self.assert_(out== '31\n')
 
-    def xtest_cmp(self):
+    def test_cmp(self):
         '''numeric comparisons'''
 
         self.istrue("3 == 3")
@@ -175,7 +175,7 @@ else:
         self.isfalse("3 > 5")
         self.isfalse("5 < 3")
 
-    def xtest_bool(self):
+    def test_bool(self):
         '''boolean logic'''
 
         self.interp('''
@@ -202,7 +202,7 @@ a = arange(7)''')
         self.isfalse("not yes")
         self.istrue("not no")
 
-    def xtest_bool_coerce(self):
+    def test_bool_coerce(self):
         '''coercion to boolean'''
 
         self.istrue("1")
@@ -221,7 +221,7 @@ a = arange(7)''')
         self.istrue("dict(y=1)")
         self.isfalse("{}")
 
-    def xtest_assignment(self):
+    def test_assignment(self):
         '''variables assignment'''
         self.interp('n = 5')
         self.isvalue("n",  5)
@@ -234,12 +234,12 @@ a = arange(7)''')
         self.interp('a[1:5] = 1 + 0.5 * arange(4)')
         self.isnear("a", np.array([ 0. ,  1. ,  1.5,  2. ,  2.5,  5. ,  6. ,  7. ,  8. ,  9. ]))
 
-    def xtest_names(self):
+    def test_names(self):
         '''names test'''
         self.interp('nx = 1')
         self.interp('nx1 = 1')
 
-    def xtest_syntaxerrors_1(self):
+    def test_syntaxerrors_1(self):
         '''assignment syntax errors test'''
         for expr in ('class = 1', 'for = 1', 'if = 1', 'raise = 1',
                      '1x = 1', '1.x = 1', '1_x = 1'):
@@ -254,7 +254,7 @@ a = arange(7)''')
             self.assertTrue(errtype == 'SyntaxError')
             #self.assertTrue(errmsg.startswith('invalid syntax'))
 
-    def xtest_unsupportednodes(self):
+    def test_unsupportednodes(self):
         '''unsupported nodes'''
 
         for expr in ('f = lambda x: x*x', 'yield 10'):
@@ -268,7 +268,7 @@ a = arange(7)''')
             self.assertTrue(errtype == 'NotImplementedError')
 
 
-    def xtest_syntaxerrors_2(self):
+    def test_syntaxerrors_2(self):
         '''syntax errors test'''
         for expr in ('x = (1/*)', 'x = 1.A', 'x = A.2'):
 
@@ -282,7 +282,7 @@ a = arange(7)''')
             self.assertTrue(errtype == 'SyntaxError')
             #self.assertTrue(errmsg.startswith('invalid syntax'))
 
-    def xtest_runtimeerrors_1(self):
+    def test_runtimeerrors_1(self):
         '''runtime errors test'''
         self.interp("zero = 0")
         self.interp("astr ='a string'")
@@ -306,7 +306,7 @@ a = arange(7)''')
             self.assertTrue(errtype == errname)
             #self.assertTrue(errmsg.startswith('invalid syntax'))
 
-    def xtest_ndarrays(self):
+    def test_ndarrays(self):
         '''simple ndarrays'''
         self.interp('n = array([11, 10, 9])')
         self.istrue("isinstance(n, ndarray)")
@@ -330,7 +330,7 @@ a = arange(7)''')
         self.isvalue('c', 7)
         self.istrue('(a, b, d) == (0, 2, 10)')
 
-    def xtest_binop(self):
+    def test_binop(self):
         '''test binary ops'''
         self.interp('a = 10.0')
         self.interp('b = 6.0')
@@ -340,7 +340,7 @@ a = arange(7)''')
         self.istrue("a/(b-1) == 2.0")
         self.istrue("a*b     == 60.0")
 
-    def xtest_unaryop(self):
+    def test_unaryop(self):
         '''test binary ops'''
         self.interp('a = -10.0')
         self.interp('b = -6.0')
@@ -348,7 +348,7 @@ a = arange(7)''')
         self.isnear("a", -10.0)
         self.isnear("b", -6.0)
 
-    def xtest_del(self):
+    def test_del(self):
         '''test del function'''
         self.interp('a = -10.0')
         self.interp('b = -6.0')
@@ -362,7 +362,7 @@ a = arange(7)''')
         self.assertFalse('a' in self.symtable)
         self.assertFalse('b' in self.symtable)
 
-    def xtest_math1(self):
+    def test_math1(self):
         '''builtin math functions'''
         self.interp('n = sqrt(4)')
         self.istrue('n == 2')
@@ -371,7 +371,7 @@ a = arange(7)''')
         self.istrue('exp(0) == 1')
         self.isnear('exp(1)', np.e)
 
-    def xtest_namefinder(self):
+    def test_namefinder(self):
         'test namefinder'
         ast = self.interp.parse('x+y+cos(z)')
         nf = NameFinder()
@@ -381,12 +381,12 @@ a = arange(7)''')
         self.assertTrue('z' in nf.names)
         self.assertTrue('cos' in nf.names)
 
-    def xtest_list_comprehension(self):
+    def test_list_comprehension(self):
         "test list comprehension"
         self.interp('x = [i*i for i in range(4)]')
         self.isvalue('x', [0, 1, 4, 9])
 
-    def xtest_ifexp(self):
+    def test_ifexp(self):
         "test if expressions"
         self.interp('x = 2')
         self.interp('y = 4 if x > 0 else -1')
@@ -394,7 +394,7 @@ a = arange(7)''')
         self.isvalue('y', 4)
         self.isvalue('z', -1)
 
-    def xtest_index_assignment(self):
+    def test_index_assignment(self):
         "test indexing / subscripting on assignment"
         self.interp('x = arange(10)')
         self.interp('l = [1,2,3,4,5]')
@@ -418,7 +418,7 @@ a = arange(7)''')
         self.assertTrue(errmsgs[1].startswith('bob'))
 
 
-    def xtest_tryexcept(self):
+    def test_tryexcept(self):
         "test try/except"
         self.interp("""
 x = 5
@@ -442,8 +442,8 @@ def fcn(x, scale=2):
 """)
         self.interp("a = fcn(4, scale=9)")
 
-        self.read_stdout()
-        # print(self.interp.error)
+        print(" OUT = ", self.read_stdout())
+        print(" ERR = ", self.interp.error)
         self.isvalue("a", 18)
         self.interp("a = fcn(9, scale=0)")
         self.isvalue("a", 3)
@@ -451,6 +451,7 @@ def fcn(x, scale=2):
         self.interp("print(fcn)")
         out = self.read_stdout()
         out = out.split('\n')
+        print(" print(fcn) -> ", out)
         self.assert_(out[0].startswith('<Procedure fcn(x, scale='))
         self.assert_('test func' in out[1])
 
@@ -466,7 +467,7 @@ def fcn(x, scale=2):
         errmsgs = errmsg.split('\n')
         self.assertTrue(errtype == 'NameError')
 
-    def xtest_function_vararg(self):
+    def test_function_vararg(self):
         "test function with var args"
         self.interp("""
 def fcn(*args):
@@ -483,7 +484,7 @@ def fcn(*args):
         out = out.split('\n')
         self.assert_(out[0].startswith('<Procedure fcn('))
 
-    def ytest_function_kwargs(self):
+    def test_function_kwargs(self):
         "test function with kw args, no **kws"
         self.interp("""
 def fcn(square=False, x=0, y=0, z=0, t=0):
@@ -517,7 +518,7 @@ def fcn(square=False, x=0, y=0, z=0, t=0):
         errmsg0, errmsg1 = errmsg.split('\n')
         self.assertTrue(errmsg1.startswith('extra keyword arg'))
 
-    def ytest_function_kwargs1(self):
+    def test_function_kwargs1(self):
         "test function with **kws arg"
         self.interp("""
 def fcn(square=False, **kws):
@@ -542,7 +543,7 @@ def fcn(square=False, **kws):
         self.isvalue('o', 14)
 
 
-    def ytest_function_kwargs2(self):
+    def test_function_kwargs2(self):
         "test function with positional and **kws args"
 
         self.interp("""

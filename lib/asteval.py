@@ -11,18 +11,18 @@ later, using the current values in the
 """
 
 from __future__ import division, print_function
-from sys import exc_info, stdout
+from sys import exc_info, stdout, version_info
 import ast
 import math
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY,
                        NUMPY_RENAMES, op2func, ExceptionHolder,
                        valid_symbol_name)
+HAS_NUMPY = False
 try:
     import numpy
     HAS_NUMPY = True
 except ImportError:
-    HAS_NUMPY = False
     print("Warning: numpy not available... functionality will be limited.")
 
 __version__ = '0.3'
@@ -53,7 +53,7 @@ class Interpreter:
      function definitions with def
   """
 
-    supported_nodes = ('assert', 'assign', 'attribute', 'augassign',
+    supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
                        'binop', 'boolop', 'break', 'call', 'compare',
                        'continue', 'delete', 'dict', 'ellipsis',
                        'excepthandler', 'expr', 'expression', 'extslice',
@@ -74,6 +74,7 @@ class Interpreter:
         self.expr       = None
         self.retval     = None
         self.lineno    = 0
+        global HAS_NUMPY
         if not use_numpy:
             HAS_NUMPY = False
 
@@ -536,14 +537,19 @@ class Interpreter:
             for tnode in node.orelse:
                 self.run(tnode)
 
-
     def on_raise(self, node):    # ('type', 'inst', 'tback')
-        "raise statement"
-        out = self.run(node.type)
+        "raise statement: note difference for python 2 and 3"
+        if version_info[0] == 3:
+            excnode  = node.exc
+            msgnode  = node.cause
+        else:
+            excnode  = node.type
+            msgnode  = node.inst
+        out  = self.run(excnode)
         msg = ' '.join(out.args)
-        inst_out = self.run(node.inst)
-        if inst_out not in (None, 'None'):
-            msg = "%s: %s" % (msg, inst_out)
+        msg2 = self.run(msgnode)
+        if msg2 not in (None, 'None'):
+            msg = "%s: %s" % (msg, msg2)
         self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
 
     def on_call(self, node):
@@ -573,18 +579,36 @@ class Interpreter:
         except:
             self.raise_exception(node, exc=RuntimeError, msg = "Error running %s" % (func))
 
+    def on_arg(self, node):    # ('test', 'msg')
+        "arg for function definitions"
+        # print(" ON ARG ! ", node, node.arg)
+        return node.arg
+
     def on_functiondef(self, node):
         "define procedures"
         # ('name', 'args', 'body', 'decorator_list')
         if node.decorator_list != []:
             raise Warning("decorated procedures not supported!")
         kwargs = []
+        #print(" \n >> ", self.dump(node))
+        #print(" \n ARGS ", node.args)
+        #print(" \n DIR ARGS ", dir(node.args))
+        #print(" \n   >> ", self.dump(node.args))
         offset = len(node.args.args) - len(node.args.defaults)
+        #print(" ... off = ", offset)
         for idef, defnode in enumerate(node.args.defaults):
+            #print(" ... ", idef, defnode, idef+offset)
+            #print("   --> ", node.args.args[idef+offset])
             defval = self.run(defnode)
             keyval = self.run(node.args.args[idef+offset])
             kwargs.append((keyval, defval))
-        args = [tnode.id for tnode in node.args.args[:offset]]
+        #print(" --- ",  offset, node.args.args[:offset])
+        #print(" --- ", dir(node.args.args[0]))
+        if version_info[0] == 3:
+            args = [tnode.arg for tnode in node.args.args[:offset]]
+        else:
+            args = [tnode.id for tnode in node.args.args[:offset]]
+
         doc = None
         if (isinstance(node.body[0], ast.Expr) and
             isinstance(node.body[0].value, ast.Str)):

@@ -22,7 +22,7 @@ def valid_symbol_name(name):
     "input is a valid name"
     if name in RESERVED_WORDS:
         return False
-    return NAME_MATCH(lname) is not None
+    return NAME_MATCH(name) is not None
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
