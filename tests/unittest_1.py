@@ -442,8 +442,6 @@ def fcn(x, scale=2):
 """)
         self.interp("a = fcn(4, scale=9)")
 
-        print(" OUT = ", self.read_stdout())
-        print(" ERR = ", self.interp.error)
         self.isvalue("a", 18)
         self.interp("a = fcn(9, scale=0)")
         self.isvalue("a", 3)
@@ -451,7 +449,7 @@ def fcn(x, scale=2):
         self.interp("print(fcn)")
         out = self.read_stdout()
         out = out.split('\n')
-        print(" print(fcn) -> ", out)
+
         self.assert_(out[0].startswith('<Procedure fcn(x, scale='))
         self.assert_('test func' in out[1])
 
