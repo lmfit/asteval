@@ -15,7 +15,7 @@ that is very much like python in your application, all ready to use::
     1.73205080757
     >>> aeval('''for i in range(10):
     print i, sqrt(i), log(1+1)
-''')
+    ''')
     0 0.0 0.0
     1 1.0 0.69314718056
     2 1.41421356237 1.09861228867
@@ -101,9 +101,22 @@ conditionals and loops
 
 If-then-else blocks, for-loops (including the optional *else* block) and while loops (also
 including optional *else* block) are supported, and work exactly as they do
-in python.
+in python.  Thus:
+
+    >>> code = """
+    sum = 0
+    for i in range(10):
+        sum += i*sqrt(*1.0)
+        if i % 4 == 0:
+            sum = sum + 1
+    print "sum = ", sum
+    """
+    >>> aeval(code)
+    sum =  114.049534067
+
 
 writing functions
 ===================
 
-User-defined functions can be written and executed.
+User-defined functions can be written and executed, as in python with a
+*def* block.
