@@ -8,13 +8,10 @@ from sys import version_info
 
 from unittest_utils import TestCase
 
-
 from asteval import NameFinder
-
 
 class TestEval(TestCase):
     '''testing of asteval'''
-
     def test_dict_index(self):
         '''dictionary indexing'''
         self.interp("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
@@ -158,18 +155,27 @@ else:
         self.isvalue('x',  2)
         self.isvalue('y', 33)
 
-
     def test_print(self):
         '''print a string'''
         self.interp("print(31)")
-        # self.interp.writer.flush()
-        # time.sleep(0.25)
+        self.interp.writer.flush()
+        time.sleep(0.25)
         out = self.read_stdout()
         self.assert_(out== '31\n')
 
+    def test_repr(self):
+        '''repr of dict, list'''
+        self.interp("x = {'a': 1, 'b': 2, 'c': 3}")
+        self.interp("y = ['a', 'b', 'c']")
+        self.interp("rep_x = repr(x['a'])")
+        self.interp("rep_y = repr(y)")
+        self.interp("print rep_y , rep_x")
+
+        self.isvalue("rep_x", "1")
+        self.isvalue("rep_y", "['a', 'b', 'c']")
+
     def test_cmp(self):
         '''numeric comparisons'''
-
         self.istrue("3 == 3")
         self.istrue("3.0 == 3")
         self.istrue("3.0 == 3.0")
@@ -441,13 +447,13 @@ a = arange(7)''')
                 self.assertTrue(errtype=='SyntaxError')
             else:
                 self.assertTrue(errtype=='NameError')
-                
+
         for w in ('eval', '__import__'):
             self.interp.error= []
             self.interp("%s= 2" % w)
             errtype, errmsg = self.interp.error[0].get_error()
             self.assertTrue(errtype=='NameError')
-            
+
     def test_raise(self):
         "test raise"
         self.interp("raise NameError('bob')")
@@ -468,6 +474,15 @@ except ZeroDivsionError:
     x = -999
 """)
         self.isvalue('x', -999)
+
+        self.interp("""
+x = -1
+try:
+    x = x/0
+except ZeroDivsionError:
+    pass
+""")
+        self.isvalue('x', -1)
 
     def test_function1(self):
         "test function definition and running"

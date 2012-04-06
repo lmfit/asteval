@@ -271,9 +271,7 @@ class Interpreter:
     def on_name(self, node):    # ('id', 'ctx')
         """ Name node """
         ctx = node.ctx.__class__
-        if ctx == ast.Del:
-            return node.id   # can't delete here??
-        elif ctx == ast.Param:  # for Function Def
+        if ctx in (ast.Param, ast.Del):
             return str(node.id)
         else:
             if node.id in self.symtable:
@@ -586,20 +584,13 @@ class Interpreter:
         if node.decorator_list != []:
             raise Warning("decorated procedures not supported!")
         kwargs = []
-        #print(" \n >> ", self.dump(node))
-        #print(" \n ARGS ", node.args)
-        #print(" \n DIR ARGS ", dir(node.args))
-        #print(" \n   >> ", self.dump(node.args))
+
         offset = len(node.args.args) - len(node.args.defaults)
-        #print(" ... off = ", offset)
         for idef, defnode in enumerate(node.args.defaults):
-            #print(" ... ", idef, defnode, idef+offset)
-            #print("   --> ", node.args.args[idef+offset])
             defval = self.run(defnode)
             keyval = self.run(node.args.args[idef+offset])
             kwargs.append((keyval, defval))
-        #print(" --- ",  offset, node.args.args[:offset])
-        #print(" --- ", dir(node.args.args[0]))
+
         if version_info[0] == 3:
             args = [tnode.arg for tnode in node.args.args[:offset]]
         else:
