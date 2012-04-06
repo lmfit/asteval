@@ -62,7 +62,16 @@ built-in functions
 
 At startup, 130 symbols are loaded into the symbol table from
 Python's builtins and the **math** module.   The builtins include
-a large number of named exceptions:
+several basic Python functions:
+
+    abs, all, any, bin, bool, bytearray, bytes, chr, complex,
+    delattr, dict, dir, divmod, enumerate, filter, float, format,
+    frozenset, getattr, hasattr, hash, hex, id, int, isinstance,
+    len, list, map, max, min, oct, open, ord, pow, property,
+    range, repr, reversed, round, set, setattr, slice, sorted,
+    str, sum, tuple, type, zip
+
+and a large number of named exceptions:
 
     ArithmeticError, AssertionError, AttributeError,
     BaseException, BufferError, BytesWarning, DeprecationWarning,
@@ -75,18 +84,10 @@ a large number of named exceptions:
     SyntaxError, SyntaxWarning, SystemError, SystemExit, True,
     TypeError, UnboundLocalError, UnicodeDecodeError,
     UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
-    UnicodeWarning, ValueError, Warning, ZeroDivisionError,
+    UnicodeWarning, ValueError, Warning, ZeroDivisionError
 
-and several basic functions:
 
-    abs, all, any, bin, bool, bytearray, bytes, chr, complex,
-    delattr, dict, dir, divmod, enumerate, filter, float, format,
-    frozenset, getattr, hasattr, hash, hex, id, int, isinstance,
-    len, list, map, max, min, oct, open, ord, pow, property,
-    range, repr, reversed, round, set, setattr, slice, sorted,
-    str, sum, tuple, type, zip
-
-The symbols imported from Python's **math** module include:
+The symbols imported from Python's *math* module include:
 
     acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
     cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
@@ -99,9 +100,9 @@ imported from numpy.
 conditionals and loops
 ==========================
 
-If-then-else blocks, for-loops (including the optional *else* block) and while loops (also
-including optional *else* block) are supported, and work exactly as they do
-in python.  Thus:
+If-then-else blocks, for-loops (including the optional *else* block) and
+while loops (also including optional *else* block) are supported, and work
+exactly as they do in python.  Thus:
 
     >>> code = """
     sum = 0
@@ -115,8 +116,21 @@ in python.  Thus:
     sum =  114.049534067
 
 
+printing
+===============
+
+For printing, asteval emulates Python's native :func:`print` function and
+:data:`print` statement (for python 2).  That is, the behavior mimics the
+version of python used.
+
+
 writing functions
 ===================
 
 User-defined functions can be written and executed, as in python with a
 *def* block.
+
+
+exceptions
+===============
+
