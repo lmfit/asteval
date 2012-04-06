@@ -1,13 +1,13 @@
-Installation instructions for LMFIT-py
+Installation instructions for asteval
 ========================================
 
-To install the lmfit python module, use::
+To install the lmfit asteval module, use::
 
    python setup.py build
    python setup.py install
 
 This assumes that Python 2.6 or higher is installed.
-In addition, numpy and scipy are required.
+In addition, numpy is highly recommended.
 
 Matt Newville <newville@cars.uchicago.edu>
-Last Update:  16-March-2012
+Last Update:  6-April-2012
