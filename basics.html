@@ -1,0 +1,230 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Using asteval &mdash; ASTEVAL: Minimal Python AST evaluator</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="ASTEVAL: Minimal Python AST evaluator" href="index.html" />
+    <link rel="next" title="Motivation for asteval" href="motivation.html" />
+    <link rel="prev" title="Downloading and Installation" href="installation.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="motivation.html" title="Motivation for asteval"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Downloading and Installation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+      </ul>
+    </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Using asteval</a><ul>
+<li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
+<li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
+<li><a class="reference internal" href="#conditionals-and-loops">conditionals and loops</a></li>
+<li><a class="reference internal" href="#writing-functions">writing functions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="previous chapter">Downloading and Installation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="motivation.html"
+                        title="next chapter">Motivation for asteval</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/basics.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="using-asteval">
+<h1>Using asteval<a class="headerlink" href="#using-asteval" title="Permalink to this headline">¶</a></h1>
+<p>The asteval module is very easy to use. Import the module and create an Interpreter:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>you have an embedded interpreter for a procedural, mathematical language
+that is very much like python in your application, all ready to use:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;print x&#39;</span><span class="p">)</span>
+<span class="go">1.73205080757</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;&#39;&#39;for i in range(10):</span>
+<span class="go">print i, sqrt(i), log(1+1)</span>
+<span class="go">&#39;&#39;&#39;)</span>
+<span class="go">0 0.0 0.0</span>
+<span class="go">1 1.0 0.69314718056</span>
+<span class="go">2 1.41421356237 1.09861228867</span>
+<span class="go">3 1.73205080757 1.38629436112</span>
+<span class="go">4 2.0 1.60943791243</span>
+<span class="go">5 2.2360679775 1.79175946923</span>
+<span class="go">6 2.44948974278 1.94591014906</span>
+<span class="go">7 2.64575131106 2.07944154168</span>
+<span class="go">8 2.82842712475 2.19722457734</span>
+<span class="go">9 3.0 2.30258509299</span>
+</pre></div>
+</div>
+<div class="section" id="accessing-the-symbol-table">
+<h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Permalink to this headline">¶</a></h2>
+<p>The symbol table (that is, the mapping between variable and
+function names and the underlying objects) is a simple dictionary
+held in the <tt class="xref py py-attr docutils literal"><span class="pre">symtable</span></tt> attribute of the interpreter.  Of
+course, this can be read or written to by the python program:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span>
+<span class="go">1.73205080757</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;print y/8&#39;</span><span class="p">)</span>
+<span class="go">12.5</span>
+</pre></div>
+</div>
+<p>(Note the use of true division even though the operands are integers).</p>
+<p>Certain names are reserved in Python, and cannot be used within
+the asteval interpreter.  These reserved words are:</p>
+<blockquote>
+<div>and, as, assert, break, class, continue, def, del, elif, else,
+except, exec, finally, for, from, global, if, import, in, is,
+lambda, not, or, pass, print, raise, return, try, while, with,
+True, False, None, eval, execfile, __import__, __package__</div></blockquote>
+<p>Valid symbol names must match the basic pattern of  [<a href="#id1"><span class="problematic" id="id2">a-zA-Z_</span></a>][<a href="#id3"><span class="problematic" id="id4">a-zA-Z0-9_</span></a>]*</p>
+</div>
+<div class="section" id="built-in-functions">
+<h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this headline">¶</a></h2>
+<p>At startup, 130 symbols are loaded into the symbol table from
+Python's builtins and the <strong>math</strong> module.   The builtins include
+a large number of named exceptions:</p>
+<blockquote>
+<div>ArithmeticError, AssertionError, AttributeError,
+BaseException, BufferError, BytesWarning, DeprecationWarning,
+EOFError, EnvironmentError, Exception, False,
+FloatingPointError, GeneratorExit, IOError, ImportError,
+ImportWarning, IndentationError, IndexError, KeyError,
+KeyboardInterrupt, LookupError, MemoryError, NameError, None,
+NotImplemented, NotImplementedError, OSError, OverflowError,
+ReferenceError, RuntimeError, RuntimeWarning, StopIteration,
+SyntaxError, SyntaxWarning, SystemError, SystemExit, True,
+TypeError, UnboundLocalError, UnicodeDecodeError,
+UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
+UnicodeWarning, ValueError, Warning, ZeroDivisionError,</div></blockquote>
+<p>and several basic functions:</p>
+<blockquote>
+<div>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
+delattr, dict, dir, divmod, enumerate, filter, float, format,
+frozenset, getattr, hasattr, hash, hex, id, int, isinstance,
+len, list, map, max, min, oct, open, ord, pow, property,
+range, repr, reversed, round, set, setattr, slice, sorted,
+str, sum, tuple, type, zip</div></blockquote>
+<p>The symbols imported from Python's <strong>math</strong> module include:</p>
+<blockquote>
+<div>acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
+cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
+frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
+modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</div></blockquote>
+<p>If available, a very large number (~400) additional symbols are
+imported from numpy.</p>
+</div>
+<div class="section" id="conditionals-and-loops">
+<h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Permalink to this headline">¶</a></h2>
+<p>If-then-else blocks, for-loops (including the optional <em>else</em> block) and while loops (also
+including optional <em>else</em> block) are supported, and work exactly as they do
+in python.  Thus:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<span class="go">sum = 0</span>
+<span class="go">for i in range(10):</span>
+<span class="go">    sum += i*sqrt(*1.0)</span>
+<span class="go">    if i % 4 == 0:</span>
+<span class="go">        sum = sum + 1</span>
+<span class="go">print &quot;sum = &quot;, sum</span>
+<span class="go">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+<span class="go">sum =  114.049534067</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="writing-functions">
+<h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this headline">¶</a></h2>
+<p>User-defined functions can be written and executed, as in python with a
+<em>def</em> block.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="motivation.html" title="Motivation for asteval"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Downloading and Installation"
+             >previous</a> |</li>
+        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, Matthew Newville, The University of Chicago.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.2.
+    </div>
+  </body>
+</html>
