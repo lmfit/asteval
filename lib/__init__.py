@@ -11,16 +11,16 @@
 
    using python, ast module to parse a python expression.
 
-   version: 0.3
-   last update: 31-March-2012
+   version: 0.9
+   last update: 7-Apr-2012
    License:  BSD
    Author:  Matthew Newville <newville@cars.uchicago.edu>
             Center for Advanced Radiation Sources,
             The University of Chicago
 """
-__version__ = '0.3'
+__version__ = '0.9'
 
 from .asteval import Interpreter
-from .astutils import NameFinder
+from .astutils import NameFinder, valid_symbol_name
 
-__all__ = [Interpreter, NameFinder]
+__all__ = [Interpreter, NameFinder, valid_symbol_name]

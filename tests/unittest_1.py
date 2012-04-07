@@ -156,12 +156,24 @@ else:
         self.isvalue('y', 33)
 
     def test_print(self):
-        '''print a string'''
+        '''print (ints, str, ....)'''
         self.interp("print(31)")
         self.interp.writer.flush()
-        time.sleep(0.25)
+        time.sleep(0.1)
         out = self.read_stdout()
         self.assert_(out== '31\n')
+
+        self.interp("print('%s = %.3f' % ('a', 1.2012345))")
+        self.interp.writer.flush()
+        time.sleep(0.1)
+        out = self.read_stdout()
+        self.assert_(out== 'a = 1.201\n')
+
+        self.interp("print('{0:s} = {1:.2f}'.format('a', 1.2012345))")
+        self.interp.writer.flush()
+        time.sleep(0.1)
+        out = self.read_stdout()
+        self.assert_(out== 'a = 1.20\n')
 
     def test_repr(self):
         '''repr of dict, list'''
