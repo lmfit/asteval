@@ -17,10 +17,10 @@ Downloads
 The latest stable version of asteval is available from PyPI or CARS (Univ of Chicago):
 
 
-.. _asteval-0.9.tar.gz (CARS):   http://cars9.uchicago.edu/software/asteval/src/asteval-0.9.tar.gz
-.. _asteval-0.9.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/asteval/src/asteval-0.9.win32-py2.6.exe
-.. _asteval-0.9.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/asteval/src/asteval-0.9.win32-py2.7.exe
-.. _asteval-0.9.win32-py3.2.exe (CARS): http://cars9.uchicago.edu/software/asteval/src/asteval-0.9.win32-py3.2.exe
+.. _asteval-0.9.tar.gz (CARS):   http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.tar.gz
+.. _asteval-0.9.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.win32-py2.6.exe
+.. _asteval-0.9.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.win32-py2.7.exe
+.. _asteval-0.9.win32-py3.2.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.win32-py3.2.exe
 
 .. _asteval-0.9.tar.gz (PyPI): http://pypi.python.org/packages/source/a/asteval/asteval-0.9.tar.gz
 .. _asteval-0.9.win32-py2.6.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.win32-py2.6.exe
