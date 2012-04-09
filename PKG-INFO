@@ -2,7 +2,7 @@ Metadata-Version: 1.0
 Name: asteval
 Version: 0.9
 Summary: Safe, minimalistic evaluator of python expression using ast module
-Home-page: http://newville.github.com/asteval/
+Home-page: http://github.com/newville/asteval
 Author: Matthew Newville
 Author-email: newville@cars.uchicago.edu
 License: BSD
