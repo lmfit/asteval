@@ -14,28 +14,46 @@ this package is pure Python, no significant troubles are expected.
 Downloads
 ~~~~~~~~~~~~~
 
-The latest stable version is available from PyPI or CARS (Univ of Chicago):
+The latest stable version of asteval is available from PyPI or CARS (Univ of Chicago):
 
-.. _asteval-0.3.tar.gz (CARS):          http://cars9.uchicago.edu/software/asteval/src/asteval-0.3.tar.gz
-.. _asteval-0.3.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/asteval/src/asteval-0.3.win32-py2.6.exe
-.. _asteval-0.3.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/asteval/src/asteval-0.3.win32-py2.7.exe
-.. _asteval-0.3.win32-py3.1.exe (CARS): http://cars9.uchicago.edu/software/asteval/src/asteval-0.3.win32-py3.2.exe
 
-.. _asteval-0.3.tar.gz (PyPI):          http://pypi.python.org/packages/source/l/asteval/asteval-0.3.tar.gz
-.. _asteval-0.3.win32-py2.6.exe (PyPI): http://pypi.python.org/packages/any/l/asteval/asteval-0.3.win32-py2.6.exe
-.. _asteval-0.3.win32-py2.7.exe (PyPI): http://pypi.python.org/packages/any/l/asteval/asteval-0.3.win32-py2.7.exe
-.. _asteval-0.3.win32-py3.1.exe (PyPI): http://pypi.python.org/packages/any/l/asteval/asteval-0.3.win32-py3.2.exe
+.. _asteval-0.9.tar.gz (CARS):   http://cars9.uchicago.edu/software/lmfit/src/asteval-0.9.tar.gz
+.. _asteval-0.9.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/lmfit/src/asteval-0.9.win32-py2.6.exe
+.. _asteval-0.9.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/lmfit/src/asteval-0.9.win32-py2.7.exe
+.. _asteval-0.9.win32-py3.2.exe (CARS): http://cars9.uchicago.edu/software/lmfit/src/asteval-0.9.win32-py3.2.exe
 
-.. _asteval github repository:   http://github.com/newville/asteval/
-.. _asteval at pypi:             http://pypi.python.org/pypi/asteval/
-.. _Python Setup Tools:          http://pypi.python.org/pypi/setuptools
+.. _asteval-0.9.tar.gz (PyPI): http://pypi.python.org/packages/source/l/lmfit/asteval-0.9.tar.gz
+.. _asteval-0.9.win32-py2.6.exe (PyPI): http://pypi.python.org/packages/any/l/lmfit/asteval-0.9.win32-py2.6.exe
+.. _asteval-0.9.win32-py2.7.exe (PyPI): http://pypi.python.org/packages/any/l/lmfit/asteval-0.9.win32-py2.7.exe
+.. _asteval-0.9.win32-py3.2.exe (PyPI): http://pypi.python.org/packages/any/l/lmfit/asteval-0.9.win32-py3.2.exe
 
-+----------------------+------------------+--------------------------------------------+
-|  Download Option     | Python Versions  |  Location                                  |
-+======================+==================+============================================+
-|  Source Kit          | 2.6, 2.7, 3.2    | -  `asteval-0.3.tar.gz (PyPI)`_            |
-|                      |                  | -  `asteval-0.3.tar.gz (CARS)`_            |
-+----------------------+------------------+--------------------------------------------+
+.. _lmfit github repository:   http://github.com/newville/lmfit-py
+.. _lmfit at pypi:             http://pypi.python.org/pypi/lmfit/
+.. _Python Setup Tools:        http://pypi.python.org/pypi/setuptools
+
++----------------------+------------------+----------------------------------------------+
+|  Download Option     | Python Versions  |  Location                                    |
++======================+==================+==============================================+
+|  Source Kit          | 2.6, 2.7, 3.2    | -  `asteval-0.9.tar.gz (PyPI)`_              |
+|                      |                  | -  `asteval-0.9.tar.gz (CARS)`_              |
++----------------------+------------------+----------------------------------------------+
+|  Win32 Installer     |   2.6            | -  `asteval-0.9.win32-py2.6.exe (PyPI)`_     |
+|                      |                  | -  `asteval-0.9.win32-py2.6.exe (CARS)`_     |
++----------------------+------------------+----------------------------------------------+
+|  Win32 Installer     |   2.7            | -  `asteval-0.9.win32-py2.7.exe (PyPI)`_     |
+|                      |                  | -  `asteval-0.9.win32-py2.7.exe (CARS)`_     |
++----------------------+------------------+----------------------------------------------+
+|  Win32 Installer     |   3.2            | -  `asteval-0.9.win32-py3.2.exe (PyPI)`_     |
+|                      |                  | -  `asteval-0.9.win32-py3.2.exe (CARS)`_     |
++----------------------+------------------+----------------------------------------------+
+|  Development Version |   all            |  use `lmfit github repository`_              |
++----------------------+------------------+----------------------------------------------+
+
+if you have `Python Setup Tools`_  installed, you can download and install
+the lmfit-py Package simply with::
+
+
+
 
 if you have `Python Setup Tools`_  installed, you can download and install
 the asteval Package simply with::
