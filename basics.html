@@ -141,7 +141,9 @@ the asteval interpreter.  These reserved words are:</p>
 except, exec, finally, for, from, global, if, import, in, is,
 lambda, not, or, pass, print, raise, return, try, while, with,
 True, False, None, eval, execfile, __import__, __package__</div></blockquote>
-<p>Valid symbol names must match the basic pattern of  [<a href="#id1"><span class="problematic" id="id2">a-zA-Z_</span></a>][<a href="#id3"><span class="problematic" id="id4">a-zA-Z0-9_</span></a>]*</p>
+<p>Valid symbol names must match the basic regular expression pattern:</p>
+<div class="highlight-python"><pre>valid_name = [a-zA-Z_][a-zA-Z0-9_]*</pre>
+</div>
 </div>
 <div class="section" id="built-in-functions">
 <h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this headline">¶</a></h2>
