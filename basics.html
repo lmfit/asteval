@@ -16,7 +16,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.3',
+        VERSION:     '0.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -53,7 +53,9 @@
 <li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
 <li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
 <li><a class="reference internal" href="#conditionals-and-loops">conditionals and loops</a></li>
+<li><a class="reference internal" href="#printing">printing</a></li>
 <li><a class="reference internal" href="#writing-functions">writing functions</a></li>
+<li><a class="reference internal" href="#exceptions">exceptions</a></li>
 </ul>
 </li>
 </ul>
@@ -145,7 +147,15 @@ True, False, None, eval, execfile, __import__, __package__</div></blockquote>
 <h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this headline">¶</a></h2>
 <p>At startup, 130 symbols are loaded into the symbol table from
 Python's builtins and the <strong>math</strong> module.   The builtins include
-a large number of named exceptions:</p>
+several basic Python functions:</p>
+<blockquote>
+<div>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
+delattr, dict, dir, divmod, enumerate, filter, float, format,
+frozenset, getattr, hasattr, hash, hex, id, int, isinstance,
+len, list, map, max, min, oct, open, ord, pow, property,
+range, repr, reversed, round, set, setattr, slice, sorted,
+str, sum, tuple, type, zip</div></blockquote>
+<p>and a large number of named exceptions:</p>
 <blockquote>
 <div>ArithmeticError, AssertionError, AttributeError,
 BaseException, BufferError, BytesWarning, DeprecationWarning,
@@ -158,16 +168,8 @@ ReferenceError, RuntimeError, RuntimeWarning, StopIteration,
 SyntaxError, SyntaxWarning, SystemError, SystemExit, True,
 TypeError, UnboundLocalError, UnicodeDecodeError,
 UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
-UnicodeWarning, ValueError, Warning, ZeroDivisionError,</div></blockquote>
-<p>and several basic functions:</p>
-<blockquote>
-<div>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
-delattr, dict, dir, divmod, enumerate, filter, float, format,
-frozenset, getattr, hasattr, hash, hex, id, int, isinstance,
-len, list, map, max, min, oct, open, ord, pow, property,
-range, repr, reversed, round, set, setattr, slice, sorted,
-str, sum, tuple, type, zip</div></blockquote>
-<p>The symbols imported from Python's <strong>math</strong> module include:</p>
+UnicodeWarning, ValueError, Warning, ZeroDivisionError</div></blockquote>
+<p>The symbols imported from Python's <em>math</em> module include:</p>
 <blockquote>
 <div>acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
 cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
@@ -178,9 +180,9 @@ imported from numpy.</p>
 </div>
 <div class="section" id="conditionals-and-loops">
 <h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Permalink to this headline">¶</a></h2>
-<p>If-then-else blocks, for-loops (including the optional <em>else</em> block) and while loops (also
-including optional <em>else</em> block) are supported, and work exactly as they do
-in python.  Thus:</p>
+<p>If-then-else blocks, for-loops (including the optional <em>else</em> block) and
+while loops (also including optional <em>else</em> block) are supported, and work
+exactly as they do in python.  Thus:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
 <span class="go">sum = 0</span>
 <span class="go">for i in range(10):</span>
@@ -194,10 +196,19 @@ in python.  Thus:</p>
 </pre></div>
 </div>
 </div>
+<div class="section" id="printing">
+<h2>printing<a class="headerlink" href="#printing" title="Permalink to this headline">¶</a></h2>
+<p>For printing, asteval emulates Python's native <tt class="xref py py-func docutils literal"><span class="pre">print()</span></tt> function and
+<tt class="xref py py-data docutils literal"><span class="pre">print</span></tt> statement (for python 2).  That is, the behavior mimics the
+version of python used.</p>
+</div>
 <div class="section" id="writing-functions">
 <h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this headline">¶</a></h2>
 <p>User-defined functions can be written and executed, as in python with a
 <em>def</em> block.</p>
+</div>
+<div class="section" id="exceptions">
+<h2>exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
