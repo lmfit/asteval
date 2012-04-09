@@ -52,12 +52,6 @@ The latest stable version of asteval is available from PyPI or CARS (Univ of Chi
 if you have `Python Setup Tools`_  installed, you can download and install
 the asteval Package simply with::
 
-
-
-
-if you have `Python Setup Tools`_  installed, you can download and install
-the asteval Package simply with::
-
    easy_install -U asteval
 
 

@@ -54,7 +54,9 @@ the asteval interpreter.  These reserved words are:
     lambda, not, or, pass, print, raise, return, try, while, with,
     True, False, None, eval, execfile, __import__, __package__
 
-Valid symbol names must match the basic pattern of  [a-zA-Z_][a-zA-Z0-9_]*
+Valid symbol names must match the basic regular expression pattern::
+
+   valid_name = [a-zA-Z_][a-zA-Z0-9_]*
 
 
 built-in functions
