@@ -19,7 +19,11 @@ RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
 def valid_symbol_name(name):
-    "input is a valid name"
+    """determines whether the input symbol name is a valid name
+
+    This checks for reserved words, and that the name matches the
+    regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
+    """
     if name in RESERVED_WORDS:
         return False
     return NAME_MATCH(name) is not None
