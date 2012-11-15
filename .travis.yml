@@ -7,6 +7,11 @@ python:
   - "2.7"
   - "3.2"
 
+install:
+   # deactivate the virtualenv so that numpy can be quickly installed
+   - deactivate 
+   - sudo apt-get install -qq python-numpy python-sphinx
+
 script:
   - cd tests
   - nosetests
