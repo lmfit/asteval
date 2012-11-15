@@ -10,12 +10,13 @@ env:
 install:
   # Deactivate the virtualenv to get fast install of dependencies
   - deactivate
-  - sudo apt-get install -qq $PYTHON-numpy $PYTHON-sphinx $PYTHON-nose
-  - sudo python setup.py install
+  - time sudo apt-get install -qq $PYTHON-numpy $PYTHON-sphinx $PYTHON-nose
+  - sudo python$PYSUF setup.py install
 
 script:
   - cd tests
   - nosetests$PYSUF
 
   - cd ../doc
+  # TODO: This probably runs Python 2 Sphinx even for the Python 3 build?
   - make html
