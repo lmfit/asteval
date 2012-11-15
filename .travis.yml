@@ -11,6 +11,7 @@ install:
   # Deactivate the virtualenv to get fast install of dependencies
   - deactivate
   - sudo apt-get install -qq $PYTHON-numpy $PYTHON-sphinx $PYTHON-nose
+  - python setup.py install
 
 script:
   - cd tests
