@@ -1,3 +1,20 @@
+ASTEVAL
+=======
+
+.. image:: https://travis-ci.org/newville/asteval.png
+   :target: https://travis-ci.org/newville/asteval
+
+Links
+-----
+
+* Documentation: http://newville.github.com/asteval
+* PyPI: http://pypi.python.org/pypi/asteval
+* Code: http://github.com/newville/asteval
+* Issues: http://github.com/newville/asteval/issues
+
+What is it?
+-----------
+
 ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
 using Python's ast module.  The idea is to provide a simple, safe, and
 robust miniature mathematical language that can handle user-input.  The
