@@ -4,9 +4,10 @@ ASTEVAL: Minimal Python AST Evaluator
 ================================================
 
 ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
-using Python's ast module.  The idea is to provide a simple, safe, and
-robust miniature mathematical language that can handle user-input in cases
-where one might be tempted to use Python's *eval*.  The emphasis here is on
+using Python's ast module.  The idea is to provide a simple, robust
+miniature mathematical language that can handle user-input in cases where
+one might be tempted to use Python's *eval*, and which is it at least
+mostly safe from errant and malious input.  The emphasis here is on
 mathematical expressions, so numpy functions are imported and used if
 available.
 
@@ -29,6 +30,8 @@ mathemetical functions from the math module.  As mentioned above, if numpy
 is available, many of its functions will also be available.  Users can
 define their own functions, but given the restrictions of not being able to
 define classes or import modules, the language is decidedly limited.
+
+
 
 .. toctree::
    :maxdepth: 2
