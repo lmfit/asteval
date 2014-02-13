@@ -5,28 +5,25 @@ utility functions for asteval
    The University of Chicago
 """
 from __future__ import division, print_function
+import re
 import ast
 from sys import exc_info
-import re
 
 RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'def', 'del', 'elif', 'else', 'except', 'exec',
-                  'finally', 'for', 'from', 'global', 'if', 'import', 'in',
-                  'is', 'lambda', 'not', 'or', 'pass', 'print', 'raise',
-                  'return', 'try', 'while', 'with', 'True', 'False',
-                  'None', 'eval', 'execfile', '__import__', '__package__')
+                  'finally', 'for', 'from', 'global', 'if', 'import',
+                  'in', 'is', 'lambda', 'not', 'or', 'pass', 'print',
+                  'raise', 'return', 'try', 'while', 'with', 'True',
+                  'False', 'None', 'eval', 'execfile', '__import__',
+                  '__package__')
 
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
-def valid_symbol_name(name):
-    """determines whether the input symbol name is a valid name
-
-    This checks for reserved words, and that the name matches the
-    regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
-    """
-    if name in RESERVED_WORDS:
-        return False
-    return NAME_MATCH(name) is not None
+UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__',
+                '__code__', '__closure__', '__func__', '__self__',
+                '__module__', '__dict__', '__class__', 'func_globals',
+                'func_code', 'func_closure', 'im_class', 'im_func',
+                'im_self', 'gi_code', 'gi_frame')
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -152,9 +149,9 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'absolute', 'add', 'alen', 'all',
               'version', 'void', 'void0', 'vsplit', 'vstack', 'where',
               'who', 'zeros', 'zeros_like')
 
-NUMPY_RENAMES = {'ln':'log', 'asin':'arcsin', 'acos':'arccos',
-                 'atan':'arctan', 'atan2':'arctan2', 'atanh':'arctanh',
-                 'acosh':'arccosh', 'asinh':'arcsinh'}
+NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
+                 'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
+                 'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
 OPERATORS = {ast.Is:     lambda a, b: a is b,
              ast.IsNot:  lambda a, b: a is not b,
@@ -185,17 +182,35 @@ OPERATORS = {ast.Is:     lambda a, b: a is b,
              ast.UAdd:   lambda a: +a,
              ast.USub:   lambda a: -a}
 
+
+def valid_symbol_name(name):
+    """determines whether the input symbol name is a valid name
+
+    This checks for reserved words, and that the name matches the
+    regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
+    """
+    if name in RESERVED_WORDS:
+        return False
+    return NAME_MATCH(name) is not None
+
 def op2func(op):
     "return function for operator nodes"
     return OPERATORS[op.__class__]
 
+class Empty:
+    def __nonzero__(self):
+        return False
+
+ReturnedNone = Empty()
+
+
 class ExceptionHolder(object):
     "basic exception handler"
     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
-        self.node   = node
-        self.expr   = expr
-        self.msg    = msg
-        self.exc    = exc
+        self.node = node
+        self.expr = expr
+        self.msg = msg
+        self.exc = exc
         self.lineno = lineno
         self.exc_info = exc_info()
         if self.exc is None and self.exc_info[0] is not None:
@@ -224,6 +239,7 @@ class ExceptionHolder(object):
         out.append(str(self.msg))
         return (exc_name, '\n'.join(out))
 
+
 class NameFinder(ast.NodeVisitor):
     """find all symbol names used by a parsed node"""
     def __init__(self):
@@ -233,7 +249,6 @@ class NameFinder(ast.NodeVisitor):
     def generic_visit(self, node):
         nodename = node.__class__.__name__.lower()
         if nodename == 'name':
-            if (node.ctx.__class__ == ast.Load and
-                node.id not in self.names):
+            if node.ctx.__class__ == ast.Load and node.id not in self.names:
                 self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)

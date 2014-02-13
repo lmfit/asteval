@@ -15,9 +15,9 @@ from sys import exc_info, stdout, version_info
 import ast
 import math
 
-from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY,
+from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        NUMPY_RENAMES, op2func, ExceptionHolder,
-                       valid_symbol_name)
+                       ReturnedNone, valid_symbol_name)
 HAS_NUMPY = False
 try:
     import numpy
@@ -25,7 +25,6 @@ try:
 except ImportError:
     print("Warning: numpy not available... functionality will be limited.")
 
-__version__ = '0.3'
 
 class Interpreter:
     """mathematical expression compiler and interpreter.
@@ -68,12 +67,12 @@ class Interpreter:
 
         if symtable is None:
             symtable = {}
-        self.symtable   = symtable
+        self.symtable = symtable
         self._interrupt = None
-        self.error      = []
-        self.expr       = None
-        self.retval     = None
-        self.lineno    = 0
+        self.error = []
+        self.expr = None
+        self.retval = None
+        self.lineno = 0
         global HAS_NUMPY
         if not use_numpy:
             HAS_NUMPY = False
@@ -100,21 +99,22 @@ class Interpreter:
     def unimplemented(self, node):
         "unimplemented nodes"
         self.raise_exception(node, exc=NotImplementedError,
-                             msg="'%s' not supported" % (node.__class__.__name__))
+                             msg="'%s' not supported" %
+                             (node.__class__.__name__))
 
     def raise_exception(self, node, exc=None, msg='', expr=None,
                         lineno=None):
         "add an exception"
         if self.error is None:
             self.error = []
-        if expr  is None:
-            expr  = self.expr
+        if expr is None:
+            expr = self.expr
         if len(self.error) > 0 and not isinstance(node, ast.Module):
             msg = '%s' % msg
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
         self._interrupt = ast.Break()
         self.error.append(err)
-        raise RuntimeError
+        raise RuntimeError(err.msg)
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
@@ -122,7 +122,7 @@ class Interpreter:
     #  eval:   string statement -> result = run(parse(statement))
     def parse(self, text):
         """parse statement/expression to Ast representation"""
-        self.expr  = text
+        self.expr = text
         try:
             return ast.parse(text)
         except:
@@ -133,15 +133,16 @@ class Interpreter:
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
+        if len(self.error) > 0:
+            return
         if node is None:
             return None
         if isinstance(node, str):
             node = self.parse(node)
         if lineno is not None:
             self.lineno = lineno
-
-        if expr   is not None:
-            self.expr   = expr
+        if expr is not None:
+            self.expr = expr
 
         # get handler for this node:
         #   on_xxx with handle nodes of type 'xxx', etc
@@ -178,7 +179,6 @@ class Interpreter:
                 raise RuntimeError(errmsg)
             print(errmsg, file=self.writer)
             return
-        out = None
         try:
             return self.run(node, expr=expr, lineno=lineno)
         except RuntimeError:
@@ -203,9 +203,11 @@ class Interpreter:
         "index"
         return self.run(node.value)  # ('value',)
 
-    def on_return(self, node): # ('value',)
-        "return statement"
+    def on_return(self, node):  # ('value',)
+        "return statement: look for None, return special sentinal"
         self.retval = self.run(node.value)
+        if self.retval is None:
+            self.retval = ReturnedNone
         return
 
     def on_repr(self, node):
@@ -257,14 +259,14 @@ class Interpreter:
 
     def on_dict(self, node):    # ('keys', 'values')
         "dictionary"
-        return dict([(self.run(k), self.run(v)) for k, v in \
+        return dict([(self.run(k), self.run(v)) for k, v in
                      zip(node.keys, node.values)])
 
-    def on_num(self, node): # ('n',)
+    def on_num(self, node):   # ('n',)
         'return number'
         return node.n
 
-    def on_str(self, node): # ('s',)
+    def on_str(self, node):   # ('s',)
         'return string'
         return node.s
 
@@ -290,14 +292,14 @@ class Interpreter:
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             sym = self.symtable[node.id] = val
         elif node.__class__ == ast.Attribute:
-            if node.ctx.__class__  == ast.Load:
+            if node.ctx.__class__ == ast.Load:
                 msg = "cannot assign to attribute %s" % node.attr
                 self.raise_exception(node, exc=AttributeError, msg=msg)
 
             setattr(self.run(node.value), node.attr, val)
 
         elif node.__class__ == ast.Subscript:
-            sym    = self.run(node.value)
+            sym = self.run(node.value)
             xslice = self.run(node.slice)
             if isinstance(node.slice, ast.Index):
                 sym[xslice] = val
@@ -315,35 +317,41 @@ class Interpreter:
     def on_attribute(self, node):    # ('value', 'attr', 'ctx')
         "extract attribute"
         ctx = node.ctx.__class__
-        if ctx == ast.Load:
-            sym = self.run(node.value)
-            if hasattr(sym, node.attr):
-                return getattr(sym, node.attr)
-            else:
-                obj = self.run(node.value)
-                fmt = "%s does not have attribute '%s'"
-                msg = fmt % (obj, node.attr)
-                self.raise_exception(node, exc=AttributeError, msg=msg)
-
-        elif ctx == ast.Del:
+        if ctx == ast.Del:
             return delattr(sym, node.attr)
         elif ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
             self.raise_exception(node, exc=RuntimeError, msg=msg)
+            
+        # ctx is ast.Load
+        sym = self.run(node.value)
+        fmt = "cannnot access attribute '%s' for %s"
+        if node.attr not in UNSAFE_ATTRS:
+            fmt = "no attribute '%s' for %s"
+            try:
+                return getattr(sym, node.attr)
+            except AttributeError:
+                pass
+            
+        # AttributeError or accessed unsafe attribute
+        obj = self.run(node.value)
+        msg = fmt % (node.attr, obj)
+        self.raise_exception(node, exc=AttributeError, msg=msg)
+
 
     def on_assign(self, node):    # ('targets', 'value')
         "simple assignment"
         val = self.run(node.value)
         for tnode in node.targets:
             self.node_assign(tnode, val)
-        return # return val
+        return
 
     def on_augassign(self, node):    # ('target', 'op', 'value')
         "augmented assign"
         return self.on_assign(ast.Assign(targets=[node.target],
-                                         value=ast.BinOp(left = node.target,
-                                                         op = node.op,
-                                                         right= node.value)))
+                                         value=ast.BinOp(left=node.target,
+                                                         op=node.op,
+                                                         right=node.value)))
 
     def on_slice(self, node):    # ():('lower', 'upper', 'step')
         "simple slice"
@@ -351,17 +359,16 @@ class Interpreter:
                      self.run(node.upper),
                      self.run(node.step))
 
-
     def on_extslice(self, node):    # ():('dims',)
         "extended slice"
         return tuple([self.run(tnode) for tnode in node.dims])
 
     def on_subscript(self, node):    # ('value', 'slice', 'ctx')
         "subscript handling -- one of the tricky parts"
-        val    = self.run(node.value)
+        val = self.run(node.value)
         nslice = self.run(node.slice)
         ctx = node.ctx.__class__
-        if ctx in ( ast.Load, ast.Store):
+        if ctx in (ast.Load, ast.Store):
             if isinstance(node.slice, (ast.Index, ast.Slice, ast.Ellipsis)):
                 return val.__getitem__(nslice)
             elif isinstance(node.slice, ast.ExtSlice):
@@ -411,10 +418,10 @@ class Interpreter:
     def on_compare(self, node):    # ('left', 'ops', 'comparators')
         "comparison operators"
         lval = self.run(node.left)
-        out  = True
+        out = True
         for op, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
-            out  = op2func(op)(lval, rval)
+            out = op2func(op)(lval, rval)
             lval = rval
             if HAS_NUMPY and isinstance(out, numpy.ndarray) and out.any():
                 break
@@ -430,19 +437,19 @@ class Interpreter:
         if node.nl:
             end = '\n'
         out = [self.run(tnode) for tnode in node.values]
-        if out and len(self.error)==0:
+        if out and len(self.error) == 0:
             self._printer(*out, file=dest, end=end)
 
     def _printer(self, *out, **kws):
         "generic print function"
         flush = kws.pop('flush', True)
-        file = kws.pop('file', self.writer)
+        fileh = kws.pop('file', self.writer)
         sep = kws.pop('sep', ' ')
         end = kws.pop('sep', '\n')
 
-        print(*out, file=file, sep=sep, end=end)
+        print(*out, file=fileh, sep=sep, end=end)
         if flush:
-            file.flush()
+            fileh.flush()
 
     def on_if(self, node):    # ('test', 'body', 'orelse')
         "regular if-then-else statement"
@@ -504,7 +511,7 @@ class Interpreter:
                         out.append(self.run(node.elt))
         return out
 
-    def on_excepthandler(self, node): # ('type', 'name', 'body')
+    def on_excepthandler(self, node):  # ('type', 'name', 'body')
         "exception handler..."
         return (self.run(node.type), node.name, node.body)
 
@@ -534,12 +541,12 @@ class Interpreter:
     def on_raise(self, node):    # ('type', 'inst', 'tback')
         "raise statement: note difference for python 2 and 3"
         if version_info[0] == 3:
-            excnode  = node.exc
-            msgnode  = node.cause
+            excnode = node.exc
+            msgnode = node.cause
         else:
-            excnode  = node.type
-            msgnode  = node.inst
-        out  = self.run(excnode)
+            excnode = node.type
+            msgnode = node.inst
+        out = self.run(excnode)
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
@@ -571,7 +578,8 @@ class Interpreter:
         try:
             return func(*args, **keywords)
         except:
-            self.raise_exception(node, exc=RuntimeError, msg = "Error running %s" % (func))
+            self.raise_exception(node, exc=RuntimeError,
+                                 msg="Error running %s" % (func))
 
     def on_arg(self, node):    # ('test', 'msg')
         "arg for function definitions"
@@ -597,18 +605,17 @@ class Interpreter:
             args = [tnode.id for tnode in node.args.args[:offset]]
 
         doc = None
-        if (isinstance(node.body[0], ast.Expr) and
-            isinstance(node.body[0].value, ast.Str)):
-            docnode = node.body[0]
-            doc = docnode.value.s
+        nb0 = node.body[0]
+        if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
+            doc = nb0.value.s
 
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
-                                             body = node.body,
-                                             lineno = self.lineno,
-                                             args = args,
-                                             kwargs = kwargs,
-                                             vararg = node.args.vararg,
-                                             varkws = node.args.kwarg)
+                                             lineno=self.lineno,
+                                             body=node.body,
+                                             args=args, kwargs=kwargs,
+                                             vararg=node.args.vararg,
+                                             varkws=node.args.kwarg)
+
 
 class Procedure(object):
     """Procedure: user-defined function for asteval
@@ -666,8 +673,7 @@ class Procedure(object):
             n_kws = len(kwargs)
 
         if len(self.argnames) > 0 and kwargs is not None:
-            msg = "got multiple values for keyword argument '%s' in Procedure %s"
-
+            msg = "multiple values for keyword argument '%s' in Procedure %s"
             for targ in self.argnames:
                 if targ in kwargs:
                     self.raise_exc(None, exc=TypeError,
@@ -678,9 +684,8 @@ class Procedure(object):
             msg = None
             if n_args < n_names:
                 msg = 'not enough arguments for Procedure %s()' % self.name
-                msg = '%s (expected %i, got %i)'% (msg, n_names, n_args)
+                msg = '%s (expected %i, got %i)' % (msg, n_names, n_args)
                 self.raise_exc(None, exc=TypeError, msg=msg)
-
 
         for argname in self.argnames:
             symlocals[argname] = args.pop(0)
@@ -720,6 +725,8 @@ class Procedure(object):
                 break
             if self.interpreter.retval is not None:
                 retval = self.interpreter.retval
+                if retval is ReturnedNone:
+                    retval = None
                 break
 
         self.interpreter.symtable = save_symtable
