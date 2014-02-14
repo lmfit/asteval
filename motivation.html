@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.1',
+        VERSION:     '0.9.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -118,13 +118,13 @@ In preliminary tests, it's about 4x slower than Python.</p>
 malicious code cannot ever cause damage, you're definitely looking in the
 wrong place.  I don't suggest that asteval is completely safe, only that it
 is safer than the builtin <tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt>, and that you might find it useful.
-For further details, see, for example <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">eval_is_evil</a> and discussion and
-links therein for a clear explanation of how difficult this prospect is.
-Basically, if input can cause Python to core-dump, safety cannot be
-guaranteed.</p>
+For further details, see, for example <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and
+the comments and links therein for a clear explanation of how difficult
+this prospect is.  Basically, if input can cause Python to seg-fault,
+safety cannot be guaranteed.</p>
 <p>Still, asteval is meant to be safe relative to the builtin <tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt>,
-especially from errors of benign stupidity.  To do this, the following
-actions are not allowed from the asteval interpreter:</p>
+especially from errors of benign stupidity.  To do this, many
+actions are not allowed from the asteval interpreter, including:</p>
 <blockquote>
 <div><ul class="simple">
 <li>importing modules.  Neither 'import' nor '__import__' is supported.</li>
@@ -150,12 +150,14 @@ to address. The most important of these is resource hogging.  There is no
 timeout on any calculation, and so reasonable looking calculuation such as</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;&quot;&quot;for i in range(100000000):</span>
-<span class="go">    x = sqrt(arange(1000)/(i*10.0)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;i = 0&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&quot;&quot;&quot;while i&lt;1.e6:</span>
+<span class="go">    i = (i + 1.25)</span>
+<span class="go">    x = sqrt(i*arange(3.e7))</span>
 <span class="go">&quot;&quot;&quot;)</span>
 </pre></div>
 </div>
-<p>can take a noticeable amount of CPU time, ranging from seconds to hundreds
+<p>will take a noticeable amount of CPU time, ranging from seconds to hundreds
 of years.  Your threshold for an acceptable run-time is probably somewhere
 between these values.</p>
 <p>In summary, there are many ways that asteval could be considered part of an

@@ -42,21 +42,19 @@ In preliminary tests, it's about 4x slower than Python.
 How Safe is asteval?
 =======================
 
-.. _eval_is_evil:  http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html
-.. _save_eval1: http://code.activestate.com/recipes/496746-restricted-safe-eval
-
 The short answer is: Not very.  If you're looking for guarantees that
 malicious code cannot ever cause damage, you're definitely looking in the
 wrong place.  I don't suggest that asteval is completely safe, only that it
 is safer than the builtin :func:`eval`, and that you might find it useful.
-For further details, see, for example `eval_is_evil`_ and discussion and
-links therein for a clear explanation of how difficult this prospect is.
-Basically, if input can cause Python to core-dump, safety cannot be
-guaranteed.
+For further details, see, for example `Eval is really dangerous
+<http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html>`_ and
+the comments and links therein for a clear explanation of how difficult
+this prospect is.  Basically, if input can cause Python to seg-fault,
+safety cannot be guaranteed.
 
 Still, asteval is meant to be safe relative to the builtin :func:`eval`,
-especially from errors of benign stupidity.  To do this, the following
-actions are not allowed from the asteval interpreter:
+especially from errors of benign stupidity.  To do this, many
+actions are not allowed from the asteval interpreter, including:
    
   * importing modules.  Neither 'import' nor '__import__' is supported.
   * create classes or modules.
@@ -83,11 +81,13 @@ timeout on any calculation, and so reasonable looking calculuation such as
 
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()
-   >>> aeval.eval("""for i in range(100000000):
-       x = sqrt(arange(1000)/(i*10.0)))
+   >>> aeval.eval("i = 0")
+   >>> aeval.eval("""while i<1.e6:
+       i = (i + 1.25)
+       x = sqrt(i*arange(3.e7))
    """)
 
-can take a noticeable amount of CPU time, ranging from seconds to hundreds
+will take a noticeable amount of CPU time, ranging from seconds to hundreds
 of years.  Your threshold for an acceptable run-time is probably somewhere
 between these values.
 
