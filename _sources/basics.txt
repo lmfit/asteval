@@ -130,9 +130,44 @@ writing functions
 ===================
 
 User-defined functions can be written and executed, as in python with a
-*def* block.
+*def* block, for example::
+
+   >>> from asteval import Interpreter
+   >>> aeval = Interpreter()
+   >>> code = """def func(a, b, norm=1.0):
+   ... return (a + b)/norm
+   ... """
+   >>> aeval.eval(code)
+   >>> aeval.eval("func(1, 3, norm=10.0)")
+   0.4
+
+
 
 
 exceptions
 ===============
+
+asteval monitors and caches exceptions in the evaluated code.  Brief error
+messages are printed (with Python's print statement or function, and so
+using standard output by default), and the full set of exceptions is kept
+in the :attr:`error` attribute of the :class:`Interpreter` instance.  This
+:attr:`error` attribute is a list of instances of the asteval
+:class:`ExceptionHolder` class, which is accessed throught the
+:meth:`get_error` method.  The :attr:`error` attribute is reset to an empty
+list at the beginning of each :meth:`eval`, so that errors are from only
+the most recent :meth:`eval`.  
+
+Thus, to handle and re-raise exceptions from your Python code in a simple
+REPL loop, you'd want to do something similar to
+    
+   >>> from asteval import Interpreter
+   >>> aeval = Interpreter()
+   >>> while True:
+   >>>     inp_string = raw_input('dsl:>')
+   >>>     result = aeval.eval(inp_string)
+   >>>     if len(aeval.error)>0:
+   >>>         for err in aeval.error:
+   >>>             print(err.get_error())
+   >>>     else:
+   >>>         print(result)
 

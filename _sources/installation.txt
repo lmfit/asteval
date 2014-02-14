@@ -14,18 +14,18 @@ this package is pure Python, no significant troubles are expected.
 Downloads
 ~~~~~~~~~~~~~
 
-The latest stable version of asteval is 0.9.1, available either from PyPI or CARS (Univ of Chicago):
+The latest stable version of asteval is 0.9.2, available either from PyPI or CARS (Univ of Chicago):
 
 
-.. _asteval-0.9.1.tar.gz (CARS):   http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.1.tar.gz
-.. _asteval-0.9.1.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.1.win32-py2.6.exe
-.. _asteval-0.9.1.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.1.win32-py2.7.exe
-.. _asteval-0.9.1.win32-py3.2.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.1.win32-py3.2.exe
+.. _asteval-0.9.2.tar.gz (CARS):   http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.tar.gz
+.. _asteval-0.9.2.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.win32-py2.6.exe
+.. _asteval-0.9.2.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.win32-py2.7.exe
+.. _asteval-0.9.2.win32-py3.2.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.win32-py3.2.exe
 
-.. _asteval-0.9.1.tar.gz (PyPI): http://pypi.python.org/packages/source/a/asteval/asteval-0.9.1.tar.gz
-.. _asteval-0.9.1.win32-py2.6.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.1.win32-py2.6.exe
-.. _asteval-0.9.1.win32-py2.7.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.1.win32-py2.7.exe
-.. _asteval-0.9.1.win32-py3.2.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.1.win32-py3.2.exe
+.. _asteval-0.9.2.tar.gz (PyPI): http://pypi.python.org/packages/source/a/asteval/asteval-0.9.2.tar.gz
+.. _asteval-0.9.2.win32-py2.6.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.2.win32-py2.6.exe
+.. _asteval-0.9.2.win32-py2.7.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.2.win32-py2.7.exe
+.. _asteval-0.9.2.win32-py3.2.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.2.win32-py3.2.exe
 
 .. _asteval github repository: http://github.com/newville/asteval
 .. _asteval at pypi:           http://pypi.python.org/pypi/asteval/
@@ -34,17 +34,17 @@ The latest stable version of asteval is 0.9.1, available either from PyPI or CAR
 +----------------------+------------------+------------------------------------------------+
 |  Download Option     | Python Versions  |  Location                                      |
 +======================+==================+================================================+
-|  Source Kit          | 2.6, 2.7, 3.2    | -  `asteval-0.9.1.tar.gz (PyPI)`_              |
-|                      |                  | -  `asteval-0.9.1.tar.gz (CARS)`_              |
+|  Source Kit          | 2.6, 2.7, 3.2    | -  `asteval-0.9.2.tar.gz (PyPI)`_              |
+|                      |                  | -  `asteval-0.9.2.tar.gz (CARS)`_              |
 +----------------------+------------------+------------------------------------------------+
-|  Win32 Installer     |   2.6            | -  `asteval-0.9.1.win32-py2.6.exe (PyPI)`_     |
-|                      |                  | -  `asteval-0.9.1.win32-py2.6.exe (CARS)`_     |
+|  Win32 Installer     |   2.6            | -  `asteval-0.9.2.win32-py2.6.exe (PyPI)`_     |
+|                      |                  | -  `asteval-0.9.2.win32-py2.6.exe (CARS)`_     |
 +----------------------+------------------+------------------------------------------------+
-|  Win32 Installer     |   2.7            | -  `asteval-0.9.1.win32-py2.7.exe (PyPI)`_     |
-|                      |                  | -  `asteval-0.9.1.win32-py2.7.exe (CARS)`_     |
+|  Win32 Installer     |   2.7            | -  `asteval-0.9.2.win32-py2.7.exe (PyPI)`_     |
+|                      |                  | -  `asteval-0.9.2.win32-py2.7.exe (CARS)`_     |
 +----------------------+------------------+------------------------------------------------+
-|  Win32 Installer     |   3.2            | -  `asteval-0.9.1.win32-py3.2.exe (PyPI)`_     |
-|                      |                  | -  `asteval-0.9.1.win32-py3.2.exe (CARS)`_     |
+|  Win32 Installer     |   3.2            | -  `asteval-0.9.2.win32-py3.2.exe (PyPI)`_     |
+|                      |                  | -  `asteval-0.9.2.win32-py3.2.exe (CARS)`_     |
 +----------------------+------------------+------------------------------------------------+
 |  Development Version |   all            |  use `asteval github repository`_              |
 +----------------------+------------------+------------------------------------------------+

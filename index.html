@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.9.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -83,9 +81,10 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
   <div class="section" id="asteval-minimal-python-ast-evaluator">
 <h1>ASTEVAL: Minimal Python AST Evaluator<a class="headerlink" href="#asteval-minimal-python-ast-evaluator" title="Permalink to this headline">¶</a></h1>
 <p>ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
-using Python's ast module.  The idea is to provide a simple, safe, and
-robust miniature mathematical language that can handle user-input in cases
-where one might be tempted to use Python's <em>eval</em>.  The emphasis here is on
+using Python's ast module.  The idea is to provide a simple, robust
+miniature mathematical language that can handle user-input in cases where
+one might be tempted to use Python's <em>eval</em>, and which is it at least
+mostly safe from errant and malious input.  The emphasis here is on
 mathematical expressions, so numpy functions are imported and used if
 available.</p>
 <p>While much of Python's constructs are supported, there are important
@@ -128,7 +127,10 @@ define classes or import modules, the language is decidedly limited.</p>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#exceptions">exceptions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for asteval</a></li>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for asteval</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="motivation.html#how-safe-is-asteval">How Safe is asteval?</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -153,7 +155,7 @@ define classes or import modules, the language is decidedly limited.</p>
     </div>
     <div class="footer">
         &copy; Copyright 2011, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
     </div>
   </body>
 </html>
