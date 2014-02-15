@@ -59,8 +59,7 @@ class Interpreter:
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
                        'list', 'listcomp', 'module', 'name', 'num', 'pass',
                        'print', 'raise', 'repr', 'return', 'slice', 'str',
-                       'subscript', 'tryexcept', 'tuple', 'unaryop',
-                       'while')
+                       'subscript', 'try', 'tuple', 'unaryop', 'while')
 
     def __init__(self, symtable=None, writer=None, use_numpy=True):
         self.writer = writer or stdout
@@ -93,8 +92,11 @@ class Interpreter:
 
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node))
                                    for node in self.supported_nodes))
-        # for Python3.3
-        self.node_handlers['try'] = self.node_handlers['tryexcept'] 
+
+        # to rationalize try/except try/finally for Python2.6 through Python3.3
+        self.node_handlers['tryexcept'] = self.node_handlers['try']
+        self.node_handlers['tryfinally'] = self.node_handlers['try']
+
 
     def unimplemented(self, node):
         "unimplemented nodes"
@@ -517,8 +519,8 @@ class Interpreter:
         "exception handler..."
         return (self.run(node.type), node.name, node.body)
 
-    def on_tryexcept(self, node):    # ('body', 'handlers', 'orelse')
-        "try/except blocks"
+    def on_try(self, node):    # ('body', 'handlers', 'orelse', 'finalbody')
+        "try/except/else/finally blocks"
         no_errors = True
         for tnode in node.body:
             self.run(tnode, with_raise=False)
@@ -536,8 +538,12 @@ class Interpreter:
                         for tline in hnd.body:
                             self.run(tline)
                         break
-        if no_errors:
+        if no_errors and hasattr(node, 'orelse'):
             for tnode in node.orelse:
+                self.run(tnode)
+
+        if hasattr(node, 'finalbody'):
+            for tnode in node.finalbody:
                 self.run(tnode)
 
     def on_raise(self, node):    # ('type', 'inst', 'tback')
