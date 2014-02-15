@@ -73,9 +73,7 @@ class Interpreter:
         self.expr = None
         self.retval = None
         self.lineno = 0
-        global HAS_NUMPY
-        if not use_numpy:
-            HAS_NUMPY = False
+        self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self._printer
         for sym in FROM_PY:
@@ -85,7 +83,7 @@ class Interpreter:
             if hasattr(math, sym):
                 symtable[sym] = getattr(math, sym)
 
-        if HAS_NUMPY:
+        if self.use_numpy:
             for sym in FROM_NUMPY:
                 if hasattr(numpy, sym):
                     symtable[sym] = getattr(numpy, sym)
@@ -125,9 +123,12 @@ class Interpreter:
         self.expr = text
         try:
             return ast.parse(text)
-        except:
+        except SyntaxError:
             self.raise_exception(None, exc=SyntaxError,
                                  msg='Syntax Error', expr=text)
+        except RuntimeError:
+            self.raise_exception(None, exc=RuntimeError,
+                                 msg='Runtime Error', expr=text)
 
     def run(self, node, expr=None, lineno=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
@@ -322,7 +323,7 @@ class Interpreter:
         elif ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
             self.raise_exception(node, exc=RuntimeError, msg=msg)
-            
+
         # ctx is ast.Load
         sym = self.run(node.value)
         fmt = "cannnot access attribute '%s' for %s"
@@ -332,12 +333,11 @@ class Interpreter:
                 return getattr(sym, node.attr)
             except AttributeError:
                 pass
-            
+
         # AttributeError or accessed unsafe attribute
         obj = self.run(node.value)
         msg = fmt % (node.attr, obj)
         self.raise_exception(node, exc=AttributeError, msg=msg)
-
 
     def on_assign(self, node):    # ('targets', 'value')
         "simple assignment"
@@ -423,7 +423,7 @@ class Interpreter:
             rval = self.run(rnode)
             out = op2func(op)(lval, rval)
             lval = rval
-            if HAS_NUMPY and isinstance(out, numpy.ndarray) and out.any():
+            if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
                 break
             elif not out:
                 break
@@ -577,7 +577,7 @@ class Interpreter:
 
         try:
             return func(*args, **keywords)
-        except:
+        except RuntimeError:
             self.raise_exception(node, exc=RuntimeError,
                                  msg="Error running %s" % (func))
 
