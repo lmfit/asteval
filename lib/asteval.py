@@ -93,6 +93,8 @@ class Interpreter:
 
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node))
                                    for node in self.supported_nodes))
+        # for Python3.3
+        self.node_handlers['try'] = self.node_handlers['tryexcept'] 
 
     def unimplemented(self, node):
         "unimplemented nodes"
