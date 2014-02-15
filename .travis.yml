@@ -2,21 +2,48 @@
 
 language: python
 
-env:
-    - PYTHON=python PYSUF='' # uses Python 2.7
-    - PYTHON=python3 PYSUF=3 # uses Python 3.2
+# Config file for automatic testing at travis-ci.org
 
-# command to install dependencies
+language: python
+
+python:
+    - 2.6
+
+matrix:
+    include:
+        - python: 2.7
+          env:
+            - PYTHON=python
+            - PYVER=2.x
+        - python: 3.2
+          env:
+            - PYTHON=python3
+            - PYVER=3.x
+    exclude:
+        - python: 2.6
+
+virtualenv:
+    system_site_packages: true
+
+before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+
+    - sudo apt-get update
+    - sudo apt-get install $PYTHON-setuptools
+    - sudo apt-get install $PYTHON-numpy
+    - sudo apt-get install $PYTHON-sphinx
+    - sudo apt-get install $PYTHON-nose
+
 install:
-  # Deactivate the virtualenv to get fast install of dependencies
-  - deactivate
-  - time sudo apt-get install -qq $PYTHON-numpy $PYTHON-sphinx $PYTHON-nose
-  - sudo python$PYSUF setup.py install
+    - sudo $PYTHON setup.py install
 
 script:
-  - cd tests
-  - nosetests$PYSUF
-
-  - cd ../doc
-  # TODO: This probably runs Python 2 Sphinx even for the Python 3 build?
-  - make html
+    # Execute the unit tests
+    - cd tests
+    - nosetests
+    # Generate the docs
+    - if [[ $PYVER == '2.x' ]]; then
+    -   cd ../doc
+    -   make html
+    - fi
