@@ -87,11 +87,20 @@ else:
         self.isvalue('n',  -1)
 
         self.interp("""
-n=0
+n, i = 0, 0
 while n < 10:
     n += 1
-    if n < 3:
+    if n % 2:
         continue
+    i += 1
+print( 'finish: n, i = ', n, i)
+""")
+        self.isvalue('n',  10)
+        self.isvalue('i',  5)
+
+        self.interp("""
+n=0
+while n < 10:
     n += 1
     print( ' n = ', n)
     if n > 5:
@@ -99,6 +108,30 @@ while n < 10:
 print( 'finish: n = ', n)
 """)
         self.isvalue('n',  6)
+
+    def test_while_continue(self):
+        self.interp("""
+n, i = 0, 0
+while n < 10:
+    n += 1
+    if n % 2:
+        continue
+    i += 1
+print( 'finish: n, i = ', n, i)
+""")
+        self.isvalue('n',  10)
+        self.isvalue('i',  5)
+
+    def test_while_break(self):
+        self.interp("""
+n = 0
+while n < 10:
+    n += 1
+    if n > 6:
+        break
+print( 'finish: n = ', n)
+""")
+        self.isvalue('n',  7)
 
     def test_assert(self):
         'test assert statements'
@@ -128,6 +161,7 @@ else:
 ''')
         self.isvalue('n', -1)
 
+    def test_for_break(self):
         self.interp('''
 n=0
 for i in arange(10):
@@ -181,7 +215,8 @@ else:
         self.interp("y = ['a', 'b', 'c']")
         self.interp("rep_x = repr(x['a'])")
         self.interp("rep_y = repr(y)")
-        self.interp("print rep_y , rep_x")
+        self.interp("rep_y , rep_x")
+        self.interp("repr(None)")
 
         self.isvalue("rep_x", "1")
         self.isvalue("rep_y", "['a', 'b', 'c']")
@@ -300,7 +335,6 @@ a = arange(7)''')
     def test_syntaxerrors_2(self):
         '''syntax errors test'''
         for expr in ('x = (1/*)', 'x = 1.A', 'x = A.2'):
-
             failed, errtype, errmsg = False, None, None
             try:
                 self.interp(expr, show_errors=False)
