@@ -515,7 +515,7 @@ a = arange(7)''')
 x = 5
 try:
     x = x/0
-except ZeroDivsionError:
+except ZeroDivisionError:
     print( 'Error Seen!')
     x = -999
 """)
@@ -525,11 +525,38 @@ except ZeroDivsionError:
 x = -1
 try:
     x = x/0
-except ZeroDivsionError:
+except ZeroDivisionError:
     pass
 """)
         self.isvalue('x', -1)
 
+
+    def test_tryelsefinally(self):
+
+        self.interp("""def dotry(x, y):
+    out, ok, clean = 0, False, False
+    try:
+        out = x/y
+    except ZeroDivisionError:
+        out = -1
+    else:
+        ok = True
+    finally:
+        clean = True
+    return out, ok, clean
+""")
+        self.interp("val, ok, clean = dotry(1, 2.0)")
+        self.interp("print(ok, clean)")
+        self.isnear("val", 0.5)
+        self.isvalue("ok", True)
+        self.isvalue("clean", True)
+
+        self.interp("val, ok, clean = dotry(1, 0.0)")
+        self.isvalue("val", -1)
+        self.isvalue("ok",  False)
+        self.isvalue("clean", True)
+
+        
     def test_function1(self):
         "test function definition and running"
         self.interp("""
