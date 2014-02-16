@@ -31,7 +31,7 @@ before_install:
     - fi
 
 install:
-    - sudo $PYTHON setup.py install
+    - pip install .
 
 script:
     - cd tests
