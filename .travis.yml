@@ -1,43 +1,42 @@
 # Config file for automatic testing at travis-ci.org
 language: python
 
-
 matrix:
     include:
         - python: 2.6
           env:
             - PYTHON=python
-            - PYVER=3.x
+            - BUILDDOC=0
         - python: 2.7
           env:
             - PYTHON=python
-            - PYVER=2.x
+            - BUILDDOC=1
         - python: 3.2
           env:
             - PYTHON=python3
-            - PYVER=3.x
+            - BUILDDOC=0
         - python: 3.3
           env:
-            - PYTHON=python3
-            - PYVER=3.x
-
+            - PYTHON=python3.3
+            - BUILDDOC=0
 
 before_install:
     - sudo apt-get update
     - sudo apt-get install $PYTHON-numpy
     - sudo apt-get install $PYTHON-nose
-    - if [[ $PYVER == '2.x' ]]; then
+    - if [[ $BUILDDOC == '1' ]]; then
     -    sudo apt-get install $PYTHON-sphinx
     - fi
 
 install:
-    - pip install .
+    - sudo pip install .
+    - sudo $PYTHON setup.py install
 
 script:
     - cd tests
     - nosetests
     # build docs
-    - if [[ $PYVER == '2.x' ]]; then
+    - if [[ $BUILDDOC == '1' ]]; then
     -   cd ../doc
     -   make html
     - fi
