@@ -31,7 +31,7 @@ install:
 
 script:
     - cd tests
-    - $PYTHON nosetests
+    - nosetests
     # build docs
     - if [[ $BUILDDOC == '1' ]]; then
     -   cd ../doc
