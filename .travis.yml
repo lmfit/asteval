@@ -21,8 +21,14 @@ matrix:
             - PYTHON=python3
             - BUILDDOC=0
 
+virtualenv:
+    system_site_packages: true
+
 before_install:
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
     - sudo apt-get update
+    - sudo apt-get install $PYTHON-nose
     - sudo apt-get install $PYTHON-numpy
     - if [[ $BUILDDOC == '1' ]]; then
     -    sudo apt-get install $PYTHON-sphinx
