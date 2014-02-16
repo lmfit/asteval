@@ -18,15 +18,17 @@ matrix:
             - PYVER=3.x
         - python: 3.3
           env:
-            - PYTHON=python3.3
+            - PYTHON=python3
             - PYVER=3.x
 
 
 before_install:
     - sudo apt-get update
     - sudo apt-get install $PYTHON-numpy
-    - sudo apt-get install $PYTHON-sphinx
     - sudo apt-get install $PYTHON-nose
+    - if [[ $PYVER == '2.x' ]]; then
+    -    sudo apt-get install $PYTHON-sphinx
+    - fi
 
 install:
     - pip install .
