@@ -31,13 +31,12 @@ before_install:
     - fi
 
 install:
-    - pip install .
-    - pip install -r requirements.txt
+    - sudo $PYTHON setup.py install
 
 script:
     - cd tests
     - nosetests
-    # Generate the docs
+    # build docs
     - if [[ $PYVER == '2.x' ]]; then
     -   cd ../doc
     -   make html
