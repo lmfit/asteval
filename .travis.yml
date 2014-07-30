@@ -7,11 +7,9 @@ matrix:
         - python: 2.7
           env:
             - PYTHON=python
-            - BUILDDOC=1
         - python: 3.2
           env:
             - PYTHON=python3
-            - BUILDDOC=0
 
 virtualenv:
     system_site_packages: true
@@ -21,9 +19,6 @@ before_install:
     - sudo apt-get install $PYTHON-setuptools
     - sudo apt-get install $PYTHON-numpy
     - sudo apt-get install $PYTHON-nose
-    - if [[ $BUILDDOC == '1' ]]; then
-    -    sudo apt-get install $PYTHON-sphinx
-    - fi
 
 install:
     - sudo $PYTHON setup.py install
@@ -31,8 +26,3 @@ install:
 script:
     - cd tests
     - nosetests
-    # build docs
-    - if [[ $BUILDDOC == '1' ]]; then
-    -   cd ../doc
-    -   make html
-    - fi
