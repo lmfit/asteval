@@ -310,7 +310,7 @@ a = arange(7)''')
             failed, errtype, errmsg = False, None, None
             try:
                 self.interp(expr, show_errors=False)
-            except RuntimeError:
+            except:
                 failed = True
                 errtype, errmsg = self.interp.error[0].get_error()
 
@@ -338,7 +338,7 @@ a = arange(7)''')
             failed, errtype, errmsg = False, None, None
             try:
                 self.interp(expr, show_errors=False)
-            except RuntimeError:
+            except: # RuntimeError:
                 failed = True
                 errtype, errmsg = self.interp.error[0].get_error()
             self.assertTrue(failed)
@@ -476,13 +476,18 @@ a = arange(7)''')
         self.interp('x[0:2] = [9,-9]')
         self.isvalue('x', np.array([9,-9,2,3,4,5,6,7,8,9]))
 
-    def test_eservedwords(self):
+    def test_reservedwords(self):
         "test reserved words"
         for w in ('and', 'as', 'while', 'raise', 'else',
                   'class', 'del', 'def', 'import', 'None'):
             self.interp.error= []
-            self.interp("%s= 2" % w)
-            errtype, errmsg = self.interp.error[0].get_error()
+            failed, errtype, errmsg = False, None, None
+            try:
+                self.interp("%s= 2" % w, show_errors=False)
+            except:
+                failed = True
+                errtype, errmsg = self.interp.error[0].get_error()
+
             self.assertTrue(errtype=='SyntaxError')
 
         for w in ('True', 'False'):
@@ -556,7 +561,7 @@ except ZeroDivisionError:
         self.isvalue("ok",  False)
         self.isvalue("clean", True)
 
-        
+
     def test_function1(self):
         "test function definition and running"
         self.interp("""

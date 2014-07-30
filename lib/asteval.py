@@ -129,7 +129,13 @@ class Interpreter:
             self.error_msg = "%s in expr='%s'" % (msg, self.expr)
         elif len(msg) > 0:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
-        raise self.error[0].exc(self.error_msg)
+        if exc is None:
+            try:
+                exc = self.error[0].exc
+            except:
+                exc = RuntimeError
+        raise exc(self.error_msg)
+
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
@@ -141,11 +147,9 @@ class Interpreter:
         try:
             return ast.parse(text)
         except SyntaxError:
-            self.raise_exception(None, exc=SyntaxError,
-                                 msg='Syntax Error', expr=text)
-        except RuntimeError:
-            self.raise_exception(None, exc=RuntimeError,
-                                 msg='Runtime Error', expr=text)
+            self.raise_exception(None, msg='Syntax Error', expr=text)
+        except:
+            self.raise_exception(None, msg='Runtime Error', expr=text)
 
     def run(self, node, expr=None, lineno=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
@@ -189,22 +193,30 @@ class Interpreter:
         self.error = []
         try:
             node = self.parse(expr)
-        except RuntimeError:
+        except:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
                 errmsg = "\n".join(self.error[0].get_error())
             if not show_errors:
-                raise RuntimeError(errmsg)
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
             print(errmsg, file=self.writer)
             return
         try:
             return self.run(node, expr=expr, lineno=lineno)
-        except RuntimeError:
+        except:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
                 errmsg = "\n".join(self.error[0].get_error())
             if not show_errors:
-                raise RuntimeError(errmsg)
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
             print(errmsg, file=self.writer)
             return
 
@@ -598,9 +610,8 @@ class Interpreter:
 
         try:
             return func(*args, **keywords)
-        except RuntimeError:
-            self.raise_exception(node, exc=RuntimeError,
-                                 msg="Error running %s" % (func))
+        except:
+            self.raise_exception(node, msg="Error running %s" % (func))
 
     def on_arg(self, node):    # ('test', 'msg')
         "arg for function definitions"
