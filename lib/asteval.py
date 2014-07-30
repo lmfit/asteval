@@ -16,7 +16,7 @@ import ast
 import math
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       NUMPY_RENAMES, op2func,
+                       LOCALFUNCS, NUMPY_RENAMES, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
 
 HAS_NUMPY = False
@@ -87,6 +87,10 @@ class Interpreter:
         for sym in FROM_PY:
             if sym in __builtins__:
                 symtable[sym] = __builtins__[sym]
+
+        for symname, obj in LOCALFUNCS.items():
+            symtable[symname] = obj
+
         for sym in FROM_MATH:
             if hasattr(math, sym):
                 symtable[sym] = getattr(math, sym)
