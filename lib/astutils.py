@@ -19,11 +19,13 @@ RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
 
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
-UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__',
-                '__code__', '__closure__', '__func__', '__self__',
-                '__module__', '__dict__', '__class__', 'func_globals',
-                'func_code', 'func_closure', 'im_class', 'im_func',
-                'im_self', 'gi_code', 'gi_frame')
+UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
+                '__closure__', '__func__', '__self__', '__module__',
+                '__dict__', '__class__', '__call__', '__get__',
+                '__getattribute__', '__subclasshook__', '__new__',
+                '__init__', 'func_globals', 'func_code', 'func_closure',
+                'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
+                '__asteval__')
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -40,13 +42,12 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'UnicodeDecodeError', 'UnicodeEncodeError', 'UnicodeError',
            'UnicodeTranslateError', 'UnicodeWarning', 'ValueError',
            'Warning', 'ZeroDivisionError', 'abs', 'all', 'any', 'bin',
-           'bool', 'bytearray', 'bytes', 'chr', 'complex', 'delattr',
-           'dict', 'dir', 'divmod', 'enumerate', 'filter', 'float',
-           'format', 'frozenset', 'getattr', 'hasattr', 'hash', 'hex',
-           'id', 'int', 'isinstance', 'len', 'list', 'map', 'max', 'min',
-           'oct', 'open', 'ord', 'pow', 'property', 'range', 'repr',
-           'reversed', 'round', 'set', 'setattr', 'slice', 'sorted', 'str',
-           'sum', 'tuple', 'type', 'zip')
+           'bool', 'bytearray', 'bytes', 'chr', 'complex', 'dict', 'dir',
+           'divmod', 'enumerate', 'filter', 'float', 'format', 'frozenset',
+           'hash', 'hex', 'id', 'int', 'isinstance', 'len', 'list', 'map',
+           'max', 'min', 'oct', 'open', 'ord', 'pow', 'range', 'repr',
+           'reversed', 'round', 'set', 'slice', 'sorted', 'str', 'sum',
+           'tuple', 'type', 'zip')
 
 # inherit these from python's math
 FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
