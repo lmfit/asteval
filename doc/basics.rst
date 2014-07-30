@@ -62,16 +62,15 @@ Valid symbol names must match the basic regular expression pattern::
 built-in functions
 =======================
 
-At startup, 130 symbols are loaded into the symbol table from
+At startup, many symbols are loaded into the symbol table from
 Python's builtins and the **math** module.   The builtins include
 several basic Python functions:
 
     abs, all, any, bin, bool, bytearray, bytes, chr, complex,
-    delattr, dict, dir, divmod, enumerate, filter, float, format,
-    frozenset, getattr, hasattr, hash, hex, id, int, isinstance,
-    len, list, map, max, min, oct, open, ord, pow, property,
-    range, repr, reversed, round, set, setattr, slice, sorted,
-    str, sum, tuple, type, zip
+    dict, dir, divmod, enumerate, filter, float, format,
+    frozenset, hash, hex, id, int, isinstance, len, list, map,
+    max, min, oct, ord, pow, property, range, repr, reversed,
+    round, set, slice, sorted, str, sum, tuple, type, zip
 
 and a large number of named exceptions:
 
@@ -142,8 +141,6 @@ User-defined functions can be written and executed, as in python with a
    0.4
 
 
-
-
 exceptions
 ===============
 
@@ -155,11 +152,11 @@ in the :attr:`error` attribute of the :class:`Interpreter` instance.  This
 :class:`ExceptionHolder` class, which is accessed throught the
 :meth:`get_error` method.  The :attr:`error` attribute is reset to an empty
 list at the beginning of each :meth:`eval`, so that errors are from only
-the most recent :meth:`eval`.  
+the most recent :meth:`eval`.
 
 Thus, to handle and re-raise exceptions from your Python code in a simple
 REPL loop, you'd want to do something similar to
-    
+
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()
    >>> while True:
