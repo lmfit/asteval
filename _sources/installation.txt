@@ -2,55 +2,50 @@
 Downloading and Installation
 ====================================
 
-Prerequisites
+.. _numpy: http://docs.scipy.org/doc/numpy
+
+Requirements
 ~~~~~~~~~~~~~~~
 
-The asteval package requires Python 2.6 and higher.  Extensive test with
-version compatibility has not been done yet.  Initial tests work with
-Python 3.2.  No testing has been done with 64-bit architectures, but as
-this package is pure Python, no significant troubles are expected.
+The asteval package requires Python 2.6 and higher.  Most testing has been done with
+Python 2.7 and 3.2, and no testing has yet been done with 3.4.  As this package is pure
+Python, and depends on only packages from the standard library and `numpy`_, no
+significant troubles are expected.
 
 
 Downloads
 ~~~~~~~~~~~~~
 
-The latest stable version of asteval is 0.9.2, available either from PyPI or CARS (Univ of Chicago):
+The latest stable version of asteval is 0.9.3 and is available at PyPI:
 
+.. _asteval-0.9.3.tar.gz:          http://pypi.python.org/packages/source/a/asteval/asteval-0.9.3.tar.gz
+.. _asteval-0.9.3.win32-py2.6.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.3.win32-py2.6.exe
+.. _asteval-0.9.3.win32-py2.7.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.3.win32-py2.7.exe
+.. _asteval-0.9.3.win32-py3.2.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.3.win32-py3.2.exe
+.. _github repository:             http://github.com/newville/asteval
+.. _asteval at pypi:               http://pypi.python.org/pypi/asteval/
+.. _Python Setup Tools:            http://pypi.python.org/pypi/setuptools
+.. _pip:                           http://pypi.python.org/pypi/pip
 
-.. _asteval-0.9.2.tar.gz (CARS):   http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.tar.gz
-.. _asteval-0.9.2.win32-py2.6.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.win32-py2.6.exe
-.. _asteval-0.9.2.win32-py2.7.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.win32-py2.7.exe
-.. _asteval-0.9.2.win32-py3.2.exe (CARS): http://cars9.uchicago.edu/software/python/asteval/src/asteval-0.9.2.win32-py3.2.exe
++----------------------+------------------+---------------------------------------+
+|  Download Option     | Python Versions  |  Location                             |
++======================+==================+=======================================+
+|  Source Kit          |   2.6 and higher |  `asteval-0.9.3.tar.gz`_              |
++----------------------+------------------+---------------------------------------+
+|  Win32 Installer     |   2.6            |  `asteval-0.9.3.win32-py2.6.exe`_     |
++----------------------+------------------+---------------------------------------+
+|  Win32 Installer     |   2.7            |  `asteval-0.9.3.win32-py2.7.exe`_     |
++----------------------+------------------+---------------------------------------+
+|  Win32 Installer     |   3.2            |  `asteval-0.9.3.win32-py3.2.exe`_     |
++----------------------+------------------+---------------------------------------+
+|  Development Version |   all            |  `github repository`_                 |
++----------------------+------------------+---------------------------------------+
 
-.. _asteval-0.9.2.tar.gz (PyPI): http://pypi.python.org/packages/source/a/asteval/asteval-0.9.2.tar.gz
-.. _asteval-0.9.2.win32-py2.6.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.2.win32-py2.6.exe
-.. _asteval-0.9.2.win32-py2.7.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.2.win32-py2.7.exe
-.. _asteval-0.9.2.win32-py3.2.exe (PyPI): http://pypi.python.org/packages/any/a/asteval/asteval-0.9.2.win32-py3.2.exe
+If you have `pip`_, you can install asteval with::
 
-.. _asteval github repository: http://github.com/newville/asteval
-.. _asteval at pypi:           http://pypi.python.org/pypi/asteval/
-.. _Python Setup Tools:        http://pypi.python.org/pypi/setuptools
+   pip install asteval
 
-+----------------------+------------------+------------------------------------------------+
-|  Download Option     | Python Versions  |  Location                                      |
-+======================+==================+================================================+
-|  Source Kit          | 2.6, 2.7, 3.2    | -  `asteval-0.9.2.tar.gz (PyPI)`_              |
-|                      |                  | -  `asteval-0.9.2.tar.gz (CARS)`_              |
-+----------------------+------------------+------------------------------------------------+
-|  Win32 Installer     |   2.6            | -  `asteval-0.9.2.win32-py2.6.exe (PyPI)`_     |
-|                      |                  | -  `asteval-0.9.2.win32-py2.6.exe (CARS)`_     |
-+----------------------+------------------+------------------------------------------------+
-|  Win32 Installer     |   2.7            | -  `asteval-0.9.2.win32-py2.7.exe (PyPI)`_     |
-|                      |                  | -  `asteval-0.9.2.win32-py2.7.exe (CARS)`_     |
-+----------------------+------------------+------------------------------------------------+
-|  Win32 Installer     |   3.2            | -  `asteval-0.9.2.win32-py3.2.exe (PyPI)`_     |
-|                      |                  | -  `asteval-0.9.2.win32-py3.2.exe (CARS)`_     |
-+----------------------+------------------+------------------------------------------------+
-|  Development Version |   all            |  use `asteval github repository`_              |
-+----------------------+------------------+------------------------------------------------+
-
-if you have `Python Setup Tools`_  installed, you can download and install
-the asteval Package simply with::
+If you have `Python Setup Tools`_ installed, you can use::
 
    easy_install -U asteval
 
@@ -75,7 +70,7 @@ License
 
 The ASTEVAL code is distribution under the following license:
 
-  Copyright (c) 2012 Matthew Newville, The University of Chicago
+  Copyright (c) 2014 Matthew Newville, The University of Chicago
 
   Permission to use and redistribute the source code or binary forms of this
   software and its documentation, with or without modification is hereby

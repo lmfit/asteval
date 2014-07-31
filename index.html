@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.2',
+        VERSION:     '0.9.3',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,6 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="ASTEVAL: Minimal Python AST evaluator" href="#" />
     <link rel="next" title="Downloading and Installation" href="installation.html" /> 
   </head>
@@ -34,6 +35,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="installation.html" title="Downloading and Installation"
              accesskey="N">next</a> |</li>
         <li><a href="#">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
@@ -41,22 +45,19 @@
     </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
-<p>Current version: <b>0.9.2</b></p>
+<p>Current version: <b>0.9.3</b></p>
 <p>Downloads:
-<ul>
-  <li>&nbsp; &nbsp; <a href="http://cars.uchicago.edu/software/python/asteval/src/">cars.uchicago.edu</a>
-  <li>&nbsp; &nbsp; <a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a> <p>
-       try <tt>easy_install -U asteval</tt>
-</ul>
+<a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
+
+<p> try <tt>pip install asteval</tt>
+
 <p>
+Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/asteval/">github.com</a>
 
-Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/asteval/">github.com</a> <br>
-
-<h3>Documentation</h3>
-
- <a href="asteval.pdf">  PDF Format</a>
 <hr>
-<p>
+
+
+
 <div id="searchbox" style="display: none">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -82,40 +83,48 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
 <h1>ASTEVAL: Minimal Python AST Evaluator<a class="headerlink" href="#asteval-minimal-python-ast-evaluator" title="Permalink to this headline">¶</a></h1>
 <p>ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
 using Python's ast module.  The idea is to provide a simple, robust
-miniature mathematical language that can handle user-input in cases where
-one might be tempted to use Python's <em>eval</em>, and which is it at least
-mostly safe from errant and malious input.  The emphasis here is on
-mathematical expressions, so numpy functions are imported and used if
-available.</p>
-<p>While much of Python's constructs are supported, there are important
-absences and differences, and this is by no means an attempt to reproduce
-Python with its own ast module.  Important differences and absences are:</p>
+miniature mathematical language that is more complete than
+<a class="reference external" href="http://docs.python.org/library/ast.html#ast.literal_eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">ast.literal_eval()</span></tt></a> and can handle user-input more safely than
+<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>.  The emphasis here is on mathematical calculations, so
+mathematical functions from Python's <a class="reference external" href="http://docs.python.org/library/math.html#module-math" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">math</span></tt></a> module are available,
+and a large number of functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> will be available if it is
+installed on your system.</p>
+<p>Many parts of the Python language are supported, including if-then-else
+conditionals, while loops, for loops, try-except blocks, list
+comprehension, slicing, subscripting, and writing user-defined functions.
+All objects are true python objects, and many built-in data structures
+(strings, dictionaries, tuple, lists, numpy arrays), are supported.  Still,
+there are important absences and differences, and asteval is by no means an
+attempt to reproduce Python with its own ast module.  Some of the
+differences and absences include:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li>Variable and function symbol names are held in a simple symbol
-table (a single dictionary), giving a flat namespace.</li>
-<li>creating classes is not supported.</li>
-<li>importing modules is not supported.</li>
-<li>function decorators, yield, lambda, and exec are not supported.</li>
+table -- a single dictionary -- giving a flat namespace.</li>
+<li>creating classes is not allowed.</li>
+<li>importing modules is not allowed.</li>
+<li>function decorators, generators, yield, and lambda are not supported.</li>
+<li>several builtins (<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#execfile" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">execfile()</span></tt></a>,
+<a class="reference external" href="http://docs.python.org/library/functions.html#getattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">getattr()</span></tt></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#hasattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">hasattr()</span></tt></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#setattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">setattr()</span></tt></a>, and
+<a class="reference external" href="http://docs.python.org/library/functions.html#delattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">delattr()</span></tt></a>) are not allowed.</li>
+<li>Accessing several private object attributes that can provide access to
+the python interpreter are not allowed.</li>
 </ol>
 </div></blockquote>
-<p>Many built-in python syntactical components (if-then-else, while loops, for
-loops, try-except blocks, list comprehension, slicing, subscripting), and
-built-in data structures (dictionaries, tuple, lists, numpy arrays,
-strings) are fully supported.  In addition, many built-in functions are
-supported, including the standard builtin python functions, and all
-mathemetical functions from the math module.  As mentioned above, if numpy
-is available, many of its functions will also be available.  Users can
-define their own functions, but given the restrictions of not being able to
-define classes or import modules, the language is decidedly limited.</p>
+<p>The result of this makes asteval a decidedly restricted and limited language
+that is focused on mathematical calculations.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Downloading and Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#downloads">Downloads</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#development-version">Development Version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for asteval</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="motivation.html#how-safe-is-asteval">How Safe is asteval?</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="basics.html">Using asteval</a><ul>
@@ -127,10 +136,7 @@ define classes or import modules, the language is decidedly limited.</p>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#exceptions">exceptions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for asteval</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="motivation.html#how-safe-is-asteval">How Safe is asteval?</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">asteval reference</a></li>
 </ul>
 </div>
 </div>
@@ -148,14 +154,17 @@ define classes or import modules, the language is decidedly limited.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="installation.html" title="Downloading and Installation"
              >next</a> |</li>
         <li><a href="#">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2011, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+        &copy; Copyright 2014, Matthew Newville, The University of Chicago.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
