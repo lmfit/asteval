@@ -21,8 +21,9 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.coverage',
-              'sphinx.ext.pngmath', 'sphinx.ext.intersphinx']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
+              'sphinx.ext.coverage',
+              'sphinx.ext.mathjax', 'sphinx.ext.intersphinx']
 
 intersphinx_mapping = {'py': ('http://docs.python.org/', None)}
 
@@ -93,8 +94,6 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'default'
-
 html_theme = 'sphinxdoc'
 
 # html_theme = 'nature'
@@ -166,7 +165,6 @@ html_show_sourcelink = True
 
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'astevaldoc'
-
 
 # -- Options for LaTeX output --------------------------------------------------
 
