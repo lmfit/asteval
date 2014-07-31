@@ -7,8 +7,8 @@ The asteval module is very easy to use. Import the module and create an Interpre
     >>> from asteval import Interpreter
     >>> aeval = Interpreter()
 
-you have an embedded interpreter for a procedural, mathematical language
-that is very much like python in your application, all ready to use::
+and you have an embedded interpreter for a procedural, mathematical language
+that is very much like python in your application, ready for use::
 
     >>> aeval('x = sqrt(3)')
     >>> aeval('print x')
@@ -69,8 +69,8 @@ several basic Python functions:
     abs, all, any, bin, bool, bytearray, bytes, chr, complex,
     dict, dir, divmod, enumerate, filter, float, format,
     frozenset, hash, hex, id, int, isinstance, len, list, map,
-    max, min, oct, ord, pow, property, range, repr, reversed,
-    round, set, slice, sorted, str, sum, tuple, type, zip
+    max, min, oct, ord, pow, range, repr, reversed, round,
+    set, slice, sorted, str, sum, tuple, type, zip
 
 and a large number of named exceptions:
 
@@ -95,8 +95,10 @@ The symbols imported from Python's *math* module include:
     frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
     modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc
 
+.. _numpy: http://docs.scipy.org/doc/numpy
+
 If available, a very large number (~400) additional symbols are
-imported from numpy.
+imported from `numpy`_.
 
 conditionals and loops
 ==========================
@@ -123,6 +125,8 @@ printing
 For printing, asteval emulates Python's native :func:`print` function and
 :data:`print` statement (for python 2).  That is, the behavior mimics the
 version of python used.
+
+
 
 
 writing functions
