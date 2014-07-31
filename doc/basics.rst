@@ -2,13 +2,13 @@
 Using asteval
 ================
 
-The asteval module is very easy to use. Import the module and create an Interpreter:
+The asteval module is very easy to use.   Import the module and create an Interpreter:
 
     >>> from asteval import Interpreter
     >>> aeval = Interpreter()
 
-and you have an embedded interpreter for a procedural, mathematical language
-that is very much like python in your application, ready for use::
+and now you have an embedded interpreter for a procedural, mathematical language
+that es very much like python, ready for use::
 
     >>> aeval('x = sqrt(3)')
     >>> aeval('print x')
@@ -126,7 +126,9 @@ For printing, asteval emulates Python's native :func:`print` function and
 :data:`print` statement (for python 2).  That is, the behavior mimics the
 version of python used.
 
-
+You can change where output is sent with the ``writer`` argument when
+creating the interpreter.  By default, outputs are sent to
+:py:data:`sys.stdout`.
 
 
 writing functions
@@ -140,8 +142,8 @@ User-defined functions can be written and executed, as in python with a
    >>> code = """def func(a, b, norm=1.0):
    ... return (a + b)/norm
    ... """
-   >>> aeval.eval(code)
-   >>> aeval.eval("func(1, 3, norm=10.0)")
+   >>> aeval(code)
+   >>> aeval("func(1, 3, norm=10.0)")
    0.4
 
 
@@ -165,7 +167,7 @@ REPL loop, you'd want to do something similar to
    >>> aeval = Interpreter()
    >>> while True:
    >>>     inp_string = raw_input('dsl:>')
-   >>>     result = aeval.eval(inp_string)
+   >>>     result = aeval(inp_string)
    >>>     if len(aeval.error)>0:
    >>>         for err in aeval.error:
    >>>             print(err.get_error())
