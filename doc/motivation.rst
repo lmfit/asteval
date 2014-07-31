@@ -79,14 +79,14 @@ attributes are blacklisted for all objects, and cannot be accessed:
 
 Of course, this approach of making a blacklist cannot be guaranteed to be
 complete, but it does eliminate classes of attacks to seg-fault the Python
-interpreter.  Of course, asteval will typically expose ufuncs from the
+interpreter.  Of course, asteval will typically expose numpy ufuncs from the
 numpy module, and several of these can seg-fault Python without too much
 trouble.  If you're paranoid about safe user input that can never cause a
 segmentation fault, you'll want to disable the use of numpy.
 
 There are important categories of safety that asteval does not even attempt
 to address. The most important of these is resource hogging.  There is no
-timeout on any calculation, and so a reasonable looking calculuation such as::
+timeout on any calculation, and so a reasonable looking calculation such as::
 
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()

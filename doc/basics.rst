@@ -155,7 +155,7 @@ messages are printed (with Python's print statement or function, and so
 using standard output by default), and the full set of exceptions is kept
 in the :attr:`error` attribute of the :class:`Interpreter` instance.  This
 :attr:`error` attribute is a list of instances of the asteval
-:class:`ExceptionHolder` class, which is accessed throught the
+:class:`ExceptionHolder` class, which is accessed through the
 :meth:`get_error` method.  The :attr:`error` attribute is reset to an empty
 list at the beginning of each :meth:`eval`, so that errors are from only
 the most recent :meth:`eval`.

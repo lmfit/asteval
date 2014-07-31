@@ -78,6 +78,5 @@ The ``use_numpy`` argument can be used to control whether functions from
 
    the most recent error message.
 
-
 .. autofunction:: valid_symbol_name
 

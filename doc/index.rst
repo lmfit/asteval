@@ -17,7 +17,7 @@ installed on your system.
 Many parts of the Python language are supported, including if-then-else
 conditionals, while loops, for loops, try-except blocks, list
 comprehension, slicing, subscripting, and writing user-defined functions.
-All objeects are true python objects, and many built-in data structures
+All objects are true python objects, and many built-in data structures
 (strings, dictionaries, tuple, lists, numpy arrays), are supported.  Still,
 there are important absences and differences, and asteval is by no means an
 attempt to reproduce Python with its own ast module.  Some of the
