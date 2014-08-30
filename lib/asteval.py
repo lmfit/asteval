@@ -24,8 +24,8 @@ try:
     import numpy
     HAS_NUMPY = True
 except ImportError:
-    print("Warning: numpy not available... functionality will be limited.")
-
+    # print("Warning: numpy not available... functionality will be limited.")
+    pass
 
 class Interpreter:
     """mathematical expression compiler and interpreter.
