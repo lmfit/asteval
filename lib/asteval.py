@@ -65,9 +65,10 @@ class Interpreter:
                        'continue', 'delete', 'dict', 'ellipsis',
                        'excepthandler', 'expr', 'extslice', 'for',
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
-                       'list', 'listcomp', 'module', 'name', 'num', 'pass',
-                       'print', 'raise', 'repr', 'return', 'slice', 'str',
-                       'subscript', 'try', 'tuple', 'unaryop', 'while')
+                       'list', 'listcomp', 'module', 'name', 'nameconstant',
+                       'num', 'pass', 'print', 'raise', 'repr', 'return',
+                       'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
+                       'while')
 
     def __init__(self, symtable=None, writer=None, use_numpy=True):
         self.writer = writer or stdout
@@ -315,6 +316,10 @@ class Interpreter:
             else:
                 msg = "name '%s' is not defined" % node.id
                 self.raise_exception(node, exc=NameError, msg=msg)
+
+    def on_nameconstant(self, node):
+        """ True, False, None in python >= 3.4 """
+        return node.value
 
     def node_assign(self, node, val):
         """here we assign a value (not the node.value object) to a node
