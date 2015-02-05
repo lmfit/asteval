@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
-import lib as asteval
+import asteval
 
 setup(name = 'asteval',
       version = asteval.__version__,
@@ -9,7 +9,6 @@ setup(name = 'asteval',
       url  = 'http://github.com/newville/asteval',
       license = 'BSD',
       description = "Safe, minimalistic evaluator of python expression using ast module",
-      package_dir = {'asteval': 'lib'},
       packages = ['asteval'],
       )
 
