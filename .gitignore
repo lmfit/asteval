@@ -7,5 +7,6 @@ doc/_build
 doc/*.pdf
 build
 dist
+*.egg-info
 
 MANIFEST
