@@ -625,7 +625,6 @@ class Interpreter:
 
     def on_arg(self, node):    # ('test', 'msg')
         "arg for function definitions"
-        # print(" ON ARG ! ", node, node.arg)
         return node.arg
 
     def on_functiondef(self, node):
@@ -651,12 +650,19 @@ class Interpreter:
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
             doc = nb0.value.s
 
+        varkws = node.args.kwarg
+        vararg = node.args.vararg
+        if version_info[0] == 3:
+            if isinstance(vararg, ast.arg):
+                vararg = vararg.arg
+            if isinstance(varkws, ast.arg):
+                varkws = varkws.arg
+
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
                                              lineno=self.lineno,
                                              body=node.body,
                                              args=args, kwargs=kwargs,
-                                             vararg=node.args.vararg,
-                                             varkws=node.args.kwarg)
+                                             vararg=vararg, varkws=varkws)
 
 
 class Procedure(object):
