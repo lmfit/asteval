@@ -27,6 +27,10 @@ except ImportError:
     # print("Warning: numpy not available... functionality will be limited.")
     pass
 
+builtins = __builtins__
+if not isinstance(builtins, dict):
+    builtins = builtins.__dict__
+    
 class Interpreter:
     """mathematical expression compiler and interpreter.
 
@@ -86,8 +90,8 @@ class Interpreter:
 
         symtable['print'] = self._printer
         for sym in FROM_PY:
-            if sym in __builtins__:
-                symtable[sym] = __builtins__[sym]
+            if sym in builtins:
+                symtable[sym] = builtins[sym]
 
         for symname, obj in LOCALFUNCS.items():
             symtable[symname] = obj
@@ -565,7 +569,7 @@ class Interpreter:
                 for hnd in node.handlers:
                     htype = None
                     if hnd.type is not None:
-                        htype = __builtins__.get(hnd.type.id, None)
+                        htype = builtins.get(hnd.type.id, None)
                     if htype is None or isinstance(e_type(), htype):
                         self.error = []
                         if hnd.name is not None:
