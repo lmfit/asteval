@@ -30,7 +30,7 @@ except ImportError:
 builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
-    
+
 class Interpreter:
     """mathematical expression compiler and interpreter.
 
@@ -115,6 +115,10 @@ class Interpreter:
         self.node_handlers['tryexcept'] = self.node_handlers['try']
         self.node_handlers['tryfinally'] = self.node_handlers['try']
 
+        self.no_deepcopy = []
+        for key, val in symtable.items():
+            if (callable(val) or 'numpy.lib.index_tricks' in repr(val)):
+                self.no_deepcopy.append(key)
 
     def unimplemented(self, node):
         "unimplemented nodes"
@@ -334,6 +338,9 @@ class Interpreter:
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             sym = self.symtable[node.id] = val
+            if node.id in self.no_deepcopy:
+                self.no_deepcopy.pop(node.id)
+
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
                 msg = "cannot assign to attribute %s" % node.attr
@@ -667,7 +674,8 @@ class Interpreter:
                                              body=node.body,
                                              args=args, kwargs=kwargs,
                                              vararg=vararg, varkws=varkws)
-
+        if node.name in self.no_deepcopy:
+            self.no_deepcopy.pop(node.name)
 
 class Procedure(object):
     """Procedure: user-defined function for asteval
