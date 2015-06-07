@@ -16,13 +16,13 @@ significant troubles are expected.
 Downloads
 ~~~~~~~~~~~~~
 
-The latest stable version of asteval is 0.9.4 and is available at PyPI:
+The latest stable version of asteval is 0.9.5 and is available at PyPI:
 
-.. _asteval-0.9.4.tar.gz:          http://pypi.python.org/packages/source/a/asteval/asteval-0.9.4.tar.gz
-.. _asteval-0.9.4.win32-py2.7.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.4.win32-py2.7.exe
-.. _asteval-0.9.4.win32-py3.4.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.4.win32-py3.4.exe
-.. _asteval-0.9.4-py2-none-any.whl: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.4-py2-none-any.whl
-.. _asteval-0.9.4-py3-none-any.whl: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.4-py3-none-any.whl
+.. _asteval-0.9.5.tar.gz:          http://pypi.python.org/packages/source/a/asteval/asteval-0.9.5.tar.gz
+.. _asteval-0.9.5.win32-py2.7.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5.win32-py2.7.exe
+.. _asteval-0.9.5.win32-py3.4.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5.win32-py3.4.exe
+.. _asteval-0.9.5-py2-none-any.whl: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5-py2-none-any.whl
+.. _asteval-0.9.5-py3-none-any.whl: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5-py3-none-any.whl
 .. _github repository:             http://github.com/newville/asteval
 .. _asteval at pypi:               http://pypi.python.org/pypi/asteval/
 .. _Python Setup Tools:            http://pypi.python.org/pypi/setuptools
@@ -31,15 +31,15 @@ The latest stable version of asteval is 0.9.4 and is available at PyPI:
 +----------------------+------------------+---------------------------------------+
 |  Download Option     | Python Versions  |  Location                             |
 +======================+==================+=======================================+
-|  Source Kit          |   2.6 and higher |  `asteval-0.9.4.tar.gz`_              |
+|  Source Kit          |   2.6 and higher |  `asteval-0.9.5.tar.gz`_              |
 +----------------------+------------------+---------------------------------------+
-|  Win32 Installer     |   2.7            |  `asteval-0.9.4.win32-py2.7.exe`_     |
+|  Win32 Installer     |   2.7            |  `asteval-0.9.5.win32-py2.7.exe`_     |
 +----------------------+------------------+---------------------------------------+
-|  Win32 Installer     |   3.4            |  `asteval-0.9.4.win32-py3.4.exe`_     |
+|  Win32 Installer     |   3.4            |  `asteval-0.9.5.win32-py3.4.exe`_     |
 +----------------------+------------------+---------------------------------------+
-|  Wheel Installer     |   2.7            |  `asteval-0.9.4-py2-none-any.whl`_    |
+|  Wheel Installer     |   2.7            |  `asteval-0.9.5-py2-none-any.whl`_    |
 +----------------------+------------------+---------------------------------------+
-|  Wheel Installer     |   3.4            |  `asteval-0.9.4-py3-none-any.whl`_    |
+|  Wheel Installer     |   3.4            |  `asteval-0.9.5-py3-none-any.whl`_    |
 +----------------------+------------------+---------------------------------------+
 |  Development Version |   all            |  `github repository`_                 |
 +----------------------+------------------+---------------------------------------+
