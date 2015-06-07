@@ -11,14 +11,14 @@
 
    using python, ast module to parse a python expression.
 
-   version: 0.9.4
+   version: 0.9.5
    last update: 07-June-2015
    License:  BSD
    Author:  Matthew Newville <newville@cars.uchicago.edu>
             Center for Advanced Radiation Sources,
             The University of Chicago
 """
-__version__ = '0.9.4'
+__version__ = '0.9.5'
 
 from .asteval import Interpreter
 from .astutils import NameFinder, valid_symbol_name
