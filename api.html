@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.3',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,12 +23,12 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="ASTEVAL: Minimal Python AST evaluator" href="index.html" />
     <link rel="prev" title="Using asteval" href="basics.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -40,20 +40,22 @@
         <li class="right" >
           <a href="basics.html" title="Using asteval"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="basics.html"
                         title="previous chapter">Using asteval</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/api.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/api.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -72,24 +74,24 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="asteval-reference">
 <h1>asteval reference<a class="headerlink" href="#asteval-reference" title="Permalink to this headline">¶</a></h1>
-<p>The asteval module provides an <tt class="xref py py-class docutils literal"><span class="pre">Interpreter</span></tt> class, which creates an
-interpreter.  There is also a convenience function <tt class="xref py py-func docutils literal"><span class="pre">valid_symbol_name()</span></tt></p>
+<p>The asteval module provides an <code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code> class, which creates an
+interpreter.  There is also a convenience function <code class="xref py py-func docutils literal"><span class="pre">valid_symbol_name()</span></code></p>
 <span class="target" id="module-asteval"></span><dl class="class">
 <dt id="asteval.Interpreter">
-<em class="property">class </em><tt class="descclassname">asteval.</tt><tt class="descname">Interpreter</tt><big>(</big><em>symtable=None</em><span class="optional">[</span>, <em>writer=None</em><span class="optional">[</span>, <em>use_numpy=True</em><span class="optional">]</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">asteval.</code><code class="descname">Interpreter</code><span class="sig-paren">(</span><em>symtable=None</em><span class="optional">[</span>, <em>writer=None</em><span class="optional">[</span>, <em>use_numpy=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an asteval interpreter.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>symtable</strong> (<tt class="docutils literal"><span class="pre">None</span></tt> or dict.) -- a Symbol table (if <tt class="docutils literal"><span class="pre">None</span></tt>, one will be created).</li>
+<li><strong>symtable</strong> (<code class="docutils literal"><span class="pre">None</span></code> or dict.) -- a Symbol table (if <code class="docutils literal"><span class="pre">None</span></code>, one will be created).</li>
 <li><strong>writer</strong> (<em>file-like.</em>) -- callable file-like object where standard output will be sent.</li>
-<li><strong>use_numpy</strong> (boolean (<tt class="docutils literal"><span class="pre">True</span></tt> / <tt class="docutils literal"><span class="pre">False</span></tt>)) -- whether to use functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</li>
+<li><strong>use_numpy</strong> (boolean (<code class="docutils literal"><span class="pre">True</span></code> / <code class="docutils literal"><span class="pre">False</span></code>)) -- whether to use functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</li>
 </ul>
 </td>
 </tr>
@@ -98,17 +100,17 @@ interpreter.  There is also a convenience function <tt class="xref py py-func do
 </dd></dl>
 
 <p>The symbol table will be loaded with several built in functions, several
-functions from the <a class="reference external" href="http://docs.python.org/library/math.html#module-math" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">math</span></tt></a> module and, if available and requested,
+functions from the <a class="reference external" href="http://docs.python.org/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and, if available and requested,
 several functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.  This will happen even for a symbol table
 explicitly provided.</p>
-<p>The <tt class="docutils literal"><span class="pre">writer</span></tt> argument can be used to provide a place to send all output
-that would normally go to <a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><tt class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></tt></a>.  The default is, of
-course, to send output to <a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><tt class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></tt></a>.</p>
-<p>The <tt class="docutils literal"><span class="pre">use_numpy</span></tt> argument can be used to control whether functions from
+<p>The <code class="docutils literal"><span class="pre">writer</span></code> argument can be used to provide a place to send all output
+that would normally go to <a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  The default is, of
+course, to send output to <a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.</p>
+<p>The <code class="docutils literal"><span class="pre">use_numpy</span></code> argument can be used to control whether functions from
 <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> are loaded into the symbol table.</p>
 <dl class="method">
 <dt id="asteval.eval">
-<tt class="descclassname">asteval.</tt><tt class="descname">eval</tt><big>(</big><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#asteval.eval" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">asteval.</code><code class="descname">eval</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.eval" title="Permalink to this definition">¶</a></dt>
 <dd><p>evaluate the expression, returning the result.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -118,7 +120,7 @@ course, to send output to <a class="reference external" href="http://docs.python
 <li><strong>expression</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) -- code to evaluate.</li>
 <li><strong>lineno</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) -- line number (for error messages).</li>
 <li><strong>show_errors</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) -- whether to print error messages or leave them
-in the <tt class="xref py py-attr docutils literal"><span class="pre">errors</span></tt> list.</li>
+in the <code class="xref py py-attr docutils literal"><span class="pre">errors</span></code> list.</li>
 </ul>
 </td>
 </tr>
@@ -128,8 +130,8 @@ in the <tt class="xref py py-attr docutils literal"><span class="pre">errors</sp
 
 <dl class="method">
 <dt id="asteval.__call__">
-<tt class="descclassname">asteval.</tt><tt class="descname">__call__</tt><big>(</big><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><big>)</big><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
-<dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><tt class="xref py py-meth docutils literal"><span class="pre">eval()</span></tt></a>.  That is one can do:</p>
+<code class="descclassname">asteval.</code><code class="descname">__call__</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code></a>.  That is one can do:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">(</span><span class="s">&#39;x = 1&#39;</span><span class="p">)</span>
@@ -143,18 +145,18 @@ in the <tt class="xref py py-attr docutils literal"><span class="pre">errors</sp
 
 <dl class="attribute">
 <dt id="asteval.symtable">
-<tt class="descclassname">asteval.</tt><tt class="descname">symtable</tt><a class="headerlink" href="#asteval.symtable" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">asteval.</code><code class="descname">symtable</code><a class="headerlink" href="#asteval.symtable" title="Permalink to this definition">¶</a></dt>
 <dd><p>the symbol table. A dictionary with symbol names as keys, and object
 values (data and functions).</p>
 <p>For full control of the symbol table, you can simply access the
-<a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><tt class="xref py py-attr docutils literal"><span class="pre">symtable</span></tt></a> object, inserting, replacing, or removing symbols to
+<a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><code class="xref py py-attr docutils literal"><span class="pre">symtable</span></code></a> object, inserting, replacing, or removing symbols to
 alter what symbols are known to your interpreter.  You can also access
-the <a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><tt class="xref py py-attr docutils literal"><span class="pre">symtable</span></tt></a> to retrieve results.</p>
+the <a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><code class="xref py py-attr docutils literal"><span class="pre">symtable</span></code></a> to retrieve results.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="asteval.error">
-<tt class="descclassname">asteval.</tt><tt class="descname">error</tt><a class="headerlink" href="#asteval.error" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">asteval.</code><code class="descname">error</code><a class="headerlink" href="#asteval.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>a list of error information, filled on exceptions. You can test this
 after each call of the interpreter. It will be empty if the last
 execution was successful.  If an error occurs, this will contain a liste
@@ -163,16 +165,16 @@ of Exceptions raised.</p>
 
 <dl class="attribute">
 <dt id="asteval.error_msg">
-<tt class="descclassname">asteval.</tt><tt class="descname">error_msg</tt><a class="headerlink" href="#asteval.error_msg" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">asteval.</code><code class="descname">error_msg</code><a class="headerlink" href="#asteval.error_msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>the most recent error message.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="asteval.valid_symbol_name">
-<tt class="descclassname">asteval.</tt><tt class="descname">valid_symbol_name</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#asteval.valid_symbol_name" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">asteval.</code><code class="descname">valid_symbol_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.valid_symbol_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>determines whether the input symbol name is a valid name</p>
 <p>This checks for reserved words, and that the name matches the
-regular expression <tt class="docutils literal"><span class="pre">[a-zA-Z_][a-zA-Z0-9_]</span></tt></p>
+regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_][a-zA-Z0-9_]</span></code></p>
 </dd></dl>
 
 </div>
@@ -183,7 +185,7 @@ regular expression <tt class="docutils literal"><span class="pre">[a-zA-Z_][a-zA
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -195,12 +197,12 @@ regular expression <tt class="docutils literal"><span class="pre">[a-zA-Z_][a-zA
         <li class="right" >
           <a href="basics.html" title="Using asteval"
              >previous</a> |</li>
-        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

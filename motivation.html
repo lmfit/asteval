@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.3',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,13 +23,13 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="ASTEVAL: Minimal Python AST evaluator" href="index.html" />
     <link rel="next" title="Using asteval" href="basics.html" />
     <link rel="prev" title="Downloading and Installation" href="installation.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,10 +44,10 @@
         <li class="right" >
           <a href="installation.html" title="Downloading and Installation"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -63,12 +63,14 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="basics.html"
                         title="next chapter">Using asteval</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/motivation.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/motivation.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -87,23 +89,23 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="motivation-for-asteval">
 <h1>Motivation for asteval<a class="headerlink" href="#motivation-for-asteval" title="Permalink to this headline">¶</a></h1>
 <p>The asteval module provides a means to evaluate a large subset of the
 Python language from within a python program, without using
-<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>.  It is, in effect, a limited version of Python's built-in
-<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> that is more restricted, forbidding several actions, and
+<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>.  It is, in effect, a limited version of Python's built-in
+<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> that is more restricted, forbidding several actions, and
 using using a simple dictionary as a flat namespace.  A completely fair
 question is: Why on earth would anyone do this?  That is, why not simply
-use <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>, or just use Python itself.</p>
+use <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, or just use Python itself.</p>
 <p>The short answer is that sometimes you want to allow evaluation of user
 input, or expose a simple calculator inside a larger application.  For
-this, <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> is pretty scary, as it exposes <em>all</em> of Python, which
+this, <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes <em>all</em> of Python, which
 can make user input difficult to trust.  Since asteval does not support the
 <strong>import</strong> statement (or many other constructs), user code cannot access
-the <a class="reference external" href="http://docs.python.org/library/os.html#module-os" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">os</span></tt></a> and <a class="reference external" href="http://docs.python.org/library/sys.html#module-sys" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">sys</span></tt></a> modules or any functions or classes
+the <a class="reference external" href="http://docs.python.org/library/os.html#module-os" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">os</span></code></a> and <a class="reference external" href="http://docs.python.org/library/sys.html#module-sys" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">sys</span></code></a> modules or any functions or classes
 outside the provided symbol table.</p>
 <p>Other missing features (modules, classes, lambda, yield, generators) are
 similarly motivated.  The idea for asteval is to make a simple procedural,
@@ -115,7 +117,7 @@ but was error-prone and difficult to maintain.  It turned out that using
 the Python ast module is so easy that adding more complex programming
 constructs like conditionals, loops, exception handling, complex assignment
 and slicing, and even function definition and running was fairly simple
-implement.  Importantly, because parsing is done by the <a class="reference external" href="http://docs.python.org/library/ast.html#module-ast" title="(in Python v2.7)"><tt class="xref py py-mod docutils literal"><span class="pre">ast</span></tt></a>
+implement.  Importantly, because parsing is done by the <a class="reference external" href="http://docs.python.org/library/ast.html#module-ast" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">ast</span></code></a>
 module, a whole class of implementation errors disappears -- valid python
 expression will be parsed correctly and converted into an Abstract Syntax
 Tree.  Furthermore, the resulting AST is easy to walk through, greatly
@@ -131,22 +133,22 @@ In preliminary tests, it's about 4x slower than Python.</p>
 <p>If you're looking for guarantees that malicious code cannot ever cause
 damage, you're definitely looking in the wrong place.  I don't suggest that
 asteval is completely safe, only that it is safer than the builtin
-<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>, and that you might find it useful.</p>
-<p>For why <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> is dangerous, see, for example <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really
+<a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, and that you might find it useful.</p>
+<p>For why <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> is dangerous, see, for example <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really
 dangerous</a> and
-the comments and links therein.  Clearly, making <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a> perfectly
+the comments and links therein.  Clearly, making <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> perfectly
 safe from malicious user input is a difficult prospect.  Basically, if one
 can cause Python to seg-fault, safety cannot be guaranteed.</p>
-<p>Asteval is meant to be safer than the builtin <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>, and does try
+<p>Asteval is meant to be safer than the builtin <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, and does try
 to avoid any known exploits.  Many actions are not allowed from the asteval
 interpreter, including:</p>
 <blockquote>
 <div><ul class="simple">
 <li>importing modules.  Neither 'import' nor '__import__' is supported.</li>
 <li>create classes or modules.</li>
-<li>access to Python's <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">eval()</span></tt></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#execfile" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">execfile()</span></tt></a>,
-<a class="reference external" href="http://docs.python.org/library/functions.html#getattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">getattr()</span></tt></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#hasattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">hasattr()</span></tt></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#setattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">setattr()</span></tt></a>, and
-<a class="reference external" href="http://docs.python.org/library/functions.html#delattr" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">delattr()</span></tt></a>.</li>
+<li>access to Python's <a class="reference external" href="http://docs.python.org/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#execfile" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">execfile()</span></code></a>,
+<a class="reference external" href="http://docs.python.org/library/functions.html#getattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#hasattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#setattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">setattr()</span></code></a>, and
+<a class="reference external" href="http://docs.python.org/library/functions.html#delattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">delattr()</span></code></a>.</li>
 </ul>
 </div></blockquote>
 <p>In addition (and following the discussion in the link above), the following
@@ -188,7 +190,7 @@ situation would be greatly appreciated.</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -203,12 +205,12 @@ situation would be greatly appreciated.</p>
         <li class="right" >
           <a href="installation.html" title="Downloading and Installation"
              >previous</a> |</li>
-        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>

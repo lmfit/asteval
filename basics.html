@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.3',
+        VERSION:     '0.9.4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,13 +23,13 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="ASTEVAL: Minimal Python AST evaluator" href="index.html" />
     <link rel="next" title="asteval reference" href="api.html" />
     <link rel="prev" title="Motivation for asteval" href="motivation.html" /> 
   </head>
-  <body>
-    <div class="related">
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -44,10 +44,10 @@
         <li class="right" >
           <a href="motivation.html" title="Motivation for asteval"
              accesskey="P">previous</a> |</li>
-        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
-      <div class="sphinxsidebar">
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
@@ -68,12 +68,14 @@
   <h4>Next topic</h4>
   <p class="topless"><a href="api.html"
                         title="next chapter">asteval reference</a></p>
-  <h3>This Page</h3>
-  <ul class="this-page-menu">
-    <li><a href="_sources/basics.txt"
-           rel="nofollow">Show Source</a></li>
-  </ul>
-<div id="searchbox" style="display: none">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/basics.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
       <input type="text" name="q" />
@@ -92,7 +94,7 @@
     <div class="document">
       <div class="documentwrapper">
         <div class="bodywrapper">
-          <div class="body">
+          <div class="body" role="main">
             
   <div class="section" id="using-asteval">
 <h1>Using asteval<a class="headerlink" href="#using-asteval" title="Permalink to this headline">¶</a></h1>
@@ -125,7 +127,7 @@ that es very much like python, ready for use:</p>
 <h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Permalink to this headline">¶</a></h2>
 <p>The symbol table (that is, the mapping between variable and
 function names and the underlying objects) is a simple dictionary
-held in the <tt class="xref py py-attr docutils literal"><span class="pre">symtable</span></tt> attribute of the interpreter.  Of
+held in the <code class="xref py py-attr docutils literal"><span class="pre">symtable</span></code> attribute of the interpreter.  Of
 course, this can be read or written to by the python program:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span>
@@ -202,12 +204,12 @@ exactly as they do in python.  Thus:</p>
 </div>
 <div class="section" id="printing">
 <h2>printing<a class="headerlink" href="#printing" title="Permalink to this headline">¶</a></h2>
-<p>For printing, asteval emulates Python's native <a class="reference external" href="http://docs.python.org/library/functions.html#print" title="(in Python v2.7)"><tt class="xref py py-func docutils literal"><span class="pre">print()</span></tt></a> function and
-<tt class="xref py py-data docutils literal"><span class="pre">print</span></tt> statement (for python 2).  That is, the behavior mimics the
+<p>For printing, asteval emulates Python's native <a class="reference external" href="http://docs.python.org/library/functions.html#print" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">print()</span></code></a> function and
+<code class="xref py py-data docutils literal"><span class="pre">print</span></code> statement (for python 2).  That is, the behavior mimics the
 version of python used.</p>
-<p>You can change where output is sent with the <tt class="docutils literal"><span class="pre">writer</span></tt> argument when
+<p>You can change where output is sent with the <code class="docutils literal"><span class="pre">writer</span></code> argument when
 creating the interpreter.  By default, outputs are sent to
-<a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><tt class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></tt></a>.</p>
+<a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.</p>
 </div>
 <div class="section" id="writing-functions">
 <h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this headline">¶</a></h2>
@@ -229,12 +231,12 @@ creating the interpreter.  By default, outputs are sent to
 <p>asteval monitors and caches exceptions in the evaluated code.  Brief error
 messages are printed (with Python's print statement or function, and so
 using standard output by default), and the full set of exceptions is kept
-in the <tt class="xref py py-attr docutils literal"><span class="pre">error</span></tt> attribute of the <tt class="xref py py-class docutils literal"><span class="pre">Interpreter</span></tt> instance.  This
-<tt class="xref py py-attr docutils literal"><span class="pre">error</span></tt> attribute is a list of instances of the asteval
-<tt class="xref py py-class docutils literal"><span class="pre">ExceptionHolder</span></tt> class, which is accessed through the
-<tt class="xref py py-meth docutils literal"><span class="pre">get_error()</span></tt> method.  The <tt class="xref py py-attr docutils literal"><span class="pre">error</span></tt> attribute is reset to an empty
-list at the beginning of each <tt class="xref py py-meth docutils literal"><span class="pre">eval()</span></tt>, so that errors are from only
-the most recent <tt class="xref py py-meth docutils literal"><span class="pre">eval()</span></tt>.</p>
+in the <code class="xref py py-attr docutils literal"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code> instance.  This
+<code class="xref py py-attr docutils literal"><span class="pre">error</span></code> attribute is a list of instances of the asteval
+<code class="xref py py-class docutils literal"><span class="pre">ExceptionHolder</span></code> class, which is accessed through the
+<code class="xref py py-meth docutils literal"><span class="pre">get_error()</span></code> method.  The <code class="xref py py-attr docutils literal"><span class="pre">error</span></code> attribute is reset to an empty
+list at the beginning of each <code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code>, so that errors are from only
+the most recent <code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code>.</p>
 <p>Thus, to handle and re-raise exceptions from your Python code in a simple
 REPL loop, you'd want to do something similar to</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
@@ -258,7 +260,7 @@ REPL loop, you'd want to do something similar to</p>
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related">
+    <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
         <li class="right" style="margin-right: 10px">
@@ -273,12 +275,12 @@ REPL loop, you'd want to do something similar to</p>
         <li class="right" >
           <a href="motivation.html" title="Motivation for asteval"
              >previous</a> |</li>
-        <li><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
       </ul>
     </div>
-    <div class="footer">
+    <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
     </div>
   </body>
 </html>
