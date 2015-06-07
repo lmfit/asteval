@@ -6,7 +6,7 @@ import ast
 import numpy as np
 from sys import version_info
 
-from .unittest_utils import TestCase
+from unittest_utils import TestCase
 
 from asteval import NameFinder
 
