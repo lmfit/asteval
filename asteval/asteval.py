@@ -339,7 +339,7 @@ class Interpreter:
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             sym = self.symtable[node.id] = val
             if node.id in self.no_deepcopy:
-                self.no_deepcopy.pop(node.id)
+                self.no_deepcopy.remove(node.id)
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
