@@ -11,7 +11,7 @@ later, using the current values in the
 """
 
 from __future__ import division, print_function
-from sys import exc_info, stdout, version_info
+from sys import exc_info, stdout, stderr, version_info
 import ast
 import math
 
@@ -74,8 +74,10 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True):
+    def __init__(self, symtable=None, writer=None, use_numpy=True, 
+            err_writer=None):
         self.writer = writer or stdout
+        self.err_writer = err_writer or stderr
 
         if symtable is None:
             symtable = {}
@@ -216,7 +218,7 @@ class Interpreter:
                 except:
                     exc = RuntimeError
                 raise exc(errmsg)
-            print(errmsg, file=self.writer)
+            print(errmsg, file=self.err_writer)
             return
         try:
             return self.run(node, expr=expr, lineno=lineno)
@@ -230,7 +232,7 @@ class Interpreter:
                 except:
                     exc = RuntimeError
                 raise exc(errmsg)
-            print(errmsg, file=self.writer)
+            print(errmsg, file=self.err_writer)
             return
 
     def dump(self, node, **kw):
