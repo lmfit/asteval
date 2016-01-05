@@ -14,6 +14,7 @@ from __future__ import division, print_function
 from sys import exc_info, stdout, stderr, version_info
 import ast
 import math
+from time import time
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        LOCALFUNCS, NUMPY_RENAMES, op2func,
@@ -33,6 +34,7 @@ builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
+MAX_EXEC_TIME = 2  # sec
 
 # noinspection PyIncorrectDocstring
 class Interpreter:
@@ -78,9 +80,11 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None):
+    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None, max_time=MAX_EXEC_TIME):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
+        self.start = 0
+        self.max_time = max_time
 
         if symtable is None:
             symtable = {}
@@ -172,6 +176,8 @@ class Interpreter:
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
+        if time() - self.start > self.max_time:
+            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
         if len(self.error) > 0:
             return
         if node is None:
@@ -209,6 +215,7 @@ class Interpreter:
         """evaluates a single statement"""
         self.lineno = lineno
         self.error = []
+        self.start = time()
         # noinspection PyBroadException
         try:
             node = self.parse(expr)

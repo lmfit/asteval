@@ -765,6 +765,13 @@ def fcn(x, y):
         self.interp('open("foo", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
+    def test_dos(self):
+        self.interp("""for x in range(2<<21): pass""")
+        self.check_error('RuntimeError', 'time limit')
+        self.interp("""while True: pass""")
+        self.check_error('RuntimeError', 'time limit')
+
+
 
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
