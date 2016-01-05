@@ -770,7 +770,34 @@ def fcn(x, y):
         self.check_error('RuntimeError', 'time limit')
         self.interp("""while True: pass""")
         self.check_error('RuntimeError', 'time limit')
+        self.interp("""def foo(): return foo()\nfoo()""")
+        self.check_error('RuntimeError')  # Stack overflow... is caught, but with MemoryError. A bit concerning...
 
+    def test_kaboom(self):
+        """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
+        self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
+    fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
+)()""")
+        self.check_error('NotImplementedError', 'Lambda')  # Safe, lambda is not supported
+
+        self.interp(
+            """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
+        self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
+        self.interp("9**9**9**9**9**9**9**9")
+        self.check_error('RuntimeError')  # Safe, safe_pow() catches this
+        self.interp(
+            "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
+        self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
+        self.interp("compile('xxx')")
+        self.check_error('NameError')  # Safe, compile() is not supported
+        try:
+            astnode = self.interp.parse(
+                "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
+        except Exception as e:
+            print(e)
+        else:
+            dumped = self.interp.dump(astnode)
+            print(dumped)
 
 
 class TestCase2(unittest.TestCase):

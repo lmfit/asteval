@@ -30,7 +30,7 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
                 '__getattribute__', '__subclasshook__', '__new__',
                 '__init__', 'func_globals', 'func_code', 'func_closure',
                 'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
-                '__asteval__')
+                '__asteval__', 'f_locals')
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -145,8 +145,8 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
 
 def _open(filename, mode='r', buffering=0):
     """read only version of open()"""
-    if mode not in ('r', 'rb'):
-        raise RuntimeError("Invalid open file mode, must be 'r' or 'rb'")
+    if mode not in ('r', 'rb', 'rU'):
+        raise RuntimeError("Invalid open file mode, must be 'r', 'rb', or 'rU'")
     if buffering > MAX_OPEN_BUFFER:
         raise RuntimeError("Invalid buffering value, max buffer size is {}".format(MAX_OPEN_BUFFER))
     return open(filename, mode, buffering)
