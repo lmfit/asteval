@@ -18,9 +18,9 @@
             Center for Advanced Radiation Sources,
             The University of Chicago
 """
-__version__ = '0.9.5'
 
 from .asteval import Interpreter
 from .astutils import NameFinder, valid_symbol_name
 
+__version__ = '0.9.5'
 __all__ = [Interpreter, NameFinder, valid_symbol_name]

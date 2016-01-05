@@ -6,21 +6,36 @@ import unittest
 import time
 import ast
 from sys import version_info
-import numpy as np
 import os
 from tempfile import NamedTemporaryFile
-from asteval import NameFinder,  Interpreter
+
+import io
+
+from asteval import NameFinder, Interpreter
+
+HAS_NUMPY = False
+try:
+    # noinspection PyUnresolvedReferences
+    import numpy as np
+
+    HAS_NUMPY = True
+except ImportError:
+    print("Warning: numpy not available... functionality will be limited.")
+    pass
+
 
 class TestCase(unittest.TestCase):
-    '''testing of asteval'''
+    """testing of asteval"""
+
     def setUp(self):
         self.interp = Interpreter()
         self.symtable = self.interp.symtable
         self.set_stdout()
+        if not HAS_NUMPY:
+            self.interp("arange = range")
 
     def set_stdout(self):
-        self.stdout = NamedTemporaryFile('w', delete=False,
-                                         prefix='astevaltest')
+        self.stdout = NamedTemporaryFile('w', delete=False, prefix='astevaltest')
         self.interp.writer = self.stdout
 
     def read_stdout(self):
@@ -36,67 +51,90 @@ class TestCase(unittest.TestCase):
     def tearDown(self):
         if not self.stdout.closed:
             self.stdout.close()
+
+        # noinspection PyBroadException
         try:
             os.unlink(self.stdout.name)
         except:
             pass
 
+    # noinspection PyUnresolvedReferences
     def isvalue(self, sym, val):
-        '''assert that a symboltable symbol has a particular value'''
-        if isinstance(val, np.ndarray):
-            return self.assertTrue(np.all(self.interp.symtable[sym]==val))
+        """assert that a symboltable symbol has a particular value"""
+        if HAS_NUMPY and isinstance(val, np.ndarray):
+            return self.assertTrue(np.all(self.interp.symtable[sym] == val))
         else:
-            return self.assertTrue(self.interp.symtable[sym]==val)
+            return self.assertTrue(self.interp.symtable[sym] == val)
 
     def isnear(self, expr, val, places=7):
-        '''assert that a symboltable symbol is near a particular value'''
+        """assert that a symboltable symbol is near a particular value"""
         oval = self.interp(expr)
-        if isinstance(val, np.ndarray):
+        if HAS_NUMPY and isinstance(val, np.ndarray):
             for x, y in zip(oval, val):
                 self.assertAlmostEqual(x, y, places=places)
         else:
             return self.assertAlmostEqual(oval, val, places=places)
 
+    # noinspection PyUnresolvedReferences
     def istrue(self, expr):
-        '''assert that an expression evaluates to True'''
+        """assert that an expression evaluates to True"""
         val = self.interp(expr)
-        if isinstance(val, np.ndarray):
+        if HAS_NUMPY and isinstance(val, np.ndarray):
             val = np.all(val)
         return self.assertTrue(val)
 
+    # noinspection PyUnresolvedReferences
     def isfalse(self, expr):
-        '''assert that an expression evaluates to False'''
+        """assert that an expression evaluates to False"""
         val = self.interp(expr)
-        if isinstance(val, np.ndarray):
+        if HAS_NUMPY and isinstance(val, np.ndarray):
             val = np.all(val)
         return self.assertFalse(val)
 
+    def check_output(self, chk_str, exact=False):
+        self.interp.writer.flush()
+        out = self.read_stdout().split('\n')
+        if out:
+            if exact:
+                return chk_str == out[0]
+            return chk_str in out[0]
+        return False
 
+    def check_error(self, chk_type='', chk_msg=''):
+        try:
+            errtype, errmsg = self.interp.error[0].get_error()
+            self.assertEqual(errtype, chk_type)
+            if chk_msg:
+                self.assertTrue(chk_msg in errmsg)
+        except IndexError:
+            if chk_type:
+                self.assertTrue(False)
 
 
 class TestEval(TestCase):
-    '''testing of asteval'''
+    """testing of asteval"""
+
     def test_dict_index(self):
-        '''dictionary indexing'''
+        """dictionary indexing"""
         self.interp("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
         self.istrue("a_dict['a'] == 1")
         self.istrue("a_dict['d'] == 4")
 
     def test_list_index(self):
-        '''list indexing'''
+        """list indexing"""
         self.interp("a_list = ['a', 'b', 'c', 'd', 'o']")
         self.istrue("a_list[0] == 'a'")
         self.istrue("a_list[1] == 'b'")
         self.istrue("a_list[2] == 'c'")
 
     def test_tuple_index(self):
-        '''tuple indexing'''
+        """tuple indexing"""
         self.interp("a_tuple = (5, 'a', 'x')")
         self.istrue("a_tuple[0] == 5")
         self.istrue("a_tuple[2] == 'x'")
 
     def test_string_index(self):
-        '''string indexing'''
+        """string indexing"""
         self.interp("a_string = 'hello world'")
         self.istrue("a_string[0] == 'h'")
         self.istrue("a_string[6] == 'w'")
@@ -104,30 +142,31 @@ class TestEval(TestCase):
         self.istrue("a_string[-2] == 'l'")
 
     def test_ndarray_index(self):
-        '''nd array indexing'''
-        self.interp("a_ndarray = 5*arange(20)")
-        self.istrue("a_ndarray[2] == 10")
-        self.istrue("a_ndarray[4] == 20")
+        """nd array indexing"""
+        if HAS_NUMPY:
+            self.interp("a_ndarray = 5*arange(20)")
+            self.istrue("a_ndarray[2] == 10")
+            self.istrue("a_ndarray[4] == 20")
 
     def test_ndarrayslice(self):
-        '''array slicing'''
-        self.interp("a_ndarray = arange(200).reshape(10, 20)")
-        self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
-        self.interp("y = arange(20).reshape(4, 5)")
-        self.istrue("y[:,3]  == array([3, 8, 13, 18])")
-        self.istrue("y[...,1]  == array([1, 6, 11, 16])")
-        self.interp("y[...,1] = array([2, 2, 2, 2])")
-        self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
-        # print(self.interp.symtable["y"])
+        """array slicing"""
+        if HAS_NUMPY:
+            self.interp("a_ndarray = arange(200).reshape(10, 20)")
+            self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
+            self.interp("y = arange(20).reshape(4, 5)")
+            self.istrue("y[:,3]  == array([3, 8, 13, 18])")
+            self.istrue("y[...,1]  == array([1, 6, 11, 16])")
+            self.interp("y[...,1] = array([2, 2, 2, 2])")
+            self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
 
     def test_while(self):
-        '''while loops'''
+        """while loops"""
         self.interp("""
 n=0
 while n < 8:
     n += 1
 """)
-        self.isvalue('n',  8)
+        self.isvalue('n', 8)
 
         self.interp("""
 n=0
@@ -138,8 +177,7 @@ while n < 8:
 else:
     n = -1
 """)
-        self.isvalue('n',  4)
-
+        self.isvalue('n', 4)
 
         self.interp("""
 n=0
@@ -148,7 +186,7 @@ while n < 8:
 else:
     n = -1
 """)
-        self.isvalue('n',  -1)
+        self.isvalue('n', -1)
 
         self.interp("""
 n, i = 0, 0
@@ -159,8 +197,8 @@ while n < 10:
     i += 1
 print( 'finish: n, i = ', n, i)
 """)
-        self.isvalue('n',  10)
-        self.isvalue('i',  5)
+        self.isvalue('n', 10)
+        self.isvalue('i', 5)
 
         self.interp("""
 n=0
@@ -171,7 +209,7 @@ while n < 10:
         break
 print( 'finish: n = ', n)
 """)
-        self.isvalue('n',  6)
+        self.isvalue('n', 6)
 
     def test_while_continue(self):
         self.interp("""
@@ -183,8 +221,8 @@ while n < 10:
     i += 1
 print( 'finish: n, i = ', n, i)
 """)
-        self.isvalue('n',  10)
-        self.isvalue('i',  5)
+        self.isvalue('n', 10)
+        self.isvalue('i', 5)
 
     def test_while_break(self):
         self.interp("""
@@ -195,38 +233,38 @@ while n < 10:
         break
 print( 'finish: n = ', n)
 """)
-        self.isvalue('n',  7)
+        self.isvalue('n', 7)
 
+    # noinspection PyTypeChecker
     def test_assert(self):
-        'test assert statements'
+        """test assert statements"""
         self.interp.error = []
         self.interp('n=6')
         self.interp('assert n==6')
-        self.assertTrue(self.interp.error == [])
+        self.check_error(None)
         self.interp('assert n==7')
-        errtype, errmsg = self.interp.error[0].get_error()
-        self.assertTrue(errtype == 'AssertionError')
+        self.check_error('AssertionError')
 
     def test_for(self):
-        '''for loops'''
-        self.interp('''
+        """for loops"""
+        self.interp("""
 n=0
 for i in arange(10):
     n += i
-''')
+""")
         self.isvalue('n', 45)
 
-        self.interp('''
+        self.interp("""
 n=0
 for i in arange(10):
     n += i
 else:
     n = -1
-''')
+""")
         self.isvalue('n', -1)
 
     def test_for_break(self):
-        self.interp('''
+        self.interp("""
 n=0
 for i in arange(10):
     n += i
@@ -234,12 +272,11 @@ for i in arange(10):
         break
 else:
     n = -1
-''')
+""")
         self.isvalue('n', 3)
 
-
     def test_if(self):
-        '''runtime errors test'''
+        """runtime errors test"""
         self.interp("""zero = 0
 if zero == 0:
     x = 1
@@ -250,43 +287,31 @@ if zero > 2:
 else:
     y = 33
 """)
-        self.isvalue('x',  2)
+        self.isvalue('x', 2)
         self.isvalue('y', 33)
 
     def test_print(self):
-        '''print (ints, str, ....)'''
+        """print (ints, str, ....)"""
         self.interp("print(31)")
-        self.interp.writer.flush()
-        time.sleep(0.1)
-        out = self.read_stdout()
-        self.assert_(out== '31\n')
-
+        self.check_output('31\n', True)
         self.interp("print('%s = %.3f' % ('a', 1.2012345))")
-        self.interp.writer.flush()
-        time.sleep(0.1)
-        out = self.read_stdout()
-        self.assert_(out== 'a = 1.201\n')
-
+        self.check_output('a = 1.201\n', True)
         self.interp("print('{0:s} = {1:.2f}'.format('a', 1.2012345))")
-        self.interp.writer.flush()
-        time.sleep(0.1)
-        out = self.read_stdout()
-        self.assert_(out== 'a = 1.20\n')
+        self.check_output('a = 1.20\n', True)
 
     def test_repr(self):
-        '''repr of dict, list'''
+        """repr of dict, list"""
         self.interp("x = {'a': 1, 'b': 2, 'c': 3}")
         self.interp("y = ['a', 'b', 'c']")
         self.interp("rep_x = repr(x['a'])")
         self.interp("rep_y = repr(y)")
         self.interp("rep_y , rep_x")
         self.interp("repr(None)")
-
         self.isvalue("rep_x", "1")
         self.isvalue("rep_y", "['a', 'b', 'c']")
 
     def test_cmp(self):
-        '''numeric comparisons'''
+        """numeric comparisons"""
         self.istrue("3 == 3")
         self.istrue("3.0 == 3")
         self.istrue("3.0 == 3.0")
@@ -298,19 +323,17 @@ else:
         self.istrue("3 <= 5")
         self.istrue("3 < 5")
         self.istrue("5 > 3")
-
         self.isfalse("3 == 4")
         self.isfalse("3 > 5")
         self.isfalse("5 < 3")
 
     def test_bool(self):
-        '''boolean logic'''
-
-        self.interp('''
+        """boolean logic"""
+        self.interp("""
 yes = True
 no = False
 nottrue = False
-a = arange(7)''')
+a = arange(7)""")
 
         self.istrue("yes")
         self.isfalse("no")
@@ -331,86 +354,79 @@ a = arange(7)''')
         self.istrue("not no")
 
     def test_bool_coerce(self):
-        '''coercion to boolean'''
-
+        """coercion to boolean"""
         self.istrue("1")
         self.isfalse("0")
-
         self.istrue("'1'")
         self.isfalse("''")
-
         self.istrue("[1]")
         self.isfalse("[]")
-
         self.istrue("(1)")
         self.istrue("(0,)")
         self.isfalse("()")
-
         self.istrue("dict(y=1)")
         self.isfalse("{}")
 
+    # noinspection PyUnresolvedReferences
     def test_assignment(self):
-        '''variables assignment'''
+        """variables assignment"""
         self.interp('n = 5')
-        self.isvalue("n",  5)
+        self.isvalue("n", 5)
         self.interp('s1 = "a string"')
-        self.isvalue("s1",  "a string")
+        self.isvalue("s1", "a string")
         self.interp('b = (1,2,3)')
-        self.isvalue("b",  (1,2,3))
-        self.interp('a = 1.*arange(10)')
-        self.isvalue("a", np.arange(10) )
-        self.interp('a[1:5] = 1 + 0.5 * arange(4)')
-        self.isnear("a", np.array([ 0. ,  1. ,  1.5,  2. ,  2.5,  5. ,  6. ,  7. ,  8. ,  9. ]))
+        self.isvalue("b", (1, 2, 3))
+        if HAS_NUMPY:
+            self.interp('a = 1.*arange(10)')
+            self.isvalue("a", np.arange(10))
+            self.interp('a[1:5] = 1 + 0.5 * arange(4)')
+            self.isnear("a", np.array([0., 1., 1.5, 2., 2.5, 5., 6., 7., 8., 9.]))
 
     def test_names(self):
-        '''names test'''
+        """names test"""
         self.interp('nx = 1')
         self.interp('nx1 = 1')
 
     def test_syntaxerrors_1(self):
-        '''assignment syntax errors test'''
+        """assignment syntax errors test"""
         for expr in ('class = 1', 'for = 1', 'if = 1', 'raise = 1',
                      '1x = 1', '1.x = 1', '1_x = 1'):
-            failed, errtype, errmsg = False, None, None
+            failed = False
+            # noinspection PyBroadException
             try:
                 self.interp(expr, show_errors=False)
             except:
                 failed = True
-                errtype, errmsg = self.interp.error[0].get_error()
 
             self.assertTrue(failed)
-            self.assertTrue(errtype == 'SyntaxError')
-            #self.assertTrue(errmsg.startswith('invalid syntax'))
+            self.check_error('SyntaxError')
 
     def test_unsupportednodes(self):
-        '''unsupported nodes'''
-
+        """unsupported nodes"""
         for expr in ('f = lambda x: x*x', 'yield 10'):
-            failed, errtype, errmsg = False, None, None
+            failed = False
+            # noinspection PyBroadException
             try:
                 self.interp(expr, show_errors=False)
             except:
                 failed = True
-                errtype, errmsg = self.interp.error[0].get_error()
             self.assertTrue(failed)
-            self.assertTrue(errtype == 'NotImplementedError')
-
+            self.check_error('NotImplementedError')
 
     def test_syntaxerrors_2(self):
-        '''syntax errors test'''
+        """syntax errors test"""
         for expr in ('x = (1/*)', 'x = 1.A', 'x = A.2'):
-            failed, errtype, errmsg = False, None, None
+            failed = False
+            # noinspection PyBroadException
             try:
                 self.interp(expr, show_errors=False)
-            except: # RuntimeError:
+            except:  # RuntimeError:
                 failed = True
-                errtype, errmsg = self.interp.error[0].get_error()
             self.assertTrue(failed)
-            self.assertTrue(errtype == 'SyntaxError')
-            #self.assertTrue(errmsg.startswith('invalid syntax'))
+            self.check_error('SyntaxError')
 
     def test_runtimeerrors_1(self):
-        '''runtime errors test'''
+        """runtime errors test"""
         self.interp("zero = 0")
         self.interp("astr ='a string'")
         self.interp("atup = ('a', 'b', 11021)")
@@ -424,162 +440,149 @@ a = arange(7)''')
                               ('arr.shapx = 4', 'AttributeError'),
                               ('del arr.shapx', 'KeyError')):
             failed, errtype, errmsg = False, None, None
+            # noinspection PyBroadException
             try:
                 self.interp(expr, show_errors=False)
             except:
                 failed = True
-                errtype, errmsg = self.interp.error[0].get_error()
             self.assertTrue(failed)
-            self.assertTrue(errtype == errname)
-            #self.assertTrue(errmsg.startswith('invalid syntax'))
+            self.check_error(errname)
 
+    # noinspection PyUnresolvedReferences
     def test_ndarrays(self):
-        '''simple ndarrays'''
-        self.interp('n = array([11, 10, 9])')
-        self.istrue("isinstance(n, ndarray)")
-        self.istrue("len(n) == 3")
-        self.isvalue("n", np.array([11, 10, 9]))
-        self.interp('n = arange(20).reshape(5, 4)')
-        self.istrue("isinstance(n, ndarray)")
-        self.istrue("n.shape == (5, 4)")
-        self.interp("myx = n.shape")
-        self.interp("n.shape = (4, 5)")
-        self.istrue("n.shape == (4, 5)")
-
-        # self.interp("del = n.shape")
-        self.interp("a = arange(20)")
-        self.interp("gg = a[1:13:3]")
-        self.isvalue('gg', np.array([1, 4, 7, 10]))
-
-        self.interp("gg[:2] = array([0,2])")
-        self.isvalue('gg', np.array([0, 2, 7, 10]))
-        self.interp('a, b, c, d = gg')
-        self.isvalue('c', 7)
-        self.istrue('(a, b, d) == (0, 2, 10)')
+        """simple ndarrays"""
+        if HAS_NUMPY:
+            self.interp('n = array([11, 10, 9])')
+            self.istrue("isinstance(n, ndarray)")
+            self.istrue("len(n) == 3")
+            self.isvalue("n", np.array([11, 10, 9]))
+            self.interp('n = arange(20).reshape(5, 4)')
+            self.istrue("isinstance(n, ndarray)")
+            self.istrue("n.shape == (5, 4)")
+            self.interp("myx = n.shape")
+            self.interp("n.shape = (4, 5)")
+            self.istrue("n.shape == (4, 5)")
+            self.interp("a = arange(20)")
+            self.interp("gg = a[1:13:3]")
+            self.isvalue('gg', np.array([1, 4, 7, 10]))
+            self.interp("gg[:2] = array([0,2])")
+            self.isvalue('gg', np.array([0, 2, 7, 10]))
+            self.interp('a, b, c, d = gg')
+            self.isvalue('c', 7)
+            self.istrue('(a, b, d) == (0, 2, 10)')
 
     def test_binop(self):
-        '''test binary ops'''
+        """test binary ops"""
         self.interp('a = 10.0')
         self.interp('b = 6.0')
-
         self.istrue("a+b == 16.0")
         self.isnear("a-b", 4.0)
         self.istrue("a/(b-1) == 2.0")
         self.istrue("a*b     == 60.0")
 
     def test_unaryop(self):
-        '''test binary ops'''
+        """test binary ops"""
         self.interp('a = -10.0')
         self.interp('b = -6.0')
-
         self.isnear("a", -10.0)
         self.isnear("b", -6.0)
 
     def test_del(self):
-        '''test del function'''
+        """test del function"""
         self.interp('a = -10.0')
         self.interp('b = -6.0')
-
         self.assertTrue('a' in self.symtable)
         self.assertTrue('b' in self.symtable)
-
         self.interp("del a")
         self.interp("del b")
-
         self.assertFalse('a' in self.symtable)
         self.assertFalse('b' in self.symtable)
 
+    # noinspection PyUnresolvedReferences
     def test_math1(self):
-        '''builtin math functions'''
+        """builtin math functions"""
         self.interp('n = sqrt(4)')
         self.istrue('n == 2')
         self.isnear('sin(pi/2)', 1)
         self.isnear('cos(pi/2)', 0)
         self.istrue('exp(0) == 1')
-        self.isnear('exp(1)', np.e)
+        if HAS_NUMPY:
+            self.isnear('exp(1)', np.e)
 
     def test_namefinder(self):
-        'test namefinder'
-        ast = self.interp.parse('x+y+cos(z)')
+        """test namefinder"""
+        p = self.interp.parse('x+y+cos(z)')
         nf = NameFinder()
-        nf.generic_visit(ast)
+        nf.generic_visit(p)
         self.assertTrue('x' in nf.names)
         self.assertTrue('y' in nf.names)
         self.assertTrue('z' in nf.names)
         self.assertTrue('cos' in nf.names)
 
-
     def test_list_comprehension(self):
-        "test list comprehension"
+        """test list comprehension"""
         self.interp('x = [i*i for i in range(4)]')
         self.isvalue('x', [0, 1, 4, 9])
-
         self.interp('x = [i*i for i in range(6) if i > 1]')
         self.isvalue('x', [4, 9, 16, 25])
 
     def test_ifexp(self):
-        "test if expressions"
+        """test if expressions"""
         self.interp('x = 2')
         self.interp('y = 4 if x > 0 else -1')
         self.interp('z = 4 if x > 3 else -1')
         self.isvalue('y', 4)
         self.isvalue('z', -1)
 
+    # noinspection PyUnresolvedReferences
     def test_index_assignment(self):
-        "test indexing / subscripting on assignment"
+        """test indexing / subscripting on assignment"""
         self.interp('x = arange(10)')
         self.interp('l = [1,2,3,4,5]')
         self.interp('l[0] = 0')
         self.interp('l[3] = -1')
-        self.isvalue('l', [0,2,3,-1,5])
+        self.isvalue('l', [0, 2, 3, -1, 5])
         self.interp('l[0:2] = [-1, -2]')
-        self.isvalue('l', [-1,-2,3,-1,5])
-
+        self.isvalue('l', [-1, -2, 3, -1, 5])
         self.interp('x[1] = 99')
-        self.isvalue('x', np.array([0,99,2,3,4,5,6,7,8,9]))
-        self.interp('x[0:2] = [9,-9]')
-        self.isvalue('x', np.array([9,-9,2,3,4,5,6,7,8,9]))
+        if HAS_NUMPY:
+            self.isvalue('x', np.array([0, 99, 2, 3, 4, 5, 6, 7, 8, 9]))
+            self.interp('x[0:2] = [9,-9]')
+            self.isvalue('x', np.array([9, -9, 2, 3, 4, 5, 6, 7, 8, 9]))
 
     def test_reservedwords(self):
-        "test reserved words"
+        """test reserved words"""
         for w in ('and', 'as', 'while', 'raise', 'else',
                   'class', 'del', 'def', 'import', 'None'):
-            self.interp.error= []
-            failed, errtype, errmsg = False, None, None
+            self.interp.error = []
+            # noinspection PyBroadException
             try:
                 self.interp("%s= 2" % w, show_errors=False)
             except:
-                failed = True
-                errtype, errmsg = self.interp.error[0].get_error()
+                pass
 
-            self.assertTrue(errtype=='SyntaxError')
+            self.check_error('SyntaxError')
 
         for w in ('True', 'False'):
-            self.interp.error= []
+            self.interp.error = []
             self.interp("%s= 2" % w)
-            errtype, errmsg = self.interp.error[0].get_error()
             if version_info[0] == 3:
-                self.assertTrue(errtype=='SyntaxError')
+                self.check_error('SyntaxError')
             else:
-                self.assertTrue(errtype=='NameError')
+                self.check_error('NameError')
 
         for w in ('eval', '__import__'):
-            self.interp.error= []
+            self.interp.error = []
             self.interp("%s= 2" % w)
-            errtype, errmsg = self.interp.error[0].get_error()
-            self.assertTrue(errtype=='NameError')
+            self.check_error('NameError')
 
     def test_raise(self):
-        "test raise"
+        """test raise"""
         self.interp("raise NameError('bob')")
-        errtype, errmsg = self.interp.error[0].get_error()
-        errmsgs = errmsg.split('\n')
-        self.assertTrue(errtype == 'NameError')
-        self.assertTrue(errmsgs[1].startswith('bob'))
-
+        self.check_error('NameError', 'bob')
 
     def test_tryexcept(self):
-        "test try/except"
+        """test try/except"""
         self.interp("""
 x = 5
 try:
@@ -598,7 +601,6 @@ except ZeroDivisionError:
     pass
 """)
         self.isvalue('x', -1)
-
 
     def test_tryelsefinally(self):
 
@@ -622,12 +624,11 @@ except ZeroDivisionError:
 
         self.interp("val, ok, clean = dotry(1, 0.0)")
         self.isvalue("val", -1)
-        self.isvalue("ok",  False)
+        self.isvalue("ok", False)
         self.isvalue("clean", True)
 
-
     def test_function1(self):
-        "test function definition and running"
+        """test function definition and running"""
         self.interp("""
 def fcn(x, scale=2):
     'test function'
@@ -637,32 +638,18 @@ def fcn(x, scale=2):
     return out
 """)
         self.interp("a = fcn(4, scale=9)")
-
         self.isvalue("a", 18)
         self.interp("a = fcn(9, scale=0)")
         self.isvalue("a", 3)
-
         self.interp("print(fcn)")
-        out = self.read_stdout()
-        out = out.split('\n')
-
-        self.assert_(out[0].startswith('<Procedure fcn(x, scale='))
-        self.assert_('test func' in out[1])
-
+        self.check_output('<Procedure fcn(x, scale=')
         self.interp("a = fcn()")
-        errtype, errmsg = self.interp.error[0].get_error()
-        errmsg0, errmsg1 = errmsg.split('\n')
-
-        self.assertTrue(errtype == 'TypeError')
-        self.assertTrue(errmsg1.startswith('not enough arg'))
-
+        self.check_error('TypeError', 'not enough arg')
         self.interp("a = fcn(x, bogus=3)")
-        errtype, errmsg = self.interp.error[0].get_error()
-        errmsgs = errmsg.split('\n')
-        self.assertTrue(errtype == 'NameError')
+        self.check_error('NameError')
 
     def test_function_vararg(self):
-        "test function with var args"
+        """test function with var args"""
         self.interp("""
 def fcn(*args):
     'test varargs function'
@@ -674,12 +661,10 @@ def fcn(*args):
         self.interp("o = fcn(1,2,3)")
         self.isvalue('o', 14)
         self.interp("print(fcn)")
-        out = self.read_stdout()
-        out = out.split('\n')
-        self.assert_(out[0].startswith('<Procedure fcn('))
+        self.check_output('<Procedure fcn(')
 
     def test_function_kwargs(self):
-        "test function with kw args, no **kws"
+        """test function with kw args, no **kws"""
         self.interp("""
 def fcn(square=False, x=0, y=0, z=0, t=0):
     'test varargs function'
@@ -692,28 +677,18 @@ def fcn(square=False, x=0, y=0, z=0, t=0):
     return out
 """)
         self.interp("print(fcn)")
-        out = self.read_stdout()
-        out = out.split('\n')
-        self.assert_(out[0].startswith('<Procedure fcn(square'))
-
+        self.check_output('<Procedure fcn(square')
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
         self.isvalue('o', 6)
-
         self.interp("o = fcn(x=1, y=2, z=3, square=True)")
         self.isvalue('o', 14)
-
         self.interp("o = fcn(x=1, y=2, z=3, t=-2)")
-
         self.isvalue('o', 4)
-
         self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
-        errtype, errmsg = self.interp.error[0].get_error()
-        self.assertTrue(errtype == 'TypeError')
-        errmsg0, errmsg1 = errmsg.split('\n')
-        self.assertTrue(errmsg1.startswith('extra keyword arg'))
+        self.check_error('TypeError', 'extra keyword arg')
 
     def test_function_kwargs1(self):
-        "test function with **kws arg"
+        """test function with **kws arg"""
         self.interp("""
 def fcn(square=False, **kws):
     'test varargs function'
@@ -726,49 +701,35 @@ def fcn(square=False, **kws):
     return out
 """)
         self.interp("print(fcn)")
-        out = self.read_stdout()
-        out = out.split('\n')
-        self.assert_(out[0].startswith('<Procedure fcn(square'))
-
+        self.check_output('<Procedure fcn(square')
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
         self.isvalue('o', 6)
-
         self.interp("o = fcn(x=1, y=2, z=3, square=True)")
         self.isvalue('o', 14)
 
-
     def test_function_kwargs2(self):
-        "test function with positional and **kws args"
-
+        """test function with positional and **kws args"""
         self.interp("""
 def fcn(x, y):
     'test function'
     return x + y**2
 """)
         self.interp("print(fcn)")
-        out = self.read_stdout()
-        out = out.split('\n')
-        self.assert_(out[0].startswith('<Procedure fcn(x,'))
-
+        self.check_output('<Procedure fcn(x,')
         self.interp("o = -1")
         self.interp("o = fcn(2, 1)")
         self.isvalue('o', 3)
-
         self.interp("o = fcn(x=1, y=2)")
         self.isvalue('o', 5)
-
         self.interp("o = fcn(y=2, x=7)")
         self.isvalue('o', 11)
-
         self.interp("o = fcn(1, y=2)")
         self.isvalue('o', 5)
-
         self.interp("o = fcn(1, x=2)")
-        errtype, errmsg = self.interp.error[0].get_error()
-        self.assertTrue(errtype == 'TypeError')
+        self.check_error('TypeError')
 
     def test_astdump(self):
-        "test ast parsing and dumping"
+        """test ast parsing and dumping"""
         astnode = self.interp.parse('x = 1')
         self.assertTrue(isinstance(astnode, ast.Module))
         self.assertTrue(isinstance(astnode.body[0], ast.Assign))
@@ -778,6 +739,42 @@ def fcn(x, y):
         self.assertTrue(astnode.body[0].value.n == 1)
         dumped = self.interp.dump(astnode.body[0])
         self.assertTrue(dumped.startswith('Assign'))
+
+    # noinspection PyTypeChecker
+    def test_safe_funcs(self):
+        self.interp("'*'*(2<<17)")
+        self.check_error(None)
+        self.interp("'*'*(1+2<<17)")
+        self.check_error('RuntimeError')
+        self.interp("'*'*(2<<17) + '*'")
+        self.check_error('RuntimeError')
+        self.interp("10**10000")
+        self.check_error(None)
+        self.interp("10**10001")
+        self.check_error('RuntimeError')
+        self.interp("1<<1000")
+        self.check_error(None)
+        self.interp("1<<1001")
+        self.check_error('RuntimeError')
+
+    def test_safe_open(self):
+        self.interp('open("foo", "wb")')
+        self.check_error('RuntimeError')
+        self.interp('open("foo", "rb")')
+        self.check_error('FileNotFoundError')
+        self.interp('open("foo", "rb", 2<<18)')
+        self.check_error('RuntimeError')
+
+
+class TestCase2(unittest.TestCase):
+    def test_stringio(self):
+        """ test using stringio for output/errors """
+        out = io.StringIO()
+        err = io.StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("print('out')")
+        self.assertEqual(out.getvalue(), 'out\n')
+
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval,):
