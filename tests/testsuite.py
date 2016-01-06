@@ -2,14 +2,21 @@
 """
 Base TestCase for asteval
 """
-import unittest
-import time
 import ast
-from sys import version_info
 import os
+import time
+import unittest
+from sys import version_info
 from tempfile import NamedTemporaryFile
 
-import io
+PY3 = version_info[0] == 3
+
+if PY3:
+    # noinspection PyUnresolvedReferences
+    from io import StringIO
+else:
+    # noinspection PyUnresolvedReferences
+    from cStringIO import StringIO
 
 from asteval import NameFinder, Interpreter
 
@@ -17,7 +24,6 @@ HAS_NUMPY = False
 try:
     # noinspection PyUnresolvedReferences
     import numpy as np
-
     HAS_NUMPY = True
 except ImportError:
     print("Warning: numpy not available... functionality will be limited.")
@@ -566,10 +572,7 @@ a = arange(7)""")
         for w in ('True', 'False'):
             self.interp.error = []
             self.interp("%s= 2" % w)
-            if version_info[0] == 3:
-                self.check_error('SyntaxError')
-            else:
-                self.check_error('NameError')
+            self.check_error('SyntaxError' if PY3 else 'NameError')
 
         for w in ('eval', '__import__'):
             self.interp.error = []
@@ -761,7 +764,7 @@ def fcn(x, y):
         self.interp('open("foo", "wb")')
         self.check_error('RuntimeError')
         self.interp('open("foo", "rb")')
-        self.check_error('FileNotFoundError')
+        self.check_error('FileNotFoundError' if PY3 else 'IOError')
         self.interp('open("foo", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
@@ -782,7 +785,10 @@ def fcn(x, y):
 
         self.interp(
             """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
-        self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
+        if PY3:
+            self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
+        else:
+            self.check_error('SyntaxError')
         self.interp("9**9**9**9**9**9**9**9")
         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
         self.interp(
@@ -807,8 +813,8 @@ def fcn(x, y):
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
         """ test using stringio for output/errors """
-        out = io.StringIO()
-        err = io.StringIO()
+        out = StringIO()
+        err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
