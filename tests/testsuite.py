@@ -10,6 +10,7 @@ from sys import version_info
 from tempfile import NamedTemporaryFile
 
 PY3 = version_info[0] == 3
+PY33Plus = PY3 and version_info[1] >= 3
 
 if PY3:
     # noinspection PyUnresolvedReferences
@@ -764,7 +765,7 @@ def fcn(x, y):
         self.interp('open("foo", "wb")')
         self.check_error('RuntimeError')
         self.interp('open("foo", "rb")')
-        self.check_error('FileNotFoundError' if PY3 else 'IOError')
+        self.check_error('FileNotFoundError' if PY33Plus else 'IOError')
         self.interp('open("foo", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
