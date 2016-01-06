@@ -790,14 +790,18 @@ def fcn(x, y):
         self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
         self.interp("compile('xxx')")
         self.check_error('NameError')  # Safe, compile() is not supported
-        try:
-            astnode = self.interp.parse(
-                "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
-        except Exception as e:
-            print(e)
-        else:
-            dumped = self.interp.dump(astnode)
-            print(dumped)
+
+    def test_exit_value(self):
+        """test expression eval - last exp. is returned by interpreter"""
+        z = self.interp("True")
+        self.assertTrue(z)
+        z = self.interp("x = 1\ny = 2\ny == x + x\n")
+        self.assertTrue(z)
+        z = self.interp("x = 42\nx")
+        self.assertEqual(z, 42)
+        self.isvalue('x', 42)
+        z = self.interp("""def foo(): return 42\nfoo()""")
+        self.assertEqual(z, 42)
 
 
 class TestCase2(unittest.TestCase):
