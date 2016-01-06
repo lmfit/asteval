@@ -12,11 +12,7 @@ matrix:
           env:
             - PYTHON=python3
             - DEPS=python3-setuptools python3-numpy python3-nose
-        - python: 3.4
-          env:
-            - PYTHON=python3
-            - DEPS=python3-setuptools python3-numpy python3-nose
-        - python: 3.4
+        - python: 3.2
           env:
             - PYTHON=python3
             - DEPS=python3-setuptools python3-nose
