@@ -9,6 +9,12 @@ import re
 import ast
 from sys import exc_info
 
+MAX_EXPONENT = 10000
+MAX_STR_LEN = 2 << 17  # 256KiB
+MAX_SHIFT = 1000
+MAX_OPEN_BUFFER = 2 << 17
+RECURSION_LIMIT = 100
+
 RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'def', 'del', 'elif', 'else', 'except', 'exec',
                   'finally', 'for', 'from', 'global', 'if', 'import',
@@ -25,7 +31,7 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
                 '__getattribute__', '__subclasshook__', '__new__',
                 '__init__', 'func_globals', 'func_code', 'func_closure',
                 'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
-                '__asteval__')
+                '__asteval__', 'f_locals')
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -137,29 +143,59 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
+
 def _open(filename, mode='r', buffering=0):
     """read only version of open()"""
-    umode = 'r'
-    if mode == 'rb':
-        umode = 'rb'
-    return open(filename, umode, buffering)
+    if mode not in ('r', 'rb', 'rU'):
+        raise RuntimeError("Invalid open file mode, must be 'r', 'rb', or 'rU'")
+    if buffering > MAX_OPEN_BUFFER:
+        raise RuntimeError("Invalid buffering value, max buffer size is {}".format(MAX_OPEN_BUFFER))
+    return open(filename, mode, buffering)
+
 
 LOCALFUNCS = {'open': _open}
+
+
+# Safe versions of functions to prevent denial of service issues
+
+def safe_pow(base, exp):
+    if exp > MAX_EXPONENT:
+        raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
+    return base ** exp
+
+
+def safe_mult(a, b):
+    if isinstance(a, str) and isinstance(b, int) and len(a) * b > MAX_STR_LEN:
+        raise RuntimeError("String length exceeded, max string length is {}".format(MAX_STR_LEN))
+    return a * b
+
+
+def safe_add(a, b):
+    if isinstance(a, str) and isinstance(b, str) and len(a) + len(b) > MAX_STR_LEN:
+        raise RuntimeError("String length exceeded, max string length is {}".format(MAX_STR_LEN))
+    return a + b
+
+
+def safe_lshift(a, b):
+    if b > MAX_SHIFT:
+        raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
+    return a << b
+
 
 OPERATORS = {ast.Is: lambda a, b: a is b,
              ast.IsNot: lambda a, b: a is not b,
              ast.In: lambda a, b: a in b,
              ast.NotIn: lambda a, b: a not in b,
-             ast.Add: lambda a, b: a + b,
+             ast.Add: safe_add,
              ast.BitAnd: lambda a, b: a & b,
              ast.BitOr: lambda a, b: a | b,
              ast.BitXor: lambda a, b: a ^ b,
              ast.Div: lambda a, b: a / b,
              ast.FloorDiv: lambda a, b: a // b,
-             ast.LShift: lambda a, b: a << b,
+             ast.LShift: safe_lshift,
              ast.RShift: lambda a, b: a >> b,
-             ast.Mult: lambda a, b: a * b,
-             ast.Pow: lambda a, b: a ** b,
+             ast.Mult: safe_mult,
+             ast.Pow: safe_pow,
              ast.Sub: lambda a, b: a - b,
              ast.Mod: lambda a, b: a % b,
              ast.And: lambda a, b: a and b,
@@ -181,6 +217,8 @@ def valid_symbol_name(name):
 
     This checks for reserved words, and that the name matches the
     regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
+    :param name: symbol name to test
+    :return True if valid, False otherwise
     """
     if name in RESERVED_WORDS:
         return False
@@ -188,23 +226,29 @@ def valid_symbol_name(name):
 
 
 def op2func(op):
-    "return function for operator nodes"
+    """return function for operator nodes
+    :param op:
+    """
     return OPERATORS[op.__class__]
 
 
 class Empty:
     """empty class"""
+
     def __init__(self):
         pass
 
+    # noinspection PyMethodMayBeStatic
     def __nonzero__(self):
         return False
+
 
 ReturnedNone = Empty()
 
 
 class ExceptionHolder(object):
-    "basic exception handler"
+    """basic exception handler"""
+
     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
         self.node = node
         self.expr = expr
@@ -218,7 +262,7 @@ class ExceptionHolder(object):
             self.msg = self.exc_info[1]
 
     def get_error(self):
-        "retrieve error data"
+        """retrieve error data"""
         col_offset = -1
         if self.node is not None:
             try:
@@ -234,13 +278,14 @@ class ExceptionHolder(object):
 
         out = ["   %s" % self.expr]
         if col_offset > 0:
-            out.append("    %s^^^" % ((col_offset)*' '))
+            out.append("    %s^^^" % (col_offset * ' '))
         out.append(str(self.msg))
-        return (exc_name, '\n'.join(out))
+        return exc_name, '\n'.join(out)
 
 
 class NameFinder(ast.NodeVisitor):
     """find all symbol names used by a parsed node"""
+
     def __init__(self):
         self.names = []
         ast.NodeVisitor.__init__(self)
@@ -251,8 +296,11 @@ class NameFinder(ast.NodeVisitor):
                 self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)
 
+
 def get_ast_names(astnode):
-    "returns symbol Names from an AST node"
+    """returns symbol Names from an AST node
+    :param astnode:
+    """
     finder = NameFinder()
     finder.generic_visit(astnode)
     return finder.names

@@ -7,18 +7,22 @@ matrix:
         - python: 2.7
           env:
             - PYTHON=python
+            - DEPS=python-setuptools python-numpy python-nose
         - python: 3.2
           env:
             - PYTHON=python3
+            - DEPS=python3-setuptools python3-numpy python3-nose
+        - python: 3.2
+          env:
+            - PYTHON=python3
+            - DEPS=python3-setuptools python3-nose
 
 virtualenv:
     system_site_packages: true
 
 before_install:
     - sudo apt-get update
-    - sudo apt-get install $PYTHON-setuptools
-    - sudo apt-get install $PYTHON-numpy
-    - sudo apt-get install $PYTHON-nose
+    - sudo apt-get install $DEPS
 
 install:
     - sudo $PYTHON setup.py install
