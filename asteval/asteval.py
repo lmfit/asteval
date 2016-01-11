@@ -101,7 +101,8 @@ class Interpreter:
         self.lineno = 0
         self.use_numpy = HAS_NUMPY and use_numpy
 
-        symtable['print'] = self._printer
+        symtable['print'] = self.print_
+
         for sym in FROM_PY:
             if sym in builtins:
                 symtable[sym] = builtins[sym]
@@ -132,6 +133,13 @@ class Interpreter:
         for key, val in symtable.items():
             if callable(val) or 'numpy.lib.index_tricks' in repr(val):
                 self.no_deepcopy.append(key)
+
+    def add_symbol(self, name, value):
+        self.symtable[name] = value
+
+    def add_function(self, func):
+        if callable(func) and hasattr(func, '__name__'):
+            self.symtable[func.__name__] = func
 
     @staticmethod
     def set_recursion_limit():
@@ -532,9 +540,9 @@ class Interpreter:
             end = '\n'
         out = [self.run(tnode) for tnode in node.values]
         if out and len(self.error) == 0:
-            self._printer(*out, file=dest, end=end)
+            self.print_(*out, file=dest, end=end)
 
-    def _printer(self, *out, **kws):
+    def print_(self, *out, **kws):
         """generic print function"""
         flush = kws.pop('flush', True)
         fileh = kws.pop('file', self.writer)
