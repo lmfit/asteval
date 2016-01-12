@@ -149,6 +149,9 @@ class Interpreter:
     def get_trace(self):
         return self.trace
 
+    def get_errors(self):
+        return self.error
+
     def add_symbol(self, name, value):
         self.symtable[name] = value
 
@@ -306,7 +309,7 @@ class Interpreter:
     def on_expr(self, node):
         """expression"""
         val = self.run(node.value)
-        #self.tracer("Expression returned `{}`.".format(quote(val)))
+        # self.tracer("Expression returned `{}`.".format(quote(val)))
         return val  # ('value',)
 
     def on_index(self, node):
@@ -414,7 +417,7 @@ class Interpreter:
                 errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
-            #self.tracer("Assigned value of {} to {}.".format(quote(val), node.id))
+            # self.tracer("Assigned value of {} to {}.".format(quote(val), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
 
@@ -528,7 +531,7 @@ class Interpreter:
         func, name = op2func(node.op)
         val = self.run(node.operand)
         ret = func(val)
-        #self.tracer("{}{} returned {}.".format(name, quote(val), ret))
+        # self.tracer("{}{} returned {}.".format(name, quote(val), ret))
         return ret
 
     def on_binop(self, node):  # ('left', 'op', 'right')
