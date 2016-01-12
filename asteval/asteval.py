@@ -747,8 +747,8 @@ class Interpreter:
             if name not in ('print', 'pprint', 'pformat'):
                 self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
             return ret
-        except:
-            self.raise_exception(node, msg="Error running `%s`" % func)
+        except Exception as e:
+            self.raise_exception(node, msg="Error running `%s`: %s" % (func, str(e)))
 
     # noinspection PyMethodMayBeStatic
     def on_arg(self, node):  # ('test', 'msg')
