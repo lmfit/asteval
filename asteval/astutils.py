@@ -182,34 +182,35 @@ def safe_lshift(a, b):
     return a << b
 
 
-OPERATORS = {ast.Is: lambda a, b: a is b,
-             ast.IsNot: lambda a, b: a is not b,
-             ast.In: lambda a, b: a in b,
-             ast.NotIn: lambda a, b: a not in b,
-             ast.Add: safe_add,
-             ast.BitAnd: lambda a, b: a & b,
-             ast.BitOr: lambda a, b: a | b,
-             ast.BitXor: lambda a, b: a ^ b,
-             ast.Div: lambda a, b: a / b,
-             ast.FloorDiv: lambda a, b: a // b,
-             ast.LShift: safe_lshift,
-             ast.RShift: lambda a, b: a >> b,
-             ast.Mult: safe_mult,
-             ast.Pow: safe_pow,
-             ast.Sub: lambda a, b: a - b,
-             ast.Mod: lambda a, b: a % b,
-             ast.And: lambda a, b: a and b,
-             ast.Or: lambda a, b: a or b,
-             ast.Eq: lambda a, b: a == b,
-             ast.Gt: lambda a, b: a > b,
-             ast.GtE: lambda a, b: a >= b,
-             ast.Lt: lambda a, b: a < b,
-             ast.LtE: lambda a, b: a <= b,
-             ast.NotEq: lambda a, b: a != b,
-             ast.Invert: lambda a: ~a,
-             ast.Not: lambda a: not a,
-             ast.UAdd: lambda a: +a,
-             ast.USub: lambda a: -a}
+OPERATORS = {ast.Is: (lambda a, b: a is b, 'is'),
+             ast.IsNot: (lambda a, b: a is not b, 'is not'),
+             ast.In: (lambda a, b: a in b, 'in'),
+             ast.NotIn: (lambda a, b: a not in b, 'not in'),
+             ast.Add: (safe_add, '+'),
+             ast.BitAnd: (lambda a, b: a & b, '&'),
+             ast.BitOr: (lambda a, b: a | b, '|'),
+             ast.BitXor: (lambda a, b: a ^ b, '^'),
+             ast.Div: (lambda a, b: a / b, '/'),
+             ast.FloorDiv: (lambda a, b: a // b, '//'),
+             ast.LShift: (safe_lshift, '<<'),
+             ast.RShift: (lambda a, b: a >> b, '>>'),
+             ast.Mult: (safe_mult, '*'),
+             ast.Pow: (safe_pow, '**'),
+             ast.Sub: (lambda a, b: a - b, '-'),
+             ast.Mod: (lambda a, b: a % b, '%'),
+             ast.And: (lambda a, b: a and b, 'and'),
+             ast.Or: (lambda a, b: a or b, 'or'),
+             ast.Eq: (lambda a, b: a == b, '=='),
+             ast.Gt: (lambda a, b: a > b, '>'),
+             ast.GtE: (lambda a, b: a >= b, '>='),
+             ast.Lt: (lambda a, b: a < b, '<'),
+             ast.LtE: (lambda a, b: a <= b, '<='),
+             ast.NotEq: (lambda a, b: a != b, '!='),
+             ast.Invert: (lambda a: ~a, '~'),
+             ast.Not: (lambda a: not a, 'not'),
+             ast.UAdd: (lambda a: +a, '+'),
+             ast.USub: (lambda a: -a, '-')
+             }
 
 
 def valid_symbol_name(name):
@@ -304,3 +305,10 @@ def get_ast_names(astnode):
     finder = NameFinder()
     finder.generic_visit(astnode)
     return finder.names
+
+
+def quote(s):
+    ret = "'{}'".format(s) if isinstance(s, str) else str(s)
+    if len(ret) > 100:
+        return ret[:100] + '...truncated'
+    return ret

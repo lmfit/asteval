@@ -9,6 +9,8 @@ import unittest
 from sys import version_info
 from tempfile import NamedTemporaryFile
 
+import sys
+
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
 
@@ -35,7 +37,7 @@ class TestCase(unittest.TestCase):
     """testing of asteval"""
 
     def setUp(self):
-        self.interp = Interpreter()
+        self.interp = Interpreter(max_time=3)  # show_errors=False)
         self.symtable = self.interp.symtable
         self.set_stdout()
         if not HAS_NUMPY:
@@ -116,6 +118,12 @@ class TestCase(unittest.TestCase):
         except IndexError:
             if chk_type:
                 self.assertTrue(False)
+
+    def get_error(self):
+        """
+        :return:  errtype, errmsg
+        """
+        return self.interp.error[0].get_error()
 
 
 class TestEval(TestCase):
@@ -744,6 +752,10 @@ def fcn(x, y):
         dumped = self.interp.dump(astnode.body[0])
         self.assertTrue(dumped.startswith('Assign'))
 
+        # print("X"*80)
+        # astnode = self.interp.parse("yes and (no or nottrue)")
+        # print(self.interp.dump(astnode.body[0]))
+
     # noinspection PyTypeChecker
     def test_safe_funcs(self):
         self.interp("'*'*(2<<17)")
@@ -807,8 +819,14 @@ def fcn(x, y):
         z = self.interp("x = 42\nx")
         self.assertEqual(z, 42)
         self.isvalue('x', 42)
-        z = self.interp("""def foo(): return 42\nfoo()""")
+        z = self.interp("""trace(True)\ndef foo(): return 42\nfoo()""")
         self.assertEqual(z, 42)
+        print(self.interp.trace)
+    # def test_errors(self):
+    #     z = self.interp(".xxx")
+    #     self.check_error('SyntaxError', 'xxx')
+    #     errtype, errmsg = self.get_error()
+    #     #print(errmsg)
 
 
 class TestCase2(unittest.TestCase):
@@ -819,9 +837,12 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
+        #intrep("xyz += 1")
+        #print(repr(err.getvalue()))
+        #self.assertEqual(err.getvalue(), 'xxx')
 
 
 if __name__ == '__main__':  # pragma: no cover
-    for suite in (TestEval,):
+    for suite in (TestEval, TestCase2):
         suite = unittest.TestLoader().loadTestsFromTestCase(suite)
         unittest.TextTestRunner(verbosity=2).run(suite)

@@ -20,7 +20,7 @@ import sys
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
-                       ExceptionHolder, ReturnedNone, valid_symbol_name)
+                       ExceptionHolder, ReturnedNone, valid_symbol_name, quote)
 
 HAS_NUMPY = False
 try:
@@ -83,15 +83,17 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None,
+                 max_time=MAX_EXEC_TIME):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
         self.max_time = max_time
         self.old_recursion_limit = sys.getrecursionlimit()
-
         if symtable is None:
             symtable = {}
+        self.trace_enabled = False
+        self.trace = []
         self.symtable = symtable
         self._interrupt = None
         self.error = []
@@ -102,6 +104,7 @@ class Interpreter:
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
+        symtable['trace'] = self.set_trace
 
         for sym in FROM_PY:
             if sym in builtins:
@@ -134,6 +137,15 @@ class Interpreter:
             if callable(val) or 'numpy.lib.index_tricks' in repr(val):
                 self.no_deepcopy.append(key)
 
+    def set_trace(self, on_off):
+        self.trace_enabled = on_off
+
+    set_trace.__name__ = 'trace'
+
+    def tracer(self, s):
+        if self.trace_enabled:
+            self.trace.append(s)
+
     def add_symbol(self, name, value):
         self.symtable[name] = value
 
@@ -151,7 +163,7 @@ class Interpreter:
     def unimplemented(self, node):
         """unimplemented nodes"""
         self.raise_exception(node, exc=NotImplementedError,
-                             msg="'%s' not supported" % node.__class__.__name__)
+                             msg="`%s` not supported" % node.__class__.__name__)
 
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
@@ -165,7 +177,7 @@ class Interpreter:
         self._interrupt = ast.Break()
         self.error.append(err)
         if self.error_msg is None:
-            self.error_msg = "%s in expr='%s'" % (msg, self.expr)
+            self.error_msg = "%s in expr=`%s`" % (msg, self.expr)
         elif len(msg) > 0:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
         if exc is None:
@@ -238,6 +250,10 @@ class Interpreter:
         """evaluates a single statement"""
         self.lineno = lineno
         self.error = []
+        self.trace = []
+        multiline = '\n' in expr
+        ticks = '```' if multiline else '`'
+        self.tracer("Evaluating {}{}{}".format(ticks + ('\n' if multiline else ''), expr, ticks))
         self.start = time()
 
         try:
@@ -286,7 +302,9 @@ class Interpreter:
     # handlers for ast components
     def on_expr(self, node):
         """expression"""
-        return self.run(node.value)  # ('value',)
+        val = self.run(node.value)
+        self.tracer("Expression returned `{}`".format(quote(val)))
+        return val  # ('value',)
 
     def on_index(self, node):
         """index"""
@@ -370,9 +388,13 @@ class Interpreter:
             return str(node.id)
         else:
             if node.id in self.symtable:
-                return self.symtable[node.id]
+                val = self.symtable[node.id]
+                val_str = repr(val)
+                if not val_str.startswith('<'):
+                    self.tracer("Value of `{}` is `{}`.".format(node.id, val_str))
+                return val
             else:
-                msg = "name '%s' is not defined" % node.id
+                msg = "name `%s` is not defined" % node.id
                 self.raise_exception(node, exc=NameError, msg=msg)
 
     # noinspection PyMethodMayBeStatic
@@ -386,15 +408,16 @@ class Interpreter:
         """
         if node.__class__ == ast.Name:
             if not valid_symbol_name(node.id):
-                errmsg = "invalid symbol name (reserved word?) %s" % node.id
+                errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
+            #self.tracer("Assigned value of {} to {}.".format(quote(val), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
-                msg = "cannot assign to attribute %s" % node.attr
+                msg = "cannot assign to attribute `%s`" % node.attr
                 self.raise_exception(node, exc=AttributeError, msg=msg)
 
             setattr(self.run(node.value), node.attr, val)
@@ -428,9 +451,9 @@ class Interpreter:
             return delattr(sym, node.attr)
 
         # ctx is ast.Load
-        fmt = "cannnot access attribute '%s' for %s"
+        fmt = "cannnot access attribute `%s` for `%s`"
         if node.attr not in UNSAFE_ATTRS:
-            fmt = "no attribute '%s' for %s"
+            fmt = "no attribute `%s` for `%s`"
             try:
                 return getattr(sym, node.attr)
             except AttributeError:
@@ -499,12 +522,19 @@ class Interpreter:
 
     def on_unaryop(self, node):  # ('op', 'operand')
         """unary operator"""
-        return op2func(node.op)(self.run(node.operand))
+        func, name = op2func(node.op)
+        val = self.run(node.operand)
+        ret = func(val)
+        #self.tracer("{}{} returned {}.".format(name, quote(val), ret))
+        return ret
 
     def on_binop(self, node):  # ('left', 'op', 'right')
         """binary operator"""
-        return op2func(node.op)(self.run(node.left),
-                                self.run(node.right))
+        func, name = op2func(node.op)
+        left, right = self.run(node.left), self.run(node.right)
+        ret = func(left, right)
+        self.tracer("Operation `{} {} {}` returned `{}`.".format(quote(left), name, quote(right), quote(ret)))
+        return ret
 
     def on_boolop(self, node):  # ('op', 'values')
         """boolean operator"""
@@ -512,9 +542,14 @@ class Interpreter:
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
             for n in node.values:
-                val = op2func(node.op)(val, self.run(n))
+                func, name = op2func(node.op)
+                val2 = self.run(n)
+                val1 = val
+                val = func(val, val2)
+                self.tracer("Boolean `{} {} {}` returned `{}`.".format(val1, name, val2, val))
                 if (is_and and not val) or (not is_and and val):
                     break
+        self.tracer("Boolean expression returned `{}`.".format(val))
         return val
 
     def on_compare(self, node):  # ('left', 'ops', 'comparators')
@@ -523,7 +558,9 @@ class Interpreter:
         out = True
         for op, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
-            out = op2func(op)(lval, rval)
+            func, name = op2func(op)
+            out = func(lval, rval)
+            self.tracer("Comparison `{} {} {}` returned `{}`.".format(quote(lval), name, quote(rval), quote(out)))
             lval = rval
             if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
                 break
@@ -552,6 +589,8 @@ class Interpreter:
         print(*out, file=fileh, sep=sep, end=end)
         if flush:
             fileh.flush()
+
+    print_.__name__ = 'print'
 
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
@@ -656,7 +695,7 @@ class Interpreter:
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
-            msg = "%s: %s" % (msg, msg2)
+            msg = "`%s: %s`" % (msg, msg2)
         self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
 
     def on_call(self, node):
@@ -664,7 +703,7 @@ class Interpreter:
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func)
         if not hasattr(func, '__call__') and not isinstance(func, type):
-            msg = "'%s' is not callable!!" % func
+            msg = "`%s` is not callable!!" % func
             self.raise_exception(node, exc=TypeError, msg=msg)
 
         args = [self.run(targ) for targ in node.args]
@@ -675,7 +714,7 @@ class Interpreter:
         keywords = {}
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
-                msg = "keyword error in function call '%s'" % func
+                msg = "keyword error in function call `%s`" % func
                 self.raise_exception(node, msg=msg)
             keywords[key.arg] = self.run(key.value)
 
@@ -685,9 +724,25 @@ class Interpreter:
 
         # noinspection PyBroadException
         try:
-            return func(*args, **keywords)
+            ret = func(*args, **keywords)
+            arg_list = []
+            if args:
+                arg_list.append(', '.join([quote(arg) for arg in args]))
+            if keywords:
+                arg_list.append(', '.join(['{}={}'.format(k, quote(v)) for (k, v) in keywords.items()]))
+
+            arg_str = ', '.join(arg_list)
+
+            name = '_'
+            if hasattr(func, '__name__'):
+                name = func.__name__
+            elif hasattr(func, 'name'):
+                name = func.name
+            if name != 'print':
+                self.tracer('Function `{}({})` returned `{}`'.format(name, arg_str, quote(ret)))
+            return ret
         except:
-            self.raise_exception(node, msg="Error running %s" % func)
+            self.raise_exception(node, msg="Error running `%s`" % func)
 
     # noinspection PyMethodMayBeStatic
     def on_arg(self, node):  # ('test', 'msg')
@@ -745,6 +800,7 @@ class Procedure(object):
                  body=None, args=None, kwargs=None,
                  vararg=None, varkws=None):
         self.name = name
+        self.__name__ = name
         self.__asteval__ = interp
         self.raise_exc = self.__asteval__.raise_exception
         self.__doc__ = doc
@@ -790,7 +846,7 @@ class Procedure(object):
             n_names = len(self.argnames)
 
         if len(self.argnames) > 0 and kwargs is not None:
-            msg = "multiple values for keyword argument '%s' in Procedure %s"
+            msg = "multiple values for keyword argument `%s` in Procedure `%s`"
             for targ in self.argnames:
                 if targ in kwargs:
                     self.raise_exc(None, exc=TypeError,
@@ -799,8 +855,8 @@ class Procedure(object):
 
         if n_args != n_names:
             if n_args < n_names:
-                msg = 'not enough arguments for Procedure %s()' % self.name
-                msg = '%s (expected %i, got %i)' % (msg, n_names, n_args)
+                msg = 'not enough arguments for Procedure `%s()`' % self.name
+                msg = '`%s` (expected `%i`, got `%i`)' % (msg, n_names, n_args)
                 self.raise_exc(None, exc=TypeError, msg=msg)
 
         for argname in self.argnames:
@@ -819,14 +875,14 @@ class Procedure(object):
                 symlocals[self.varkws] = kwargs
 
             elif len(kwargs) > 0:
-                msg = 'extra keyword arguments for Procedure %s (%s)'
+                msg = 'extra keyword arguments for Procedure `%s` (`%s`)'
                 msg = msg % (self.name, ','.join(list(kwargs.keys())))
                 self.raise_exc(None, msg=msg, exc=TypeError,
                                lineno=self.lineno)
 
         except (ValueError, LookupError, TypeError,
                 NameError, AttributeError):
-            msg = 'incorrect arguments for Procedure %s' % self.name
+            msg = 'incorrect arguments for Procedure `%s`' % self.name
             self.raise_exc(None, msg=msg, lineno=self.lineno)
 
         save_symtable = self.__asteval__.symtable.copy()
