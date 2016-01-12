@@ -146,6 +146,9 @@ class Interpreter:
         if self.trace_enabled:
             self.trace.append(s)
 
+    def get_trace(self):
+        return self.trace
+
     def add_symbol(self, name, value):
         self.symtable[name] = value
 
