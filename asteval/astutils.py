@@ -317,7 +317,7 @@ def quote(s):
     return ret
 
 
-def code_wrap(self, s, lang=''):
+def code_wrap(s, lang=''):
     s = str(s)
     multiline = '\n' in s
     ticks = '```' if multiline else '`'
