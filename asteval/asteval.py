@@ -141,6 +141,7 @@ class Interpreter:
         self.trace_enabled = on_off
 
     set_trace.__name__ = 'trace'
+    set_trace.__no_trace__ = True
 
     def tracer(self, s):
         if self.trace_enabled:
@@ -597,6 +598,7 @@ class Interpreter:
             fileh.flush()
 
     print_.__name__ = 'print'
+    print_.__no_trace__ = True
 
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
