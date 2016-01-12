@@ -398,7 +398,7 @@ class Interpreter:
                 val = self.symtable[node.id]
                 val_str = repr(val)
                 if not val_str.startswith('<'):
-                    self.tracer("Value of `{}` is `{}`.".format(node.id, code_wrap(val_str)))
+                    self.tracer("Value of `{}` is `{}`.".format(node.id, code_wrap(val)))
                 return val
             else:
                 msg = "name `%s` is not defined" % node.id
@@ -553,7 +553,7 @@ class Interpreter:
                 val2 = self.run(n)
                 val1 = val
                 val = func(val, val2)
-                self.tracer("Boolean `{} {} {}` returned `{}`.".format(val1, name, val2, val))
+                #self.tracer("Boolean `{} {} {}` returned `{}`.".format(val1, name, val2, val))
                 if (is_and and not val) or (not is_and and val):
                     break
         self.tracer("Boolean expression returned `{}`.".format(val))
