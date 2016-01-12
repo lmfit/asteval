@@ -739,12 +739,13 @@ class Interpreter:
 
             arg_str = ', '.join(arg_list)
 
-            name = '_'
+            name = ''
             if hasattr(func, '__name__'):
                 name = func.__name__
             elif hasattr(func, 'name'):
                 name = func.name
-            if name not in ('print', 'pprint', 'pformat'):
+
+            if name and not hasattr(func, '__no_trace__'):
                 self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
             return ret
         except Exception as e:
