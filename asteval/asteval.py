@@ -20,7 +20,7 @@ import sys
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
-                       ExceptionHolder, ReturnedNone, valid_symbol_name, quote)
+                       ExceptionHolder, ReturnedNone, valid_symbol_name, quote, code_wrap)
 
 HAS_NUMPY = False
 try:
@@ -253,7 +253,7 @@ class Interpreter:
         self.trace = []
         multiline = '\n' in expr
         ticks = '```' if multiline else '`'
-        self.tracer("Evaluating {}{}{}".format(ticks + ('\n' if multiline else ''), expr, ticks))
+        self.tracer("Evaluating {}{}{}...".format(ticks + ('\n' if multiline else ''), expr, ticks))
         self.start = time()
 
         try:
@@ -303,7 +303,7 @@ class Interpreter:
     def on_expr(self, node):
         """expression"""
         val = self.run(node.value)
-        self.tracer("Expression returned `{}`".format(quote(val)))
+        #self.tracer("Expression returned `{}`.".format(quote(val)))
         return val  # ('value',)
 
     def on_index(self, node):
@@ -391,7 +391,7 @@ class Interpreter:
                 val = self.symtable[node.id]
                 val_str = repr(val)
                 if not val_str.startswith('<'):
-                    self.tracer("Value of `{}` is `{}`.".format(node.id, val_str))
+                    self.tracer("Value of `{}` is `{}`.".format(node.id, code_wrap(val_str)))
                 return val
             else:
                 msg = "name `%s` is not defined" % node.id
@@ -738,8 +738,8 @@ class Interpreter:
                 name = func.__name__
             elif hasattr(func, 'name'):
                 name = func.name
-            if name != 'print':
-                self.tracer('Function `{}({})` returned `{}`'.format(name, arg_str, quote(ret)))
+            if name not in ('print', 'pprint', 'pformat'):
+                self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
             return ret
         except:
             self.raise_exception(node, msg="Error running `%s`" % func)

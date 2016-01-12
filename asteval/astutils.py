@@ -307,8 +307,20 @@ def get_ast_names(astnode):
     return finder.names
 
 
+# Markdown helpers
+
 def quote(s):
-    ret = "'{}'".format(s) if isinstance(s, str) else str(s)
-    if len(ret) > 100:
-        return ret[:100] + '...truncated'
+    is_str = isinstance(s, str)
+    ret = "'{}'".format(s) if is_str else str(s)
+    if is_str and len(ret) > 100:
+        return ret[:100] + "...(truncated)'"
     return ret
+
+
+def code_wrap(self, s, lang=''):
+    s = str(s)
+    multiline = '\n' in s
+    ticks = '```' if multiline else '`'
+    newlines = '\n' if multiline else ''
+    lang = lang if multiline else ''
+    return ''.join([newlines, ticks, lang, newlines, s, newlines, ticks, newlines])
