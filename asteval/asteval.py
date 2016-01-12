@@ -218,12 +218,13 @@ class Interpreter:
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
+        trace = self.trace_enabled
         if time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
         if self.error:
             return
         if node is None:
-            return None
+            return
         if isinstance(node, str):
             node = self.parse(node)
         if lineno is not None:
@@ -338,7 +339,7 @@ class Interpreter:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_pass(self, node, trace):
         """pass statement"""
-        return None  # ()
+        pass  # ()
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_ellipsis(self, node, trace):
