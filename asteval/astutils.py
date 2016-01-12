@@ -318,7 +318,7 @@ def quote(s):
 
 
 def code_wrap(s, lang=''):
-    s = str(s)
+    s = quote(s)
     multiline = '\n' in s
     ticks = '```' if multiline else '`'
     newlines = '\n' if multiline else ''
