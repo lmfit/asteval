@@ -218,7 +218,7 @@ class Interpreter:
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        trace = self.trace_enabled
+        #trace = self.trace_enabled
         if time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
         if self.error:
@@ -717,7 +717,7 @@ class Interpreter:
         """function execution"""
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func, trace)
-        trace = hasattr(func, '__no_trace__') and trace
+        trace = not hasattr(func, '__no_trace__') and trace
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
@@ -755,8 +755,6 @@ class Interpreter:
                 name = func.__name__
             elif hasattr(func, 'name'):
                 name = func.name
-
-
 
             if trace and name:
                 self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
