@@ -176,6 +176,8 @@ class Interpreter:
             expr = self.expr
         if self.error and not isinstance(node, ast.Module):
             msg = '%s' % msg
+        if lineno is None and self.lineno is not None:
+            lineno = self.lineno
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
         self._interrupt = ast.Break()
         self.error.append(err)
