@@ -218,7 +218,8 @@ class Interpreter:
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        #trace = self.trace_enabled
+        if self.trace_enabled:
+            trace = True
         if time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
         if self.error:
