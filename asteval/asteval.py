@@ -718,7 +718,8 @@ class Interpreter:
         """function execution"""
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func, trace)
-        trace = not hasattr(func, '__no_trace__') and trace
+        if hasattr(func, '__no_trace__'):
+            trace = False
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
@@ -734,6 +735,7 @@ class Interpreter:
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call `%s`" % func
                 self.raise_exception(node, msg=msg)
+
             keywords[key.arg] = self.run(key.value, trace)
 
         kwargs = getattr(node, 'kwargs', None)
@@ -742,10 +744,7 @@ class Interpreter:
 
         # noinspection PyBroadException
         try:
-            trace_enabled = self.trace_enabled
             ret = func(*args, **keywords)
-            if trace_enabled != self.trace_enabled:
-                trace = self.trace_enabled
 
             arg_list = []
             if args:
@@ -763,6 +762,7 @@ class Interpreter:
 
             if trace and name:
                 self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
+
             return ret
         except Exception as e:
             self.raise_exception(node, msg="Error running `%s`: %s" % (func, str(e)))
