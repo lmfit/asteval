@@ -182,7 +182,7 @@ class Interpreter:
         self._interrupt = ast.Break()
         self.error.append(err)
         if self.error_msg is None:
-            self.error_msg = "%s in expr=`%s`" % (msg, self.expr)
+            self.error_msg = "%s in `%s`" % (msg, self.expr)
         elif msg:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
         if exc is None:
@@ -729,26 +729,27 @@ class Interpreter:
         # noinspection PyBroadException
         try:
             ret = func(*args, **keywords)
-
-            arg_list = []
-            if args:
-                arg_list.append(', '.join([quote(arg) for arg in args]))
-            if keywords:
-                arg_list.append(', '.join(['{}={}'.format(k, quote(v)) for (k, v) in keywords.items()]))
-
-            arg_str = ', '.join(arg_list)
-
-            name = ''
-            if hasattr(func, '__name__'):
-                name = func.__name__
-            elif hasattr(func, 'name'):
-                name = func.name
-
-            self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
-
-            return ret
         except Exception as e:
             self.raise_exception(node, msg="Error running `%s`: %s" % (func, str(e)))
+
+        arg_list = []
+        if args:
+            arg_list.append(', '.join([quote(arg) for arg in args]))
+        if keywords:
+            arg_list.append(', '.join(['{}={}'.format(k, quote(v)) for (k, v) in keywords.items()]))
+
+        arg_str = ', '.join(arg_list)
+
+        name = ''
+        if hasattr(func, '__name__'):
+            name = func.__name__
+        elif hasattr(func, 'name'):
+            name = func.name
+
+        self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
+
+        return ret
+
 
     # noinspection PyMethodMayBeStatic
     def on_arg(self, node):  # ('test', 'msg')
