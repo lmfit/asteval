@@ -92,7 +92,7 @@ class Interpreter:
         self.old_recursion_limit = sys.getrecursionlimit()
         if symtable is None:
             symtable = {}
-        self.trace_enabled = False
+        self.trace_enabled = True
         self.trace = []
         self.symtable = symtable
         self._interrupt = None
@@ -144,7 +144,7 @@ class Interpreter:
     set_trace.__no_trace__ = True
 
     def tracer(self, s):
-        #if self.trace_enabled:
+        # if self.trace_enabled:
         self.trace.append(s)
 
     def get_trace(self):
@@ -195,63 +195,6 @@ class Interpreter:
                 exc = RuntimeError
         raise exc(self.error_msg)
 
-    # main entry point for Ast node evaluation
-    #  parse:  text of statements -> ast
-    #  run:    ast -> result
-    #  eval:   string statement -> result = run(parse(statement))
-    def parse(self, text):
-        """parse statement/expression to Ast representation"""
-        self.expr = text
-
-        # noinspection PyBroadException
-        try:
-            self.set_recursion_limit()
-            return ast.parse(text)
-        except SyntaxError:
-            self.raise_exception(None, msg='Syntax Error', expr=text)
-        except:
-            self.raise_exception(None, msg='Runtime Error', expr=text)
-        finally:
-            self.reset_recursion_limit()
-
-    def run(self, node, trace=False, expr=None, lineno=None, with_raise=True):
-        """executes parsed Ast representation for an expression"""
-        # Note: keep the 'node is None' test: internal code here may run
-        #    run(None) and expect a None in return.
-        if self.trace_enabled:
-            trace = True
-        if time() - self.start > self.max_time:
-            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
-        if self.error:
-            return
-        if node is None:
-            return
-        if isinstance(node, str):
-            node = self.parse(node)
-        if lineno is not None:
-            self.lineno = lineno
-        if expr is not None:
-            self.expr = expr
-
-        # get handler for this node:
-        #   on_xxx with handle nodes of type 'xxx', etc
-        try:
-            handler = self.node_handlers[node.__class__.__name__.lower()]
-        except KeyError:
-            return self.unimplemented(node)
-
-        # run the handler:  this will likely generate
-        # recursive calls into this run method.
-        # noinspection PyBroadException
-        try:
-            ret = handler(node, trace)
-            if isinstance(ret, enumerate):
-                ret = list(ret)
-            return ret
-        except:
-            if with_raise:
-                self.raise_exception(node, expr=expr)
-
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
@@ -301,6 +244,63 @@ class Interpreter:
                 return
         finally:
             self.reset_recursion_limit()
+
+    # main entry point for Ast node evaluation
+    #  parse:  text of statements -> ast
+    #  run:    ast -> result
+    #  eval:   string statement -> result = run(parse(statement))
+    def parse(self, text):
+        """parse statement/expression to Ast representation"""
+        self.expr = text
+
+        # noinspection PyBroadException
+        try:
+            self.set_recursion_limit()
+            return ast.parse(text)
+        except SyntaxError:
+            self.raise_exception(None, msg='Syntax Error', expr=text)
+        except:
+            self.raise_exception(None, msg='Runtime Error', expr=text)
+        finally:
+            self.reset_recursion_limit()
+
+    def run(self, node, trace=True, expr=None, lineno=None, with_raise=True):
+        """executes parsed Ast representation for an expression"""
+        # Note: keep the 'node is None' test: internal code here may run
+        #    run(None) and expect a None in return.
+        # if self.trace_enabled:
+        #    trace = True
+        if time() - self.start > self.max_time:
+            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
+        if self.error:
+            return
+        if node is None:
+            return
+        if isinstance(node, str):
+            node = self.parse(node)
+        if lineno is not None:
+            self.lineno = lineno
+        if expr is not None:
+            self.expr = expr
+
+        # get handler for this node:
+        #   on_xxx with handle nodes of type 'xxx', etc
+        try:
+            handler = self.node_handlers[node.__class__.__name__.lower()]
+        except KeyError:
+            return self.unimplemented(node)
+
+        # run the handler:  this will likely generate
+        # recursive calls into this run method.
+        # noinspection PyBroadException
+        try:
+            ret = handler(node, trace)
+            if isinstance(ret, enumerate):
+                ret = list(ret)
+            return ret
+        except:
+            if with_raise:
+                self.raise_exception(node, expr=expr)
 
     @staticmethod
     def dump(node, **kw):
@@ -535,7 +535,7 @@ class Interpreter:
         func, name = op2func(node.op)
         val = self.run(node.operand, trace)
         ret = func(val)
-        #if trace:
+        # if trace:
         #    self.tracer("{}{} returned {}.".format(name, quote(val), ret))
         return ret
 
