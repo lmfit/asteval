@@ -741,7 +741,11 @@ class Interpreter:
 
         # noinspection PyBroadException
         try:
+            trace_enabled = self.trace_enabled
             ret = func(*args, **keywords)
+            if trace_enabled != self.trace_enabled:
+                trace = self.trace_enabled
+
             arg_list = []
             if args:
                 arg_list.append(', '.join([quote(arg) for arg in args]))
