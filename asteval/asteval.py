@@ -545,11 +545,8 @@ class Interpreter:
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
             for n in node.values:
-                func, name = op2func(node.op)
-                val2 = self.run(n)
-                val1 = val
-                val = func(val, val2)
-                #     self.tracer("Boolean `{} {} {}` returned `{}`.".format(val1, name, val2, val))
+                func, _ = op2func(node.op)
+                val = func(val, self.run(n))
                 if (is_and and not val) or (not is_and and val):
                     break
         self.tracer("Boolean expression returned `{}`.".format(val))
