@@ -288,7 +288,7 @@ class Interpreter:
         # recursive calls into this run method.
         # noinspection PyBroadException
         try:
-            self.tracer("Calling `{}({})`...".format(handler.__name__, node))
+            #self.tracer("Calling `{}({})`...".format(handler.__name__, node))
             ret = handler(node)
             if isinstance(ret, enumerate):
                 ret = list(ret)
@@ -702,8 +702,6 @@ class Interpreter:
         """function execution"""
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func)
-
-        self.tracer("`on_call({})`".format(func.__name__))
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
