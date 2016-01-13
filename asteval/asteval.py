@@ -104,7 +104,6 @@ class Interpreter:
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
-        symtable['trace'] = self.set_trace
 
         for sym in FROM_PY:
             if sym in builtins:
@@ -140,12 +139,9 @@ class Interpreter:
     def set_trace(self, on_off):
         self.trace_enabled = on_off
 
-    set_trace.__name__ = 'trace'
-    set_trace.__no_trace__ = True
-
     def tracer(self, s):
-        # if self.trace_enabled:
-        self.trace.append(s)
+        if self.trace_enabled:
+            self.trace.append(s)
 
     def get_trace(self):
         return self.trace
@@ -203,8 +199,6 @@ class Interpreter:
         self.lineno = lineno
         self.error = []
         self.trace = []
-        if self.trace_enabled:
-            self.tracer("Evaluating {}...".format(code_wrap(expr)))
         self.start = time()
 
         try:
@@ -228,7 +222,7 @@ class Interpreter:
             # noinspection PyBroadException
             try:
                 self.set_recursion_limit()
-                return self.run(node, expr=expr, lineno=lineno, trace=self.trace_enabled)
+                return self.run(node, expr=expr, lineno=lineno)
             except:
                 errmsg = exc_info()[1]
                 if self.error:
@@ -264,12 +258,10 @@ class Interpreter:
         finally:
             self.reset_recursion_limit()
 
-    def run(self, node, trace=True, expr=None, lineno=None, with_raise=True):
+    def run(self, node, expr=None, lineno=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        # if self.trace_enabled:
-        #    trace = True
         if time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
         if self.error:
@@ -294,7 +286,7 @@ class Interpreter:
         # recursive calls into this run method.
         # noinspection PyBroadException
         try:
-            ret = handler(node, trace)
+            ret = handler(node)
             if isinstance(ret, enumerate):
                 ret = list(ret)
             return ret
@@ -308,89 +300,88 @@ class Interpreter:
         return ast.dump(node, **kw)
 
     # handlers for ast components
-    def on_expr(self, node, trace):
+    def on_expr(self, node):
         """expression"""
-        val = self.run(node.value, trace)
-        if trace:
-            self.tracer("Expression returned `{}`.".format(quote(val)))
+        val = self.run(node.value)
+        self.tracer("Expression returned `{}`.".format(quote(val)))
         return val  # ('value',)
 
-    def on_index(self, node, trace):
+    def on_index(self, node):
         """index"""
-        return self.run(node.value, trace)  # ('value',)
+        return self.run(node.value)  # ('value',)
 
-    def on_return(self, node, trace):  # ('value',)
+    def on_return(self, node):  # ('value',)
         """return statement: look for None, return special sentinal"""
-        self.retval = self.run(node.value, trace)
+        self.retval = self.run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
         return
 
-    def on_repr(self, node, trace):
+    def on_repr(self, node):
         """repr """
-        return repr(self.run(node.value, trace))  # ('value',)
+        return repr(self.run(node.value))  # ('value',)
 
-    def on_module(self, node, trace):  # ():('body',)
+    def on_module(self, node):  # ():('body',)
         """module def"""
         out = None
         for tnode in node.body:
-            out = self.run(tnode, trace)
+            out = self.run(tnode)
         return out
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def on_pass(self, node, trace):
+    def on_pass(self, node):
         """pass statement"""
         pass  # ()
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def on_ellipsis(self, node, trace):
+    def on_ellipsis(self, node):
         """ellipses"""
         return Ellipsis
 
     # for break and continue: set the instance variable _interrupt
-    def on_interrupt(self, node, trace):  # ()
+    def on_interrupt(self, node):  # ()
         """interrupt handler"""
         self._interrupt = node
         return node
 
-    def on_break(self, node, trace):
+    def on_break(self, node):
         """break"""
-        return self.on_interrupt(node, trace)
+        return self.on_interrupt(node)
 
-    def on_continue(self, node, trace):
+    def on_continue(self, node):
         """continue"""
-        return self.on_interrupt(node, trace)
+        return self.on_interrupt(node)
 
-    def on_assert(self, node, trace):  # ('test', 'msg')
+    def on_assert(self, node):  # ('test', 'msg')
         """assert statement"""
-        if not self.run(node.test, trace):
+        if not self.run(node.test):
             self.raise_exception(node, exc=AssertionError, msg=node.msg)
         return True
 
-    def on_list(self, node, trace):  # ('elt', 'ctx')
+    def on_list(self, node):  # ('elt', 'ctx')
         """list"""
-        return [self.run(e, trace) for e in node.elts]
+        return [self.run(e) for e in node.elts]
 
-    def on_tuple(self, node, trace):  # ('elts', 'ctx')
+    def on_tuple(self, node):  # ('elts', 'ctx')
         """tuple"""
-        return tuple(self.on_list(node, trace))
+        return tuple(self.on_list(node))
 
-    def on_dict(self, node, trace):  # ('keys', 'values')
+    def on_dict(self, node):  # ('keys', 'values')
         """dictionary"""
-        return dict([(self.run(k, trace), self.run(v, trace)) for k, v in
+        return dict([(self.run(k), self.run(v)) for k, v in
                      zip(node.keys, node.values)])
 
     # noinspection PyMethodMayBeStatic
-    def on_num(self, node, trace):  # ('n',)
+    def on_num(self, node):  # ('n',)
         """return number"""
         return node.n
 
     # noinspection PyMethodMayBeStatic
-    def on_str(self, node, trace):  # ('s',)
+    def on_str(self, node):  # ('s',)
         """return string"""
         return node.s
 
-    def on_name(self, node, trace):  # ('id', 'ctx')
+    def on_name(self, node):  # ('id', 'ctx')
         """ Name node """
         ctx = node.ctx.__class__
         if ctx in (ast.Param, ast.Del):
@@ -399,7 +390,7 @@ class Interpreter:
             if node.id in self.symtable:
                 val = self.symtable[node.id]
                 val_str = repr(val)
-                if trace and not val_str.startswith('<'):
+                if not val_str.startswith('<'):
                     self.tracer("Value of `{}` is `{}`.".format(node.id, code_wrap(val)))
                 return val
             else:
@@ -407,11 +398,11 @@ class Interpreter:
                 self.raise_exception(node, exc=NameError, msg=msg)
 
     # noinspection PyMethodMayBeStatic
-    def on_nameconstant(self, node, trace):
+    def on_nameconstant(self, node):
         """ True, False, None in python >= 3.4 """
         return node.value
 
-    def node_assign(self, node, val, trace):
+    def node_assign(self, node, val):
         """here we assign a value (not the node.value object) to a node
         this is used by on_assign, but also by for, list comprehension, etc.
         """
@@ -420,8 +411,7 @@ class Interpreter:
                 errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
-            if trace:
-                self.tracer("Assigned value of {} to {}.".format(code_wrap(val), node.id))
+            self.tracer("Assigned value of {} to {}.".format(code_wrap(val), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
 
@@ -430,11 +420,11 @@ class Interpreter:
                 msg = "cannot assign to attribute `%s`" % node.attr
                 self.raise_exception(node, exc=AttributeError, msg=msg)
 
-            setattr(self.run(node.value, trace), node.attr, val)
+            setattr(self.run(node.value), node.attr, val)
 
         elif node.__class__ == ast.Subscript:
-            sym = self.run(node.value, trace)
-            xslice = self.run(node.slice, trace)
+            sym = self.run(node.value)
+            xslice = self.run(node.slice)
             if isinstance(node.slice, ast.Index):
                 sym[xslice] = val
             elif isinstance(node.slice, ast.Slice):
@@ -445,18 +435,18 @@ class Interpreter:
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
                 for telem, tval in zip(node.elts, val):
-                    self.node_assign(telem, tval, trace)
+                    self.node_assign(telem, tval)
             else:
                 raise ValueError('too many values to unpack')
 
-    def on_attribute(self, node, trace):  # ('value', 'attr', 'ctx')
+    def on_attribute(self, node):  # ('value', 'attr', 'ctx')
         """extract attribute"""
         ctx = node.ctx.__class__
         if ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
             self.raise_exception(node, exc=RuntimeError, msg=msg)
 
-        sym = self.run(node.value, trace)
+        sym = self.run(node.value)
         if ctx == ast.Del:
             return delattr(sym, node.attr)
 
@@ -470,38 +460,38 @@ class Interpreter:
                 pass
 
         # AttributeError or accessed unsafe attribute
-        obj = self.run(node.value, trace)
+        obj = self.run(node.value)
         msg = fmt % (node.attr, obj)
         self.raise_exception(node, exc=AttributeError, msg=msg)
 
-    def on_assign(self, node, trace):  # ('targets', 'value')
+    def on_assign(self, node):  # ('targets', 'value')
         """simple assignment"""
-        val = self.run(node.value, trace)
+        val = self.run(node.value)
         for tnode in node.targets:
-            self.node_assign(tnode, val, trace)
+            self.node_assign(tnode, val)
         return
 
-    def on_augassign(self, node, trace):  # ('target', 'op', 'value')
+    def on_augassign(self, node):  # ('target', 'op', 'value')
         """augmented assign"""
         return self.on_assign(ast.Assign(targets=[node.target],
                                          value=ast.BinOp(left=node.target,
                                                          op=node.op,
-                                                         right=node.value)), trace)
+                                                         right=node.value)))
 
-    def on_slice(self, node, trace):  # ():('lower', 'upper', 'step')
+    def on_slice(self, node):  # ():('lower', 'upper', 'step')
         """simple slice"""
-        return slice(self.run(node.lower, trace),
-                     self.run(node.upper, trace),
-                     self.run(node.step, trace))
+        return slice(self.run(node.lower),
+                     self.run(node.upper),
+                     self.run(node.step))
 
-    def on_extslice(self, node, trace):  # ():('dims',)
+    def on_extslice(self, node):  # ():('dims',)
         """extended slice"""
-        return tuple([self.run(tnode, trace) for tnode in node.dims])
+        return tuple([self.run(tnode) for tnode in node.dims])
 
-    def on_subscript(self, node, trace):  # ('value', 'slice', 'ctx')
+    def on_subscript(self, node):  # ('value', 'slice', 'ctx')
         """subscript handling -- one of the tricky parts"""
-        val = self.run(node.value, trace)
-        nslice = self.run(node.slice, trace)
+        val = self.run(node.value)
+        nslice = self.run(node.slice)
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
             if isinstance(node.slice, (ast.Index, ast.Slice, ast.Ellipsis)):
@@ -512,7 +502,7 @@ class Interpreter:
             msg = "subscript with unknown context"
             self.raise_exception(node, msg=msg)
 
-    def on_delete(self, node, trace):  # ('targets',)
+    def on_delete(self, node):  # ('targets',)
         """delete statement"""
         for tnode in node.targets:
             if tnode.ctx.__class__ != ast.Del:
@@ -530,52 +520,47 @@ class Interpreter:
                 msg = "could not delete symbol"
                 self.raise_exception(node, msg=msg)
 
-    def on_unaryop(self, node, trace):  # ('op', 'operand')
+    def on_unaryop(self, node):  # ('op', 'operand')
         """unary operator"""
         func, name = op2func(node.op)
-        val = self.run(node.operand, trace)
+        val = self.run(node.operand)
         ret = func(val)
-        # if trace:
         #    self.tracer("{}{} returned {}.".format(name, quote(val), ret))
         return ret
 
-    def on_binop(self, node, trace):  # ('left', 'op', 'right')
+    def on_binop(self, node):  # ('left', 'op', 'right')
         """binary operator"""
         func, name = op2func(node.op)
-        left, right = self.run(node.left, trace), self.run(node.right, trace)
+        left, right = self.run(node.left), self.run(node.right)
         ret = func(left, right)
-        if trace:
-            self.tracer("Operation `{} {} {}` returned `{}`.".format(quote(left), name, quote(right), quote(ret)))
+        self.tracer("Operation `{} {} {}` returned `{}`.".format(quote(left), name, quote(right), quote(ret)))
         return ret
 
-    def on_boolop(self, node, trace):  # ('op', 'values')
+    def on_boolop(self, node):  # ('op', 'values')
         """boolean operator"""
-        val = self.run(node.values[0], trace)
+        val = self.run(node.values[0])
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
             for n in node.values:
                 func, name = op2func(node.op)
-                val2 = self.run(n, trace)
+                val2 = self.run(n)
                 val1 = val
                 val = func(val, val2)
-                # if trace:
                 #     self.tracer("Boolean `{} {} {}` returned `{}`.".format(val1, name, val2, val))
                 if (is_and and not val) or (not is_and and val):
                     break
-        if trace:
-            self.tracer("Boolean expression returned `{}`.".format(val))
+        self.tracer("Boolean expression returned `{}`.".format(val))
         return val
 
-    def on_compare(self, node, trace):  # ('left', 'ops', 'comparators')
+    def on_compare(self, node):  # ('left', 'ops', 'comparators')
         """comparison operators"""
-        lval = self.run(node.left, trace)
+        lval = self.run(node.left)
         out = True
         for op, rnode in zip(node.ops, node.comparators):
-            rval = self.run(rnode, trace)
+            rval = self.run(rnode)
             func, name = op2func(op)
             out = func(lval, rval)
-            if trace:
-                self.tracer("Comparison `{} {} {}` returned `{}`.".format(quote(lval), name, quote(rval), quote(out)))
+            self.tracer("Comparison `{} {} {}` returned `{}`.".format(quote(lval), name, quote(rval), quote(out)))
             lval = rval
             if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
                 break
@@ -583,14 +568,14 @@ class Interpreter:
                 break
         return out
 
-    def on_print(self, node, trace):  # ('dest', 'values', 'nl')
+    def on_print(self, node):  # ('dest', 'values', 'nl')
         """ note: implements Python2 style print statement, not
         print() function.  May need improvement...."""
-        dest = self.run(node.dest, trace) or self.writer
+        dest = self.run(node.dest) or self.writer
         end = ''
         if node.nl:
             end = '\n'
-        out = [self.run(tnode, trace) for tnode in node.values]
+        out = [self.run(tnode) for tnode in node.values]
         if out and not self.error:
             self.print_(*out, file=dest, end=end)
 
@@ -606,77 +591,76 @@ class Interpreter:
             fileh.flush()
 
     print_.__name__ = 'print'
-    print_.__no_trace__ = True
 
-    def on_if(self, node, trace):  # ('test', 'body', 'orelse')
+    def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
         block = node.body
-        if not self.run(node.test, trace):
+        if not self.run(node.test):
             block = node.orelse
         for tnode in block:
-            self.run(tnode, trace)
+            self.run(tnode)
 
-    def on_ifexp(self, node, trace):  # ('test', 'body', 'orelse')
+    def on_ifexp(self, node):  # ('test', 'body', 'orelse')
         """if expressions"""
         expr = node.orelse
-        if self.run(node.test, trace):
+        if self.run(node.test):
             expr = node.body
-        return self.run(expr, trace)
+        return self.run(expr)
 
-    def on_while(self, node, trace):  # ('test', 'body', 'orelse')
+    def on_while(self, node):  # ('test', 'body', 'orelse')
         """while blocks"""
-        while self.run(node.test, trace):
+        while self.run(node.test):
             self._interrupt = None
             for tnode in node.body:
-                self.run(tnode, trace)
+                self.run(tnode)
                 if self._interrupt is not None:
                     break
             if isinstance(self._interrupt, ast.Break):
                 break
         else:
             for tnode in node.orelse:
-                self.run(tnode, trace)
+                self.run(tnode)
         self._interrupt = None
 
-    def on_for(self, node, trace):  # ('target', 'iter', 'body', 'orelse')
+    def on_for(self, node):  # ('target', 'iter', 'body', 'orelse')
         """for blocks"""
-        for val in self.run(node.iter, trace):
-            self.node_assign(node.target, val, trace)
+        for val in self.run(node.iter):
+            self.node_assign(node.target, val)
             self._interrupt = None
             for tnode in node.body:
-                self.run(tnode, trace)
+                self.run(tnode)
                 if self._interrupt is not None:
                     break
             if isinstance(self._interrupt, ast.Break):
                 break
         else:
             for tnode in node.orelse:
-                self.run(tnode, trace)
+                self.run(tnode)
         self._interrupt = None
 
-    def on_listcomp(self, node, trace):  # ('elt', 'generators')
+    def on_listcomp(self, node):  # ('elt', 'generators')
         """list comprehension"""
         out = []
         for tnode in node.generators:
             if tnode.__class__ == ast.comprehension:
-                for val in self.run(tnode.iter, trace):
-                    self.node_assign(tnode.target, val, trace)
+                for val in self.run(tnode.iter):
+                    self.node_assign(tnode.target, val)
                     add = True
                     for cond in tnode.ifs:
-                        add = add and self.run(cond, trace)
+                        add = add and self.run(cond)
                     if add:
-                        out.append(self.run(node.elt, trace))
+                        out.append(self.run(node.elt))
         return out
 
-    def on_excepthandler(self, node, trace):  # ('type', 'name', 'body')
+    def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """exception handler..."""
-        return self.run(node.type, trace), node.name, node.body
+        return self.run(node.type), node.name, node.body
 
-    def on_try(self, node, trace):  # ('body', 'handlers', 'orelse', 'finalbody')
+    def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
         no_errors = True
         for tnode in node.body:
-            self.run(tnode, trace, with_raise=False)
+            self.run(tnode, with_raise=False)
             no_errors = no_errors and not self.error
             if self.error:
                 e_type, e_value, e_tback = self.error[-1].exc_info
@@ -687,19 +671,19 @@ class Interpreter:
                     if htype is None or isinstance(e_type(), htype):
                         self.error = []
                         if hnd.name is not None:
-                            self.node_assign(hnd.name, e_value, trace)
+                            self.node_assign(hnd.name, e_value)
                         for tline in hnd.body:
-                            self.run(tline, trace)
+                            self.run(tline)
                         break
         if no_errors and hasattr(node, 'orelse'):
             for tnode in node.orelse:
-                self.run(tnode, trace)
+                self.run(tnode)
 
         if hasattr(node, 'finalbody'):
             for tnode in node.finalbody:
-                self.run(tnode, trace)
+                self.run(tnode)
 
-    def on_raise(self, node, trace):  # ('type', 'inst', 'tback')
+    def on_raise(self, node):  # ('type', 'inst', 'tback')
         """raise statement: note difference for python 2 and 3"""
         if version_info[0] == 3:
             excnode = node.exc
@@ -707,28 +691,26 @@ class Interpreter:
         else:
             excnode = node.type
             msgnode = node.inst
-        out = self.run(excnode, trace)
+        out = self.run(excnode)
         msg = ' '.join(out.args)
-        msg2 = self.run(msgnode, trace)
+        msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
             msg = "`%s: %s`" % (msg, msg2)
         self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
 
-    def on_call(self, node, trace):
+    def on_call(self, node):
         """function execution"""
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
-        func = self.run(node.func, trace)
-        if hasattr(func, '__no_trace__'):
-            trace = False
+        func = self.run(node.func)
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
             self.raise_exception(node, exc=TypeError, msg=msg)
 
-        args = [self.run(targ, trace) for targ in node.args]
+        args = [self.run(targ) for targ in node.args]
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
-            args = args + self.run(starargs, trace)
+            args = args + self.run(starargs)
 
         keywords = {}
         for key in node.keywords:
@@ -736,11 +718,11 @@ class Interpreter:
                 msg = "keyword error in function call `%s`" % func
                 self.raise_exception(node, msg=msg)
 
-            keywords[key.arg] = self.run(key.value, trace)
+            keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
         if kwargs is not None:
-            keywords.update(self.run(kwargs, trace))
+            keywords.update(self.run(kwargs))
 
         # noinspection PyBroadException
         try:
@@ -760,19 +742,18 @@ class Interpreter:
             elif hasattr(func, 'name'):
                 name = func.name
 
-            if trace and name:
-                self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
+            self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
 
             return ret
         except Exception as e:
             self.raise_exception(node, msg="Error running `%s`: %s" % (func, str(e)))
 
     # noinspection PyMethodMayBeStatic
-    def on_arg(self, node, trace):  # ('test', 'msg')
+    def on_arg(self, node):  # ('test', 'msg')
         """arg for function definitions"""
         return node.arg
 
-    def on_functiondef(self, node, trace):
+    def on_functiondef(self, node):
         """define procedures"""
         # ('name', 'args', 'body', 'decorator_list')
         if node.decorator_list:
@@ -781,8 +762,8 @@ class Interpreter:
 
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
-            defval = self.run(defnode, trace)
-            keyval = self.run(node.args.args[idef + offset], trace)
+            defval = self.run(defnode)
+            keyval = self.run(node.args.args[idef + offset])
             kwargs.append((keyval, defval))
 
         if version_info[0] == 3:
