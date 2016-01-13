@@ -705,6 +705,8 @@ class Interpreter:
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func)
 
+        self.tracer("`on_call({})`".format(func.__name__))
+
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
             self.raise_exception(node, exc=TypeError, msg=msg)
