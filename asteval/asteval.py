@@ -202,7 +202,7 @@ class Interpreter:
         self.error = []
         self.trace = []
         self.start = time()
-
+        self.tracer("Evaluating line {}: `{}`...".format(lineno, expr))
         try:
             # noinspection PyBroadException
             try:
@@ -288,6 +288,7 @@ class Interpreter:
         # recursive calls into this run method.
         # noinspection PyBroadException
         try:
+            self.tracer("Calling `{}({})`...".format(handler.__name__, node))
             ret = handler(node)
             if isinstance(ret, enumerate):
                 ret = list(ret)
@@ -749,9 +750,7 @@ class Interpreter:
             name = func.name
 
         self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
-
         return ret
-
 
     # noinspection PyMethodMayBeStatic
     def on_arg(self, node):  # ('test', 'msg')
