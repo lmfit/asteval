@@ -277,7 +277,10 @@ class ExceptionHolder(object):
         if exc_name in (None, 'None'):
             exc_name = 'UnknownError'
 
-        out = ["   %s" % self.expr]
+        out = []
+        if self.lineno is not None:
+            out.append("Error on line %d:" % self.lineno)
+        out.append("    %s" % self.expr)
         if col_offset > 0:
             out.append("    %s^^^" % (col_offset * ' '))
         out.append(str(self.msg))
