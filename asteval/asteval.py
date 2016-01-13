@@ -544,7 +544,7 @@ class Interpreter:
         val = self.run(node.values[0])
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
-            for n in node.values:
+            for n in node.values[1:]:
                 func, _ = op2func(node.op)
                 val = func(val, self.run(n))
                 if (is_and and not val) or (not is_and and val):
