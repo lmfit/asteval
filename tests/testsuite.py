@@ -8,6 +8,7 @@ import time
 import unittest
 from sys import version_info
 from tempfile import NamedTemporaryFile
+#import warnings
 
 import sys
 
@@ -29,7 +30,7 @@ try:
     import numpy as np
     HAS_NUMPY = True
 except ImportError:
-    print("Warning: numpy not available... functionality will be limited.")
+    #warnings.warn("Warning: numpy not available... functionality will be limited.")
     pass
 
 
@@ -821,7 +822,8 @@ def fcn(x, y):
         self.isvalue('x', 42)
         z = self.interp("""trace(True)\ndef foo(): return 42\nfoo()""")
         self.assertEqual(z, 42)
-        print(self.interp.trace)
+        #print(self.interp.trace)
+
     # def test_errors(self):
     #     z = self.interp(".xxx")
     #     self.check_error('SyntaxError', 'xxx')
@@ -837,9 +839,6 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
-        #intrep("xyz += 1")
-        #print(repr(err.getvalue()))
-        #self.assertEqual(err.getvalue(), 'xxx')
 
 
 if __name__ == '__main__':  # pragma: no cover

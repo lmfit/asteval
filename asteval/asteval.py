@@ -724,11 +724,17 @@ class Interpreter:
         if kwargs is not None:
             keywords.update(self.run(kwargs))
 
+        name = ''
+        if hasattr(func, '__name__'):
+            name = func.__name__
+        elif hasattr(func, 'name'):
+            name = func.name
+
         # noinspection PyBroadException
         try:
             ret = func(*args, **keywords)
         except Exception as e:
-            self.raise_exception(node, msg="Error running `%s`: %s" % (func, str(e)))
+            self.raise_exception(node, msg="Error running `%s`: %s" % (name, str(e)))
 
         arg_list = []
         if args:
@@ -737,12 +743,6 @@ class Interpreter:
             arg_list.append(', '.join(['{}={}'.format(k, quote(v)) for (k, v) in keywords.items()]))
 
         arg_str = ', '.join(arg_list)
-
-        name = ''
-        if hasattr(func, '__name__'):
-            name = func.__name__
-        elif hasattr(func, 'name'):
-            name = func.name
 
         self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
         return ret
