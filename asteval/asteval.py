@@ -151,14 +151,14 @@ class Interpreter:
             self.error = []
         if expr is None:
             expr = self.expr
-        if len(self.error) > 0 and not isinstance(node, ast.Module):
+        if self.error and not isinstance(node, ast.Module):
             msg = '%s' % msg
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
         self._interrupt = ast.Break()
         self.error.append(err)
         if self.error_msg is None:
             self.error_msg = "%s in expr='%s'" % (msg, self.expr)
-        elif len(msg) > 0:
+        elif msg:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
         if exc is None:
             # noinspection PyBroadException
@@ -193,10 +193,10 @@ class Interpreter:
         #    run(None) and expect a None in return.
         if time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
-        if len(self.error) > 0:
+        if self.error:
             return
         if node is None:
-            return None
+            return
         if isinstance(node, str):
             node = self.parse(node)
         if lineno is not None:
@@ -239,7 +239,7 @@ class Interpreter:
                 node = self.parse(expr)
             except:
                 errmsg = exc_info()[1]
-                if len(self.error) > 0:
+                if self.error:
                     errmsg = "\n".join(self.error[0].get_error())
                 if not show_errors:
                     # noinspection PyBroadException
@@ -256,7 +256,7 @@ class Interpreter:
                 return self.run(node, expr=expr, lineno=lineno)
             except:
                 errmsg = exc_info()[1]
-                if len(self.error) > 0:
+                if self.error:
                     errmsg = "\n".join(self.error[0].get_error())
                 if not show_errors:
                     # noinspection PyBroadException
@@ -503,7 +503,7 @@ class Interpreter:
         val = self.run(node.values[0])
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
-            for n in node.values:
+            for n in node.values[1:]:
                 val = op2func(node.op)(val, self.run(n))
                 if (is_and and not val) or (not is_and and val):
                     break
@@ -531,7 +531,7 @@ class Interpreter:
         if node.nl:
             end = '\n'
         out = [self.run(tnode) for tnode in node.values]
-        if out and len(self.error) == 0:
+        if out and not self.error:
             self._printer(*out, file=dest, end=end)
 
     def _printer(self, *out, **kws):
@@ -614,8 +614,8 @@ class Interpreter:
         no_errors = True
         for tnode in node.body:
             self.run(tnode, with_raise=False)
-            no_errors = no_errors and len(self.error) == 0
-            if len(self.error) > 0:
+            no_errors = no_errors and not self.error
+            if self.error:
                 e_type, e_value, e_tback = self.error[-1].exc_info
                 for hnd in node.handlers:
                     htype = None
@@ -749,12 +749,12 @@ class Procedure(object):
 
     def __repr__(self):
         sig = ""
-        if len(self.argnames) > 0:
+        if self.argnames:
             sig = "%s%s" % (sig, ', '.join(self.argnames))
         if self.vararg is not None:
             sig = "%s, *%s" % (sig, self.vararg)
-        if len(self.kwargs) > 0:
-            if len(sig) > 0:
+        if self.kwargs:
+            if sig:
                 sig = "%s, " % sig
             _kw = ["%s=%s" % (k, v) for k, v in self.kwargs]
             sig = "%s%s" % (sig, ', '.join(_kw))
@@ -771,17 +771,16 @@ class Procedure(object):
         args = list(args)
         n_args = len(args)
         n_names = len(self.argnames)
-        n_kws = len(kwargs)
 
         # may need to move kwargs to args if names align!
-        if (n_args < n_names) and n_kws > 0:
+        if (n_args < n_names) and kwargs:
             for name in self.argnames[n_args:]:
                 if name in kwargs:
                     args.append(kwargs.pop(name))
             n_args = len(args)
             n_names = len(self.argnames)
 
-        if len(self.argnames) > 0 and kwargs is not None:
+        if self.argnames and kwargs is not None:
             msg = "multiple values for keyword argument '%s' in Procedure %s"
             for targ in self.argnames:
                 if targ in kwargs:
@@ -810,7 +809,7 @@ class Procedure(object):
             if self.varkws is not None:
                 symlocals[self.varkws] = kwargs
 
-            elif len(kwargs) > 0:
+            elif kwargs:
                 msg = 'extra keyword arguments for Procedure %s (%s)'
                 msg = msg % (self.name, ','.join(list(kwargs.keys())))
                 self.raise_exc(None, msg=msg, exc=TypeError,
@@ -829,7 +828,7 @@ class Procedure(object):
         # evaluate script of function
         for node in self.body:
             self.__asteval__.run(node, expr='<>', lineno=self.lineno)
-            if len(self.__asteval__.error) > 0:
+            if self.__asteval__.error:
                 break
             if self.__asteval__.retval is not None:
                 retval = self.__asteval__.retval
