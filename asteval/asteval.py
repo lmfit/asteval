@@ -255,7 +255,8 @@ class Interpreter:
         self.set_recursion_limit()
         try:
             return ast.parse(text)
-        except SyntaxError:
+        except SyntaxError as e:
+            self.tracer(str(e))
             self.raise_exception(None, msg='Syntax Error', expr=text)
         except:
             self.raise_exception(None, msg='Runtime Error', expr=text)

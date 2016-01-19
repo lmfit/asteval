@@ -784,10 +784,9 @@ def fcn(x, y):
 
     def test_dos(self):
         self.interp("""for x in range(2<<21): pass""")
-        self.check_error('RuntimeError', 'time limit')
+        self.check_error('RuntimeError', 'Max cycles')
         self.interp("""while True:\n    pass""")
-        print(self.interp.cycles)
-        self.check_error('RuntimeError', 'time limit')
+        self.check_error('RuntimeError', 'Max cycles')
         # self.interp("""while 1: pass""")
         # self.check_error('RuntimeError', 'time limit')
         self.interp("""def foo(): return foo()\nfoo()""")
