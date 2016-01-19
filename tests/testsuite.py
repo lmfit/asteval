@@ -826,6 +826,11 @@ def fcn(x, y):
         self.assertEqual(z, 42)
         #print(self.interp.trace)
 
+    def test_errors(self):
+        self.interp("x=1\ny=1\nz=56%$#%@$#%@#$...")
+        errtype, errmsg = self.interp.error[0].get_error()
+        print(errtype, errmsg)
+
     # def test_errors(self):
     #     z = self.interp(".xxx")
     #     self.check_error('SyntaxError', 'xxx')

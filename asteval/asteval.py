@@ -101,7 +101,7 @@ class Interpreter:
         self.error_msg = None
         self.expr = None
         self.retval = None
-        self.lineno = 0
+        # self.lineno = 0
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
@@ -176,9 +176,12 @@ class Interpreter:
         if expr is None:
             expr = self.expr
         if self.error and not isinstance(node, ast.Module):
-            msg = '%s' % msg
-        if lineno is None and self.lineno is not None:
-            lineno = self.lineno
+            msg = str(msg)
+        if lineno is None and exc is not None:
+            try:
+                lineno = exc.lineno
+            except (AttributeError, ValueError):
+                pass
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
         self._interrupt = ast.Break()
         self.error.append(err)
@@ -197,9 +200,9 @@ class Interpreter:
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
-    def eval(self, expr, lineno=0, show_errors=True):
+    def eval(self, expr, show_errors=True):
         """evaluates a single statement"""
-        self.lineno = lineno
+        # self.lineno = lineno
         self.error = []
         self.trace = []
         self.start = time()
@@ -226,7 +229,7 @@ class Interpreter:
             # noinspection PyBroadException
             try:
                 self.set_recursion_limit()
-                return self.run(node, expr=expr, lineno=lineno)
+                return self.run(node, expr=expr) #, lineno=lineno)
             except:
                 errmsg = exc_info()[1]
                 if self.error:
@@ -257,13 +260,14 @@ class Interpreter:
             return ast.parse(text)
         except SyntaxError as e:
             self.tracer(str(e))
-            self.raise_exception(None, msg='Syntax Error', expr=text)
-        except:
-            self.raise_exception(None, msg='Runtime Error', expr=text)
+            self.raise_exception(None, exc=e, msg='Syntax Error', expr=text)
+        except Exception as e:
+            self.tracer(str(e))
+            self.raise_exception(None, exc=e, msg='Runtime Error', expr=text)
         finally:
             self.reset_recursion_limit()
 
-    def run(self, node, expr=None, lineno=None, with_raise=True):
+    def run(self, node, expr=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
@@ -278,8 +282,8 @@ class Interpreter:
             return
         if isinstance(node, str):
             node = self.parse(node)
-        if lineno is not None:
-            self.lineno = lineno
+        # if lineno is not None:
+        #     self.lineno = lineno
         if expr is not None:
             self.expr = expr
 
@@ -790,7 +794,8 @@ class Interpreter:
                 varkws = varkws.arg
 
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
-                                             lineno=self.lineno,
+                                             # lineno=self.lineno,
+                                             lineno=node.lineno,
                                              body=node.body,
                                              args=args, kwargs=kwargs,
                                              vararg=vararg, varkws=varkws)
