@@ -20,7 +20,7 @@ import sys
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
-                       ExceptionHolder, ReturnedNone, valid_symbol_name, quote, code_wrap)
+                       ExceptionHolder, ReturnedNone, valid_symbol_name, quote, code_wrap, MAX_CYCLES)
 
 HAS_NUMPY = False
 try:
@@ -88,6 +88,7 @@ class Interpreter:
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
+        self.cycles = 0
         self.max_time = max_time
         self.old_recursion_limit = sys.getrecursionlimit()
         if symtable is None:
@@ -202,11 +203,12 @@ class Interpreter:
         self.error = []
         self.trace = []
         self.start = time()
+        self.cycles = 0
         self.tracer("Evaluating line {}: `{}`...".format(lineno, expr))
         try:
             # noinspection PyBroadException
+            self.set_recursion_limit()
             try:
-                self.set_recursion_limit()
                 node = self.parse(expr)
             except:
                 errmsg = exc_info()[1]
@@ -250,8 +252,8 @@ class Interpreter:
         self.expr = text
 
         # noinspection PyBroadException
+        self.set_recursion_limit()
         try:
-            self.set_recursion_limit()
             return ast.parse(text)
         except SyntaxError:
             self.raise_exception(None, msg='Syntax Error', expr=text)
@@ -266,6 +268,9 @@ class Interpreter:
         #    run(None) and expect a None in return.
         if time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
+        self.cycles += 1
+        if self.cycles > MAX_CYCLES:
+            raise RuntimeError("Max cycles exceeded, max is {}.".format(MAX_CYCLES))
         if self.error:
             return
         if node is None:

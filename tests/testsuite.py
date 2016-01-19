@@ -785,8 +785,11 @@ def fcn(x, y):
     def test_dos(self):
         self.interp("""for x in range(2<<21): pass""")
         self.check_error('RuntimeError', 'time limit')
-        self.interp("""while True: pass""")
+        self.interp("""while True:\n    pass""")
+        print(self.interp.cycles)
         self.check_error('RuntimeError', 'time limit')
+        # self.interp("""while 1: pass""")
+        # self.check_error('RuntimeError', 'time limit')
         self.interp("""def foo(): return foo()\nfoo()""")
         self.check_error('RuntimeError')  # Stack overflow... is caught, but with MemoryError. A bit concerning...
 
