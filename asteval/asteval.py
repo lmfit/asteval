@@ -204,7 +204,7 @@ class Interpreter:
         self.trace = []
         self.start = time()
         self.cycles = 0
-        self.tracer("Evaluating line {}: `{}`...".format(lineno, expr))
+        #self.tracer("Evaluating line {}: `{}`...".format(lineno, expr))
         try:
             # noinspection PyBroadException
             self.set_recursion_limit()
