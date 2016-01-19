@@ -260,10 +260,10 @@ class Interpreter:
             return ast.parse(text)
         except SyntaxError as e:
             self.tracer(str(e))
-            self.raise_exception(None, exc=e, msg='Syntax Error', expr=text)
+            self.raise_exception(None, msg='Syntax Error', expr=text, lineno=e.lineno)
         except Exception as e:
             self.tracer(str(e))
-            self.raise_exception(None, exc=e, msg='Runtime Error', expr=text)
+            self.raise_exception(None, msg='Runtime Error', expr=text)
         finally:
             self.reset_recursion_limit()
 
