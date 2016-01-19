@@ -259,11 +259,11 @@ class Interpreter:
         try:
             return ast.parse(text)
         except SyntaxError as e:
-            self.tracer(str(e))
-            self.raise_exception(None, msg='Syntax Error', expr=text, lineno=e.lineno)
+            # self.tracer(str(e))
+            self.raise_exception(None, msg='Syntax Error: {}'.format(e), expr=text, lineno=e.lineno)
         except Exception as e:
-            self.tracer(str(e))
-            self.raise_exception(None, msg='Runtime Error', expr=text)
+            # self.tracer(str(e))
+            self.raise_exception(None, msg='Runtime Error: {}'.format(e), expr=text)
         finally:
             self.reset_recursion_limit()
 
