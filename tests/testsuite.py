@@ -823,7 +823,7 @@ def fcn(x, y):
         z = self.interp("x = 42\nx")
         self.assertEqual(z, 42)
         self.isvalue('x', 42)
-        z = self.interp("""trace(True)\ndef foo(): return 42\nfoo()""")
+        z = self.interp("""def foo(): return 42\nfoo()""")
         self.assertEqual(z, 42)
         #print(self.interp.trace)
 
