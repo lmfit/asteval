@@ -229,7 +229,7 @@ class Interpreter:
             # noinspection PyBroadException
             try:
                 self.set_recursion_limit()
-                return self.run(node, expr=expr) #, lineno=lineno)
+                return self.run(node, expr=expr)
             except:
                 errmsg = exc_info()[1]
                 if self.error:
@@ -906,7 +906,7 @@ class Procedure(object):
 
         # evaluate script of function
         for node in self.body:
-            self.__asteval__.run(node, expr='<>', lineno=self.lineno)
+            self.__asteval__.run(node, expr='<>')
             if self.__asteval__.error:
                 break
             if self.__asteval__.retval is not None:
