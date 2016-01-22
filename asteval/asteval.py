@@ -161,13 +161,14 @@ class Interpreter:
             raise ValueError("Invalid type/value of `{!r}` for assignment to `{}`.".format(value, name))
 
     def set_symbol_subscript(self, name, sym, xslice, value):
+        print(name, sym, xslice, value)
         ok = True
         if self.symbol_set_callback is not None:
             ok = self.symbol_set_callback(name, value)
         if ok:
             sym[xslice] = value
         else:
-            raise ValueError("Invalid type/value of `{!r}` for assignment to `{}`.".format(value, name))
+            raise ValueError("Invalid type/value of `{!r}` for assignment to subscript of `{}`.".format(value, name))
 
     def add_function(self, func):
         if callable(func) and hasattr(func, '__name__'):
