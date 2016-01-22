@@ -756,9 +756,9 @@ def fcn(x, y):
         self.assertTrue(dumped.startswith('Assign'))
 
         # print("X"*80)
-        astnode = self.interp.parse("x = {}; x['a'] = 3.14; y=[]; y[0]=1")
-        for b in astnode.body:
-            print(self.interp.dump(b))
+        astnode = self.interp.parse("x = {}; x['a'] = 3.14")
+        print(self.interp.dump(astnode.body[0]))
+        print(self.interp.dump(astnode.body[1]))
 
     # noinspection PyTypeChecker
     def test_safe_funcs(self):
@@ -872,7 +872,7 @@ class TestCase3(unittest.TestCase):
         self.assertEqual(out.getvalue(), 'out\n')
         intrep("""x = {}; x["a"] = 1; XXX = print""")
         # self.assertEqual(self.x, 1)
-        #print(intrep.trace)
+        print(intrep.trace)
 
 
 

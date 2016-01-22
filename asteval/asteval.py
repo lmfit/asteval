@@ -152,7 +152,6 @@ class Interpreter:
         return self.error
 
     def set_symbol(self, name, value):
-        print(name, value)
         ok = True
         if self.symbol_set_callback is not None:
             ok = self.symbol_set_callback(name, value)
@@ -455,7 +454,6 @@ class Interpreter:
             setattr(self.run(node.value), node.attr, val)
 
 # Assign(targets=[Subscript(value=Name(id='x', ctx=Load()), slice=Index(value=Str(s='a')), ctx=Store())], value=Num(n=3.14))
-# Assign(targets=[Subscript(value=Name(id='y', ctx=Load()), slice=Index(value=Num(n=0)), ctx=Store())], value=Num(n=1))
 
         elif node.__class__ == ast.Subscript:
             sym = self.run(node.value)
