@@ -328,7 +328,6 @@ class Interpreter:
         self.retval = self.run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
-        return self.retval
 
     def on_repr(self, node):
         """repr """
