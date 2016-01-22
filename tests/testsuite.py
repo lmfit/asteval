@@ -12,6 +12,8 @@ from tempfile import NamedTemporaryFile
 
 import sys
 
+from sqlalchemy.util import NoneType
+
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
 
@@ -846,6 +848,24 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
+
+
+class TestCase3(unittest.TestCase):
+
+    def sym_cb(self, name, value):
+        if name == "XXX" and not isinstance(value, (int, str, float, list, dict, NoneType)):
+            return False
+        return True
+
+    def test_sym_cb(self):
+        """ test using symbol table callback """
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err, symbol_set_callback=self.sym_cb)
+        #intrep("print('out')")
+        #self.assertEqual(out.getvalue(), 'out\n')
+        intrep("""XXX = lambda x: x""")
+
 
 
 if __name__ == '__main__':  # pragma: no cover

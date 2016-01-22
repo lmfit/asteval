@@ -10,3 +10,5 @@ dist
 *.egg-info
 
 MANIFEST
+
+tests/src/pip-delete-this-directory.txt
