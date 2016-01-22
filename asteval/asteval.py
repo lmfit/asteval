@@ -160,6 +160,15 @@ class Interpreter:
         else:
             raise ValueError("Invalid type/value of `{!r}` for assignment to `{}`.".format(value, name))
 
+    def set_symbol_subscript(self, name, sym, xslice, value):
+        ok = True
+        if self.symbol_set_callback is not None:
+            ok = self.symbol_set_callback(name, value)
+        if ok:
+            sym[xslice] = value
+        else:
+            raise ValueError("Invalid type/value of `{!r}` for assignment to `{}`.".format(value, name))
+
     def add_function(self, func):
         if callable(func) and hasattr(func, '__name__'):
             self.set_symbol(func.__name__, func)
@@ -411,7 +420,7 @@ class Interpreter:
                 val = self.symtable[node.id]
                 val_str = repr(val)
                 if not val_str.startswith('<'):
-                    self.tracer("Value of `{}` is `{}`.".format(node.id, code_wrap(val)))
+                    self.tracer("Value of `{}` is {}.".format(node.id, code_wrap(val)))
                 return val
             else:
                 msg = "name `%s` is not defined" % node.id
@@ -432,7 +441,7 @@ class Interpreter:
                 self.raise_exception(node, exc=NameError, msg=errmsg)
 
             self.set_symbol(node.id, val)
-            self.tracer("Assigned value of {} to {}.".format(code_wrap(val), node.id))
+            self.tracer("Assigned value of {} to {}.".format(quote(val), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
 
@@ -443,16 +452,22 @@ class Interpreter:
 
             setattr(self.run(node.value), node.attr, val)
 
+# Assign(targets=[Subscript(value=Name(id='x', ctx=Load()), slice=Index(value=Str(s='a')), ctx=Store())], value=Num(n=3.14))
+
         elif node.__class__ == ast.Subscript:
             sym = self.run(node.value)
+            name = node.id
             xslice = self.run(node.slice)
+
             if isinstance(node.slice, ast.Index):
-                sym[xslice] = val
+                self.set_symbol_subscript(name, sym, xslice, val)
+                #sym[xslice] = val
             elif isinstance(node.slice, ast.Slice):
                 # noinspection PyTypeChecker
                 sym[slice(xslice.start, xslice.stop)] = val
             elif isinstance(node.slice, ast.ExtSlice):
-                sym[xslice] = val
+                # sym[xslice] = val
+                self.set_symbol_subscript(name, sym, xslice, val)
 
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
