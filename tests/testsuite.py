@@ -756,9 +756,8 @@ def fcn(x, y):
         self.assertTrue(dumped.startswith('Assign'))
 
         # print("X"*80)
-        astnode = self.interp.parse("x = {}; x['a'] = 3.14")
-        print(self.interp.dump(astnode.body[0]))
-        print(self.interp.dump(astnode.body[1]))
+        # astnode = self.interp.parse("yes and (no or nottrue)")
+        # print(self.interp.dump(astnode.body[0]))
 
     # noinspection PyTypeChecker
     def test_safe_funcs(self):
@@ -852,15 +851,10 @@ class TestCase2(unittest.TestCase):
 
 
 class TestCase3(unittest.TestCase):
-    x = 0
 
     def sym_cb(self, name, value):
-        print(name, value)
-        self.x += 1
         if name == "XXX" and not isinstance(value, (int, str, float, list, dict, NoneType)):
-            print("False")
             return False
-        print("True")
         return True
 
     def test_sym_cb(self):
@@ -868,11 +862,9 @@ class TestCase3(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err, symbol_set_callback=self.sym_cb)
-        intrep("print('out')")
-        self.assertEqual(out.getvalue(), 'out\n')
-        intrep("""x = {}; x["a"] = 1; XXX = print""")
-        # self.assertEqual(self.x, 1)
-        print(intrep.trace)
+        #intrep("print('out')")
+        #self.assertEqual(out.getvalue(), 'out\n')
+        intrep("""XXX = lambda x: x""")
 
 
 
