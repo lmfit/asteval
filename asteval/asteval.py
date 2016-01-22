@@ -84,7 +84,7 @@ class Interpreter:
                        'while')
 
     def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None,
-                 max_time=MAX_EXEC_TIME, symbol_set_callback=None):
+                 max_time=MAX_EXEC_TIME):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
@@ -101,7 +101,6 @@ class Interpreter:
         self.error_msg = None
         self.expr = None
         self.retval = None
-        self.symbol_set_callback = symbol_set_callback
         # self.lineno = 0
         self.use_numpy = HAS_NUMPY and use_numpy
 
@@ -151,18 +150,12 @@ class Interpreter:
     def get_errors(self):
         return self.error
 
-    def set_symbol(self, name, value):
-        ok = True
-        if self.symbol_set_callback is not None:
-            ok = self.symbol_set_callback(name, value)
-        if ok:
-            self.symtable[name] = value
-        else:
-            raise ValueError("Invalid type/value of `{!r}` for assignment to `{}`.".format(value, name))
+    def add_symbol(self, name, value):
+        self.symtable[name] = value
 
     def add_function(self, func):
         if callable(func) and hasattr(func, '__name__'):
-            self.set_symbol(func.__name__, func)
+            self.symtable[func.__name__] = func
 
     @staticmethod
     def set_recursion_limit():
@@ -430,8 +423,7 @@ class Interpreter:
             if not valid_symbol_name(node.id):
                 errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
-
-            self.set_symbol(node.id, val)
+            self.symtable[node.id] = val
             self.tracer("Assigned value of {} to {}.".format(code_wrap(val), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
@@ -453,7 +445,6 @@ class Interpreter:
                 sym[slice(xslice.start, xslice.stop)] = val
             elif isinstance(node.slice, ast.ExtSlice):
                 sym[xslice] = val
-
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
                 for telem, tval in zip(node.elts, val):
