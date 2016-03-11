@@ -282,8 +282,8 @@ class ExceptionHolder(object):
         if self.lineno is not None:
             out.append("Error on line %d:" % self.lineno)
         out.append("%s" % self.expr)
-        if col_offset > 0:
-            out.append("%s^^^" % (col_offset * ' '))
+        # if col_offset > 0:
+        #     out.append("%s^^^" % (col_offset * ' '))
         out.append(str(self.msg))
         return exc_name, '\n'.join(out)
 

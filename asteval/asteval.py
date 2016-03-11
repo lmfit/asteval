@@ -169,6 +169,17 @@ class Interpreter:
         self.raise_exception(node, exc=NotImplementedError,
                              msg="`%s` not supported" % node.__class__.__name__)
 
+    @staticmethod
+    def getLinenoLabel(node):
+        if hasattr(node, 'lineno'):
+            return "Line {}: ".format(node.lineno)
+        return ''
+
+    @staticmethod
+    def getLineno(node):
+        if hasattr(node, 'lineno'):
+            return node.lineno
+
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
         if self.error is None:
@@ -177,11 +188,8 @@ class Interpreter:
             expr = self.expr
         if self.error and not isinstance(node, ast.Module):
             msg = str(msg)
-        if lineno is None and exc is not None:
-            try:
-                lineno = exc.lineno
-            except (AttributeError, ValueError):
-                pass
+        if lineno is None:
+            lineno = self.getLineno(node)
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
         self._interrupt = ast.Break()
         self.error.append(err)
@@ -207,7 +215,6 @@ class Interpreter:
         self.trace = []
         self.start = time()
         self.cycles = 0
-        #self.tracer("Evaluating line {}: `{}`...".format(lineno, expr))
         try:
             # noinspection PyBroadException
             self.set_recursion_limit()
@@ -316,7 +323,7 @@ class Interpreter:
     def on_expr(self, node):
         """expression"""
         val = self.run(node.value)
-        self.tracer("Expression returned `{}`.".format(quote(val)))
+        self.tracer("{}Expression returned `{}`.".format(self.getLinenoLabel(node), quote(val)))
         return val  # ('value',)
 
     def on_index(self, node):
@@ -403,7 +410,7 @@ class Interpreter:
                 val = self.symtable[node.id]
                 val_str = repr(val)
                 if not val_str.startswith('<'):
-                    self.tracer("Value of `{}` is `{}`.".format(node.id, code_wrap(val)))
+                    self.tracer("{}Value of `{}` is `{}`.".format(self.getLinenoLabel(node), node.id, code_wrap(val)))
                 return val
             else:
                 msg = "name `%s` is not defined" % node.id
@@ -423,7 +430,7 @@ class Interpreter:
                 errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
-            self.tracer("Assigned value of {} to {}.".format(code_wrap(val), node.id))
+            self.tracer("{}Assigned value of {} to `{}`.".format(self.getLinenoLabel(node), code_wrap(val), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
 
@@ -537,7 +544,6 @@ class Interpreter:
         func, name = op2func(node.op)
         val = self.run(node.operand)
         ret = func(val)
-        #    self.tracer("{}{} returned {}.".format(name, quote(val), ret))
         return ret
 
     def on_binop(self, node):  # ('left', 'op', 'right')
@@ -545,7 +551,8 @@ class Interpreter:
         func, name = op2func(node.op)
         left, right = self.run(node.left), self.run(node.right)
         ret = func(left, right)
-        self.tracer("Operation `{} {} {}` returned `{}`.".format(quote(left), name, quote(right), quote(ret)))
+        self.tracer("{}Operation `{} {} {}` returned `{}`."
+                    .format(self.getLinenoLabel(node), quote(left), name, quote(right), quote(ret)))
         return ret
 
     def on_boolop(self, node):  # ('op', 'values')
@@ -558,7 +565,7 @@ class Interpreter:
                 val = func(val, self.run(n))
                 if (is_and and not val) or (not is_and and val):
                     break
-        self.tracer("Boolean expression returned `{}`.".format(val))
+        self.tracer("{}Boolean expression returned `{}`.".format(self.getLinenoLabel(node), val))
         return val
 
     def on_compare(self, node):  # ('left', 'ops', 'comparators')
@@ -569,7 +576,8 @@ class Interpreter:
             rval = self.run(rnode)
             func, name = op2func(op)
             out = func(lval, rval)
-            self.tracer("Comparison `{} {} {}` returned `{}`.".format(quote(lval), name, quote(rval), quote(out)))
+            self.tracer("{}Comparison `{} {} {}` returned `{}`."
+                        .format(self.getLinenoLabel(node), quote(lval), name, quote(rval), quote(out)))
             lval = rval
             if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
                 break
@@ -753,7 +761,8 @@ class Interpreter:
 
         arg_str = ', '.join(arg_list)
 
-        self.tracer('Function `{}({})` returned `{}`.'.format(name, arg_str, code_wrap(ret)))
+        self.tracer('{}Function `{}({})` returned `{}`.'
+                    .format(self.getLinenoLabel(node), name, arg_str, code_wrap(ret)))
         return ret
 
     # noinspection PyMethodMayBeStatic
