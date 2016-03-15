@@ -208,18 +208,19 @@ class Interpreter:
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
-    def eval(self, expr, show_errors=True):
+    def eval(self, expr, show_errors=True, limit_recursion=False):
         """evaluates a single statement"""
         # self.lineno = lineno
         self.error = []
         self.trace = []
         self.start = time()
         self.cycles = 0
-        self.set_recursion_limit()
+        if limit_recursion:
+            self.set_recursion_limit()
         try:
             # noinspection PyBroadException
             try:
-                node = self.parse(expr)
+                node = self.parse(expr, limit_recursion=limit_recursion)
             except:
                 errmsg = exc_info()[1]
                 if self.error:
@@ -250,18 +251,20 @@ class Interpreter:
                 print(errmsg, file=self.err_writer)
                 return
         finally:
-            self.reset_recursion_limit()
+            if limit_recursion:
+                self.reset_recursion_limit()
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
     #  run:    ast -> result
     #  eval:   string statement -> result = run(parse(statement))
-    def parse(self, text):
+    def parse(self, text, limit_recursion=False):
         """parse statement/expression to Ast representation"""
         self.expr = text
 
         # noinspection PyBroadException
-        self.set_recursion_limit()
+        if limit_recursion:
+            self.set_recursion_limit()
         try:
             return ast.parse(text)
         except SyntaxError as e:
@@ -271,7 +274,8 @@ class Interpreter:
             # self.tracer(str(e))
             self.raise_exception(None, msg='Runtime Error: {}'.format(e), expr=text)
         finally:
-            self.reset_recursion_limit()
+            if limit_recursion:
+                self.reset_recursion_limit()
 
     def run(self, node, expr=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
