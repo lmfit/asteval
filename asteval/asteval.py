@@ -215,9 +215,9 @@ class Interpreter:
         self.trace = []
         self.start = time()
         self.cycles = 0
+        self.set_recursion_limit()
         try:
             # noinspection PyBroadException
-            self.set_recursion_limit()
             try:
                 node = self.parse(expr)
             except:
@@ -235,7 +235,6 @@ class Interpreter:
                 return
             # noinspection PyBroadException
             try:
-                self.set_recursion_limit()
                 return self.run(node, expr=expr)
             except:
                 errmsg = exc_info()[1]
