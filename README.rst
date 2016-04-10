@@ -7,8 +7,6 @@ ASTEVAL
 .. image:: https://zenodo.org/badge/4185/newville/asteval.svg
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
 
-https://zenodo.org/badge/4185/newville/asteval.svg
-)](https://zenodo.org/badge/latestdoi/4185/newville/asteval)
 
 Links
 -----
