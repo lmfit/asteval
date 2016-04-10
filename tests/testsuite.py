@@ -11,6 +11,7 @@ from tempfile import NamedTemporaryFile
 
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
+PY35Plus = PY3 and version_info[1] >= 5
 
 if PY3:
     # noinspection PyUnresolvedReferences
@@ -797,7 +798,7 @@ def fcn(x, y):
         self.interp("""while True: pass""")
         self.check_error('RuntimeError', 'time limit')
         self.interp("""def foo(): return foo()\nfoo()""")
-        self.check_error('RuntimeError')  # Stack overflow... is caught, but with MemoryError. A bit concerning...
+        self.check_error('RecursionError' if PY35Plus else 'RuntimeErrorr')
 
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
