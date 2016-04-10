@@ -36,8 +36,6 @@ builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
-MAX_EXEC_TIME = 2  # sec
-
 
 # noinspection PyIncorrectDocstring
 class Interpreter:
@@ -83,7 +81,7 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None, max_time=5):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
@@ -192,7 +190,7 @@ class Interpreter:
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
         if time() - self.start > self.max_time:
-            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
+            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(self.max_time))
         if self.error:
             return
         if node is None:
