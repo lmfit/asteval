@@ -1,31 +1,27 @@
 # Config file for automatic testing at travis-ci.org
+
 language: python
+sudo: false
 
-
-matrix:
-    include:
-        - python: 2.7
-          env:
-            - PYTHON=python
-            - DEPS=python-setuptools python-numpy python-nose
-        - python: 3.2
-          env:
-            - PYTHON=python3
-            - DEPS=python3-setuptools python3-numpy python3-nose
-        - python: 3.2
-          env:
-            - PYTHON=python3
-            - DEPS=python3-setuptools python3-nose
-
-virtualenv:
-    system_site_packages: true
+python:
+    - 2.7
+    - 3.3
+    - 3.4
+    - 3.5
 
 before_install:
-    - sudo apt-get update
-    - sudo apt-get install $DEPS
+    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+    - bash miniconda.sh -b -p $HOME/miniconda
+    - export PATH="$HOME/miniconda/bin:$PATH"
+    - hash -r
+    - conda config --set always_yes yes --set changeps1 no
+    - conda update -q conda
+    - conda info -a
 
 install:
-    - sudo $PYTHON setup.py install
+    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy nose
+    - source activate test_env
+    - python setup.py install
 
 script:
     - cd tests
