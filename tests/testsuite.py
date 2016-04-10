@@ -38,6 +38,7 @@ class TestCase(unittest.TestCase):
         self.interp = Interpreter()
         self.symtable = self.interp.symtable
         self.set_stdout()
+        self.set_stderr()
         if not HAS_NUMPY:
             self.interp("arange = range")
 
@@ -55,13 +56,34 @@ class TestCase(unittest.TestCase):
         os.unlink(fname)
         return out
 
+    def set_stderr(self):
+        self.stderr = NamedTemporaryFile('w', delete=False,
+                                         prefix='astevaltest_stderr')
+        self.interp.err_writer = self.stderr
+
+    def read_stderr(self):
+        self.stderr.close()
+        time.sleep(0.1)
+        fname = self.stderr.name
+        with open(self.stderr.name) as inp:
+            out = inp.read()
+        self.set_stderr()
+        os.unlink(fname)
+        return out
+
     def tearDown(self):
         if not self.stdout.closed:
             self.stdout.close()
+        if not self.stderr.closed:
+            self.stderr.close()
 
         # noinspection PyBroadException
         try:
             os.unlink(self.stdout.name)
+        except:
+            pass
+        try:
+            os.unlink(self.stderr.name)
         except:
             pass
 
