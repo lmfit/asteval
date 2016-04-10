@@ -1,14 +1,17 @@
+.. _lmfit: http://github.com/lmfit/lmfit-py
+.. _xraylarch: http://github.com/xraypy/xraylarch
+
 ========================
 Motivation for asteval
 ========================
 
 The asteval module provides a means to evaluate a large subset of the
 Python language from within a python program, without using
-:py:func:`eval`.  It is, in effect, a limited version of Python's built-in
-:py:func:`eval` that is more restricted, forbidding several actions, and
-using using a simple dictionary as a flat namespace.  A completely fair
-question is: Why on earth would anyone do this?  That is, why not simply
-use :py:func:`eval`, or just use Python itself.
+:py:func:`eval`.  It is, in effect, a restricted version of Python's
+built-in :py:func:`eval`, forbidding several actions, and using using a
+simple dictionary as a flat namespace.  A completely fair question is: Why
+on earth would anyone do this?  That is, why not simply use
+:py:func:`eval`, or just use Python itself?
 
 The short answer is that sometimes you want to allow evaluation of user
 input, or expose a simple calculator inside a larger application.  For
@@ -24,13 +27,14 @@ mathematically-oriented language that can be embedded safely into larger
 applications.
 
 In fact, the asteval module grew out the the need for a simple expression
-evaluator for scientific applications.  A first attempt using pyparsing,
-but was error-prone and difficult to maintain.  It turned out that using
-the Python ast module is so easy that adding more complex programming
+evaluator for scientific applications such as the `lmfit`_ and `xraylarch`_
+modules.  A first attempt using the pyparsing module worked but was
+error-prone and difficult to maintain.  It turned out that using the Python
+:py:mod:`ast` module is so easy that adding more complex programming
 constructs like conditionals, loops, exception handling, complex assignment
-and slicing, and even function definition and running was fairly simple
+and slicing, and even user-defined functions was fairly simple to
 implement.  Importantly, because parsing is done by the :py:mod:`ast`
-module, a whole class of implementation errors disappears -- valid python
+module, whole classes of implementation errors disappear.  Valid python
 expression will be parsed correctly and converted into an Abstract Syntax
 Tree.  Furthermore, the resulting AST is easy to walk through, greatly
 simplifying evaluation over any other approach.  What started as a desire
@@ -76,28 +80,27 @@ attributes are blacklisted for all objects, and cannot be accessed:
    __getattribute__, __subclasshook__, __new__, __init__, func_globals,
    func_code, func_closure, im_class, im_func, im_self, gi_code, gi_frame
 
-
 Of course, this approach of making a blacklist cannot be guaranteed to be
 complete, but it does eliminate classes of attacks to seg-fault the Python
-interpreter.  Of course, asteval will typically expose numpy ufuncs from the
-numpy module, and several of these can seg-fault Python without too much
-trouble.  If you're paranoid about safe user input that can never cause a
-segmentation fault, you'll want to disable the use of numpy.
+interpreter.  On the other hand, asteval will typically expose numpy ufuncs
+from the numpy module, and several of these can seg-fault Python without
+too much trouble.  If you're paranoid about safe user input that can never
+cause a segmentation fault, you'll want to disable the use of numpy.
 
 There are important categories of safety that asteval does not even attempt
 to address. The most important of these is resource hogging.  There is no
-timeout on any calculation, and so a reasonable looking calculation such as::
+guaranteed timeout on any calculation, and so a reasonable looking
+calculation such as::
 
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()
    >>> txt = """nmax = 1e8
-   ... a = sqrt(arange(nmax)
+   ... a = sqrt(arange(nmax))
    ... """
    >>> aeval.eval(txt)
 
-
 can take a noticeable amount of CPU time.  It it not hard to come up with
-short program that can run for hundreds of years, which probably exceeds
+short program that would run for hundreds of years, which probably exceeds
 your threshold for an acceptable run-time.
 
 In summary, there are many ways that asteval could be considered part of an

@@ -3,62 +3,36 @@ Downloading and Installation
 ====================================
 
 .. _numpy: http://docs.scipy.org/doc/numpy
+.. _github:  http://github.com/newville/asteval
+.. _PyPI:  http://pypi.python.org/pypi/asteval/
 
 Requirements
 ~~~~~~~~~~~~~~~
 
-The asteval package requires Python 2.6 and higher.  Most testing has been
-done with Python 2.7 and 3.2 through 3.4.  As this package is pure Python,
-and depends on only packages from the standard library and `numpy`_, no
-significant troubles are expected.
+The asteval package is supported for use with Python 2.7, 3.3, 3.4, and 3.5.
+The package may work for Python 2.6, and Python 3.2, but no testing is done
+for these out-dated versions.  Asteval will make use of the `numpy`_ module
+if available.
 
 
-Downloads
-~~~~~~~~~~~~~
+Download and Installation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The latest stable version of asteval is 0.9.5 and is available at PyPI:
-
-.. _asteval-0.9.5.tar.gz:          http://pypi.python.org/packages/source/a/asteval/asteval-0.9.5.tar.gz
-.. _asteval-0.9.5.win32-py2.7.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5.win32-py2.7.exe
-.. _asteval-0.9.5.win32-py3.4.exe: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5.win32-py3.4.exe
-.. _asteval-0.9.5-py2-none-any.whl: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5-py2-none-any.whl
-.. _asteval-0.9.5-py3-none-any.whl: http://pypi.python.org/packages/any/a/asteval/asteval-0.9.5-py3-none-any.whl
-.. _github repository:             http://github.com/newville/asteval
-.. _asteval at pypi:               http://pypi.python.org/pypi/asteval/
-.. _Python Setup Tools:            http://pypi.python.org/pypi/setuptools
-.. _pip:                           http://pypi.python.org/pypi/pip
-
-+----------------------+------------------+---------------------------------------+
-|  Download Option     | Python Versions  |  Location                             |
-+======================+==================+=======================================+
-|  Source Kit          |   2.6 and higher |  `asteval-0.9.5.tar.gz`_              |
-+----------------------+------------------+---------------------------------------+
-|  Win32 Installer     |   2.7            |  `asteval-0.9.5.win32-py2.7.exe`_     |
-+----------------------+------------------+---------------------------------------+
-|  Win32 Installer     |   3.4            |  `asteval-0.9.5.win32-py3.4.exe`_     |
-+----------------------+------------------+---------------------------------------+
-|  Wheel Installer     |   2.7            |  `asteval-0.9.5-py2-none-any.whl`_    |
-+----------------------+------------------+---------------------------------------+
-|  Wheel Installer     |   3.4            |  `asteval-0.9.5-py3-none-any.whl`_    |
-+----------------------+------------------+---------------------------------------+
-|  Development Version |   all            |  `github repository`_                 |
-+----------------------+------------------+---------------------------------------+
-
-If you have `pip`_, you can install asteval with::
+The latest stable version of asteval is 0.9.6 and is available at `PyPI`_ or as
+a conda package.  That is, you should be able to install asteval with::
 
    pip install asteval
 
-If you have `Python Setup Tools`_ installed, you can use::
+or::
 
-   easy_install -U asteval
-
+   conda install -c newville asteval
 
 Development Version
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-To get the latest development version, use::
+The latest development version can be found at the `github`_ repository, and cloned with::
 
-   git clone http://github.com/newville/asteval.git
+    git clone http://github.com/newville/asteval.git
 
 
 Installation
@@ -73,7 +47,7 @@ License
 
 The ASTEVAL code is distribution under the following license:
 
-  Copyright (c) 2014 Matthew Newville, The University of Chicago
+  Copyright (c) 2016 Matthew Newville, The University of Chicago
 
   Permission to use and redistribute the source code or binary forms of this
   software and its documentation, with or without modification is hereby

@@ -24,7 +24,7 @@ attempt to reproduce Python with its own ast module.  Some of the
 differences and absences include:
 
  1. Variable and function symbol names are held in a simple symbol
-    table -- a single dictionary -- giving a flat namespace.
+    table - a single dictionary - giving a flat namespace.
  2. creating classes is not allowed.
  3. importing modules is not allowed.
  4. function decorators, generators, yield, and lambda are not supported.
