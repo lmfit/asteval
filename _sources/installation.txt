@@ -18,7 +18,7 @@ if available.
 Download and Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The latest stable version of asteval is 0.9.6 and is available at `PyPI`_ or as
+The latest stable version of asteval is 0.9.7 and is available at `PyPI`_ or as
 a conda package.  That is, you should be able to install asteval with::
 
    pip install asteval
