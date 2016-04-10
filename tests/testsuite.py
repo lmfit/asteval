@@ -798,7 +798,7 @@ def fcn(x, y):
         self.interp("""while True: pass""")
         self.check_error('RuntimeError', 'time limit')
         self.interp("""def foo(): return foo()\nfoo()""")
-        self.check_error('RecursionError' if PY35Plus else 'RuntimeErrorr')
+        self.check_error('RecursionError' if PY35Plus else 'RuntimeError')
 
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
