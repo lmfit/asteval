@@ -11,7 +11,7 @@
 
    using python, ast module to parse a python expression.
 
-   version: 0.9.6
+   version: 0.9.7
    last update: 10-April-2016
    License:  BSD
    Author:  Matthew Newville <newville@cars.uchicago.edu>
@@ -22,5 +22,5 @@
 from .asteval import Interpreter
 from .astutils import NameFinder, valid_symbol_name
 
-__version__ = '0.9.6'
+__version__ = '0.9.7'
 __all__ = [Interpreter, NameFinder, valid_symbol_name]
