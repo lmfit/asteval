@@ -4,8 +4,11 @@ ASTEVAL
 .. image:: https://travis-ci.org/newville/asteval.png
    :target: https://travis-ci.org/newville/asteval
 
-.. image:: https://zenodo.org/badge/4185/newville/asteval.png  
-   :target: http://dx.doi.org/10.5281/zenodo.11108
+.. image:: https://zenodo.org/badge/4185/newville/asteval.svg
+   :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
+
+https://zenodo.org/badge/4185/newville/asteval.svg
+)](https://zenodo.org/badge/latestdoi/4185/newville/asteval)
 
 Links
 -----
