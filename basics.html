@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.5',
+        VERSION:     '0.9.6',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -105,10 +105,10 @@
 </div>
 <p>and now you have an embedded interpreter for a procedural, mathematical language
 that es very much like python, ready for use:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;print x&#39;</span><span class="p">)</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print x&#39;</span><span class="p">)</span>
 <span class="go">1.73205080757</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;&#39;&#39;for i in range(10):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;for i in range(10):</span>
 <span class="go">print i, sqrt(i), log(1+1)</span>
 <span class="go">&#39;&#39;&#39;)</span>
 <span class="go">0 0.0 0.0</span>
@@ -129,11 +129,11 @@ that es very much like python, ready for use:</p>
 function names and the underlying objects) is a simple dictionary
 held in the <code class="xref py py-attr docutils literal"><span class="pre">symtable</span></code> attribute of the interpreter.  Of
 course, this can be read or written to by the python program:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s">&#39;x&#39;</span><span class="p">]</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="go">1.73205080757</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&#39;print y/8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print y/8&#39;</span><span class="p">)</span>
 <span class="go">12.5</span>
 </pre></div>
 </div>
@@ -189,7 +189,7 @@ imported from <a class="reference external" href="http://docs.scipy.org/doc/nump
 <p>If-then-else blocks, for-loops (including the optional <em>else</em> block) and
 while loops (also including optional <em>else</em> block) are supported, and work
 exactly as they do in python.  Thus:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;</span>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="go">sum = 0</span>
 <span class="go">for i in range(10):</span>
 <span class="go">    sum += i*sqrt(*1.0)</span>
@@ -217,11 +217,11 @@ creating the interpreter.  By default, outputs are sent to
 <em>def</em> block, for example:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>
-<span class="gp">... </span><span class="s">return (a + b)/norm</span>
-<span class="gp">... </span><span class="s">&quot;&quot;&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>
+<span class="gp">... </span><span class="s2">return (a + b)/norm</span>
+<span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s">&quot;func(1, 3, norm=10.0)&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s2">&quot;func(1, 3, norm=10.0)&quot;</span><span class="p">)</span>
 <span class="go">0.4</span>
 </pre></div>
 </div>
@@ -242,7 +242,7 @@ REPL loop, you'd want to do something similar to</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-<span class="gp">&gt;&gt;&gt; </span>    <span class="n">inp_string</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s">&#39;dsl:&gt;&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span>    <span class="n">inp_string</span> <span class="o">=</span> <span class="nb">raw_input</span><span class="p">(</span><span class="s1">&#39;dsl:&gt;&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">result</span> <span class="o">=</span> <span class="n">aeval</span><span class="p">(</span><span class="n">inp_string</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aeval</span><span class="o">.</span><span class="n">error</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>        <span class="k">for</span> <span class="n">err</span> <span class="ow">in</span> <span class="n">aeval</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
@@ -280,7 +280,7 @@ REPL loop, you'd want to do something similar to</p>
     </div>
     <div class="footer" role="contentinfo">
         &copy; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.5.
     </div>
   </body>
 </html>
