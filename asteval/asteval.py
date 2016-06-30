@@ -102,6 +102,7 @@ class Interpreter:
         self.error_msg = None
         self.expr = None
         self.retval = None
+        self.last_error = None
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
@@ -680,8 +681,9 @@ class Interpreter:
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """exception handler"""
-        if node.name is not None:  # set the `as` variable if specified
-            self.node_assign(node.name, node.type)
+        if node.name is not None and self.last_error:  # set the `as` variable if specified
+            self.node_assign(node.name, self.last_error)
+            self.last_error = None
         for ebody in node.body:  # run the statements in the handler body
             self.run(ebody, with_raise=False)
 
@@ -692,16 +694,19 @@ class Interpreter:
             self.run(tnode, with_raise=False)
             no_errors = no_errors and not self.error
             if self.error:
+                self.last_error = self.error[-1].exc_info[1]
                 self.error = []
                 for hnd in node.handlers:
                     self.run(hnd)
                 break
 
         if no_errors and hasattr(node, 'orelse'):
+            self.tracer('{}Executing `else` block.'.format(self.getLinenoLabel(node.orelse)))
             for tnode in node.orelse:
                 self.run(tnode)
 
         if hasattr(node, 'finalbody'):
+            self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node.finalbody)))
             for tnode in node.finalbody:
                 self.run(tnode)
 
@@ -752,12 +757,6 @@ class Interpreter:
         elif hasattr(func, 'name'):
             name = func.name
 
-        # noinspection PyBroadException
-        try:
-            ret = func(*args, **keywords)
-        except Exception as e:
-            self.raise_exception(node, msg="Error calling `%s()`: `%s`" % (name, str(e)))
-
         arg_list = []
         if args:
             arg_list.append(', '.join([quote(arg) for arg in args]))
@@ -765,6 +764,16 @@ class Interpreter:
             arg_list.append(', '.join(['{}={}'.format(k, quote(v)) for (k, v) in keywords.items()]))
 
         arg_str = ', '.join(arg_list)
+
+        # noinspection PyBroadException
+        try:
+            ret = func(*args, **keywords)
+        except Exception as e:
+            self.tracer('{}Function `{}({})` raised on exception `{}`.'
+                        .format(self.getLinenoLabel(node), name, arg_str, code_wrap(str(e))))
+
+            self.raise_exception(node, msg="Error calling `%s()`: `%s`" % (name, str(e)))
+            return
 
         self.tracer('{}Function `{}({})` returned `{}`.'
                     .format(self.getLinenoLabel(node), name, arg_str, code_wrap(ret)))

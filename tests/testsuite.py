@@ -601,10 +601,12 @@ x = 5
 try:
     x = x/0
 except ZeroDivisionError as err:
-    print( 'Error Seen! {}'.format(err))
+    print('Error Seen! {}'.format(err))
     x = -999
 """)
         self.isvalue('x', -999)
+        x = self.read_stdout()
+        self.assertEquals(x, 'Error Seen! division by zero\n')
 
         self.interp("""
 x = -1
