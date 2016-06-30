@@ -275,12 +275,13 @@ class ExceptionHolder(object):
             exc_name = self.exc.__name__
         except AttributeError:
             exc_name = str(self.exc)
+
         if exc_name in (None, 'None'):
             exc_name = 'UnknownError'
 
         out = []
         if self.lineno is not None:
-            out.append("Error on line %d:" % self.lineno)
+            out.append("error on line %d:" % self.lineno)
             lines = self.expr.splitlines()
             try:
                 out.append('`{}`'.format(lines[self.lineno-1]))
