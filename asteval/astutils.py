@@ -265,12 +265,12 @@ class ExceptionHolder(object):
 
     def get_error(self):
         """retrieve error data"""
-        col_offset = -1
-        if self.node is not None:
-            try:
-                col_offset = self.node.col_offset
-            except AttributeError:
-                pass
+        # col_offset = -1
+        # if self.node is not None:
+        #     try:
+        #         col_offset = self.node.col_offset
+        #     except AttributeError:
+        #         pass
         try:
             exc_name = self.exc.__name__
         except AttributeError:
@@ -281,11 +281,16 @@ class ExceptionHolder(object):
         out = []
         if self.lineno is not None:
             out.append("Error on line %d:" % self.lineno)
-        out.append("%s" % self.expr)
+            lines = self.expr.splitlines()
+            try:
+                out.append('`{}`'.format(lines[self.lineno-1]))
+            except IndexError:
+                pass
+        # out.append("%s" % self.expr)
         # if col_offset > 0:
         #     out.append("%s^^^" % (col_offset * ' '))
         out.append(str(self.msg))
-        return exc_name, '\n'.join(out)
+        return exc_name, '\n\n'.join(out)
 
 
 class NameFinder(ast.NodeVisitor):
