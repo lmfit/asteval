@@ -754,7 +754,7 @@ class Interpreter:
         try:
             ret = func(*args, **keywords)
         except Exception as e:
-            self.raise_exception(node, msg="Error running `%s`: %s" % (name, str(e)))
+            self.raise_exception(node, msg="Error calling `%s()`: `%s`" % (name, str(e)))
 
         arg_list = []
         if args:
