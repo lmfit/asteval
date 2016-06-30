@@ -683,7 +683,6 @@ class Interpreter:
         """exception handler"""
         if node.name is not None and self.last_error:  # set the `as` variable if specified
             self.node_assign(node.name, self.last_error)
-            self.last_error = None
         for ebody in node.body:  # run the statements in the handler body
             self.run(ebody, with_raise=False)
 
@@ -698,6 +697,7 @@ class Interpreter:
                 self.error = []
                 for hnd in node.handlers:
                     self.run(hnd)
+                self.last_error = None
                 break
 
         if no_errors and hasattr(node, 'orelse'):
