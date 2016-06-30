@@ -74,7 +74,7 @@ class TestCase(unittest.TestCase):
         if HAS_NUMPY and isinstance(val, np.ndarray):
             return self.assertTrue(np.all(self.interp.symtable[sym] == val))
         else:
-            return self.assertTrue(self.interp.symtable[sym] == val)
+            return self.assertEquals(self.interp.symtable[sym], val)
 
     def isnear(self, expr, val, places=7):
         """assert that a symboltable symbol is near a particular value"""

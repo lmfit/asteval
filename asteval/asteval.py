@@ -85,7 +85,7 @@ class Interpreter:
 
     def __init__(self, symtable=None, writer=None, use_numpy=False, err_writer=None,
                  max_time=MAX_EXEC_TIME):
-        self.debugging = True
+        self.debugging = False  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
@@ -102,7 +102,6 @@ class Interpreter:
         self.error_msg = None
         self.expr = None
         self.retval = None
-        # self.lineno = 0
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
@@ -210,7 +209,7 @@ class Interpreter:
         return self.eval(expr, **kw)
 
     def eval(self, expr, show_errors=True, limit_recursion=False):
-        """evaluates a single statement"""
+        """evaluates a single or block of statements or whole file"""
         # self.lineno = lineno
         self.error = []
         self.trace = []
@@ -462,6 +461,12 @@ class Interpreter:
             else:
                 raise ValueError('too many values to unpack')
 
+        elif isinstance(node, str):
+            self.symtable[node] = val
+
+        else:
+            raise ValueError("Invalid node assignment type!")
+
     def on_attribute(self, node):  # ('value', 'attr', 'ctx')
         """extract attribute"""
         ctx = node.ctx.__class__
@@ -597,7 +602,7 @@ class Interpreter:
         if node.nl:
             end = '\n'
         out = [self.run(tnode) for tnode in node.values]
-        if out and not self.error:
+        if out:  # and not self.error:
             self.print_(*out, file=dest, end=end)
 
     def print_(self, *out, **kws):
@@ -675,9 +680,9 @@ class Interpreter:
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """exception handler"""
-        if node.name is not None:
+        if node.name is not None:  # set the `as` variable if specified
             self.node_assign(node.name, node.type)
-        for ebody in node.body:
+        for ebody in node.body:  # run the statements in the handler body
             self.run(ebody, with_raise=False)
 
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
@@ -687,7 +692,7 @@ class Interpreter:
             self.run(tnode, with_raise=False)
             no_errors = no_errors and not self.error
             if self.error:
-                self.error = False
+                self.error = []
                 for hnd in node.handlers:
                     self.run(hnd)
                 break
