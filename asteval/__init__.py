@@ -23,4 +23,4 @@ from .asteval import Interpreter
 from .astutils import NameFinder, valid_symbol_name
 
 __version__ = '0.9.7'
-__all__ = [Interpreter, NameFinder, valid_symbol_name]
+__all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name']
