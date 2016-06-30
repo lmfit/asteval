@@ -195,7 +195,8 @@ class Interpreter:
         self._interrupt = ast.Break()
         self.error.append(err)
         if self.error_msg is None:
-            self.error_msg = "%s in `%s`" % (msg, self.expr)
+            #self.error_msg = "%s in `%s`" % (msg, self.expr)
+            self.error_msg = msg
         elif msg:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
         if exc is None:
@@ -455,6 +456,7 @@ class Interpreter:
                 sym[slice(xslice.start, xslice.stop)] = val
             elif isinstance(node.slice, ast.ExtSlice):
                 sym[xslice] = val
+
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
                 for telem, tval in zip(node.elts, val):
@@ -770,7 +772,7 @@ class Interpreter:
             ret = func(*args, **keywords)
         except Exception as e:
             self.tracer('{}Function `{}({})` raised on exception `{}`.'
-                        .format(self.getLinenoLabel(node), name, arg_str, code_wrap(str(e))))
+                        .format(self.getLinenoLabel(node), name, arg_str, str(e)))
 
             self.raise_exception(node, msg="Error calling `%s()`: `%s`" % (name, str(e)))
             return
