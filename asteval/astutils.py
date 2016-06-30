@@ -57,12 +57,13 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'tuple', 'type', 'zip')
 
 # inherit these from python's math
-FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
-             'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'e', 'exp',
-             'fabs', 'factorial', 'floor', 'fmod', 'frexp', 'fsum',
-             'hypot', 'isinf', 'isnan', 'ldexp', 'log', 'log10', 'log1p',
-             'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
-             'tanh', 'trunc')
+# FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
+#              'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'e', 'exp',
+#              'fabs', 'factorial', 'floor', 'fmod', 'frexp', 'fsum',
+#              'hypot', 'isinf', 'isnan', 'ldexp', 'log', 'log10', 'log1p',
+#              'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
+#              'tanh', 'trunc')
+FROM_MATH = ('ceil', 'floor', 'sqrt', 'trunc')
 
 FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'angle', 'any', 'append', 'arange', 'arccos', 'arccosh',

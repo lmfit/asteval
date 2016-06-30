@@ -83,8 +83,9 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None,
+    def __init__(self, symtable=None, writer=None, use_numpy=False, err_writer=None,
                  max_time=MAX_EXEC_TIME):
+        self.debugging = True
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
@@ -281,7 +282,7 @@ class Interpreter:
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        if time() - self.start > self.max_time:
+        if not self.debugging and time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
         self.cycles += 1
         if self.cycles > MAX_CYCLES:
@@ -673,8 +674,11 @@ class Interpreter:
         return out
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
-        """exception handler..."""
-        return self.run(node.type), node.name, node.body
+        """exception handler"""
+        if node.name is not None:
+            self.node_assign(node.name, node.type)
+        for ebody in node.body:
+            self.run(ebody, with_raise=False)
 
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
@@ -683,18 +687,11 @@ class Interpreter:
             self.run(tnode, with_raise=False)
             no_errors = no_errors and not self.error
             if self.error:
-                e_type, e_value, e_tback = self.error[-1].exc_info
+                self.error = False
                 for hnd in node.handlers:
-                    htype = None
-                    if hnd.type is not None:
-                        htype = builtins.get(hnd.type.id, None)
-                    if htype is None or isinstance(e_type(), htype):
-                        self.error = []
-                        if hnd.name is not None:
-                            self.node_assign(hnd.name, e_value)
-                        for tline in hnd.body:
-                            self.run(tline)
-                        break
+                    self.run(hnd)
+                break
+
         if no_errors and hasattr(node, 'orelse'):
             for tnode in node.orelse:
                 self.run(tnode)
