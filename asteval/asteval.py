@@ -415,7 +415,9 @@ class Interpreter:
                 val = self.symtable[node.id]
                 val_str = repr(val)
                 if not val_str.startswith('<'):
-                    self.tracer("{}Value of `{}` is `{}`.".format(self.getLinenoLabel(node), node.id, code_wrap(val)))
+                    if isinstance(val, str):
+                        val = val.replace('`', '')
+                    self.tracer("{}Value of `{}` is {}.".format(self.getLinenoLabel(node), node.id, code_wrap(val)))
                 return val
             else:
                 msg = "name `%s` is not defined" % node.id
@@ -691,6 +693,7 @@ class Interpreter:
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
         no_errors = True
+        self.tracer('{}Executing `try` block.'.format(self.getLinenoLabel(node)))
         for tnode in node.body:
             self.run(tnode, with_raise=False)
             no_errors = no_errors and not self.error
