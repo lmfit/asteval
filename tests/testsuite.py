@@ -855,18 +855,15 @@ class TestCase2(unittest.TestCase):
         self.assertEqual(out.getvalue(), 'out\n')
 
 @ddt.ddt
-class TestCase2(unittest.TestCase):
+class TRecurse(unittest.TestCase):
     def setUp(self):
-        self._defaul_recusion_limit = sys.getrecursionlimit()
+        self._original_recusion_limit = sys.getrecursionlimit()
 
     def _check_recursion_mock(self, m, assert_recursion_limit):
         rlimit = len(inspect.stack()) + assert_recursion_limit
         self.assertEqual(m.mock_calls, [
-                mock.call(rlimit + 2),
                 mock.call(rlimit + 3),
-                mock.call(self._defaul_recusion_limit),
-                mock.call(rlimit + 2),
-                mock.call(self._defaul_recusion_limit),
+                mock.call(self._original_recusion_limit),
                 ])
 
     def test_recursion_limit__default_not_invoking(self):
@@ -875,6 +872,7 @@ class TestCase2(unittest.TestCase):
         with mock.patch('sys.setrecursionlimit', m):
             interp(textwrap.dedent("pass"))
             m.assert_not_called()
+        self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
     @ddt.data(None, 0, False, '')
     def test_recursion_limit__non_true_not_invoking(self, rlimit):
@@ -883,6 +881,7 @@ class TestCase2(unittest.TestCase):
         with mock.patch('sys.setrecursionlimit', m):
             interp(textwrap.dedent("pass"))
             m.assert_not_called()
+        self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
     @ddt.data(object(), True, 'foo')
     def test_recursion_limit__non_integer_invoking_default_limit(self, rlimit):
@@ -891,6 +890,7 @@ class TestCase2(unittest.TestCase):
         with mock.patch('sys.setrecursionlimit', m):
             interp(textwrap.dedent("pass"))
             self._check_recursion_mock(m, astutils.RECURSION_LIMIT)
+        self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
     @ddt.data(3, 3.14, '3')
     def test_recursion_limit__number(self, rlimit):
@@ -899,6 +899,7 @@ class TestCase2(unittest.TestCase):
         with mock.patch('sys.setrecursionlimit', m):
             interp(textwrap.dedent("pass"))
             self._check_recursion_mock(m, 3)
+        self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
     @ddt.data(-3, -3.14, '-3')
     def test_recursion_limit__negative(self, rlimit):
@@ -907,6 +908,7 @@ class TestCase2(unittest.TestCase):
         with mock.patch('sys.setrecursionlimit', m):
             interp(textwrap.dedent("pass"))
             m.assert_not_called()
+        self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
 
 

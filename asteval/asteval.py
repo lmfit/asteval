@@ -13,6 +13,7 @@ later, using the current values in the
 from __future__ import division, print_function
 
 import ast
+import contextlib
 import inspect
 import math
 from sys import exc_info, stdout, stderr, version_info
@@ -98,7 +99,6 @@ class Interpreter:
         self.err_writer = err_writer or stderr
         self.start = 0
         self.max_time = max_time
-        self.old_recursion_limit = sys.getrecursionlimit()
         if recursion_limit is True:
             self.recursion_limit = RECURSION_LIMIT
         else:
@@ -152,13 +152,17 @@ class Interpreter:
             if callable(val) or 'numpy.lib.index_tricks' in repr(val):
                 self.no_deepcopy.append(key)
 
-    def set_recursion_limit(self):
+    @contextlib.contextmanager
+    def limited_recursion(self):
         if self.recursion_limit:
+            old_recursion_limit = sys.getrecursionlimit()
             sys.setrecursionlimit(len(inspect.stack()) + self.recursion_limit)
-
-    def reset_recursion_limit(self):
-        if self.recursion_limit:
-            sys.setrecursionlimit(self.old_recursion_limit)
+            try:
+                yield
+            finally:
+                sys.setrecursionlimit(old_recursion_limit)
+        else:
+            yield
 
     def unimplemented(self, node):
         """unimplemented nodes"""
@@ -193,22 +197,29 @@ class Interpreter:
     #  run:    ast -> result
     #  eval:   string statement -> result = run(parse(statement))
     def parse(self, text):
-        """parse statement/expression to Ast representation"""
+        """Parse statement/expression to Ast representation."""
+        with self.limited_recursion():
+            return self._parse(text)
+
+    def _parse(self, text):
+        """Parse statement/expression to Ast representation WITHOUT recursion-limit."""
         self.expr = text
 
         # noinspection PyBroadException
         try:
-            self.set_recursion_limit()
             return ast.parse(text)
         except SyntaxError:
             self.raise_exception(None, msg='Syntax Error', expr=text)
         except:
             self.raise_exception(None, msg='Runtime Error', expr=text)
-        finally:
-            self.reset_recursion_limit()
 
     def run(self, node, expr=None, lineno=None, with_raise=True):
-        """executes parsed Ast representation for an expression"""
+        """Executes parsed Ast representation for an expression."""
+        with self.limited_recursion():
+            return self._run(node, expr, lineno, with_raise)
+
+    def _run(self, node, expr=None, lineno=None, with_raise=True):
+        """Executes parsed Ast representation for an expression WITHOUT recursion-limit."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
         if time() - self.start > self.max_time:
@@ -218,7 +229,7 @@ class Interpreter:
         if node is None:
             return
         if isinstance(node, str):
-            node = self.parse(node)
+            node = self._parse(node)
         if lineno is not None:
             self.lineno = lineno
         if expr is not None:
@@ -247,48 +258,46 @@ class Interpreter:
         return self.eval(expr, **kw)
 
     def eval(self, expr, lineno=0, show_errors=True):
-        """evaluates a single statement"""
+        """Evaluates a single statement."""
+        with self.limited_recursion():
+            return self._eval(expr, lineno, show_errors)
+
+    def _eval(self, expr, lineno=0, show_errors=True):
+        """Evaluates a single statement WITHOUT recursion-limit."""
         self.lineno = lineno
         self.error = []
         self.start = time()
 
         try:
-            # noinspection PyBroadException
-            try:
-                self.set_recursion_limit()
-                node = self.parse(expr)
-            except:
-                errmsg = exc_info()[1]
-                if self.error:
-                    errmsg = "\n".join(self.error[0].get_error())
-                if not show_errors:
-                    # noinspection PyBroadException
-                    try:
-                        exc = self.error[0].exc
-                    except:
-                        exc = RuntimeError
-                    raise exc(errmsg)
-                print(errmsg, file=self.err_writer)
-                return
-            # noinspection PyBroadException
-            try:
-                self.set_recursion_limit()
-                return self.run(node, expr=expr, lineno=lineno)
-            except:
-                errmsg = exc_info()[1]
-                if self.error:
-                    errmsg = "\n".join(self.error[0].get_error())
-                if not show_errors:
-                    # noinspection PyBroadException
-                    try:
-                        exc = self.error[0].exc
-                    except:
-                        exc = RuntimeError
-                    raise exc(errmsg)
-                print(errmsg, file=self.err_writer)
-                return
-        finally:
-            self.reset_recursion_limit()
+            node = self._parse(expr)
+        except:
+            errmsg = exc_info()[1]
+            if self.error:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                # noinspection PyBroadException
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
+            print(errmsg, file=self.err_writer)
+            return
+        # noinspection PyBroadException
+        try:
+            return self._run(node, expr=expr, lineno=lineno)
+        except:
+            errmsg = exc_info()[1]
+            if self.error:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                # noinspection PyBroadException
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
+            print(errmsg, file=self.err_writer)
 
     @staticmethod
     def dump(node, **kw):
@@ -298,28 +307,28 @@ class Interpreter:
     # handlers for ast components
     def on_expr(self, node):
         """expression"""
-        return self.run(node.value)  # ('value',)
+        return self._run(node.value)  # ('value',)
 
     def on_index(self, node):
         """index"""
-        return self.run(node.value)  # ('value',)
+        return self._run(node.value)  # ('value',)
 
     def on_return(self, node):  # ('value',)
         """return statement: look for None, return special sentinal"""
-        self.retval = self.run(node.value)
+        self.retval = self._run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
         return
 
     def on_repr(self, node):
         """repr """
-        return repr(self.run(node.value))  # ('value',)
+        return repr(self._run(node.value))  # ('value',)
 
     def on_module(self, node):  # ():('body',)
         """module def"""
         out = None
         for tnode in node.body:
-            out = self.run(tnode)
+            out = self._run(tnode)
         return out
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
@@ -348,13 +357,13 @@ class Interpreter:
 
     def on_assert(self, node):  # ('test', 'msg')
         """assert statement"""
-        if not self.run(node.test):
+        if not self._run(node.test):
             self.raise_exception(node, exc=AssertionError, msg=node.msg)
         return True
 
     def on_list(self, node):  # ('elt', 'ctx')
         """list"""
-        return [self.run(e) for e in node.elts]
+        return [self._run(e) for e in node.elts]
 
     def on_tuple(self, node):  # ('elts', 'ctx')
         """tuple"""
@@ -362,7 +371,7 @@ class Interpreter:
 
     def on_dict(self, node):  # ('keys', 'values')
         """dictionary"""
-        return dict([(self.run(k), self.run(v)) for k, v in
+        return dict([(self._run(k), self._run(v)) for k, v in
                      zip(node.keys, node.values)])
 
     # noinspection PyMethodMayBeStatic
@@ -409,11 +418,11 @@ class Interpreter:
                 msg = "cannot assign to attribute %s" % node.attr
                 self.raise_exception(node, exc=AttributeError, msg=msg)
 
-            setattr(self.run(node.value), node.attr, val)
+            setattr(self._run(node.value), node.attr, val)
 
         elif node.__class__ == ast.Subscript:
-            sym = self.run(node.value)
-            xslice = self.run(node.slice)
+            sym = self._run(node.value)
+            xslice = self._run(node.slice)
             if isinstance(node.slice, ast.Index):
                 sym[xslice] = val
             elif isinstance(node.slice, ast.Slice):
@@ -435,7 +444,7 @@ class Interpreter:
             msg = "attribute for storage: shouldn't be here!"
             self.raise_exception(node, exc=RuntimeError, msg=msg)
 
-        sym = self.run(node.value)
+        sym = self._run(node.value)
         if ctx == ast.Del:
             return delattr(sym, node.attr)
 
@@ -449,13 +458,13 @@ class Interpreter:
                 pass
 
         # AttributeError or accessed unsafe attribute
-        obj = self.run(node.value)
+        obj = self._run(node.value)
         msg = fmt % (node.attr, obj)
         self.raise_exception(node, exc=AttributeError, msg=msg)
 
     def on_assign(self, node):  # ('targets', 'value')
         """simple assignment"""
-        val = self.run(node.value)
+        val = self._run(node.value)
         for tnode in node.targets:
             self.node_assign(tnode, val)
         return
@@ -469,18 +478,18 @@ class Interpreter:
 
     def on_slice(self, node):  # ():('lower', 'upper', 'step')
         """simple slice"""
-        return slice(self.run(node.lower),
-                     self.run(node.upper),
-                     self.run(node.step))
+        return slice(self._run(node.lower),
+                     self._run(node.upper),
+                     self._run(node.step))
 
     def on_extslice(self, node):  # ():('dims',)
         """extended slice"""
-        return tuple([self.run(tnode) for tnode in node.dims])
+        return tuple([self._run(tnode) for tnode in node.dims])
 
     def on_subscript(self, node):  # ('value', 'slice', 'ctx')
         """subscript handling -- one of the tricky parts"""
-        val = self.run(node.value)
-        nslice = self.run(node.slice)
+        val = self._run(node.value)
+        nslice = self._run(node.slice)
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
             if isinstance(node.slice, (ast.Index, ast.Slice, ast.Ellipsis)):
@@ -511,30 +520,30 @@ class Interpreter:
 
     def on_unaryop(self, node):  # ('op', 'operand')
         """unary operator"""
-        return op2func(node.op)(self.run(node.operand))
+        return op2func(node.op)(self._run(node.operand))
 
     def on_binop(self, node):  # ('left', 'op', 'right')
         """binary operator"""
-        return op2func(node.op)(self.run(node.left),
-                                self.run(node.right))
+        return op2func(node.op)(self._run(node.left),
+                                self._run(node.right))
 
     def on_boolop(self, node):  # ('op', 'values')
         """boolean operator"""
-        val = self.run(node.values[0])
+        val = self._run(node.values[0])
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
             for n in node.values[1:]:
-                val = op2func(node.op)(val, self.run(n))
+                val = op2func(node.op)(val, self._run(n))
                 if (is_and and not val) or (not is_and and val):
                     break
         return val
 
     def on_compare(self, node):  # ('left', 'ops', 'comparators')
         """comparison operators"""
-        lval = self.run(node.left)
+        lval = self._run(node.left)
         out = True
         for op, rnode in zip(node.ops, node.comparators):
-            rval = self.run(rnode)
+            rval = self._run(rnode)
             out = op2func(op)(lval, rval)
             lval = rval
             if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
@@ -546,11 +555,11 @@ class Interpreter:
     def on_print(self, node):  # ('dest', 'values', 'nl')
         """ note: implements Python2 style print statement, not
         print() function.  May need improvement...."""
-        dest = self.run(node.dest) or self.writer
+        dest = self._run(node.dest) or self.writer
         end = ''
         if node.nl:
             end = '\n'
-        out = [self.run(tnode) for tnode in node.values]
+        out = [self._run(tnode) for tnode in node.values]
         if out and not self.error:
             self._printer(*out, file=dest, end=end)
 
@@ -568,47 +577,47 @@ class Interpreter:
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
         block = node.body
-        if not self.run(node.test):
+        if not self._run(node.test):
             block = node.orelse
         for tnode in block:
-            self.run(tnode)
+            self._run(tnode)
 
     def on_ifexp(self, node):  # ('test', 'body', 'orelse')
         """if expressions"""
         expr = node.orelse
-        if self.run(node.test):
+        if self._run(node.test):
             expr = node.body
-        return self.run(expr)
+        return self._run(expr)
 
     def on_while(self, node):  # ('test', 'body', 'orelse')
         """while blocks"""
-        while self.run(node.test):
+        while self._run(node.test):
             self._interrupt = None
             for tnode in node.body:
-                self.run(tnode)
+                self._run(tnode)
                 if self._interrupt is not None:
                     break
             if isinstance(self._interrupt, ast.Break):
                 break
         else:
             for tnode in node.orelse:
-                self.run(tnode)
+                self._run(tnode)
         self._interrupt = None
 
     def on_for(self, node):  # ('target', 'iter', 'body', 'orelse')
         """for blocks"""
-        for val in self.run(node.iter):
+        for val in self._run(node.iter):
             self.node_assign(node.target, val)
             self._interrupt = None
             for tnode in node.body:
-                self.run(tnode)
+                self._run(tnode)
                 if self._interrupt is not None:
                     break
             if isinstance(self._interrupt, ast.Break):
                 break
         else:
             for tnode in node.orelse:
-                self.run(tnode)
+                self._run(tnode)
         self._interrupt = None
 
     def on_listcomp(self, node):  # ('elt', 'generators')
@@ -616,24 +625,24 @@ class Interpreter:
         out = []
         for tnode in node.generators:
             if tnode.__class__ == ast.comprehension:
-                for val in self.run(tnode.iter):
+                for val in self._run(tnode.iter):
                     self.node_assign(tnode.target, val)
                     add = True
                     for cond in tnode.ifs:
-                        add = add and self.run(cond)
+                        add = add and self._run(cond)
                     if add:
-                        out.append(self.run(node.elt))
+                        out.append(self._run(node.elt))
         return out
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """exception handler..."""
-        return self.run(node.type), node.name, node.body
+        return self._run(node.type), node.name, node.body
 
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
         no_errors = True
         for tnode in node.body:
-            self.run(tnode, with_raise=False)
+            self._run(tnode, with_raise=False)
             no_errors = no_errors and not self.error
             if self.error:
                 e_type, e_value, e_tback = self.error[-1].exc_info
@@ -646,15 +655,15 @@ class Interpreter:
                         if hnd.name is not None:
                             self.node_assign(hnd.name, e_value)
                         for tline in hnd.body:
-                            self.run(tline)
+                            self._run(tline)
                         break
         if no_errors and hasattr(node, 'orelse'):
             for tnode in node.orelse:
-                self.run(tnode)
+                self._run(tnode)
 
         if hasattr(node, 'finalbody'):
             for tnode in node.finalbody:
-                self.run(tnode)
+                self._run(tnode)
 
     def on_raise(self, node):  # ('type', 'inst', 'tback')
         """raise statement: note difference for python 2 and 3"""
@@ -664,9 +673,9 @@ class Interpreter:
         else:
             excnode = node.type
             msgnode = node.inst
-        out = self.run(excnode)
+        out = self._run(excnode)
         msg = ' '.join(out.args)
-        msg2 = self.run(msgnode)
+        msg2 = self._run(msgnode)
         if msg2 not in (None, 'None'):
             msg = "%s: %s" % (msg, msg2)
         self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
@@ -674,26 +683,26 @@ class Interpreter:
     def on_call(self, node):
         """function execution"""
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
-        func = self.run(node.func)
+        func = self._run(node.func)
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "'%s' is not callable!!" % func
             self.raise_exception(node, exc=TypeError, msg=msg)
 
-        args = [self.run(targ) for targ in node.args]
+        args = [self._run(targ) for targ in node.args]
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
-            args = args + self.run(starargs)
+            args = args + self._run(starargs)
 
         keywords = {}
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call '%s'" % func
                 self.raise_exception(node, msg=msg)
-            keywords[key.arg] = self.run(key.value)
+            keywords[key.arg] = self._run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
         if kwargs is not None:
-            keywords.update(self.run(kwargs))
+            keywords.update(self._run(kwargs))
 
         # noinspection PyBroadException
         try:
@@ -715,8 +724,8 @@ class Interpreter:
 
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
-            defval = self.run(defnode)
-            keyval = self.run(node.args.args[idef + offset])
+            defval = self._run(defnode)
+            keyval = self._run(node.args.args[idef + offset])
             kwargs.append((keyval, defval))
 
         if version_info[0] == 3:
