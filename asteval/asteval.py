@@ -73,10 +73,10 @@ class Interpreter:
 
   :param recursion_limit:
       Enforce a limit on the depth of function-calls *in addition* to
-      the current stack, by invoking :func:`sys.setrecursionlimit()`
+      the current stack, by invoking :func:`sys.setrecursionlimit()`.
       (affect python-interpreter globally!).
-      If evaluates to `False`, no limit enforced;
-      if not an integer but evaluates to `True`, the default value
+      If it evaluates to `False`, no limit enforced;
+      if it is not an integer but evaluates to `True`, the default value
       :data:`astutils.RECURSION_LIMIT` is used.
   :type recursion_limit:
       int, boolean, None
@@ -104,6 +104,8 @@ class Interpreter:
         else:
             try:
                 self.recursion_limit = int(recursion_limit)
+                if self.recursion_limit < 0:
+                    self.recursion_limit = False
             except:
                 self.recursion_limit = recursion_limit and RECURSION_LIMIT
 

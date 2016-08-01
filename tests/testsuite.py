@@ -893,13 +893,20 @@ class TestCase2(unittest.TestCase):
             self._check_recursion_mock(m, astutils.RECURSION_LIMIT)
 
     @ddt.data(3, 3.14, '3')
-    def test_recursion_limit_number(self, rlimit):
+    def test_recursion_limit__number(self, rlimit):
         interp = Interpreter(recursion_limit=rlimit)
         m = mock.MagicMock()
         with mock.patch('sys.setrecursionlimit', m):
             interp(textwrap.dedent("pass"))
             self._check_recursion_mock(m, 3)
 
+    @ddt.data(-3, -3.14, '-3')
+    def test_recursion_limit__negative(self, rlimit):
+        interp = Interpreter(recursion_limit=rlimit)
+        m = mock.MagicMock()
+        with mock.patch('sys.setrecursionlimit', m):
+            interp(textwrap.dedent("pass"))
+            m.assert_not_called()
 
 
 
