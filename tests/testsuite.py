@@ -3,11 +3,23 @@
 Base TestCase for asteval
 """
 import ast
+import inspect
 import os
+from sys import version_info
+import sys
+from tempfile import NamedTemporaryFile
+import textwrap
 import time
 import unittest
-from sys import version_info
-from tempfile import NamedTemporaryFile
+
+from asteval import NameFinder, Interpreter, astutils
+import ddt
+
+
+try:
+    from unittest import mock
+except ImportError: # PY2
+    import mock # @UnusedImport
 
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
@@ -20,7 +32,6 @@ else:
     # noinspection PyUnresolvedReferences
     from cStringIO import StringIO
 
-from asteval import NameFinder, Interpreter
 
 HAS_NUMPY = False
 try:
@@ -839,9 +850,57 @@ class TestCase2(unittest.TestCase):
         """ test using stringio for output/errors """
         out = StringIO()
         err = StringIO()
-        intrep = Interpreter(writer=out, err_writer=err)
-        intrep("print('out')")
+        interp = Interpreter(writer=out, err_writer=err)
+        interp("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
+
+@ddt.ddt
+class TestCase2(unittest.TestCase):
+    def setUp(self):
+        self._defaul_recusion_limit = sys.getrecursionlimit()
+
+    def _check_recursion_mock(self, m, assert_recursion_limit):
+        rlimit = len(inspect.stack()) + assert_recursion_limit
+        self.assertEqual(m.mock_calls, [
+                mock.call(rlimit + 2),
+                mock.call(rlimit + 3),
+                mock.call(self._defaul_recusion_limit),
+                mock.call(rlimit + 2),
+                mock.call(self._defaul_recusion_limit),
+                ])
+
+    def test_recursion_limit__default_not_invoking(self):
+        interp = Interpreter()
+        m = mock.MagicMock()
+        with mock.patch('sys.setrecursionlimit', m):
+            interp(textwrap.dedent("pass"))
+            m.assert_not_called()
+
+    @ddt.data(None, 0, False, '')
+    def test_recursion_limit__non_true_not_invoking(self, rlimit):
+        interp = Interpreter(recursion_limit=rlimit)
+        m = mock.MagicMock()
+        with mock.patch('sys.setrecursionlimit', m):
+            interp(textwrap.dedent("pass"))
+            m.assert_not_called()
+
+    @ddt.data(object(), True, 'foo')
+    def test_recursion_limit__non_integer_invoking_default_limit(self, rlimit):
+        interp = Interpreter(recursion_limit=rlimit)
+        m = mock.MagicMock()
+        with mock.patch('sys.setrecursionlimit', m):
+            interp(textwrap.dedent("pass"))
+            self._check_recursion_mock(m, astutils.RECURSION_LIMIT)
+
+    @ddt.data(3, 3.14, '3')
+    def test_recursion_limit_number(self, rlimit):
+        interp = Interpreter(recursion_limit=rlimit)
+        m = mock.MagicMock()
+        with mock.patch('sys.setrecursionlimit', m):
+            interp(textwrap.dedent("pass"))
+            self._check_recursion_mock(m, 3)
+
+
 
 
 if __name__ == '__main__':  # pragma: no cover
