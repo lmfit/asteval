@@ -11,16 +11,18 @@ later, using the current values in the
 """
 
 from __future__ import division, print_function
-from sys import exc_info, stdout, stderr, version_info
-import ast
-import math
-from time import time
 
+import ast
+import inspect
+import math
+from sys import exc_info, stdout, stderr, version_info
 import sys
+from time import time
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
+
 
 HAS_NUMPY = False
 try:
@@ -69,6 +71,15 @@ class Interpreter:
 
   If numpy is installed, many numpy functions are also imported.
 
+  :param recursion_limit:
+      Enforce a limit on the depth of function-calls *in addition* to
+      the current stack, by invoking :func:`sys.setrecursionlimit()`
+      (affect python-interpreter globally!).
+      If evaluates to `False`, no limit enforced;
+      if not an integer but evaluates to `True`, the default value
+      :data:`astutils.RECURSION_LIMIT` is used.
+  :type recursion_limit:
+      int, boolean, None
   """
 
     supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
@@ -81,12 +92,20 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None, max_time=5):
+    def __init__(self, symtable=None, writer=None, use_numpy=True,
+                 err_writer=None, max_time=5, recursion_limit=None):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
         self.max_time = max_time
         self.old_recursion_limit = sys.getrecursionlimit()
+        if recursion_limit is True:
+            self.recursion_limit = RECURSION_LIMIT
+        else:
+            try:
+                self.recursion_limit = int(recursion_limit)
+            except:
+                self.recursion_limit = recursion_limit and RECURSION_LIMIT
 
         if symtable is None:
             symtable = {}
@@ -131,12 +150,13 @@ class Interpreter:
             if callable(val) or 'numpy.lib.index_tricks' in repr(val):
                 self.no_deepcopy.append(key)
 
-    @staticmethod
-    def set_recursion_limit():
-        sys.setrecursionlimit(RECURSION_LIMIT)
+    def set_recursion_limit(self):
+        if self.recursion_limit:
+            sys.setrecursionlimit(len(inspect.stack()) + self.recursion_limit)
 
     def reset_recursion_limit(self):
-        sys.setrecursionlimit(self.old_recursion_limit)
+        if self.recursion_limit:
+            sys.setrecursionlimit(self.old_recursion_limit)
 
     def unimplemented(self, node):
         """unimplemented nodes"""
