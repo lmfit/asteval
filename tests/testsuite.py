@@ -202,78 +202,78 @@ class TestEval(TestCase):
 
     def test_while(self):
         """while loops"""
-        self.interp("""
-n=0
-while n < 8:
-    n += 1
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            while n < 8:
+                n += 1
+            """))
         self.isvalue('n', 8)
 
-        self.interp("""
-n=0
-while n < 8:
-    n += 1
-    if n > 3:
-        break
-else:
-    n = -1
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            while n < 8:
+                n += 1
+                if n > 3:
+                    break
+            else:
+                n = -1
+            """))
         self.isvalue('n', 4)
 
-        self.interp("""
-n=0
-while n < 8:
-    n += 1
-else:
-    n = -1
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            while n < 8:
+                n += 1
+            else:
+                n = -1
+            """))
         self.isvalue('n', -1)
 
-        self.interp("""
-n, i = 0, 0
-while n < 10:
-    n += 1
-    if n % 2:
-        continue
-    i += 1
-print( 'finish: n, i = ', n, i)
-""")
+        self.interp(textwrap.dedent("""
+            n, i = 0, 0
+            while n < 10:
+                n += 1
+                if n % 2:
+                    continue
+                i += 1
+            print( 'finish: n, i = ', n, i)
+            """))
         self.isvalue('n', 10)
         self.isvalue('i', 5)
 
-        self.interp("""
-n=0
-while n < 10:
-    n += 1
-    print( ' n = ', n)
-    if n > 5:
-        break
-print( 'finish: n = ', n)
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            while n < 10:
+                n += 1
+                print( ' n = ', n)
+                if n > 5:
+                    break
+            print( 'finish: n = ', n)
+            """))
         self.isvalue('n', 6)
 
     def test_while_continue(self):
-        self.interp("""
-n, i = 0, 0
-while n < 10:
-    n += 1
-    if n % 2:
-        continue
-    i += 1
-print( 'finish: n, i = ', n, i)
-""")
+        self.interp(textwrap.dedent("""
+            n, i = 0, 0
+            while n < 10:
+                n += 1
+                if n % 2:
+                    continue
+                i += 1
+            print( 'finish: n, i = ', n, i)
+            """))
         self.isvalue('n', 10)
         self.isvalue('i', 5)
 
     def test_while_break(self):
-        self.interp("""
-n = 0
-while n < 10:
-    n += 1
-    if n > 6:
-        break
-print( 'finish: n = ', n)
-""")
+        self.interp(textwrap.dedent("""
+            n = 0
+            while n < 10:
+                n += 1
+                if n > 6:
+                    break
+            print( 'finish: n = ', n)
+            """))
         self.isvalue('n', 7)
 
     # noinspection PyTypeChecker
@@ -288,46 +288,47 @@ print( 'finish: n = ', n)
 
     def test_for(self):
         """for loops"""
-        self.interp("""
-n=0
-for i in arange(10):
-    n += i
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            for i in arange(10):
+                n += i
+            """))
         self.isvalue('n', 45)
 
-        self.interp("""
-n=0
-for i in arange(10):
-    n += i
-else:
-    n = -1
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            for i in arange(10):
+                n += i
+            else:
+                n = -1
+            """))
         self.isvalue('n', -1)
 
     def test_for_break(self):
-        self.interp("""
-n=0
-for i in arange(10):
-    n += i
-    if n > 2:
-        break
-else:
-    n = -1
-""")
+        self.interp(textwrap.dedent("""
+            n=0
+            for i in arange(10):
+                n += i
+                if n > 2:
+                    break
+            else:
+                n = -1
+            """))
         self.isvalue('n', 3)
 
     def test_if(self):
         """runtime errors test"""
-        self.interp("""zero = 0
-if zero == 0:
-    x = 1
-if zero != 100:
-    x = x+1
-if zero > 2:
-    x = x + 1
-else:
-    y = 33
-""")
+        self.interp(textwrap.dedent("""
+            zero = 0
+            if zero == 0:
+                x = 1
+            if zero != 100:
+                x = x+1
+            if zero > 2:
+                x = x + 1
+            else:
+                y = 33
+            """))
         self.isvalue('x', 2)
         self.isvalue('y', 33)
 
@@ -370,11 +371,11 @@ else:
 
     def test_bool(self):
         """boolean logic"""
-        self.interp("""
-yes = True
-no = False
-nottrue = False
-a = arange(7)""")
+        self.interp(textwrap.dedent("""
+            yes = True
+            no = False
+            nottrue = False
+            a = arange(7)"""))
 
         self.istrue("yes")
         self.isfalse("no")
@@ -621,39 +622,40 @@ a = arange(7)""")
 
     def test_tryexcept(self):
         """test try/except"""
-        self.interp("""
-x = 5
-try:
-    x = x/0
-except ZeroDivisionError:
-    print( 'Error Seen!')
-    x = -999
-""")
+        self.interp(textwrap.dedent("""
+            x = 5
+            try:
+                x = x/0
+            except ZeroDivisionError:
+                print( 'Error Seen!')
+                x = -999
+            """))
         self.isvalue('x', -999)
 
-        self.interp("""
-x = -1
-try:
-    x = x/0
-except ZeroDivisionError:
-    pass
-""")
+        self.interp(textwrap.dedent("""
+            x = -1
+            try:
+                x = x/0
+            except ZeroDivisionError:
+                pass
+            """))
         self.isvalue('x', -1)
 
     def test_tryelsefinally(self):
 
-        self.interp("""def dotry(x, y):
-    out, ok, clean = 0, False, False
-    try:
-        out = x/y
-    except ZeroDivisionError:
-        out = -1
-    else:
-        ok = True
-    finally:
-        clean = True
-    return out, ok, clean
-""")
+        self.interp(textwrap.dedent("""
+            def dotry(x, y):
+                out, ok, clean = 0, False, False
+                try:
+                    out = x/y
+                except ZeroDivisionError:
+                    out = -1
+                else:
+                    ok = True
+                finally:
+                    clean = True
+                return out, ok, clean
+            """))
         self.interp("val, ok, clean = dotry(1, 2.0)")
         self.interp("print(ok, clean)")
         self.isnear("val", 0.5)
@@ -667,14 +669,14 @@ except ZeroDivisionError:
 
     def test_function1(self):
         """test function definition and running"""
-        self.interp("""
-def fcn(x, scale=2):
-    'test function'
-    out = sqrt(x)
-    if scale > 1:
-        out = out * scale
-    return out
-""")
+        self.interp(textwrap.dedent("""
+            def fcn(x, scale=2):
+                'test function'
+                out = sqrt(x)
+                if scale > 1:
+                    out = out * scale
+                return out
+            """))
         self.interp("a = fcn(4, scale=9)")
         self.isvalue("a", 18)
         self.interp("a = fcn(9, scale=0)")
@@ -688,14 +690,14 @@ def fcn(x, scale=2):
 
     def test_function_vararg(self):
         """test function with var args"""
-        self.interp("""
-def fcn(*args):
-    'test varargs function'
-    out = 0
-    for i in args:
-        out = out + i*i
-    return out
-""")
+        self.interp(textwrap.dedent("""
+            def fcn(*args):
+                'test varargs function'
+                out = 0
+                for i in args:
+                    out = out + i*i
+                return out
+            """))
         self.interp("o = fcn(1,2,3)")
         self.isvalue('o', 14)
         self.interp("print(fcn)")
@@ -703,17 +705,17 @@ def fcn(*args):
 
     def test_function_kwargs(self):
         """test function with kw args, no **kws"""
-        self.interp("""
-def fcn(square=False, x=0, y=0, z=0, t=0):
-    'test varargs function'
-    out = 0
-    for i in (x, y, z, t):
-        if square:
-            out = out + i*i
-        else:
-            out = out + i
-    return out
-""")
+        self.interp(textwrap.dedent("""
+            def fcn(square=False, x=0, y=0, z=0, t=0):
+                'test varargs function'
+                out = 0
+                for i in (x, y, z, t):
+                    if square:
+                        out = out + i*i
+                    else:
+                        out = out + i
+                return out
+            """))
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(square')
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
@@ -727,17 +729,17 @@ def fcn(square=False, x=0, y=0, z=0, t=0):
 
     def test_function_kwargs1(self):
         """test function with **kws arg"""
-        self.interp("""
-def fcn(square=False, **kws):
-    'test varargs function'
-    out = 0
-    for i in kws.values():
-        if square:
-            out = out + i*i
-        else:
-            out = out + i
-    return out
-""")
+        self.interp(textwrap.dedent("""
+            def fcn(square=False, **kws):
+                'test varargs function'
+                out = 0
+                for i in kws.values():
+                    if square:
+                        out = out + i*i
+                    else:
+                        out = out + i
+                return out
+            """))
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(square')
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
@@ -747,11 +749,11 @@ def fcn(square=False, **kws):
 
     def test_function_kwargs2(self):
         """test function with positional and **kws args"""
-        self.interp("""
-def fcn(x, y):
-    'test function'
-    return x + y**2
-""")
+        self.interp(textwrap.dedent("""
+            def fcn(x, y):
+                'test function'
+                return x + y**2
+            """))
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(x,')
         self.interp("o = -1")
@@ -870,7 +872,7 @@ class TRecurse(unittest.TestCase):
         interp = Interpreter()
         m = mock.MagicMock()
         with mock.patch('sys.setrecursionlimit', m):
-            interp(textwrap.dedent("pass"))
+            interp("pass")
             m.assert_not_called()
         self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
@@ -879,7 +881,7 @@ class TRecurse(unittest.TestCase):
         interp = Interpreter(recursion_limit=rlimit)
         m = mock.MagicMock()
         with mock.patch('sys.setrecursionlimit', m):
-            interp(textwrap.dedent("pass"))
+            interp("pass")
             m.assert_not_called()
         self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
@@ -888,7 +890,7 @@ class TRecurse(unittest.TestCase):
         interp = Interpreter(recursion_limit=rlimit)
         m = mock.MagicMock()
         with mock.patch('sys.setrecursionlimit', m):
-            interp(textwrap.dedent("pass"))
+            interp("pass")
             self._check_recursion_mock(m, astutils.RECURSION_LIMIT)
         self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
@@ -897,7 +899,7 @@ class TRecurse(unittest.TestCase):
         interp = Interpreter(recursion_limit=rlimit)
         m = mock.MagicMock()
         with mock.patch('sys.setrecursionlimit', m):
-            interp(textwrap.dedent("pass"))
+            interp("pass")
             self._check_recursion_mock(m, 3)
         self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
@@ -906,7 +908,7 @@ class TRecurse(unittest.TestCase):
         interp = Interpreter(recursion_limit=rlimit)
         m = mock.MagicMock()
         with mock.patch('sys.setrecursionlimit', m):
-            interp(textwrap.dedent("pass"))
+            interp("pass")
             m.assert_not_called()
         self.assertEqual(sys.getrecursionlimit(), self._original_recusion_limit)
 
