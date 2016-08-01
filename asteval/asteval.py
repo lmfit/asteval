@@ -21,7 +21,7 @@ import sys
 from time import time
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
+                       LOCALFUNCS, NUMPY_RENAMES, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
 
 
@@ -72,15 +72,14 @@ class Interpreter:
 
   If numpy is installed, many numpy functions are also imported.
 
-  :param recursion_limit:
+  :param int recursion_limit:
       Enforce a limit on the depth of function-calls *in addition* to
       the current stack, by invoking :func:`sys.setrecursionlimit()`.
-      (affect python-interpreter globally!).
-      If it evaluates to `False`, no limit enforced;
-      if it is not an integer but evaluates to `True`, the default value
-      :data:`astutils.RECURSION_LIMIT` is used.
-  :type recursion_limit:
-      int, boolean, None
+      (affect python-interpreter globally!);
+      if negative(-1 by default), no limit enforced.
+
+      .. Warning::
+         If limit too low (i.e. 10), :func:`eval()` may silently fail!
   """
 
     supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
@@ -94,20 +93,16 @@ class Interpreter:
                        'while')
 
     def __init__(self, symtable=None, writer=None, use_numpy=True,
-                 err_writer=None, max_time=5, recursion_limit=None):
+                 err_writer=None, max_time=5, recursion_limit=-1):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
         self.max_time = max_time
-        if recursion_limit is True:
-            self.recursion_limit = RECURSION_LIMIT
-        else:
-            try:
-                self.recursion_limit = int(recursion_limit)
-                if self.recursion_limit < 0:
-                    self.recursion_limit = False
-            except:
-                self.recursion_limit = recursion_limit and RECURSION_LIMIT
+        if isinstance(recursion_limit, bool) or not isinstance(recursion_limit, int):
+            ## Dissallow True/False to be assumed as integers.
+            msg = "The recursion_limit(%s) must be an integer!"
+            raise ValueError(msg % recursion_limit)
+        self.recursion_limit = recursion_limit
 
         if symtable is None:
             symtable = {}
@@ -154,7 +149,7 @@ class Interpreter:
 
     @contextlib.contextmanager
     def limited_recursion(self):
-        if self.recursion_limit:
+        if self.recursion_limit >= 0:
             old_recursion_limit = sys.getrecursionlimit()
             sys.setrecursionlimit(len(inspect.stack()) + self.recursion_limit)
             try:

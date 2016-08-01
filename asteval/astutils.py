@@ -5,15 +5,16 @@ utility functions for asteval
    The University of Chicago
 """
 from __future__ import division, print_function
-import re
+
 import ast
+import re
 from sys import exc_info
+
 
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
-RECURSION_LIMIT = 100
 
 RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'def', 'del', 'elif', 'else', 'except', 'exec',
