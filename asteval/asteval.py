@@ -19,7 +19,7 @@ from time import time
 import sys
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
+                       LOCALFUNCS, NUMPY_RENAMES, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
 
 HAS_NUMPY = False
@@ -86,7 +86,6 @@ class Interpreter:
         self.err_writer = err_writer or stderr
         self.start = 0
         self.max_time = max_time
-        self.old_recursion_limit = sys.getrecursionlimit()
 
         if symtable is None:
             symtable = {}
@@ -131,13 +130,6 @@ class Interpreter:
             if callable(val) or 'numpy.lib.index_tricks' in repr(val):
                 self.no_deepcopy.append(key)
 
-    @staticmethod
-    def set_recursion_limit():
-        sys.setrecursionlimit(RECURSION_LIMIT)
-
-    def reset_recursion_limit(self):
-        sys.setrecursionlimit(self.old_recursion_limit)
-
     def unimplemented(self, node):
         """unimplemented nodes"""
         self.raise_exception(node, exc=NotImplementedError,
@@ -176,14 +168,11 @@ class Interpreter:
 
         # noinspection PyBroadException
         try:
-            self.set_recursion_limit()
             return ast.parse(text)
         except SyntaxError:
             self.raise_exception(None, msg='Syntax Error', expr=text)
         except:
             self.raise_exception(None, msg='Runtime Error', expr=text)
-        finally:
-            self.reset_recursion_limit()
 
     def run(self, node, expr=None, lineno=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
@@ -230,43 +219,38 @@ class Interpreter:
         self.error = []
         self.start = time()
 
+        # noinspection PyBroadException
         try:
-            # noinspection PyBroadException
-            try:
-                self.set_recursion_limit()
-                node = self.parse(expr)
-            except:
-                errmsg = exc_info()[1]
-                if self.error:
-                    errmsg = "\n".join(self.error[0].get_error())
-                if not show_errors:
-                    # noinspection PyBroadException
-                    try:
-                        exc = self.error[0].exc
-                    except:
-                        exc = RuntimeError
-                    raise exc(errmsg)
-                print(errmsg, file=self.err_writer)
-                return
-            # noinspection PyBroadException
-            try:
-                self.set_recursion_limit()
-                return self.run(node, expr=expr, lineno=lineno)
-            except:
-                errmsg = exc_info()[1]
-                if self.error:
-                    errmsg = "\n".join(self.error[0].get_error())
-                if not show_errors:
-                    # noinspection PyBroadException
-                    try:
-                        exc = self.error[0].exc
-                    except:
-                        exc = RuntimeError
-                    raise exc(errmsg)
-                print(errmsg, file=self.err_writer)
-                return
-        finally:
-            self.reset_recursion_limit()
+            node = self.parse(expr)
+        except:
+            errmsg = exc_info()[1]
+            if self.error:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                # noinspection PyBroadException
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
+            print(errmsg, file=self.err_writer)
+            return
+        # noinspection PyBroadException
+        try:
+            return self.run(node, expr=expr, lineno=lineno)
+        except:
+            errmsg = exc_info()[1]
+            if self.error:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                # noinspection PyBroadException
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
+            print(errmsg, file=self.err_writer)
+            return
 
     @staticmethod
     def dump(node, **kw):
