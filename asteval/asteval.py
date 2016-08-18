@@ -19,8 +19,8 @@ from time import time
 import sys
 
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       LOCALFUNCS, NUMPY_RENAMES, op2func, RECURSION_LIMIT,
-                       ExceptionHolder, ReturnedNone, valid_symbol_name, quote, code_wrap, MAX_CYCLES)
+                       LOCALFUNCS, NUMPY_RENAMES, op2func, ExceptionHolder,
+                       ReturnedNone, valid_symbol_name, quote, code_wrap, MAX_CYCLES)
 
 HAS_NUMPY = False
 try:
@@ -91,7 +91,6 @@ class Interpreter:
         self.start = 0
         self.cycles = 0
         self.max_time = max_time
-        self.old_recursion_limit = sys.getrecursionlimit()
         if symtable is None:
             symtable = {}
         self.trace_enabled = True
@@ -158,13 +157,6 @@ class Interpreter:
         if callable(func) and hasattr(func, '__name__'):
             self.symtable[func.__name__] = func
 
-    @staticmethod
-    def set_recursion_limit():
-        sys.setrecursionlimit(RECURSION_LIMIT)
-
-    def reset_recursion_limit(self):
-        sys.setrecursionlimit(self.old_recursion_limit)
-
     def unimplemented(self, node):
         """unimplemented nodes"""
         self.raise_exception(node, exc=NotImplementedError,
@@ -210,63 +202,56 @@ class Interpreter:
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
-    def eval(self, expr, show_errors=True, limit_recursion=False):
+    def eval(self, expr, show_errors=True, **kwargs):
         """evaluates a single or block of statements or whole file"""
         # self.lineno = lineno
         self.error = []
         self.trace = []
         self.start = time()
         self.cycles = 0
-        if limit_recursion:
-            self.set_recursion_limit()
+        # noinspection PyBroadException
         try:
-            # noinspection PyBroadException
-            try:
-                node = self.parse(expr, limit_recursion=limit_recursion)
-            except:
-                errmsg = exc_info()[1]
-                if self.error:
-                    errmsg = "\n".join(self.error[0].get_error())
-                if not show_errors:
-                    # noinspection PyBroadException
-                    try:
-                        exc = self.error[0].exc
-                    except:
-                        exc = RuntimeError
-                    raise exc(errmsg)
-                print(errmsg, file=self.err_writer)
-                return
-            # noinspection PyBroadException
-            try:
-                return self.run(node, expr=expr)
-            except:
-                errmsg = exc_info()[1]
-                if self.error:
-                    errmsg = "\n".join(self.error[0].get_error())
-                if not show_errors:
-                    # noinspection PyBroadException
-                    try:
-                        exc = self.error[0].exc
-                    except:
-                        exc = RuntimeError
-                    raise exc(errmsg)
-                print(errmsg, file=self.err_writer)
-                return
-        finally:
-            if limit_recursion:
-                self.reset_recursion_limit()
+            node = self.parse(expr)
+        except:
+            errmsg = exc_info()[1]
+            if self.error:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                # noinspection PyBroadException
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
+            print(errmsg, file=self.err_writer)
+            return
+        # noinspection PyBroadException
+        try:
+            return self.run(node, expr=expr)
+        except:
+            errmsg = exc_info()[1]
+            if self.error:
+                errmsg = "\n".join(self.error[0].get_error())
+            if not show_errors:
+                # noinspection PyBroadException
+                try:
+                    exc = self.error[0].exc
+                except:
+                    exc = RuntimeError
+                raise exc(errmsg)
+            print(errmsg, file=self.err_writer)
+            return
+
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
     #  run:    ast -> result
     #  eval:   string statement -> result = run(parse(statement))
-    def parse(self, text, limit_recursion=False):
+    def parse(self, text):
         """parse statement/expression to Ast representation"""
         self.expr = text
 
         # noinspection PyBroadException
-        if limit_recursion:
-            self.set_recursion_limit()
         try:
             return ast.parse(text)
         except SyntaxError as e:
@@ -275,9 +260,6 @@ class Interpreter:
         except Exception as e:
             # self.tracer(str(e))
             self.raise_exception(None, msg='Runtime Error: {}'.format(e), expr=text)
-        finally:
-            if limit_recursion:
-                self.reset_recursion_limit()
 
     def run(self, node, expr=None, with_raise=True):
         """executes parsed Ast representation for an expression"""
