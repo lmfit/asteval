@@ -850,6 +850,28 @@ class TestCase2(unittest.TestCase):
         self.assertEqual(out.getvalue(), 'out\n')
 
 
+class TestCase3(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        #intrep("print('out')")
+        #self.assertEqual(out.getvalue(), 'out\n')
+        intrep("""
+x = []
+print(x)
+try:
+    print(x[0])
+except IndexError as e:
+    print("Exception!")
+    #print(str(e))
+print("Continue")
+        """)
+        print(out.getvalue())
+        print(err.getvalue())
+        print('\n'.join(intrep.trace))
+
+
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval, TestCase2):
         suite = unittest.TestLoader().loadTestsFromTestCase(suite)

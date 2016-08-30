@@ -175,6 +175,7 @@ class Interpreter:
 
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
+        #print(node, exc, msg, expr, lineno)
         if self.error is None:
             self.error = []
         if expr is None:
@@ -197,6 +198,8 @@ class Interpreter:
                 exc = self.error[0].exc
             except:
                 exc = RuntimeError
+        if len(self.error) == 1:
+            self.tracer("{}Exception `{}` raised: {}".format(self.getLinenoLabel(node), exc.__name__, self.error_msg))
         raise exc(self.error_msg)
 
     def __call__(self, expr, **kw):
@@ -297,9 +300,10 @@ class Interpreter:
             if isinstance(ret, enumerate):
                 ret = list(ret)
             return ret
-        except:
+        except Exception as e:
+            #print("****", str(e))
             if with_raise:
-                self.raise_exception(node, expr=expr)
+                self.raise_exception(node, expr=expr, msg='An error occurred!')
 
     @staticmethod
     def dump(node, **kw):
@@ -446,7 +450,8 @@ class Interpreter:
                 for telem, tval in zip(node.elts, val):
                     self.node_assign(telem, tval)
             else:
-                raise ValueError('too many values to unpack')
+                #raise ValueError('too many values to unpack')
+                self.raise_exception(node, exc=ValueError, msg='too many values to unpack')
 
         elif isinstance(node, str):
             self.symtable[node] = val
@@ -510,7 +515,10 @@ class Interpreter:
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
             if isinstance(node.slice, (ast.Index, ast.Slice, ast.Ellipsis)):
-                return val.__getitem__(nslice)
+                try:
+                    return val.__getitem__(nslice)
+                except IndexError:
+                    self.raise_exception(node, exc=IndexError, msg='index out of range')
             elif isinstance(node.slice, ast.ExtSlice):
                 return val[nslice]
         else:
@@ -682,20 +690,23 @@ class Interpreter:
             if self.error:
                 self.last_error = self.error[-1].exc_info[1]
                 self.error = []
+                self.tracer('{}Executing exception handlers...'.format(self.getLinenoLabel(node)))
                 for hnd in node.handlers:
                     self.run(hnd)
                 self.last_error = None
                 break
 
         if no_errors and hasattr(node, 'orelse'):
-            self.tracer('{}Executing `else` block.'.format(self.getLinenoLabel(node.orelse)))
-            for tnode in node.orelse:
-                self.run(tnode)
+            if node.orelse:
+                self.tracer('{}Executing `else` block.'.format(self.getLinenoLabel(node.orelse)))
+                for tnode in node.orelse:
+                    self.run(tnode)
 
         if hasattr(node, 'finalbody'):
-            self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node.finalbody)))
-            for tnode in node.finalbody:
-                self.run(tnode)
+            if node.finalbody:
+                self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node.finalbody)))
+                for tnode in node.finalbody:
+                    self.run(tnode)
 
     def on_raise(self, node):  # ('type', 'inst', 'tback')
         """raise statement: note difference for python 2 and 3"""
@@ -762,8 +773,12 @@ class Interpreter:
             self.raise_exception(node, msg="Error calling `%s()`: `%s`" % (name, str(e)))
             return
 
-        self.tracer('{}Function `{}({})` returned `{}`.'
-                    .format(self.getLinenoLabel(node), name, arg_str, code_wrap(ret)))
+        if name not in ('pprint', 'print', 'jprint'):
+            self.tracer('{}Function `{}({})` returned {}.'
+                        .format(self.getLinenoLabel(node), name, arg_str, code_wrap(ret)))
+        else:
+            self.tracer('{}Function `{}({})` completed.'.format(self.getLinenoLabel(node), name, arg_str))
+
         return ret
 
     # noinspection PyMethodMayBeStatic
