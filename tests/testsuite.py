@@ -9,8 +9,7 @@ import unittest
 from sys import version_info
 from tempfile import NamedTemporaryFile
 #import warnings
-
-import sys
+from textwrap import dedent
 
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
@@ -178,78 +177,78 @@ class TestEval(TestCase):
 
     def test_while(self):
         """while loops"""
-        self.interp("""
-n=0
-while n < 8:
-    n += 1
-""")
+        self.interp(dedent("""
+            n=0
+            while n < 8:
+                n += 1
+            """))
         self.isvalue('n', 8)
 
-        self.interp("""
-n=0
-while n < 8:
-    n += 1
-    if n > 3:
-        break
-else:
-    n = -1
-""")
+        self.interp(dedent("""
+            n=0
+            while n < 8:
+                n += 1
+                if n > 3:
+                    break
+            else:
+                n = -1
+            """))
         self.isvalue('n', 4)
 
-        self.interp("""
-n=0
-while n < 8:
-    n += 1
-else:
-    n = -1
-""")
+        self.interp(dedent("""
+            n=0
+            while n < 8:
+                n += 1
+            else:
+                n = -1
+            """))
         self.isvalue('n', -1)
 
-        self.interp("""
-n, i = 0, 0
-while n < 10:
-    n += 1
-    if n % 2:
-        continue
-    i += 1
-print( 'finish: n, i = ', n, i)
-""")
+        self.interp(dedent("""
+            n, i = 0, 0
+            while n < 10:
+                n += 1
+                if n % 2:
+                    continue
+                i += 1
+            print( 'finish: n, i = ', n, i)
+            """))
         self.isvalue('n', 10)
         self.isvalue('i', 5)
 
-        self.interp("""
-n=0
-while n < 10:
-    n += 1
-    print( ' n = ', n)
-    if n > 5:
-        break
-print( 'finish: n = ', n)
-""")
+        self.interp(dedent("""
+            n=0
+            while n < 10:
+                n += 1
+                print( ' n = ', n)
+                if n > 5:
+                    break
+            print( 'finish: n = ', n)
+            """))
         self.isvalue('n', 6)
 
     def test_while_continue(self):
-        self.interp("""
-n, i = 0, 0
-while n < 10:
-    n += 1
-    if n % 2:
-        continue
-    i += 1
-print( 'finish: n, i = ', n, i)
-""")
+        self.interp(dedent("""
+            n, i = 0, 0
+            while n < 10:
+                n += 1
+                if n % 2:
+                    continue
+                i += 1
+            print( 'finish: n, i = ', n, i)
+            """))
         self.isvalue('n', 10)
         self.isvalue('i', 5)
 
     def test_while_break(self):
-        self.interp("""
-n = 0
-while n < 10:
-    n += 1
-    if n > 6:
-        break
-print( 'finish: n = ', n)
-""")
+        self.interp(dedent("""
+            n = 0
+            while n < 10:
+                n += 1
+                if n > 6:
+                    break
+            print( 'finish: n = ', n)
+            """))
         self.isvalue('n', 7)
 
     # noinspection PyTypeChecker
@@ -264,46 +263,46 @@ print( 'finish: n = ', n)
 
     def test_for(self):
         """for loops"""
-        self.interp("""
-n=0
-for i in arange(10):
-    n += i
-""")
+        self.interp(dedent("""
+            n=0
+            for i in arange(10):
+                n += i
+            """))
         self.isvalue('n', 45)
 
-        self.interp("""
-n=0
-for i in arange(10):
-    n += i
-else:
-    n = -1
-""")
+        self.interp(dedent("""
+            n=0
+            for i in arange(10):
+                n += i
+            else:
+                n = -1
+            """))
         self.isvalue('n', -1)
 
     def test_for_break(self):
-        self.interp("""
-n=0
-for i in arange(10):
-    n += i
-    if n > 2:
-        break
-else:
-    n = -1
-""")
+        self.interp(dedent("""
+            n=0
+            for i in arange(10):
+                n += i
+                if n > 2:
+                    break
+            else:
+                n = -1
+            """))
         self.isvalue('n', 3)
 
     def test_if(self):
         """runtime errors test"""
-        self.interp("""zero = 0
-if zero == 0:
-    x = 1
-if zero != 100:
-    x = x+1
-if zero > 2:
-    x = x + 1
-else:
-    y = 33
-""")
+        self.interp(dedent("""zero = 0
+            if zero == 0:
+                x = 1
+            if zero != 100:
+                x = x+1
+            if zero > 2:
+                x = x + 1
+            else:
+                y = 33
+            """))
         self.isvalue('x', 2)
         self.isvalue('y', 33)
 
@@ -346,11 +345,11 @@ else:
 
     def test_bool(self):
         """boolean logic"""
-        self.interp("""
-yes = True
-no = False
-nottrue = False
-a = arange(7)""")
+        self.interp(dedent("""
+            yes = True
+            no = False
+            nottrue = False
+            a = arange(7)"""))
 
         self.istrue("yes")
         self.isfalse("no")
@@ -598,41 +597,41 @@ a = arange(7)""")
 
     def test_tryexcept(self):
         """test try/except"""
-        self.interp("""
-x = 5
-try:
-    x = x/0
-except ZeroDivisionError as err:
-    print('Error Seen! {}'.format(err))
-    x = -999
-""")
+        self.interp(dedent("""
+            x = 5
+            try:
+                x = x/0
+            except ZeroDivisionError as err:
+                print('Error Seen! {}'.format(err))
+                x = -999
+            """))
         self.isvalue('x', -999)
         x = self.read_stdout()
         self.assertEquals(x, 'Error Seen! division by zero\n')
 
-        self.interp("""
-x = -1
-try:
-    x = x/0
-except ZeroDivisionError:
-    pass
-""")
+        self.interp(dedent("""
+            x = -1
+            try:
+                x = x/0
+            except ZeroDivisionError:
+                pass
+            """))
         self.isvalue('x', -1)
 
     def test_tryelsefinally(self):
 
-        self.interp("""def dotry(x, y):
-    out, ok, clean = 0, False, False
-    try:
-        out = x/y
-    except ZeroDivisionError:
-        out = -1
-    else:
-        ok = True
-    finally:
-        clean = True
-    return out, ok, clean
-""")
+        self.interp(dedent("""
+            def dotry(x, y):
+                out, ok, clean = 0, False, False
+                try:
+                    out = x/y
+                except ZeroDivisionError:
+                    out = -1
+                else:
+                    ok = True
+                finally:
+                    clean = True
+                return out, ok, clean"""))
         self.interp("val, ok, clean = dotry(1, 2.0)")
         self.interp("print(ok, clean)")
         self.isnear("val", 0.5)
@@ -646,14 +645,14 @@ except ZeroDivisionError:
 
     def test_function1(self):
         """test function definition and running"""
-        self.interp("""
-def fcn(x, scale=2):
-    'test function'
-    out = sqrt(x)
-    if scale > 1:
-        out = out * scale
-    return out
-""")
+        self.interp(dedent("""
+            def fcn(x, scale=2):
+                'test function'
+                out = sqrt(x)
+                if scale > 1:
+                    out = out * scale
+                return out
+            """))
         self.interp("a = fcn(4, scale=9)")
         self.isvalue("a", 18)
         self.interp("a = fcn(9, scale=0)")
@@ -667,14 +666,14 @@ def fcn(x, scale=2):
 
     def test_function_vararg(self):
         """test function with var args"""
-        self.interp("""
-def fcn(*args):
-    'test varargs function'
-    out = 0
-    for i in args:
-        out = out + i*i
-    return out
-""")
+        self.interp(dedent("""
+            def fcn(*args):
+                'test varargs function'
+                out = 0
+                for i in args:
+                    out = out + i*i
+                return out
+            """))
         self.interp("o = fcn(1,2,3)")
         self.isvalue('o', 14)
         self.interp("print(fcn)")
@@ -682,17 +681,17 @@ def fcn(*args):
 
     def test_function_kwargs(self):
         """test function with kw args, no **kws"""
-        self.interp("""
-def fcn(square=False, x=0, y=0, z=0, t=0):
-    'test varargs function'
-    out = 0
-    for i in (x, y, z, t):
-        if square:
-            out = out + i*i
-        else:
-            out = out + i
-    return out
-""")
+        self.interp(dedent("""
+            def fcn(square=False, x=0, y=0, z=0, t=0):
+                'test varargs function'
+                out = 0
+                for i in (x, y, z, t):
+                    if square:
+                        out = out + i*i
+                    else:
+                        out = out + i
+                return out
+            """))
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(square')
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
@@ -706,17 +705,17 @@ def fcn(square=False, x=0, y=0, z=0, t=0):
 
     def test_function_kwargs1(self):
         """test function with **kws arg"""
-        self.interp("""
-def fcn(square=False, **kws):
-    'test varargs function'
-    out = 0
-    for i in kws.values():
-        if square:
-            out = out + i*i
-        else:
-            out = out + i
-    return out
-""")
+        self.interp(dedent("""
+            def fcn(square=False, **kws):
+                'test varargs function'
+                out = 0
+                for i in kws.values():
+                    if square:
+                        out = out + i*i
+                    else:
+                        out = out + i
+                return out
+            """))
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(square')
         self.interp("o = fcn(x=1, y=2, z=3, square=False)")
@@ -726,11 +725,11 @@ def fcn(square=False, **kws):
 
     def test_function_kwargs2(self):
         """test function with positional and **kws args"""
-        self.interp("""
-def fcn(x, y):
-    'test function'
-    return x + y**2
-""")
+        self.interp(dedent("""
+            def fcn(x, y):
+                'test function'
+                return x + y**2
+            """))
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(x,')
         self.interp("o = -1")
@@ -857,16 +856,16 @@ class TestCase3(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-x = []
-print(x)
-try:
-    print(x[0])
-except IndexError as e:
-    print("Exception!")
+        intrep(dedent("""
+            x = []
+            print(x)
+            try:
+                print(x[0])
+            except IndexError as e:
+                print("Exception!")
 
-print("Continue")
-""")
+            print("Continue")
+            """))
 
         #print(out.getvalue())
         #print(err.getvalue())
@@ -879,40 +878,40 @@ class TestCase4(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-x = [0, 1, 2]
-print(x)
-z = "foo"                                      # LINE 4
-prev, this, next = None, None, None
-try:                                           # LINE 6
-    for y in range(len(x)):
-        try:                                   # LINE 8
-            if y == 0:                         # LINE 9
-                raise IndexError("Test msg")
-            prev = x[y-1]
-        except (IndexError, TypeError) as e:   # LINE 12
-            prev = None                        # LINE 13
-            print(str(e))                      # LINE 14
-        except RuntimeError as e:
-            print(e)
-            w = "bar"
+        intrep(dedent("""
+            x = [0, 1, 2]
+            print(x)
+            z = "foo"                                      # LINE 4
+            prev, this, next = None, None, None
+            try:                                           # LINE 6
+                for y in range(len(x)):
+                    try:                                   # LINE 8
+                        if y == 0:                         # LINE 9
+                            raise IndexError("Test msg")
+                        prev = x[y-1]
+                    except (IndexError, TypeError) as e:   # LINE 12
+                        prev = None                        # LINE 13
+                        print(str(e))                      # LINE 14
+                    except RuntimeError as e:
+                        print(e)
+                        w = "bar"
 
-        try:
-            this = x[y]
-        except (IndexError, TypeError):
-            this = None
-            break
+                    try:
+                        this = x[y]
+                    except (IndexError, TypeError):
+                        this = None
+                        break
 
-        try:
-            next = x[y+1]
-        except (IndexError, TypeError):
-            next = None
+                    try:
+                        next = x[y+1]
+                    except (IndexError, TypeError):
+                        next = None
 
-        print(prev, this, next)
+                    print(prev, this, next)
 
-except ValueError as e:
-    print(e)
-""")
+            except ValueError as e:
+                print(e)
+            """))
         #print(out.getvalue())
         #print(err.getvalue())
         #print('\n'.join(intrep.trace))
@@ -924,19 +923,19 @@ class TestCase5(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-try:
-    try:
-        raise IndexError("test")
-    except IndexError as e:
-        print("Caught:", str(e))
-    except (ValueError, IOError) as e:
-        print("Caught3:", str(e))
-    print("Continue")
-except ValueError as e:
-    print("Caught2:", str(e))
-print("End")
-""")
+        intrep(dedent("""
+            try:
+                try:
+                    raise IndexError("test")
+                except IndexError as e:
+                    print("Caught:", str(e))
+                except (ValueError, IOError) as e:
+                    print("Caught3:", str(e))
+                print("Continue")
+            except ValueError as e:
+                print("Caught2:", str(e))
+            print("End")
+            """))
 
         #print(out.getvalue())
         #print(err.getvalue())
@@ -949,19 +948,19 @@ class TestCase6(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-try:
-    try:
-        raise ValueError("test")
-    except IndexError as e:
-        print("Caught:", str(e))
-    except (ValueError, IOError) as e:
-        print("Caught3:", str(e))
-    print("Continue")
-except KeyError as e:
-    print("Caught2:", str(e))
-print("End")
-""")
+        intrep(dedent("""
+            try:
+                try:
+                    raise ValueError("test")
+                except IndexError as e:
+                    print("Caught:", str(e))
+                except (ValueError, IOError) as e:
+                    print("Caught3:", str(e))
+                print("Continue")
+            except KeyError as e:
+                print("Caught2:", str(e))
+            print("End")
+            """))
 
         #print(out.getvalue())
         #print(err.getvalue())
@@ -974,19 +973,19 @@ class TestCase7(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-try:
-    try:
-        raise KeyError("test")
-    except IndexError as e:
-        print("Caught:", str(e))
-    except (ValueError, IOError) as e:
-        print("Caught3:", str(e))
-    print("Continue")
-except KeyError as f:
-    print("Caught2:", str(f))
-print("End")
-""")
+        intrep(dedent("""
+            try:
+                try:
+                    raise KeyError("test")
+                except IndexError as e:
+                    print("Caught:", str(e))
+                except (ValueError, IOError) as e:
+                    print("Caught3:", str(e))
+                print("Continue")
+            except KeyError as f:
+                print("Caught2:", str(f))
+            print("End")
+            """))
 
         #print(out.getvalue())
         #print(err.getvalue())
@@ -999,25 +998,25 @@ class TestCase8(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-try:
-    try:
-        raise KeyError("test")
-    except IndexError as e:
-        print("Caught:", str(e))
-    except (ValueError, IOError) as e:
-        print("Caught3:", str(e))
-    finally:
-        print("Finally1")
+        intrep(dedent("""
+            try:
+                try:
+                    raise KeyError("test")
+                except IndexError as e:
+                    print("Caught:", str(e))
+                except (ValueError, IOError) as e:
+                    print("Caught3:", str(e))
+                finally:
+                    print("Finally1")
 
-    print("Continue")
+                print("Continue")
 
-except KeyError as e:
-    print("Caught2:", str(e))
-finally:
-    print("Finally2")
-print("End")
-""")
+            except KeyError as e:
+                print("Caught2:", str(e))
+            finally:
+                print("Finally2")
+            print("End")
+            """))
 
         #print(out.getvalue())
         #print(err.getvalue())
@@ -1030,28 +1029,28 @@ class TestCase9(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        intrep("""
-try:
-    try:
-        raise IndexError("test")
-    except IndexError as e:
-        print("Caught:", str(e))
-    except (ValueError, IOError) as e:
-        print("Caught3:", str(e))
-    finally:
-        print("Finally1")
+        intrep(dedent("""
+            try:
+                try:
+                    raise IndexError("test")
+                except IndexError as e:
+                    print("Caught:", str(e))
+                except (ValueError, IOError) as e:
+                    print("Caught3:", str(e))
+                finally:
+                    print("Finally1")
 
-    print("Continue")
+                print("Continue")
 
-except KeyError as e:
-    print("Caught2:", str(e))
-else:
-    print("Else2")
-finally:
-    print("Finally2")
+            except KeyError as e:
+                print("Caught2:", str(e))
+            else:
+                print("Else2")
+            finally:
+                print("Finally2")
 
-print("End")
-""")
+            print("End")
+            """))
 
         #print(out.getvalue())
         #print(err.getvalue())
@@ -1064,26 +1063,26 @@ class TestCase10(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         interp = Interpreter(writer=out, err_writer=err)
-        interp("""
-print("Start")
-x = 1
-y = 0
-out, ok, clean = 0, False, False
-try:
-    out = x/y
-except ZeroDivisionError:
-    out = -1
-    print("Boom!")
-else:
-    ok = True
-    print("Else")
-finally:
-    clean = True
-    print("Finally")
-print(out)
-print(ok)
-print(clean)
-""")
+        interp(dedent("""
+            print("Start")
+            x = 1
+            y = 0
+            out, ok, clean = 0, False, False
+            try:
+                out = x/y
+            except ZeroDivisionError:
+                out = -1
+                print("Boom!")
+            else:
+                ok = True
+                print("Else")
+            finally:
+                clean = True
+                print("Finally")
+            print(out)
+            print(ok)
+            print(clean)
+            """))
 
         print("\n".join(interp.trace))
         self.assertEqual("Start\nBoom!\nFinally\n-1\nFalse\nTrue\n", out.getvalue())
@@ -1094,36 +1093,37 @@ class TestCase11(unittest.TestCase):
         out = StringIO()
         err = StringIO()
         interp = Interpreter(writer=out, err_writer=err)
-        interp("""
-print("Start")
-try:
-    1/0
-except:
-    print("ZDE")
-print("End")
-""")
+        interp(dedent("""
+            print("Start")
+            try:
+                1/0
+            except:
+                print("ZDE")
+            print("End")
+            """))
 
         print("\n".join(interp.trace))
         self.assertEqual("Start\nZDE\nEnd\n", out.getvalue())
         #self.assertEqual(interp.symtable['out'], -1)
+
 
 class TestCase12(unittest.TestCase):
     def test_exceptions(self):
         out = StringIO()
         err = StringIO()
         interp = Interpreter(writer=out, err_writer=err)
-        interp("""
-print("Start")
-try:
-    1/0
-except IndexError:
-    print("IE")
-except Exception:
-    print("ZDE")
-except:
-    print("Bare")
-print("End")
-""")
+        interp(dedent("""
+            print("Start")
+            try:
+                1/0
+            except IndexError:
+                print("IE")
+            except Exception:
+                print("ZDE")
+            except:
+                print("Bare")
+            print("End")
+            """))
 
         print("\n".join(interp.trace))
         self.assertEqual("Start\nZDE\nEnd\n", out.getvalue())
