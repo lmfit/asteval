@@ -110,15 +110,16 @@ class TestCase(unittest.TestCase):
             return chk_str in out[0]
         return False
 
-    def check_error(self, chk_type='', chk_msg=''):
+    def check_error(self, chk_type='', chk_msg='', msg=''):
         try:
-            errtype, errmsg = self.interp.error[0].get_error()
-            self.assertEqual(errtype, chk_type)
-            if chk_msg:
-                self.assertTrue(chk_msg in errmsg)
+            if self.interp.error is not None:
+                errtype, errmsg = self.interp.error.get_error()
+                self.assertEqual(chk_type, errtype, msg=msg)
+                if chk_msg:
+                    self.assertTrue(chk_msg in errmsg, msg=msg)
         except IndexError:
             if chk_type:
-                self.assertTrue(False)
+                self.assertTrue(False, msg=msg)
 
     def get_error(self):
         """
@@ -572,12 +573,13 @@ a = arange(7)""")
                   'class', 'del', 'def', 'import', 'None'):
             self.interp.error = []
             # noinspection PyBroadException
+            expr = "%s= 2" % w
             try:
-                self.interp("%s= 2" % w, show_errors=False)
+                self.interp(expr, show_errors=False)
             except:
                 pass
 
-            self.check_error('SyntaxError')
+            self.check_error('SyntaxError', msg=expr)
 
         for w in ('True', 'False'):
             self.interp.error = []
@@ -780,7 +782,7 @@ def fcn(x, y):
         self.interp('open("foo", "wb")')
         self.check_error('RuntimeError')
         self.interp('open("foo", "rb")')
-        self.check_error('FileNotFoundError' if PY33Plus else 'IOError')
+        self.check_error('RuntimeError' if PY33Plus else 'IOError')
         self.interp('open("foo", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
@@ -830,7 +832,7 @@ def fcn(x, y):
 
     def test_errors(self):
         self.interp("x=1\ny=1\nz=56%$#%@$#%@#$...")
-        errtype, errmsg = self.interp.error[0].get_error()
+        errtype, errmsg = self.interp.error.get_error()
         print(errtype, errmsg)
 
     # def test_errors(self):
@@ -851,12 +853,10 @@ class TestCase2(unittest.TestCase):
 
 
 class TestCase3(unittest.TestCase):
-    def test_exceptions(self):
+    def test_exceptions_simple(self):
         out = StringIO()
         err = StringIO()
         intrep = Interpreter(writer=out, err_writer=err)
-        #intrep("print('out')")
-        #self.assertEqual(out.getvalue(), 'out\n')
         intrep("""
 x = []
 print(x)
@@ -864,13 +864,269 @@ try:
     print(x[0])
 except IndexError as e:
     print("Exception!")
-    #print(str(e))
-print("Continue")
-        """)
-        print(out.getvalue())
-        print(err.getvalue())
-        print('\n'.join(intrep.trace))
 
+print("Continue")
+""")
+
+        #print(out.getvalue())
+        #print(err.getvalue())
+        print('\n'.join(intrep.trace))
+        self.assertEqual('[]\nException!\nContinue\n', out.getvalue())
+
+
+class TestCase4(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("""
+x = [0, 1, 2]
+print(x)
+z = "foo"                                      # LINE 4
+prev, this, next = None, None, None
+try:                                           # LINE 6
+    for y in range(len(x)):
+        try:                                   # LINE 8
+            if y == 0:                         # LINE 9
+                raise IndexError("Test msg")
+            prev = x[y-1]
+        except (IndexError, TypeError) as e:   # LINE 12
+            prev = None                        # LINE 13
+            print(str(e))                      # LINE 14
+        except RuntimeError as e:
+            print(e)
+            w = "bar"
+
+        try:
+            this = x[y]
+        except (IndexError, TypeError):
+            this = None
+            break
+
+        try:
+            next = x[y+1]
+        except (IndexError, TypeError):
+            next = None
+
+        print(prev, this, next)
+
+except ValueError as e:
+    print(e)
+""")
+        #print(out.getvalue())
+        #print(err.getvalue())
+        #print('\n'.join(intrep.trace))
+        self.assertEqual('[0, 1, 2]\nTest msg\nNone 0 1\n0 1 2\n1 2 None\n', out.getvalue())
+
+
+class TestCase5(unittest.TestCase):
+    def test_exceptions_nested(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("""
+try:
+    try:
+        raise IndexError("test")
+    except IndexError as e:
+        print("Caught:", str(e))
+    except (ValueError, IOError) as e:
+        print("Caught3:", str(e))
+    print("Continue")
+except ValueError as e:
+    print("Caught2:", str(e))
+print("End")
+""")
+
+        #print(out.getvalue())
+        #print(err.getvalue())
+        #print('\n'.join(intrep.trace))
+        self.assertEqual("Caught: <class 'IndexError'>\nContinue\nEnd\n", out.getvalue())
+
+
+class TestCase6(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("""
+try:
+    try:
+        raise ValueError("test")
+    except IndexError as e:
+        print("Caught:", str(e))
+    except (ValueError, IOError) as e:
+        print("Caught3:", str(e))
+    print("Continue")
+except KeyError as e:
+    print("Caught2:", str(e))
+print("End")
+""")
+
+        #print(out.getvalue())
+        #print(err.getvalue())
+        #print('\n'.join(intrep.trace))
+        self.assertEqual("Caught3: <class 'ValueError'>\nContinue\nEnd\n", out.getvalue())
+
+
+class TestCase7(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("""
+try:
+    try:
+        raise KeyError("test")
+    except IndexError as e:
+        print("Caught:", str(e))
+    except (ValueError, IOError) as e:
+        print("Caught3:", str(e))
+    print("Continue")
+except KeyError as f:
+    print("Caught2:", str(f))
+print("End")
+""")
+
+        #print(out.getvalue())
+        #print(err.getvalue())
+        print('\n'.join(intrep.trace))
+        self.assertEqual("Caught2: <class 'KeyError'>\nEnd\n", out.getvalue())
+
+
+class TestCase8(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("""
+try:
+    try:
+        raise KeyError("test")
+    except IndexError as e:
+        print("Caught:", str(e))
+    except (ValueError, IOError) as e:
+        print("Caught3:", str(e))
+    finally:
+        print("Finally1")
+
+    print("Continue")
+
+except KeyError as e:
+    print("Caught2:", str(e))
+finally:
+    print("Finally2")
+print("End")
+""")
+
+        #print(out.getvalue())
+        #print(err.getvalue())
+        #print('\n'.join(intrep.trace))
+        self.assertEqual("Finally1\nCaught2: <class 'KeyError'>\nFinally2\nEnd\n", out.getvalue())
+
+
+class TestCase9(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        intrep = Interpreter(writer=out, err_writer=err)
+        intrep("""
+try:
+    try:
+        raise IndexError("test")
+    except IndexError as e:
+        print("Caught:", str(e))
+    except (ValueError, IOError) as e:
+        print("Caught3:", str(e))
+    finally:
+        print("Finally1")
+
+    print("Continue")
+
+except KeyError as e:
+    print("Caught2:", str(e))
+else:
+    print("Else2")
+finally:
+    print("Finally2")
+
+print("End")
+""")
+
+        #print(out.getvalue())
+        #print(err.getvalue())
+        #print('\n'.join(intrep.trace))
+        self.assertEqual("Caught: <class 'IndexError'>\nFinally1\nContinue\nElse2\nFinally2\nEnd\n", out.getvalue())
+
+
+class TestCase10(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        interp = Interpreter(writer=out, err_writer=err)
+        interp("""
+print("Start")
+x = 1
+y = 0
+out, ok, clean = 0, False, False
+try:
+    out = x/y
+except ZeroDivisionError:
+    out = -1
+    print("Boom!")
+else:
+    ok = True
+    print("Else")
+finally:
+    clean = True
+    print("Finally")
+print(out)
+print(ok)
+print(clean)
+""")
+
+        print("\n".join(interp.trace))
+        self.assertEqual("Start\nBoom!\nFinally\n-1\nFalse\nTrue\n", out.getvalue())
+        self.assertEqual(interp.symtable['out'], -1)
+
+class TestCase11(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        interp = Interpreter(writer=out, err_writer=err)
+        interp("""
+print("Start")
+try:
+    1/0
+except:
+    print("ZDE")
+print("End")
+""")
+
+        print("\n".join(interp.trace))
+        self.assertEqual("Start\nZDE\nEnd\n", out.getvalue())
+        #self.assertEqual(interp.symtable['out'], -1)
+
+class TestCase12(unittest.TestCase):
+    def test_exceptions(self):
+        out = StringIO()
+        err = StringIO()
+        interp = Interpreter(writer=out, err_writer=err)
+        interp("""
+print("Start")
+try:
+    1/0
+except IndexError:
+    print("IE")
+except Exception:
+    print("ZDE")
+except:
+    print("Bare")
+print("End")
+""")
+
+        print("\n".join(interp.trace))
+        self.assertEqual("Start\nZDE\nEnd\n", out.getvalue())
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval, TestCase2):

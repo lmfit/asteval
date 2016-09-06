@@ -56,12 +56,6 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'tuple', 'type', 'zip')
 
 # inherit these from python's math
-# FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
-#              'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'e', 'exp',
-#              'fabs', 'factorial', 'floor', 'fmod', 'frexp', 'fsum',
-#              'hypot', 'isinf', 'isnan', 'ldexp', 'log', 'log10', 'log1p',
-#              'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
-#              'tanh', 'trunc')
 FROM_MATH = ('ceil', 'floor', 'sqrt', 'trunc')
 
 FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
@@ -143,6 +137,16 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
 NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
+
+
+def get_class_name(obj):
+    try:
+        return obj.__name__
+    except:
+        try:
+            return obj.__class__.__name__
+        except:
+            return str(obj)
 
 
 def _open(filename, mode='r', buffering=0):
@@ -265,16 +269,7 @@ class ExceptionHolder(object):
 
     def get_error(self):
         """retrieve error data"""
-        # col_offset = -1
-        # if self.node is not None:
-        #     try:
-        #         col_offset = self.node.col_offset
-        #     except AttributeError:
-        #         pass
-        try:
-            exc_name = self.exc.__name__
-        except AttributeError:
-            exc_name = str(self.exc)
+        exc_name = get_class_name(self.exc)
 
         if exc_name in (None, 'None'):
             exc_name = 'UnknownError'
@@ -287,11 +282,12 @@ class ExceptionHolder(object):
                 out.append('`{}`'.format(lines[self.lineno-1]))
             except IndexError:
                 pass
-        # out.append("%s" % self.expr)
-        # if col_offset > 0:
-        #     out.append("%s^^^" % (col_offset * ' '))
+
         out.append(str(self.msg))
         return exc_name, '\n\n'.join(out)
+
+    def __str__(self):
+        return self.get_error()[0]
 
 
 class NameFinder(ast.NodeVisitor):

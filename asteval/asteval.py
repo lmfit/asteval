@@ -16,21 +16,16 @@ import ast
 import math
 from time import time
 
-import sys
-
 from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
                        LOCALFUNCS, NUMPY_RENAMES, op2func, ExceptionHolder,
-                       ReturnedNone, valid_symbol_name, quote, code_wrap, MAX_CYCLES)
+                       ReturnedNone, valid_symbol_name, quote, code_wrap, MAX_CYCLES, get_class_name)
 
-HAS_NUMPY = False
 try:
     # noinspection PyUnresolvedReferences
     import numpy
-
     HAS_NUMPY = True
 except ImportError:
-    # print("Warning: numpy not available... functionality will be limited.")
-    pass
+    HAS_NUMPY = False
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -85,7 +80,7 @@ class Interpreter:
 
     def __init__(self, symtable=None, writer=None, use_numpy=False, err_writer=None,
                  max_time=MAX_EXEC_TIME):
-        self.debugging = False  # Set to True to disable the runtime limiter
+        self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
@@ -97,11 +92,10 @@ class Interpreter:
         self.trace = []
         self.symtable = symtable
         self._interrupt = None
-        self.error = []
+        self.error = None #[]
         self.error_msg = None
         self.expr = None
         self.retval = None
-        self.last_error = None
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
@@ -148,7 +142,7 @@ class Interpreter:
         return self.trace
 
     def get_errors(self):
-        return self.error
+       return self.error
 
     def add_symbol(self, name, value):
         self.symtable[name] = value
@@ -175,40 +169,42 @@ class Interpreter:
 
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
-        #print(node, exc, msg, expr, lineno)
-        if self.error is None:
-            self.error = []
+        # if self.error is None:
+        #     self.error = []
         if expr is None:
             expr = self.expr
-        if self.error and not isinstance(node, ast.Module):
+        if self.error is not None and not isinstance(node, ast.Module):
             msg = str(msg)
         if lineno is None:
             lineno = self.getLineno(node)
-        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
-        self._interrupt = ast.Break()
-        self.error.append(err)
-        if self.error_msg is None:
-            #self.error_msg = "%s in `%s`" % (msg, self.expr)
-            self.error_msg = msg
-        elif msg:
-            self.error_msg = "%s\n %s" % (self.error_msg, msg)
         if exc is None:
             # noinspection PyBroadException
             try:
-                exc = self.error[0].exc
+                exc = self.error.exc
             except:
                 exc = RuntimeError
-        if len(self.error) == 1:
-            self.tracer("{}Exception `{}` raised: {}".format(self.getLinenoLabel(node), exc.__name__, self.error_msg))
+
+        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
+
+        self.error = err #.append(err)
+        if self.error_msg is None:
+            self.error_msg = msg
+        elif msg:
+            self.error_msg = "%s\n %s" % (self.error_msg, msg)
+
+        #if len(self.error) == 1:
+        self.tracer("{}Exception `{}` raised: {}".format(self.getLinenoLabel(node),
+                                                         get_class_name(exc), self.error_msg))
+
         raise exc(self.error_msg)
 
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
-    def eval(self, expr, show_errors=True, **kwargs):
+    def eval(self, expr, show_errors=True, **_):
         """evaluates a single or block of statements or whole file"""
         # self.lineno = lineno
-        self.error = []
+        self.error = None #[]
         self.trace = []
         self.start = time()
         self.cycles = 0
@@ -217,39 +213,38 @@ class Interpreter:
             node = self.parse(expr)
         except:
             errmsg = exc_info()[1]
-            if self.error:
-                errmsg = "\n".join(self.error[0].get_error())
+            if self.error is not None:
+                errmsg = "\n".join(self.error.get_error())
             if not show_errors:
                 # noinspection PyBroadException
                 try:
-                    exc = self.error[0].exc
+                    exc = self.error.exc
                 except:
-                    exc = RuntimeError
+                    exc = SyntaxError
                 raise exc(errmsg)
             print(errmsg, file=self.err_writer)
             return
+
         # noinspection PyBroadException
         try:
-            return self.run(node, expr=expr)
+            ret = self.run(node, expr=expr)
+            if self.error is not None:
+                self.tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
+            return ret
         except:
             errmsg = exc_info()[1]
-            if self.error:
-                errmsg = "\n".join(self.error[0].get_error())
+            if self.error is not None:
+                errmsg = "\n".join(self.error.get_error())
             if not show_errors:
                 # noinspection PyBroadException
                 try:
-                    exc = self.error[0].exc
+                    exc = self.error.exc
                 except:
                     exc = RuntimeError
                 raise exc(errmsg)
             print(errmsg, file=self.err_writer)
             return
 
-
-    # main entry point for Ast node evaluation
-    #  parse:  text of statements -> ast
-    #  run:    ast -> result
-    #  eval:   string statement -> result = run(parse(statement))
     def parse(self, text):
         """parse statement/expression to Ast representation"""
         self.expr = text
@@ -258,13 +253,11 @@ class Interpreter:
         try:
             return ast.parse(text)
         except SyntaxError as e:
-            # self.tracer(str(e))
-            self.raise_exception(None, msg='Syntax Error: {}'.format(e), expr=text, lineno=e.lineno)
+            self.raise_exception(None, exc=SyntaxError, msg='Syntax Error: {}'.format(e), expr=text, lineno=e.lineno)
         except Exception as e:
-            # self.tracer(str(e))
-            self.raise_exception(None, msg='Runtime Error: {}'.format(e), expr=text)
+            self.raise_exception(None, exc=SyntaxError, msg='Runtime Error: {}'.format(e), expr=text)
 
-    def run(self, node, expr=None, with_raise=True):
+    def run(self, node, expr=None):
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
@@ -273,37 +266,33 @@ class Interpreter:
         self.cycles += 1
         if self.cycles > MAX_CYCLES:
             raise RuntimeError("Max cycles exceeded, max is {}.".format(MAX_CYCLES))
-        if self.error:
+
+        if self.error is not None:
             return
+
         if node is None:
             return
+
         if isinstance(node, str):
             node = self.parse(node)
-        # if lineno is not None:
-        #     self.lineno = lineno
+
         if expr is not None:
             self.expr = expr
 
         # get handler for this node:
         #   on_xxx with handle nodes of type 'xxx', etc
         try:
-            handler = self.node_handlers[node.__class__.__name__.lower()]
+            handler = self.node_handlers[get_class_name(node).lower()]
         except KeyError:
             return self.unimplemented(node)
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
         # noinspection PyBroadException
-        try:
-            #self.tracer("Calling `{}({})`...".format(handler.__name__, node))
-            ret = handler(node)
-            if isinstance(ret, enumerate):
-                ret = list(ret)
-            return ret
-        except Exception as e:
-            #print("****", str(e))
-            if with_raise:
-                self.raise_exception(node, expr=expr, msg='An error occurred!')
+        ret = handler(node)
+        if isinstance(ret, enumerate):
+            ret = list(ret)
+        return ret
 
     @staticmethod
     def dump(node, **kw):
@@ -423,7 +412,11 @@ class Interpreter:
                 errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
-            self.tracer("{}Assigned value of {} to `{}`.".format(self.getLinenoLabel(node), code_wrap(val), node.id))
+            if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
+                self.tracer("{}Assigned value of {} to `{}`.".format(self.getLinenoLabel(node), code_wrap(val), node.id))
+            else:
+                self.tracer(
+                    "{}Assigned value of {} to `{}`.".format(self.getLinenoLabel(node), code_wrap(repr(val)), node.id))
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
 
@@ -450,7 +443,6 @@ class Interpreter:
                 for telem, tval in zip(node.elts, val):
                     self.node_assign(telem, tval)
             else:
-                #raise ValueError('too many values to unpack')
                 self.raise_exception(node, exc=ValueError, msg='too many values to unpack')
 
         elif isinstance(node, str):
@@ -675,38 +667,74 @@ class Interpreter:
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """exception handler"""
-        if node.name is not None and self.last_error:  # set the `as` variable if specified
-            self.node_assign(node.name, self.last_error)
         for ebody in node.body:  # run the statements in the handler body
-            self.run(ebody, with_raise=False)
+            self.run(ebody)
 
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
-        no_errors = True
+        no_errors, found, exc, last_error = True, False, None, None
         self.tracer('{}Executing `try` block.'.format(self.getLinenoLabel(node)))
         for tnode in node.body:
-            self.run(tnode, with_raise=False)
-            no_errors = no_errors and not self.error
-            if self.error:
-                self.last_error = self.error[-1].exc_info[1]
-                self.error = []
-                self.tracer('{}Executing exception handlers...'.format(self.getLinenoLabel(node)))
+            try:
+                self.run(tnode)
+            except Exception as ex:
+                exc = ex
+                no_errors = False
+                if self.error is None:
+                    self.error = ExceptionHolder(node, exc=exc)
+                last_error = self.error
+                self.error = None
+                ex_name = get_class_name(exc)
+                self.tracer("{}{} exception raised!".format(self.getLinenoLabel(node), ex_name))
+                found = False
+
                 for hnd in node.handlers:
-                    self.run(hnd)
-                self.last_error = None
+                    if hnd.type is not None:
+                        if isinstance(hnd.type, ast.Name) and isinstance(ex, builtins.get(hnd.type.id)):
+                            if hnd.name is not None:
+                                self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error.exc)
+                            self.run(hnd)
+                            found = True
+                            break
+
+                        elif isinstance(hnd.type, ast.Tuple):
+                            for t in hnd.type.elts:
+                                if isinstance(ex, builtins.get(t.id)):
+                                    if hnd.name is not None:
+                                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error.exc)
+                                    self.run(hnd)
+                                    found = True
+                                    break
+                    if found:
+                        break
+
                 break
 
-        if no_errors and hasattr(node, 'orelse'):
-            if node.orelse:
-                self.tracer('{}Executing `else` block.'.format(self.getLinenoLabel(node.orelse)))
-                for tnode in node.orelse:
-                    self.run(tnode)
+        if no_errors and hasattr(node, 'orelse') and node.orelse:
+            self.tracer('{}Executing `else` block.'.format(self.getLinenoLabel(node.orelse)))
+            for tnode in node.orelse:
+                self.run(tnode)
 
-        if hasattr(node, 'finalbody'):
-            if node.finalbody:
-                self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node.finalbody)))
-                for tnode in node.finalbody:
-                    self.run(tnode)
+        if not no_errors and not found and exc is not None:
+            # Run a bare except if it exists
+            for hnd in node.handlers:
+                if hnd.type is None:
+                    self.tracer("{}Executing bare except... (Note: Poor coding practice)".format(self.getLinenoLabel(node)))
+                    if hnd.name is not None:  # Not sure if this is possible?
+                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error.exc)
+                    self.run(hnd)
+                    found = True  # prevent unhandled exception
+                    break
+
+        if hasattr(node, 'finalbody') and node.finalbody:
+            self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node.finalbody)))
+            for tnode in node.finalbody:
+                self.run(tnode)
+
+        if not no_errors and not found and exc is not None:
+            self.tracer("{}Unhandled exception, unrolling stack...".format(self.getLinenoLabel(node)))
+            self.error = last_error
+            raise exc
 
     def on_raise(self, node):  # ('type', 'inst', 'tback')
         """raise statement: note difference for python 2 and 3"""
@@ -716,12 +744,18 @@ class Interpreter:
         else:
             excnode = node.type
             msgnode = node.inst
+
         out = self.run(excnode)
-        msg = ' '.join(out.args)
+
+        try:
+            msg = ' '.join(out.args)
+        except TypeError as e:
+            msg = ''
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
             msg = "`%s: %s`" % (msg, msg2)
-        self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
+
+        self.raise_exception(node, exc=out.__class__, msg=msg, expr='')
 
     def on_call(self, node):
         """function execution"""
