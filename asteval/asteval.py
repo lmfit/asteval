@@ -1,7 +1,5 @@
 """
 Safe(ish) evaluator of python expressions, using ast module.
-The emphasis here is on mathematical expressions, and so
-numpy functions are imported if available and used.
 
 Symbols are held in the Interpreter symtable -- a simple
 dictionary supporting a simple, flat namespace.
@@ -15,17 +13,12 @@ from sys import exc_info, stdout, stderr, version_info
 import ast
 import math
 from time import time
+from inspect import getargspec
 
-from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       LOCALFUNCS, NUMPY_RENAMES, op2func, ExceptionHolder,
-                       ReturnedNone, valid_symbol_name, quote, code_wrap, MAX_CYCLES, get_class_name)
-
-try:
-    # noinspection PyUnresolvedReferences
-    import numpy
-    HAS_NUMPY = True
-except ImportError:
-    HAS_NUMPY = False
+from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
+                       LOCALFUNCS, op2func,
+                       ReturnedNone, valid_symbol_name, quote,
+                       code_wrap, MAX_CYCLES, get_class_name)
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -36,8 +29,7 @@ MAX_EXEC_TIME = 2  # sec
 
 # noinspection PyIncorrectDocstring
 class Interpreter:
-    """mathematical expression compiler and interpreter.
-
+    """
   This module compiles expressions and statements to AST representation,
   using python's ast module, and then executes the AST representation
   using a dictionary of named object (variable, functions).
@@ -64,8 +56,6 @@ class Interpreter:
   builtin functions are missing ('eval', 'exec', and 'getattr' for
   example) that can be considered unsafe.
 
-  If numpy is installed, many numpy functions are also imported.
-
   """
 
     supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
@@ -78,8 +68,7 @@ class Interpreter:
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
                        'while')
 
-    def __init__(self, symtable=None, writer=None, use_numpy=False, err_writer=None,
-                 max_time=MAX_EXEC_TIME):
+    def __init__(self, symtable=None, writer=None, err_writer=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -92,11 +81,9 @@ class Interpreter:
         self.trace = []
         self.symtable = symtable
         self._interrupt = None
-        self.error = None #[]
-        self.error_msg = None
+        self.error = None
         self.expr = None
         self.retval = None
-        self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self.print_
 
@@ -111,14 +98,6 @@ class Interpreter:
             if hasattr(math, sym):
                 symtable[sym] = getattr(math, sym)
 
-        if self.use_numpy:
-            for sym in FROM_NUMPY:
-                if hasattr(numpy, sym):
-                    symtable[sym] = getattr(numpy, sym)
-            for name, sym in NUMPY_RENAMES.items():
-                if hasattr(numpy, sym):
-                    symtable[name] = getattr(numpy, sym)
-
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node))
                                    for node in self.supported_nodes))
 
@@ -128,7 +107,7 @@ class Interpreter:
 
         self.no_deepcopy = []
         for key, val in symtable.items():
-            if callable(val) or 'numpy.lib.index_tricks' in repr(val):
+            if callable(val):
                 self.no_deepcopy.append(key)
 
     def set_trace(self, on_off):
@@ -164,98 +143,121 @@ class Interpreter:
 
     @staticmethod
     def getLineno(node):
-        if hasattr(node, 'lineno'):
+        if node is not None and hasattr(node, 'lineno'):
             return node.lineno
 
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
+        #print(node, exc, msg)
         # if self.error is None:
         #     self.error = []
-        if expr is None:
-            expr = self.expr
-        if self.error is not None and not isinstance(node, ast.Module):
-            msg = str(msg)
+        # if expr is None:
+        #     expr = self.expr
+        #if self.error is not None and not isinstance(node, ast.Module):
+        #    msg = str(msg)
         if lineno is None:
             lineno = self.getLineno(node)
+
         if exc is None:
-            # noinspection PyBroadException
-            try:
-                exc = self.error.exc
-            except:
-                exc = RuntimeError
+            # # noinspection PyBroadException
+            # try:
+            #     exc = self.error.exc
+            # except:
+            exc = RuntimeError
 
-        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
+        #err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
 
-        self.error = err #.append(err)
-        if self.error_msg is None:
-            self.error_msg = msg
-        elif msg:
-            self.error_msg = "%s\n %s" % (self.error_msg, msg)
+        #err_msg = str(exc) if str(exc)
+        # if msg:
 
-        #if len(self.error) == 1:
-        self.tracer("{}Exception `{}` raised: {}".format(self.getLinenoLabel(node),
-                                                         get_class_name(exc), self.error_msg))
+        self.error = exc(msg)
+        # print(self.error)
+        # if self.error_msg is None:
+        #     self.error_msg = msg
+        # elif msg:
+        #     self.error_msg = "%s\n %s" % (self.error_msg, msg)
 
-        raise exc(self.error_msg)
+        self.tracer("Exception `{}` raised: {}".format(get_class_name(exc), msg))
+        raise exc(msg)
 
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
-    def eval(self, expr, show_errors=True, **_):
+    def eval(self, expr, **kw):
         """evaluates a single or block of statements or whole file"""
         # self.lineno = lineno
-        self.error = None #[]
+        self.error = None
         self.trace = []
         self.start = time()
         self.cycles = 0
         # noinspection PyBroadException
-        try:
-            node = self.parse(expr)
-        except:
-            errmsg = exc_info()[1]
-            if self.error is not None:
-                errmsg = "\n".join(self.error.get_error())
-            if not show_errors:
-                # noinspection PyBroadException
-                try:
-                    exc = self.error.exc
-                except:
-                    exc = SyntaxError
-                raise exc(errmsg)
-            print(errmsg, file=self.err_writer)
-            return
+
+        node = self.parse(expr)
+
+        # try:
+        #     node = self.parse(expr)
+        # except Exception as e:
+        #     errmsg = exc_info()[1]
+        #     if self.error is not None:
+        #         #errmsg = "\n".join(self.error.get_error())
+        #         errmsg = str(self.error)
+        #         raise self.error
+        #
+        #     raise
+
+            # if not show_errors:
+            #     # noinspection PyBroadException
+            #     try:
+            #         exc = self.error.exc
+            #     except:
+            #         exc = SyntaxError
+            #     raise exc(errmsg)
+            # print(errmsg, file=self.err_writer)
+            # return
+
+        ret = self.run(node, expr=expr)
+        if self.error is not None:
+            self.tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
+        return ret
 
         # noinspection PyBroadException
-        try:
-            ret = self.run(node, expr=expr)
-            if self.error is not None:
-                self.tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
-            return ret
-        except:
-            errmsg = exc_info()[1]
-            if self.error is not None:
-                errmsg = "\n".join(self.error.get_error())
-            if not show_errors:
-                # noinspection PyBroadException
-                try:
-                    exc = self.error.exc
-                except:
-                    exc = RuntimeError
-                raise exc(errmsg)
-            print(errmsg, file=self.err_writer)
-            return
+        # try:
+        #     ret = self.run(node, expr=expr)
+        #     if self.error is not None:
+        #         self.tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
+        #     return ret
+        # except Exception as e:
+        #     errmsg = exc_info()[1]
+        #     if self.error is not None:
+        #         #errmsg = "\n".join(self.error.get_error())
+        #         errmsg = str(self.error)
+        #         raise self.error
+        #
+        #     raise
+
+            # if not show_errors:
+            #     # noinspection PyBroadException
+            #     try:
+            #         exc = self.error.exc
+            #     except:
+            #         exc = RuntimeError
+            #     raise exc(errmsg)
+            # print(errmsg, file=self.err_writer)
+            # return
 
     def parse(self, text):
         """parse statement/expression to Ast representation"""
         self.expr = text
 
         # noinspection PyBroadException
-        try:
-            return ast.parse(text)
-        except SyntaxError as e:
-            self.raise_exception(None, exc=SyntaxError, msg='Syntax Error: {}'.format(e), expr=text, lineno=e.lineno)
-        except Exception as e:
-            self.raise_exception(None, exc=SyntaxError, msg='Runtime Error: {}'.format(e), expr=text)
+        return ast.parse(text)
+
+        # try:
+        #     return ast.parse(text)
+        # except SyntaxError as e:
+        #     self.raise_exception(None, exc=SyntaxError, msg='Syntax Error: {}'.format(e), expr=text, lineno=e.lineno)
+        # except Exception as e:
+        #     self.raise_exception(None, exc=SyntaxError, msg='Runtime Error: {}'.format(e), expr=text)
 
     def run(self, node, expr=None):
         """executes parsed Ast representation for an expression"""
@@ -263,11 +265,13 @@ class Interpreter:
         #    run(None) and expect a None in return.
         if not self.debugging and time() - self.start > self.max_time:
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
+
         self.cycles += 1
         if self.cycles > MAX_CYCLES:
             raise RuntimeError("Max cycles exceeded, max is {}.".format(MAX_CYCLES))
 
         if self.error is not None:
+            # Skip over statements if there's a pending exception
             return
 
         if node is None:
@@ -531,6 +535,17 @@ class Interpreter:
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
+
+            elif tnode.__class__ == ast.Subscript:
+                sym = self.run(tnode.value)
+                xslice = self.run(tnode.slice)
+                if isinstance(tnode.slice, ast.Index):
+                    del sym[xslice]
+                elif isinstance(tnode.slice, ast.Slice):
+                    # noinspection PyTypeChecker
+                    del sym[slice(xslice.start, xslice.stop, xslice.step)]
+                elif isinstance(tnode.slice, ast.ExtSlice):
+                    del sym[xslice]
             else:
                 msg = "could not delete symbol"
                 self.raise_exception(node, msg=msg)
@@ -575,9 +590,7 @@ class Interpreter:
             self.tracer("{}Comparison `{} {} {}` returned `{}`."
                         .format(self.getLinenoLabel(node), quote(lval), name, quote(rval), quote(out)))
             lval = rval
-            if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
-                break
-            elif not out:
+            if not out:
                 break
         return out
 
@@ -680,19 +693,20 @@ class Interpreter:
             except Exception as ex:
                 exc = ex
                 no_errors = False
-                if self.error is None:
-                    self.error = ExceptionHolder(node, exc=exc)
+                #if self.error is None:
+                #    self.error = ExceptionHolder(node, exc=exc)
+                self.error = exc
                 last_error = self.error
                 self.error = None
                 ex_name = get_class_name(exc)
-                self.tracer("{}{} exception raised!".format(self.getLinenoLabel(node), ex_name))
+                #self.tracer("{}{} exception raised!".format(self.getLinenoLabel(node), ex_name))
                 found = False
 
                 for hnd in node.handlers:
                     if hnd.type is not None:
                         if isinstance(hnd.type, ast.Name) and isinstance(ex, builtins.get(hnd.type.id)):
                             if hnd.name is not None:
-                                self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error.exc)
+                                self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
                             self.run(hnd)
                             found = True
                             break
@@ -701,7 +715,7 @@ class Interpreter:
                             for t in hnd.type.elts:
                                 if isinstance(ex, builtins.get(t.id)):
                                     if hnd.name is not None:
-                                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error.exc)
+                                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
                                     self.run(hnd)
                                     found = True
                                     break
@@ -721,13 +735,13 @@ class Interpreter:
                 if hnd.type is None:
                     self.tracer("{}Executing bare except... (Note: Poor coding practice)".format(self.getLinenoLabel(node)))
                     if hnd.name is not None:  # Not sure if this is possible?
-                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error.exc)
+                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
                     self.run(hnd)
                     found = True  # prevent unhandled exception
                     break
 
         if hasattr(node, 'finalbody') and node.finalbody:
-            self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node.finalbody)))
+            self.tracer('{}Executing `finally` block.'.format(self.getLinenoLabel(node)))
             for tnode in node.finalbody:
                 self.run(tnode)
 
@@ -762,11 +776,25 @@ class Interpreter:
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func)
 
+        name = ''
+        if hasattr(func, '__name__'):
+            name = func.__name__
+        elif hasattr(func, 'name'):
+            name = func.name
+
+        self.tracer("{}Calling function {}()...".format(self.getLinenoLabel(node), name))
+
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
             self.raise_exception(node, exc=TypeError, msg=msg)
 
         args = [self.run(targ) for targ in node.args]
+
+        # arg_spec, _, _, _ = getargspec(func)
+        # if len(args) > len(arg_spec):
+        #     self.tracer("{}, {}".format(len(arg_spec), len(args)))
+        #     self.raise_exception(node, exc=TypeError, msg='Wrong number of arguments to function!')
+
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
             args = args + self.run(starargs)
@@ -783,12 +811,6 @@ class Interpreter:
         if kwargs is not None:
             keywords.update(self.run(kwargs))
 
-        name = ''
-        if hasattr(func, '__name__'):
-            name = func.__name__
-        elif hasattr(func, 'name'):
-            name = func.name
-
         arg_list = []
         if args:
             arg_list.append(', '.join([quote(arg) for arg in args]))
@@ -801,10 +823,10 @@ class Interpreter:
         try:
             ret = func(*args, **keywords)
         except Exception as e:
-            self.tracer('{}Function `{}({})` raised on exception `{}`.'
+            self.tracer('{}Function `{}({})` raised on exception: {}.'
                         .format(self.getLinenoLabel(node), name, arg_str, str(e)))
 
-            self.raise_exception(node, msg="Error calling `%s()`: `%s`" % (name, str(e)))
+            self.raise_exception(node, exc=e.__class__, msg="Error calling `%s()`: `%s`" % (name, str(e)))
             return
 
         if name not in ('pprint', 'print', 'jprint'):
@@ -868,8 +890,7 @@ class Procedure(object):
     'functiondef' ast node for later evaluation.
     """
 
-    def __init__(self, name, interp, doc=None, lineno=0,
-                 body=None, args=None, kwargs=None,
+    def __init__(self, name, interp, doc=None, lineno=0, body=None, args=None, kwargs=None,
                  vararg=None, varkws=None):
         self.name = name
         self.__name__ = name
@@ -887,8 +908,10 @@ class Procedure(object):
         sig = ""
         if self.argnames:
             sig = "%s%s" % (sig, ', '.join(self.argnames))
+
         if self.vararg is not None:
             sig = "%s, *%s" % (sig, self.vararg)
+
         if self.kwargs:
             if sig:
                 sig = "%s, " % sig
@@ -897,9 +920,12 @@ class Procedure(object):
 
         if self.varkws is not None:
             sig = "%s, **%s" % (sig, self.varkws)
-        sig = "<Procedure %s(%s)>" % (self.name, sig)
-        if self.__doc__ is not None:
-            sig = "%s\n  %s" % (sig, self.__doc__)
+
+        sig = "<Function %s(%s)>" % (self.name, sig)
+
+        #if self.__doc__ is not None:
+        #    sig = "%s\n  %s" % (sig, self.__doc__)
+
         return sig
 
     def __call__(self, *args, **kwargs):
@@ -907,10 +933,9 @@ class Procedure(object):
         args = list(args)
         n_args = len(args)
         n_names = len(self.argnames)
-        n_kws = len(kwargs)
 
         # may need to move kwargs to args if names align!
-        if (n_args < n_names) and n_kws > 0:
+        if n_args < n_names and kwargs:
             for name in self.argnames[n_args:]:
                 if name in kwargs:
                     args.append(kwargs.pop(name))
@@ -918,18 +943,19 @@ class Procedure(object):
             n_names = len(self.argnames)
 
         if self.argnames and kwargs is not None:
-            msg = "multiple values for keyword argument `%s` in Procedure `%s`"
+            msg = "multiple values for keyword argument `{}`"
             for targ in self.argnames:
                 if targ in kwargs:
                     self.raise_exc(None, exc=TypeError,
-                                   msg=msg % (targ, self.name),
+                                   msg=msg.format(targ),
                                    lineno=self.lineno)
 
-        if n_args != n_names:
-            if n_args < n_names:
-                msg = 'not enough arguments for Procedure `%s()`' % self.name
-                msg = '`%s` (expected `%i`, got `%i`)' % (msg, n_names, n_args)
-                self.raise_exc(None, exc=TypeError, msg=msg)
+        msg = '[expected `{}`, got `{}`]'.format(n_names, n_args)
+        if n_args < n_names:
+            self.raise_exc(None, exc=TypeError, msg="not enough positional parameters {}".format(msg))
+
+        elif n_args > n_names and not self.vararg:
+            self.raise_exc(None, exc=TypeError, msg="too many positional parameters {}".format(msg))
 
         for argname in self.argnames:
             symlocals[argname] = args.pop(0)
@@ -947,15 +973,12 @@ class Procedure(object):
                 symlocals[self.varkws] = kwargs
 
             elif kwargs:
-                msg = 'extra keyword arguments for Procedure `%s` (`%s`)'
-                msg = msg % (self.name, ','.join(list(kwargs.keys())))
-                self.raise_exc(None, msg=msg, exc=TypeError,
-                               lineno=self.lineno)
+                self.raise_exc(None, msg='extra keyword arguments (`{}`)'.format(','.join(list(kwargs.keys()))),
+                               exc=TypeError, lineno=self.lineno)
 
         except (ValueError, LookupError, TypeError,
                 NameError, AttributeError):
-            msg = 'incorrect arguments for Procedure `%s`' % self.name
-            self.raise_exc(None, msg=msg, lineno=self.lineno)
+            self.raise_exc(None, msg='incorrect arguments', lineno=self.lineno)
 
         save_symtable = self.__asteval__.symtable.copy()
         self.__asteval__.symtable.update(symlocals)

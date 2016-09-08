@@ -58,86 +58,6 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
 # inherit these from python's math
 FROM_MATH = ('ceil', 'floor', 'sqrt', 'trunc')
 
-FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
-              'angle', 'any', 'append', 'arange', 'arccos', 'arccosh',
-              'arcsin', 'arcsinh', 'arctan', 'arctan2', 'arctanh',
-              'argmax', 'argmin', 'argsort', 'argwhere', 'around', 'array',
-              'array2string', 'asanyarray', 'asarray', 'asarray_chkfinite',
-              'ascontiguousarray', 'asfarray', 'asfortranarray',
-              'asmatrix', 'asscalar', 'atleast_1d', 'atleast_2d',
-              'atleast_3d', 'average', 'bartlett', 'base_repr',
-              'bitwise_and', 'bitwise_not', 'bitwise_or', 'bitwise_xor',
-              'blackman', 'bool', 'broadcast', 'broadcast_arrays', 'byte',
-              'c_', 'cdouble', 'ceil', 'cfloat', 'chararray', 'choose',
-              'clip', 'clongdouble', 'clongfloat', 'column_stack',
-              'common_type', 'complex', 'complex128', 'complex64',
-              'complex_', 'complexfloating', 'compress', 'concatenate',
-              'conjugate', 'convolve', 'copy', 'copysign', 'corrcoef',
-              'correlate', 'cos', 'cosh', 'cov', 'cross', 'csingle',
-              'cumprod', 'cumsum', 'datetime_data', 'deg2rad', 'degrees',
-              'delete', 'diag', 'diag_indices', 'diag_indices_from',
-              'diagflat', 'diagonal', 'diff', 'digitize', 'divide', 'dot',
-              'double', 'dsplit', 'dstack', 'dtype', 'e', 'ediff1d',
-              'empty', 'empty_like', 'equal', 'exp', 'exp2', 'expand_dims',
-              'expm1', 'extract', 'eye', 'fabs', 'fill_diagonal', 'finfo',
-              'fix', 'flatiter', 'flatnonzero', 'fliplr', 'flipud',
-              'float', 'float32', 'float64', 'float_', 'floating', 'floor',
-              'floor_divide', 'fmax', 'fmin', 'fmod', 'format_parser',
-              'frexp', 'frombuffer', 'fromfile', 'fromfunction',
-              'fromiter', 'frompyfunc', 'fromregex', 'fromstring', 'fv',
-              'genfromtxt', 'getbufsize', 'geterr', 'gradient', 'greater',
-              'greater_equal', 'hamming', 'hanning', 'histogram',
-              'histogram2d', 'histogramdd', 'hsplit', 'hstack', 'hypot',
-              'i0', 'identity', 'iinfo', 'imag', 'in1d', 'index_exp',
-              'indices', 'inexact', 'inf', 'info', 'infty', 'inner',
-              'insert', 'int', 'int0', 'int16', 'int32', 'int64', 'int8',
-              'int_', 'int_asbuffer', 'intc', 'integer', 'interp',
-              'intersect1d', 'intp', 'invert', 'ipmt', 'irr', 'iscomplex',
-              'iscomplexobj', 'isfinite', 'isfortran', 'isinf', 'isnan',
-              'isneginf', 'isposinf', 'isreal', 'isrealobj', 'isscalar',
-              'issctype', 'iterable', 'ix_', 'kaiser', 'kron', 'ldexp',
-              'left_shift', 'less', 'less_equal', 'linspace',
-              'little_endian', 'load', 'loads', 'loadtxt', 'log', 'log10',
-              'log1p', 'log2', 'logaddexp', 'logaddexp2', 'logical_and',
-              'logical_not', 'logical_or', 'logical_xor', 'logspace',
-              'long', 'longcomplex', 'longdouble', 'longfloat', 'longlong',
-              'mafromtxt', 'mask_indices', 'mat', 'matrix', 'max',
-              'maximum', 'maximum_sctype', 'may_share_memory', 'mean',
-              'median', 'memmap', 'meshgrid', 'mgrid', 'min', 'minimum',
-              'mintypecode', 'mirr', 'mod', 'modf', 'msort', 'multiply',
-              'nan', 'nan_to_num', 'nanargmax', 'nanargmin', 'nanmax',
-              'nanmin', 'nansum', 'ndarray', 'ndenumerate', 'ndfromtxt',
-              'ndim', 'ndindex', 'negative', 'newaxis', 'nextafter',
-              'nonzero', 'not_equal', 'nper', 'npv', 'number',
-              'obj2sctype', 'ogrid', 'ones', 'ones_like', 'outer',
-              'packbits', 'percentile', 'pi', 'piecewise', 'place', 'pmt',
-              'poly', 'poly1d', 'polyadd', 'polyder', 'polydiv', 'polyfit',
-              'polyint', 'polymul', 'polysub', 'polyval', 'power', 'ppmt',
-              'prod', 'product', 'ptp', 'put', 'putmask', 'pv', 'r_',
-              'rad2deg', 'radians', 'rank', 'rate', 'ravel', 'real',
-              'real_if_close', 'reciprocal', 'record', 'remainder',
-              'repeat', 'reshape', 'resize', 'restoredot', 'right_shift',
-              'rint', 'roll', 'rollaxis', 'roots', 'rot90', 'round',
-              'round_', 'row_stack', 's_', 'sctype2char', 'searchsorted',
-              'select', 'setbufsize', 'setdiff1d', 'seterr', 'setxor1d',
-              'shape', 'short', 'sign', 'signbit', 'signedinteger', 'sin',
-              'sinc', 'single', 'singlecomplex', 'sinh', 'size',
-              'sometrue', 'sort', 'sort_complex', 'spacing', 'split',
-              'sqrt', 'square', 'squeeze', 'std', 'str', 'str_',
-              'subtract', 'sum', 'swapaxes', 'take', 'tan', 'tanh',
-              'tensordot', 'tile', 'trace', 'transpose', 'trapz', 'tri',
-              'tril', 'tril_indices', 'tril_indices_from', 'trim_zeros',
-              'triu', 'triu_indices', 'triu_indices_from', 'true_divide',
-              'trunc', 'ubyte', 'uint', 'uint0', 'uint16', 'uint32',
-              'uint64', 'uint8', 'uintc', 'uintp', 'ulonglong', 'union1d',
-              'unique', 'unravel_index', 'unsignedinteger', 'unwrap',
-              'ushort', 'vander', 'var', 'vdot', 'vectorize', 'vsplit',
-              'vstack', 'where', 'who', 'zeros', 'zeros_like')
-
-NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
-                 'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
-                 'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
-
 
 def get_class_name(obj):
     try:
@@ -148,17 +68,7 @@ def get_class_name(obj):
         except:
             return str(obj)
 
-
-def _open(filename, mode='r', buffering=0):
-    """read only version of open()"""
-    if mode not in ('r', 'rb', 'rU'):
-        raise RuntimeError("Invalid open file mode, must be 'r', 'rb', or 'rU'")
-    if buffering > MAX_OPEN_BUFFER:
-        raise RuntimeError("Invalid buffering value, max buffer size is {}".format(MAX_OPEN_BUFFER))
-    return open(filename, mode, buffering)
-
-
-LOCALFUNCS = {'open': _open}
+LOCALFUNCS = {}
 
 
 # Safe versions of functions to prevent denial of service issues
@@ -252,42 +162,42 @@ class Empty:
 ReturnedNone = Empty()
 
 
-class ExceptionHolder(object):
-    """basic exception handler"""
-
-    def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
-        self.node = node
-        self.expr = expr
-        self.msg = msg
-        self.exc = exc
-        self.lineno = lineno
-        self.exc_info = exc_info()
-        if self.exc is None and self.exc_info[0] is not None:
-            self.exc = self.exc_info[0]
-        if self.msg is '' and self.exc_info[1] is not None:
-            self.msg = self.exc_info[1]
-
-    def get_error(self):
-        """retrieve error data"""
-        exc_name = get_class_name(self.exc)
-
-        if exc_name in (None, 'None'):
-            exc_name = 'UnknownError'
-
-        out = []
-        if self.lineno is not None:
-            out.append("error on line %d:" % self.lineno)
-            lines = self.expr.splitlines()
-            try:
-                out.append('`{}`'.format(lines[self.lineno-1]))
-            except IndexError:
-                pass
-
-        out.append(str(self.msg))
-        return exc_name, '\n\n'.join(out)
-
-    def __str__(self):
-        return self.get_error()[0]
+# class ExceptionHolder(object):
+#     """basic exception handler"""
+#
+#     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
+#         self.node = node
+#         self.expr = expr
+#         self.msg = msg
+#         self.exc = exc
+#         self.lineno = lineno
+#         self.exc_info = exc_info()
+#         if self.exc is None and self.exc_info[0] is not None:
+#             self.exc = self.exc_info[0]
+#         if self.msg is '' and self.exc_info[1] is not None:
+#             self.msg = self.exc_info[1]
+#
+#     def get_error(self):
+#         """retrieve error data"""
+#         exc_name = get_class_name(self.exc)
+#
+#         if exc_name in (None, 'None'):
+#             exc_name = 'UnknownError'
+#
+#         out = []
+#         if self.lineno is not None:
+#             out.append("error on line %d:" % self.lineno)
+#             lines = self.expr.splitlines()
+#             try:
+#                 out.append('`{}`'.format(lines[self.lineno-1]))
+#             except IndexError:
+#                 pass
+#
+#         out.append(str(self.msg))
+#         return exc_name, '\n\n'.join(out)
+#
+#     def __str__(self):
+#         return self.get_error()[0]
 
 
 class NameFinder(ast.NodeVisitor):
