@@ -13,7 +13,6 @@ from tempfile import NamedTemporaryFile
 
 import sys
 
-from asteval.astutils import get_class_name
 from math import sqrt
 
 PY3 = version_info[0] == 3
@@ -102,26 +101,6 @@ class TestCase(unittest.TestCase):
             return chk_str in out[0]
         return False
 
-    # def check_error(self, chk_type='', chk_msg='', msg=''):
-    #     try:
-    #         if self.interp.error is not None:
-    #             #errtype, errmsg = self.interp.error.get_error()
-    #             err = self.interp.get_errors()
-    #             errtype = get_class_name(err)
-    #             errmsg = str(err)
-    #             self.assertEqual(chk_type, errtype, msg=msg)
-    #             if chk_msg:
-    #                 self.assertTrue(chk_msg in errmsg, msg=msg)
-    #     except IndexError:
-    #         if chk_type:
-    #             self.assertTrue(False, msg=msg)
-
-    def get_error(self):
-        """
-        :return:  errtype, errmsg
-        """
-        return self.interp.error[0].get_error()
-
 
 class TestEval(TestCase):
     """testing of asteval"""
@@ -132,10 +111,8 @@ class TestEval(TestCase):
         self.interp.error = []
         self.interp('n=6')
         self.interp('assert n==6')
-        #self.check_error(None)
         with self.assertRaises(AssertionError):
             self.interp('assert n==7')
-        #self.check_error('AssertionError')
 
     def test_names(self):
         """names test"""
@@ -150,11 +127,6 @@ class TestEval(TestCase):
             # noinspection PyBroadException
             with self.assertRaises(SyntaxError):
                 self.interp(expr, show_errors=False)
-            # except:
-            #     failed = True
-            #
-            # self.assertTrue(failed)
-            # self.check_error('SyntaxError')
 
     def test_unsupportednodes(self):
         """unsupported nodes"""
@@ -163,10 +135,7 @@ class TestEval(TestCase):
             # noinspection PyBroadException
             with self.assertRaises(NotImplementedError):
                 self.interp(expr, show_errors=False)
-            # except:
-            #     failed = True
-            # self.assertTrue(failed)
-            # self.check_error('NotImplementedError')
+
 
     def test_syntaxerrors_2(self):
         """syntax errors test"""
@@ -175,34 +144,24 @@ class TestEval(TestCase):
             # noinspection PyBroadException
             with self.assertRaises(SyntaxError):
                 self.interp(expr, show_errors=False)
-            # except:  # RuntimeError:
-            #     failed = True
-            # self.assertTrue(failed)
-            # self.check_error('SyntaxError')
 
-    # def test_runtimeerrors_1(self):
-    #     """runtime errors test"""
-    #     self.interp("zero = 0")
-    #     self.interp("astr ='a string'")
-    #     self.interp("atup = ('a', 'b', 11021)")
-    #     self.interp("arr  = range(20)")
-    #     for expr, errname in (('x = 1/zero', 'ZeroDivisionError'),
-    #                           ('x = zero + nonexistent', 'NameError'),
-    #                           ('x = zero + astr', 'TypeError'),
-    #                           ('x = zero()', 'TypeError'),
-    #                           ('x = astr * atup', 'TypeError'),
-    #                           ('x = arr.shapx', 'AttributeError'),
-    #                           ('arr.shapx = 4', 'AttributeError'),
-    #                           ('del arr.shapx', 'KeyError')):
-    #         failed, errtype, errmsg = False, None, None
-    #         # noinspection PyBroadException
-    #         #try:
-    #         with self.assertRaises(RuntimeError):
-    #             self.interp(expr, show_errors=False)
-    #         except:
-    #             failed = True
-    #         self.assertTrue(failed)
-    #         #self.check_error(errname)
+    def test_runtimeerrors_1(self):
+        """runtime errors test"""
+        self.interp("zero = 0")
+        self.interp("astr ='a string'")
+        self.interp("atup = ('a', 'b', 11021)")
+        self.interp("arr  = range(20)")
+        for expr, err in (('x = 1/zero', ZeroDivisionError),
+                              ('x = zero + nonexistent', NameError),
+                              ('x = zero + astr', TypeError),
+                              ('x = zero()', TypeError),
+                              ('x = astr * atup', TypeError),
+                              ('x = arr.shapx', AttributeError),
+                              ('arr.shapx = 4', AttributeError),
+                              ('del arr.shapx', KeyError)):
+            with self.assertRaises(err):
+                self.interp(expr)
+
 
     def test_namefinder(self):
         """test namefinder"""
@@ -225,19 +184,15 @@ class TestEval(TestCase):
             with self.assertRaises(SyntaxError):
                 self.interp(expr, show_errors=False)
 
-            #self.check_error('SyntaxError', msg=expr)
-
         for w in ('True', 'False'):
             self.interp.error = []
             with self.assertRaises(SyntaxError):
                 self.interp("%s= 2" % w)
-            #self.check_error('SyntaxError' if PY3 else 'NameError')
 
         for w in ('eval', '__import__'):
             self.interp.error = []
             with self.assertRaises(NameError):
                 self.interp("%s= 2" % w)
-            #self.check_error('NameError')
 
 
     def test_astdump(self):
@@ -255,32 +210,21 @@ class TestEval(TestCase):
     # noinspection PyTypeChecker
     def test_safe_funcs(self):
         self.interp("'*'*(2<<17)")
-        #self.check_error(None)
         with self.assertRaises(RuntimeError):
             self.interp("'*'*(1+2<<17)")
 
-        #self.check_error('RuntimeError')
         with self.assertRaises(RuntimeError):
             self.interp("'*'*(2<<17) + '*'")
 
-        #self.check_error('RuntimeError')
-        #with self.assertRaises(RuntimeError):
         self.interp("10**10000")
 
-        #self.check_error(None)
         with self.assertRaises(RuntimeError):
             self.interp("10**10001")
 
-        #self.check_error('RuntimeError')
-
-        #with self.assertRaises(RuntimeError):
         self.interp("1<<1000")
-
-        #self.check_error(None)
 
         with self.assertRaises(RuntimeError):
             self.interp("1<<1001")
-        #self.check_error('RuntimeError')
 
 #     def test_dos(self):
 #         self.interp("""for x in range(2<<21): pass""")

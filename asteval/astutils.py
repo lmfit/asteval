@@ -7,7 +7,6 @@ utility functions for asteval
 from __future__ import division, print_function
 import re
 import ast
-from sys import exc_info
 
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
@@ -162,44 +161,6 @@ class Empty:
 ReturnedNone = Empty()
 
 
-# class ExceptionHolder(object):
-#     """basic exception handler"""
-#
-#     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
-#         self.node = node
-#         self.expr = expr
-#         self.msg = msg
-#         self.exc = exc
-#         self.lineno = lineno
-#         self.exc_info = exc_info()
-#         if self.exc is None and self.exc_info[0] is not None:
-#             self.exc = self.exc_info[0]
-#         if self.msg is '' and self.exc_info[1] is not None:
-#             self.msg = self.exc_info[1]
-#
-#     def get_error(self):
-#         """retrieve error data"""
-#         exc_name = get_class_name(self.exc)
-#
-#         if exc_name in (None, 'None'):
-#             exc_name = 'UnknownError'
-#
-#         out = []
-#         if self.lineno is not None:
-#             out.append("error on line %d:" % self.lineno)
-#             lines = self.expr.splitlines()
-#             try:
-#                 out.append('`{}`'.format(lines[self.lineno-1]))
-#             except IndexError:
-#                 pass
-#
-#         out.append(str(self.msg))
-#         return exc_name, '\n\n'.join(out)
-#
-#     def __str__(self):
-#         return self.get_error()[0]
-
-
 class NameFinder(ast.NodeVisitor):
     """find all symbol names used by a parsed node"""
 
@@ -224,6 +185,7 @@ def get_ast_names(astnode):
 
 
 # Markdown helpers
+
 
 def quote(s):
     is_str = isinstance(s, str)

@@ -9,11 +9,10 @@ later, using the current values in the
 """
 
 from __future__ import division, print_function
-from sys import exc_info, stdout, stderr, version_info
+from sys import stdout, stderr, version_info
 import ast
 import math
 from time import time
-from inspect import getargspec
 
 from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
                        LOCALFUNCS, op2func,
@@ -34,11 +33,10 @@ class Interpreter:
   using python's ast module, and then executes the AST representation
   using a dictionary of named object (variable, functions).
 
-  The result is a restricted, simplified version of Python meant for
-  numerical caclulations that is somewhat safer than 'eval' because some
-  operations (such as 'import' and 'eval') are simply not allowed.  The
-  resulting language uses a flat namespace that works on Python objects,
-  but does not allow new classes to be defined.
+  The result is a restricted, simplified version of Python that is
+  somewhat safer than 'eval' because some operations (such as 'import' and 'eval')
+  are simply not allowed.  The resulting language uses a flat namespace that works
+  on Python objects, but does not allow new classes to be defined.
 
   Many parts of Python syntax are supported, including:
      for loops, while loops, if-then-elif-else conditionals
@@ -132,12 +130,11 @@ class Interpreter:
 
     def unimplemented(self, node):
         """unimplemented nodes"""
-        self.raise_exception(node, exc=NotImplementedError,
-                             msg="`%s` not supported" % node.__class__.__name__)
+        self.raise_exception(node, exc=NotImplementedError, msg="`%s` not supported" % get_class_name(node))
 
     @staticmethod
     def getLinenoLabel(node):
-        if hasattr(node, 'lineno'):
+        if node is not None and hasattr(node, 'lineno'):
             return "Line {}: ".format(node.lineno)
         return ''
 
@@ -148,35 +145,17 @@ class Interpreter:
 
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
-        #print(node, exc, msg)
-        # if self.error is None:
-        #     self.error = []
-        # if expr is None:
-        #     expr = self.expr
-        #if self.error is not None and not isinstance(node, ast.Module):
-        #    msg = str(msg)
-        if lineno is None:
-            lineno = self.getLineno(node)
+
+        if lineno is None and node is not None:
+            lineno = self.getLinenoLabel(node)
 
         if exc is None:
-            # # noinspection PyBroadException
-            # try:
-            #     exc = self.error.exc
-            # except:
             exc = RuntimeError
 
-        #err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
-
-        #err_msg = str(exc) if str(exc)
-        # if msg:
+        if not isinstance(exc, type):
+            exc = exc.__class__
 
         self.error = exc(msg)
-        # print(self.error)
-        # if self.error_msg is None:
-        #     self.error_msg = msg
-        # elif msg:
-        #     self.error_msg = "%s\n %s" % (self.error_msg, msg)
-
         self.tracer("Exception `{}` raised: {}".format(get_class_name(exc), msg))
         raise exc(msg)
 
@@ -185,79 +164,23 @@ class Interpreter:
 
     def eval(self, expr, **kw):
         """evaluates a single or block of statements or whole file"""
-        # self.lineno = lineno
         self.error = None
         self.trace = []
         self.start = time()
         self.cycles = 0
-        # noinspection PyBroadException
 
         node = self.parse(expr)
-
-        # try:
-        #     node = self.parse(expr)
-        # except Exception as e:
-        #     errmsg = exc_info()[1]
-        #     if self.error is not None:
-        #         #errmsg = "\n".join(self.error.get_error())
-        #         errmsg = str(self.error)
-        #         raise self.error
-        #
-        #     raise
-
-            # if not show_errors:
-            #     # noinspection PyBroadException
-            #     try:
-            #         exc = self.error.exc
-            #     except:
-            #         exc = SyntaxError
-            #     raise exc(errmsg)
-            # print(errmsg, file=self.err_writer)
-            # return
-
         ret = self.run(node, expr=expr)
         if self.error is not None:
             self.tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
         return ret
 
-        # noinspection PyBroadException
-        # try:
-        #     ret = self.run(node, expr=expr)
-        #     if self.error is not None:
-        #         self.tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
-        #     return ret
-        # except Exception as e:
-        #     errmsg = exc_info()[1]
-        #     if self.error is not None:
-        #         #errmsg = "\n".join(self.error.get_error())
-        #         errmsg = str(self.error)
-        #         raise self.error
-        #
-        #     raise
-
-            # if not show_errors:
-            #     # noinspection PyBroadException
-            #     try:
-            #         exc = self.error.exc
-            #     except:
-            #         exc = RuntimeError
-            #     raise exc(errmsg)
-            # print(errmsg, file=self.err_writer)
-            # return
 
     def parse(self, text):
         """parse statement/expression to Ast representation"""
         self.expr = text
-
-        # noinspection PyBroadException
         return ast.parse(text)
 
-        # try:
-        #     return ast.parse(text)
-        # except SyntaxError as e:
-        #     self.raise_exception(None, exc=SyntaxError, msg='Syntax Error: {}'.format(e), expr=text, lineno=e.lineno)
-        # except Exception as e:
-        #     self.raise_exception(None, exc=SyntaxError, msg='Runtime Error: {}'.format(e), expr=text)
 
     def run(self, node, expr=None):
         """executes parsed Ast representation for an expression"""
@@ -292,7 +215,6 @@ class Interpreter:
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
-        # noinspection PyBroadException
         ret = handler(node)
         if isinstance(ret, enumerate):
             ret = list(ret)
@@ -693,18 +615,13 @@ class Interpreter:
             except Exception as ex:
                 exc = ex
                 no_errors = False
-                #if self.error is None:
-                #    self.error = ExceptionHolder(node, exc=exc)
-                self.error = exc
-                last_error = self.error
+                last_error = exc
                 self.error = None
-                ex_name = get_class_name(exc)
-                #self.tracer("{}{} exception raised!".format(self.getLinenoLabel(node), ex_name))
                 found = False
 
                 for hnd in node.handlers:
                     if hnd.type is not None:
-                        if isinstance(hnd.type, ast.Name) and isinstance(ex, builtins.get(hnd.type.id)):
+                        if isinstance(hnd.type, ast.Name) and isinstance(exc, builtins.get(hnd.type.id)):
                             if hnd.name is not None:
                                 self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
                             self.run(hnd)
@@ -713,7 +630,7 @@ class Interpreter:
 
                         elif isinstance(hnd.type, ast.Tuple):
                             for t in hnd.type.elts:
-                                if isinstance(ex, builtins.get(t.id)):
+                                if isinstance(exc, builtins.get(t.id)):
                                     if hnd.name is not None:
                                         self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
                                     self.run(hnd)
@@ -766,10 +683,11 @@ class Interpreter:
         except TypeError as e:
             msg = ''
         msg2 = self.run(msgnode)
+
         if msg2 not in (None, 'None'):
             msg = "`%s: %s`" % (msg, msg2)
 
-        self.raise_exception(node, exc=out.__class__, msg=msg, expr='')
+        self.raise_exception(node, exc=out, msg=msg, expr='')
 
     def on_call(self, node):
         """function execution"""
@@ -789,11 +707,6 @@ class Interpreter:
             self.raise_exception(node, exc=TypeError, msg=msg)
 
         args = [self.run(targ) for targ in node.args]
-
-        # arg_spec, _, _, _ = getargspec(func)
-        # if len(args) > len(arg_spec):
-        #     self.tracer("{}, {}".format(len(arg_spec), len(args)))
-        #     self.raise_exception(node, exc=TypeError, msg='Wrong number of arguments to function!')
 
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
@@ -826,7 +739,7 @@ class Interpreter:
             self.tracer('{}Function `{}({})` raised on exception: {}.'
                         .format(self.getLinenoLabel(node), name, arg_str, str(e)))
 
-            self.raise_exception(node, exc=e.__class__, msg="Error calling `%s()`: `%s`" % (name, str(e)))
+            self.raise_exception(node, exc=e, msg="Error calling `%s()`: `%s`" % (name, str(e)))
             return
 
         if name not in ('pprint', 'print', 'jprint'):
@@ -923,9 +836,6 @@ class Procedure(object):
 
         sig = "<Function %s(%s)>" % (self.name, sig)
 
-        #if self.__doc__ is not None:
-        #    sig = "%s\n  %s" % (sig, self.__doc__)
-
         return sig
 
     def __call__(self, *args, **kwargs):
@@ -976,9 +886,8 @@ class Procedure(object):
                 self.raise_exc(None, msg='extra keyword arguments (`{}`)'.format(','.join(list(kwargs.keys()))),
                                exc=TypeError, lineno=self.lineno)
 
-        except (ValueError, LookupError, TypeError,
-                NameError, AttributeError):
-            self.raise_exc(None, msg='incorrect arguments', lineno=self.lineno)
+        except (ValueError, LookupError, TypeError, NameError, AttributeError) as ex:
+            self.raise_exc(None, exc=ex, msg='incorrect arguments', lineno=self.lineno)
 
         save_symtable = self.__asteval__.symtable.copy()
         self.__asteval__.symtable.update(symlocals)
