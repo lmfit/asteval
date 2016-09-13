@@ -12,7 +12,7 @@ MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
-MAX_CYCLES = 5000
+MAX_CYCLES = 100000
 
 RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'def', 'del', 'elif', 'else', 'except', 'exec',
