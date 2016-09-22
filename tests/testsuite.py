@@ -302,7 +302,7 @@ class TestCaseRunner(unittest.TestCase):
                 print(trace)
 
                 with stdoutIO() as s:
-                    exec(script)
+                    exec(script, dict())
 
                 expected = s.getvalue()
                 self.assertEqual(expected, actual, msg="AstEval {!r} != CPython {!r} in {}".format(actual, expected, f))

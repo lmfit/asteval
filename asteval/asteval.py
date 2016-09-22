@@ -9,6 +9,8 @@ later, using the current values in the
 """
 
 from __future__ import division, print_function
+
+#from pprint import pprint
 from sys import stdout, stderr, version_info
 import ast
 import math
@@ -60,11 +62,10 @@ class Interpreter:
                        'binop', 'boolop', 'break', 'call', 'compare',
                        'continue', 'delete', 'dict', 'ellipsis',
                        'excepthandler', 'expr', 'extslice', 'for',
-                       'functiondef', 'if', 'ifexp', 'index', 'interrupt',
-                       'list', 'listcomp', 'module', 'name', 'nameconstant',
+                       'functiondef', 'if', 'ifexp', 'index', 'interrupt',  # 'global',
+                       'list', 'listcomp', 'module', 'name', 'nameconstant',  # 'nonlocal',
                        'num', 'pass', 'print', 'raise', 'repr', 'return',
-                       'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
-                       'while')
+                       'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop', 'while')
 
     def __init__(self, symtable=None, writer=None, err_writer=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
@@ -794,6 +795,9 @@ class Interpreter:
                                              vararg=vararg, varkws=varkws)
         if node.name in self.no_deepcopy:
             self.no_deepcopy.pop(node.name)
+
+    def on_global(self, node):
+        print(node)
 
 
 class Procedure(object):
