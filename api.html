@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>asteval reference &mdash; ASTEVAL: Minimal Python AST evaluator</title>
+    <title>asteval reference &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.7',
+        VERSION:     '0.9.8',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -40,7 +40,7 @@
         <li class="right" >
           <a href="basics.html" title="Using asteval"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li> 
       </ul>
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
@@ -58,14 +58,11 @@
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
-      <input type="submit" value="Go" />
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
-    <p class="searchtip" style="font-size: 90%">
-    Enter search terms or a module, class or function name.
-    </p>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -100,12 +97,12 @@ interpreter.  There is also a convenience function <code class="xref py py-func 
 </dd></dl>
 
 <p>The symbol table will be loaded with several built in functions, several
-functions from the <a class="reference external" href="http://docs.python.org/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and, if available and requested,
+functions from the <a class="reference external" href="https://docs.python.org/2/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and, if available and requested,
 several functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.  This will happen even for a symbol table
 explicitly provided.</p>
 <p>The <code class="docutils literal"><span class="pre">writer</span></code> argument can be used to provide a place to send all output
-that would normally go to <a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  The default is, of
-course, to send output to <a class="reference external" href="http://docs.python.org/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.</p>
+that would normally go to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  The default is, of
+course, to send output to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.</p>
 <p>The <code class="docutils literal"><span class="pre">use_numpy</span></code> argument can be used to control whether functions from
 <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> are loaded into the symbol table.</p>
 <dl class="method">
@@ -117,9 +114,9 @@ course, to send output to <a class="reference external" href="http://docs.python
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>expression</strong> (<a class="reference external" href="http://docs.python.org/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) -- code to evaluate.</li>
-<li><strong>lineno</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) -- line number (for error messages).</li>
-<li><strong>show_errors</strong> (<a class="reference external" href="http://docs.python.org/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) -- whether to print error messages or leave them
+<li><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/2/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) -- code to evaluate.</li>
+<li><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) -- line number (for error messages).</li>
+<li><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) -- whether to print error messages or leave them
 in the <code class="xref py py-attr docutils literal"><span class="pre">errors</span></code> list.</li>
 </ul>
 </td>
@@ -132,13 +129,13 @@ in the <code class="xref py py-attr docutils literal"><span class="pre">errors</
 <dt id="asteval.__call__">
 <code class="descclassname">asteval.</code><code class="descname">__call__</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code></a>.  That is one can do:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">(</span><span class="s">&#39;x = 1&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">(</span><span class="s1">&#39;x = 1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>instead of:</p>
-<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s">&#39;x = 1&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="s1">&#39;x = 1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -199,12 +196,12 @@ regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_][a-
         <li class="right" >
           <a href="basics.html" title="Using asteval"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &raquo;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &copy; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+        &#169; Copyright 2014, Matthew Newville, The University of Chicago.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
     </div>
   </body>
 </html>

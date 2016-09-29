@@ -1,9 +1,9 @@
 .. _lmfit: http://github.com/lmfit/lmfit-py
 .. _xraylarch: http://github.com/xraypy/xraylarch
 
-========================
+########################
 Motivation for asteval
-========================
+########################
 
 The asteval module provides a means to evaluate a large subset of the
 Python language from within a python program, without using
@@ -102,6 +102,24 @@ calculation such as::
 can take a noticeable amount of CPU time.  It it not hard to come up with
 short program that would run for hundreds of years, which probably exceeds
 your threshold for an acceptable run-time.
+
+Nevertheless, you may try to limit the *recursion limit* when executing 
+expressions, with a code like this::
+
+    import contextlib
+    
+    @contextlib.contextmanager
+    def limited_recursion(recursion_limit):
+        old_limit = sys.getrecursionlimit()
+        sys.setrecursionlimit(recursion_limit)
+        try:
+            yield
+        finally:
+            sys.setrecursionlimit(old_limit)
+    
+    with limited_recursion(100):
+        Interpreter().eval(...)
+
 
 In summary, there are many ways that asteval could be considered part of an
 un-safe programming environment.  Recommendations for how to improve this
