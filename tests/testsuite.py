@@ -10,6 +10,7 @@ import time
 import unittest
 from sys import version_info
 from tempfile import NamedTemporaryFile
+from textwrap import dedent
 
 import sys
 
@@ -43,7 +44,7 @@ class TestCase(unittest.TestCase):
 
     def setUp(self):
         self.interp = Interpreter(max_time=3)  # show_errors=False)
-        self.symtable = self.interp.symtable
+        #self.symtable = self.interp.symtable
         self.set_stdout()
 
     def set_stdout(self):
@@ -73,7 +74,8 @@ class TestCase(unittest.TestCase):
     # noinspection PyUnresolvedReferences
     def isvalue(self, sym, val):
         """assert that a symboltable symbol has a particular value"""
-        return self.assertEquals(self.interp.symtable[sym], val)
+        #return self.assertEquals(self.interp.symtable[sym], val)
+        return self.assertEquals(self.interp.get_global_frame().get_symbol(sym), val)
 
     def isnear(self, expr, val, places=7):
         """assert that a symboltable symbol is near a particular value"""
@@ -159,7 +161,9 @@ class TestEval(TestCase):
                               ('x = arr.shapx', AttributeError),
                               ('arr.shapx = 4', AttributeError),
                               ('del arr.shapx', KeyError)):
+
             with self.assertRaises(err):
+                # print(expr, repr(err))
                 self.interp(expr)
 
 
@@ -172,6 +176,13 @@ class TestEval(TestCase):
         self.assertTrue('y' in nf.names)
         self.assertTrue('z' in nf.names)
         self.assertTrue('cos' in nf.names)
+
+
+    def test_import_noops(self):
+        # Import, etc. are accepted but are NOOPs
+        self.interp("import sys")
+        self.interp("from sys import getcwd")
+        self.interp("from sys import getcwd as GetCwd")
 
 
     def test_reservedwords(self):
@@ -273,6 +284,26 @@ class TestEval(TestCase):
         with self.assertRaises(SyntaxError):
             self.interp("x=1\ny=1\nz=56%$#%@$#%@#$...")
 
+    def test_tracer(self):
+        def tracer(frame, event, args):
+            print(frame.get_name(), frame.get_symbols(), event, args)
+
+        self.interp.set_trace(tracer)
+
+        self.interp(dedent("""
+            z = 42
+            def foo(x):
+                def bar(x):
+                    return x * x
+                return bar(x)
+
+            for y in range(10):
+                print(foo(y))
+
+            z = [foo(x) for x in range(3)]
+            print("ok!")
+        """))
+
 
 EXPECTED_PAT = re.compile("""^#\s*(?:"([^"]+)"|'([^']+)')""")
 
@@ -293,12 +324,12 @@ class TestCaseRunner(unittest.TestCase):
                 try:
                     interp(script)
                 except Exception as e:
-                    trace = '\n'.join(interp.trace)
+                    trace = '\n'.join(interp.ui_trace)
                     print(trace)
                     self.fail("Unhandled exception! {}".format(e))
 
                 actual = out.getvalue()
-                trace = '\n'.join(interp.trace)
+                trace = '\n'.join(interp.ui_trace)
                 print(trace)
 
                 with stdoutIO() as s:
