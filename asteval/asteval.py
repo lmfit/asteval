@@ -67,16 +67,14 @@ class Interpreter:
                        'excepthandler', 'expr', 'extslice', 'for',
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
                        'list', 'listcomp', 'module', 'name', 'nameconstant',
-                       'num', 'pass', 'print', 'raise', 'repr', 'return',
+                       'num', 'pass', 'raise', 'repr', 'return',  # 'print'
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop', 'while',
                        'import', 'importfrom', 'alias',  # these 3 import related nodes are accepted but are NOOPs
                        )
 
-
-    def __init__(self, writer=None, err_writer=None, globals=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, writer=None, globals=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
-        self.err_writer = err_writer or stderr
         self.start = 0
         self.cycles = 0
         self.max_time = max_time
@@ -89,7 +87,7 @@ class Interpreter:
         self.prev_lineno = 0
         self.frames = []  # [ BUILTINS, GLOBALS, ...function & comprehension frames... ]
 
-        self.push_frame(Frame('Builtins', {'print': self.print_, 'settrace': self.set_trace}))
+        self.push_frame(Frame('Builtins', {'settrace': self.set_trace}))
 
         for sym in FROM_PY:
             if sym in builtins:
@@ -153,6 +151,9 @@ class Interpreter:
     def get_ui_trace(self):
         return self.ui_trace
 
+    def clear_ui_trace(self):
+        self.ui_trace.clear()
+
     def get_errors(self):
         return self.error
 
@@ -201,6 +202,9 @@ class Interpreter:
         self.cycles = 0
 
         node = self.parse(expr)
+        # print("*"*80)
+        # from pprint import pprint
+        # pprint(self.dump(node))
         ret = self.run(node, expr=expr)
         if self.error is not None:
             self.ui_tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
@@ -567,29 +571,9 @@ class Interpreter:
                 break
         return out
 
-    def on_print(self, node):  # ('dest', 'values', 'nl')
-        """ note: implements Python2 style print statement, not
-        print() function.  May need improvement...."""
-        dest = self.run(node.dest) or self.writer
-        end = ''
-        if node.nl:
-            end = '\n'
-        out = [self.run(tnode) for tnode in node.values]
-        if out:  # and not self.error:
-            self.print_(*out, file=dest, end=end)
-
-    def print_(self, *out, **kws):
+    def print_(self, *objects, sep='', end='\n'):
         """generic print function"""
-        flush = kws.pop('flush', True)
-        fileh = kws.pop('file', self.writer)
-        sep = kws.pop('sep', ' ')
-        end = kws.pop('sep', '\n')
-
-        print(*out, file=fileh, sep=sep, end=end)
-        if flush:
-            fileh.flush()
-
-    print_.__name__ = 'print'
+        print(*objects, file=self.writer, sep=sep, end=end)
 
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
