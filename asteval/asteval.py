@@ -19,7 +19,7 @@ from time import time
 from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
                        LOCALFUNCS, op2func,
                        ReturnedNone, valid_symbol_name, quote,
-                       code_wrap, MAX_CYCLES, get_class_name)
+                       code_wrap, MAX_CYCLES, get_class_name, NoReturn)
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -87,6 +87,7 @@ class Interpreter:
         self.expr = None
         self.prev_lineno = 0
         self.frames = []  # [ BUILTINS, GLOBALS, ...function & comprehension frames... ]
+        self.imports = []
 
         self.push_frame(Frame('Builtins', {'settrace': self.set_trace}))
 
@@ -147,7 +148,7 @@ class Interpreter:
 
     def ui_tracer(self, s):
         if self.ui_trace_enabled:
-            self.ui_trace.append(s)
+            self.ui_trace.append("{}:{}".format(self.get_current_frame().get_filename() or 'main', s))
 
     def get_ui_trace(self):
         return self.ui_trace
@@ -169,7 +170,7 @@ class Interpreter:
     @staticmethod
     def get_lineno_label(node):
         if node is not None and hasattr(node, 'lineno'):
-            return "Line {}: ".format(node.lineno)
+            return "{}: ".format(node.lineno)
         return ''
 
     @staticmethod
@@ -287,7 +288,7 @@ class Interpreter:
         return self.run(node.value)  # ('value',)
 
     def on_return(self, node):  # ('value',)
-        """return statement: look for None, return special sentinal"""
+        """return statement: look for None, return special sentinel"""
         __retval = self.run(node.value)
 
         if self.trace:
@@ -297,6 +298,8 @@ class Interpreter:
             __retval = ReturnedNone
 
         self.get_current_frame().set_retval(__retval)
+
+        return __retval
 
     def on_repr(self, node):
         """repr """
@@ -312,7 +315,7 @@ class Interpreter:
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_pass(self, node):
         """pass statement"""
-        pass  # ()
+        return NoReturn
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_ellipsis(self, node):
@@ -434,6 +437,8 @@ class Interpreter:
         else:
             raise ValueError("Invalid node assignment type!")
 
+        return NoReturn
+
     def on_attribute(self, node):  # ('value', 'attr', 'ctx')
         """extract attribute"""
         ctx = node.ctx.__class__
@@ -464,7 +469,7 @@ class Interpreter:
         val = self.run(node.value)
         for tnode in node.targets:
             self.node_assign(tnode, val)
-        return
+        return NoReturn
 
     def on_augassign(self, node):  # ('target', 'op', 'value')
         """augmented assign"""
@@ -529,6 +534,8 @@ class Interpreter:
                 msg = "could not delete symbol"
                 self.raise_exception(node, msg=msg)
 
+        return NoReturn
+
     def on_unaryop(self, node):  # ('op', 'operand')
         """unary operator"""
         func, name = op2func(node.op)
@@ -576,6 +583,7 @@ class Interpreter:
     def print_(self, *objects, sep='', end='\n'):
         """generic print function"""
         print(*objects, file=self.writer, sep=sep, end=end)
+        return NoReturn
 
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
@@ -584,6 +592,7 @@ class Interpreter:
             block = node.orelse
         for tnode in block:
             self.run(tnode)
+        return NoReturn
 
     def on_ifexp(self, node):  # ('test', 'body', 'orelse')
         """if expressions"""
@@ -605,7 +614,9 @@ class Interpreter:
         else:
             for tnode in node.orelse:
                 self.run(tnode)
+
         self._interrupt = None
+        return NoReturn
 
     def on_for(self, node):  # ('target', 'iter', 'body', 'orelse')
         """for blocks"""
@@ -621,12 +632,16 @@ class Interpreter:
         else:
             for tnode in node.orelse:
                 self.run(tnode)
+
         self._interrupt = None
+        return NoReturn
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """exception handler"""
         for ebody in node.body:  # run the statements in the handler body
             self.run(ebody)
+
+        return NoReturn
 
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
@@ -689,6 +704,8 @@ class Interpreter:
             self.ui_tracer("{}Unhandled exception, unrolling stack...".format(self.get_lineno_label(node)))
             self.error = last_error
             raise exc
+
+        return NoReturn
 
     def on_raise(self, node):  # ('type', 'inst', 'tback')
         """raise statement: note difference for python 2 and 3"""
@@ -822,6 +839,8 @@ class Interpreter:
                                              vararg=vararg,
                                              varkws=varkws))
 
+        return NoReturn
+
     def on_dictcomp(self, node):  # ('key', 'value', 'generators')
         out = {}
         self.push_frame(Frame('dict_comp'))
@@ -869,14 +888,21 @@ class Interpreter:
                 self.unimplemented(node)
 
             path, script = self.import_hook(import_name)
-            if script is None:
+            if not script:
                 self.raise_exception(node, ImportError, '{} not found.'.format(import_name))
 
-            node = self.parse(script)
-            self.run(node, expr=script)
+            self.imports.append(self.get_current_frame().get_filename())
+            self.get_current_frame().set_filename(import_name)
+            try:
+                node = self.parse(script)
+                self.run(node, expr=script)
+            finally:
+                self.get_current_frame().set_filename(self.imports.pop())
+
+        return NoReturn
 
     def on_importfrom(self, node):  # NOOP (used for PyCharm IDE error quelling)
-        pass
+        return NoReturn
 
 
 class Function:

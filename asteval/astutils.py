@@ -159,6 +159,7 @@ class Empty:
 
 
 ReturnedNone = Empty()
+NoReturn = Empty()
 
 
 class NameFinder(ast.NodeVisitor):
