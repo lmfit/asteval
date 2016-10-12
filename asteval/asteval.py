@@ -69,15 +69,16 @@ class Interpreter:
                        'list', 'listcomp', 'module', 'name', 'nameconstant',
                        'num', 'pass', 'raise', 'repr', 'return',  # 'print'
                        'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop', 'while',
-                       'import', 'importfrom', 'alias',  # these 3 import related nodes are accepted but are NOOPs
+                       'import', 'importfrom',  # these 2 import related nodes are accepted but are NOOPs
                        )
 
-    def __init__(self, writer=None, globals=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, writer=None, globals=None, import_hook=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.start = 0
         self.cycles = 0
         self.max_time = max_time
+        self.import_hook = import_hook
         self.ui_trace_enabled = True
         self.ui_trace = []
         self.trace = None  # à la sys.settrace()
@@ -266,6 +267,7 @@ class Interpreter:
 
         if isinstance(ret, enumerate):
             ret = list(ret)
+
         return ret
 
     @staticmethod
@@ -856,13 +858,24 @@ class Interpreter:
         finally:
             self.pop_frame()
 
-    def on_import(self, node):  # NOOP
-        pass
+    def on_import(self, node):  # ('names',)
+        if self.import_hook is None:
+            self.unimplemented(node)
 
-    def on_importfrom(self, node):  # NOOP
-        pass
+        for name in node.names:
+            import_name = name.name
+            asname = name.asname
+            if asname is not None:
+                self.unimplemented(node)
 
-    def on_alias(self, node):  # NOOP
+            path, script = self.import_hook(import_name)
+            if script is None:
+                self.raise_exception(node, ImportError, '{} not found.'.format(import_name))
+
+            node = self.parse(script)
+            self.run(node, expr=script)
+
+    def on_importfrom(self, node):  # NOOP (used for PyCharm IDE error quelling)
         pass
 
 
