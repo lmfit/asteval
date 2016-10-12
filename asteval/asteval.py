@@ -72,9 +72,10 @@ class Interpreter:
                        'import', 'importfrom',  # these 2 import related nodes are accepted but are NOOPs
                        )
 
-    def __init__(self, writer=None, globals=None, import_hook=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, filename='', writer=None, globals=None, import_hook=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
+        self.filename = filename
         self.start = 0
         self.cycles = 0
         self.max_time = max_time
@@ -102,7 +103,7 @@ class Interpreter:
             if hasattr(math, sym):
                 self.set_symbol(sym, getattr(math, sym))
 
-        self.push_frame(Frame('Globals', globals))
+        self.push_frame(Frame('Globals', globals, filename=filename))
 
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node)) for node in self.supported_nodes))
 
@@ -294,11 +295,8 @@ class Interpreter:
         if self.trace:
             self.trace = self.trace(self.get_current_frame(), 'return', __retval)
 
-        if __retval is None:
-            __retval = ReturnedNone
-
-        self.get_current_frame().set_retval(__retval)
-
+        self.ui_tracer("{}Returning value: `{}`".format(self.get_lineno_label(node), quote(__retval)))
+        self.get_current_frame().set_retval(__retval if __retval is not None else ReturnedNone)
         return __retval
 
     def on_repr(self, node):
@@ -310,6 +308,11 @@ class Interpreter:
         out = None
         for tnode in node.body:
             out = self.run(tnode)
+
+            __ret_val = self.get_current_frame().get_retval()
+            if __ret_val is not None:
+                return __ret_val
+
         return out
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
@@ -1021,7 +1024,7 @@ class Function:
 
 
 class Frame:
-    def __init__(self, name, initial_symbols=None):
+    def __init__(self, name, initial_symbols=None, filename=''):
         if initial_symbols is None:
             initial_symbols = {}
         self.__name = name
@@ -1029,7 +1032,7 @@ class Frame:
         self.__retval = None
         self.__id = uuid.uuid1().hex[:8]
         self.__lineno = 1
-        self.__filename = ''
+        self.__filename = filename
 
     def set_symbol(self, name, val):
         self.__symbols[name] = val
