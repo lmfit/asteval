@@ -11,7 +11,7 @@ later, using the current values in the
 from __future__ import division, print_function
 
 import uuid
-from sys import stdout, stderr, version_info
+from sys import stdout
 import ast
 import math
 from time import time
@@ -19,7 +19,7 @@ from time import time
 from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
                        LOCALFUNCS, op2func,
                        ReturnedNone, valid_symbol_name, quote,
-                       code_wrap, MAX_CYCLES, get_class_name, NoReturn)
+                       code_wrap, MAX_CYCLES, get_class_name, NoReturn, Empty)
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -28,8 +28,6 @@ if not isinstance(builtins, dict):
 MAX_EXEC_TIME = 2  # sec
 
 
-
-# noinspection PyIncorrectDocstring
 class Interpreter:
     """
   This module compiles expressions and statements to AST representation,
@@ -72,7 +70,7 @@ class Interpreter:
                        'import', 'importfrom',  # these 2 import related nodes are accepted but are NOOPs
                        )
 
-    def __init__(self, filename='', writer=None, globals=None, import_hook=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.filename = filename
@@ -103,7 +101,7 @@ class Interpreter:
             if hasattr(math, sym):
                 self.set_symbol(sym, getattr(math, sym))
 
-        self.push_frame(Frame('Globals', globals, filename=filename))
+        self.push_frame(Frame('Globals', globals_, filename=filename))
 
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node)) for node in self.supported_nodes))
 
@@ -270,6 +268,9 @@ class Interpreter:
         if isinstance(ret, enumerate):
             ret = list(ret)
 
+        if isinstance(ret, Empty):
+            ret = None
+
         return ret
 
     @staticmethod
@@ -381,7 +382,8 @@ class Interpreter:
                     if not val_str.startswith('<'):
                         if isinstance(val, str):
                             val = val.replace('`', '')
-                        self.ui_tracer("{}Value of `{}` is {}.".format(self.get_lineno_label(node), node.id, code_wrap(val)))
+                        self.ui_tracer("{}Value of `{}` is {}."
+                                       .format(self.get_lineno_label(node), node.id, code_wrap(val)))
                     return val
 
             msg = "name `%s` is not defined" % node.id
@@ -404,10 +406,11 @@ class Interpreter:
             self.set_symbol(node.id, val)
 
             if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
-                self.ui_tracer("{}Assigned value of {} to `{}`.".format(self.get_lineno_label(node), code_wrap(val), node.id))
+                self.ui_tracer("{}Assigned value of {} to `{}`."
+                               .format(self.get_lineno_label(node), code_wrap(val), node.id))
             else:
-                self.ui_tracer(
-                    "{}Assigned value of {} to `{}`.".format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
+                self.ui_tracer("{}Assigned value of {} to `{}`."
+                               .format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
@@ -691,7 +694,8 @@ class Interpreter:
             # Run a bare except if it exists
             for hnd in node.handlers:
                 if hnd.type is None:
-                    self.ui_tracer("{}Executing bare except... (Note: Poor coding practice)".format(self.get_lineno_label(node)))
+                    self.ui_tracer("{}Executing bare except... (Note: Poor coding practice)"
+                                   .format(self.get_lineno_label(node)))
                     if hnd.name is not None:  # Not sure if this is possible?
                         self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
                     self.run(hnd)
@@ -712,19 +716,16 @@ class Interpreter:
 
     def on_raise(self, node):  # ('type', 'inst', 'tback')
         """raise statement: note difference for python 2 and 3"""
-        if version_info[0] == 3:
-            excnode = node.exc
-            msgnode = node.cause
-        else:
-            excnode = node.type
-            msgnode = node.inst
+        excnode = node.exc
+        msgnode = node.cause
 
         out = self.run(excnode)
 
         try:
             msg = ' '.join(out.args)
-        except TypeError as e:
+        except TypeError:
             msg = ''
+
         msg2 = self.run(msgnode)
 
         if msg2 not in (None, 'None'):
@@ -814,10 +815,7 @@ class Interpreter:
             keyval = self.run(node.args.args[idef + offset])
             kwargs.append((keyval, defval))
 
-        if version_info[0] == 3:
-            args = [tnode.arg for tnode in node.args.args[:offset]]
-        else:
-            args = [tnode.id for tnode in node.args.args[:offset]]
+        args = [tnode.arg for tnode in node.args.args[:offset]]
 
         doc = None
         nb0 = node.body[0]
@@ -826,21 +824,21 @@ class Interpreter:
 
         varkws = node.args.kwarg
         vararg = node.args.vararg
-        if version_info[0] == 3:
-            if isinstance(vararg, ast.arg):
-                vararg = vararg.arg
-            if isinstance(varkws, ast.arg):
-                varkws = varkws.arg
+
+        if isinstance(vararg, ast.arg):
+            vararg = vararg.arg
+        if isinstance(varkws, ast.arg):
+            varkws = varkws.arg
 
         self.set_symbol(node.name, Function(node.name,
-                                             self,
-                                             doc=doc,
-                                             lineno=node.lineno,
-                                             body=node.body,
-                                             args=args,
-                                             kwargs=kwargs,
-                                             vararg=vararg,
-                                             varkws=varkws))
+                                            self,
+                                            doc=doc,
+                                            lineno=node.lineno,
+                                            body=node.body,
+                                            args=args,
+                                            kwargs=kwargs,
+                                            vararg=vararg,
+                                            varkws=varkws))
 
         return NoReturn
 
@@ -904,6 +902,7 @@ class Interpreter:
 
         return NoReturn
 
+    # noinspection PyMethodMayBeStatic
     def on_importfrom(self, node):  # NOOP (used for PyCharm IDE error quelling)
         return NoReturn
 
