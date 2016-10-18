@@ -43,8 +43,8 @@ class TestCase(unittest.TestCase):
     """testing of asteval"""
 
     def setUp(self):
-        self.interp = Interpreter(max_time=3)  # show_errors=False)
-        #self.symtable = self.interp.symtable
+        self.interp = Interpreter(max_time=3)
+        self.interp.set_symbol('print', self.interp.print_)
         self.set_stdout()
 
     def set_stdout(self):
@@ -179,8 +179,8 @@ class TestEval(TestCase):
 
 
     def test_import_noops(self):
-        # Import, etc. are accepted but are NOOPs
-        self.interp("import sys")
+        # From import is accepted but is a NOOP
+        #self.interp("import sys")
         self.interp("from sys import getcwd")
         self.interp("from sys import getcwd as GetCwd")
 
@@ -309,6 +309,9 @@ EXPECTED_PAT = re.compile("""^#\s*(?:"([^"]+)"|'([^']+)')""")
 
 class TestCaseRunner(unittest.TestCase):
     def test_case_runner(self):
+        def print_out(*args):
+            out.write([str(a) for a in args])
+
         this_dir = os.path.dirname(__file__)
         testcases = os.path.abspath(os.path.join(this_dir, "scripts"))
         for f in os.listdir(testcases):
@@ -319,8 +322,8 @@ class TestCaseRunner(unittest.TestCase):
                     script = fobj.read()
 
                 out = StringIO()
-                err = StringIO()
-                interp = Interpreter(writer=out, err_writer=err)
+                interp = Interpreter(f, writer=out) #, globals_={'print': interp.print_})
+                interp.set_symbol('print', interp.print_)
                 try:
                     interp(script)
                 except Exception as e:

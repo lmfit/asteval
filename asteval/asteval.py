@@ -586,7 +586,7 @@ class Interpreter:
                 break
         return out
 
-    def print_(self, *objects, sep='', end='\n'):
+    def print_(self, *objects, sep=' ', end='\n'):
         """generic print function"""
         print(*objects, file=self.writer, sep=sep, end=end)
         return NoReturn
