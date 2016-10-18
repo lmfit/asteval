@@ -777,7 +777,7 @@ class Interpreter:
         arg_str = ', '.join(arg_list)
 
         if self.trace and not isinstance(func, Function):
-            self.trace = self.trace(Frame('Temp'), 'call', name)
+            self.trace = self.trace(Frame(name), 'call', name)  # builtins, etc. (not user defined Functions)
 
         # noinspection PyBroadException
         try:
@@ -832,6 +832,7 @@ class Interpreter:
 
         self.set_symbol(node.name, Function(node.name,
                                             self,
+                                            self.get_current_frame().get_filename(),
                                             doc=doc,
                                             lineno=node.lineno,
                                             body=node.body,
@@ -844,7 +845,7 @@ class Interpreter:
 
     def on_dictcomp(self, node):  # ('key', 'value', 'generators')
         out = {}
-        self.push_frame(Frame('dict_comp'))
+        self.push_frame(Frame('dict_comp', filename=self.get_current_frame().get_filename()))
         try:
             for tnode in node.generators:
                 if tnode.__class__ == ast.comprehension:
@@ -863,7 +864,7 @@ class Interpreter:
     def on_listcomp(self, node):  # ('elt', 'generators')
         """list comprehension"""
         out = []
-        self.push_frame(Frame('list_comp'))
+        self.push_frame(Frame('list_comp', filename=self.get_current_frame().get_filename()))
         try:
             for tnode in node.generators:
                 if tnode.__class__ == ast.comprehension:
@@ -914,7 +915,7 @@ class Function:
     'functiondef' ast node for later evaluation.
     """
 
-    def __init__(self, name, interp, doc=None, lineno=0, body=None, args=None, kwargs=None, vararg=None, varkws=None):
+    def __init__(self, name, interp, filename, doc=None, lineno=0, body=None, args=None, kwargs=None, vararg=None, varkws=None):
         self.name = name
         self.__name__ = name
         self.__asteval__ = interp
@@ -926,6 +927,7 @@ class Function:
         self.vararg = vararg
         self.varkws = varkws
         self.lineno = lineno
+        self.filename = filename
 
     def __repr__(self):
         sig = ""
@@ -997,7 +999,7 @@ class Function:
         except (ValueError, LookupError, TypeError, NameError, AttributeError) as ex:
             self.raise_exc(None, exc=ex, msg='incorrect arguments', lineno=self.lineno)
 
-        frame = Frame(repr(self), symlocals)
+        frame = Frame(self.name, symlocals, filename=self.filename)
         self.__asteval__.push_frame(frame)
         if self.__asteval__.trace:
             self.__asteval__.trace = self.__asteval__.trace(frame, 'call', self.name)
