@@ -674,9 +674,11 @@ class TestEval(TestCase):
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(x, scale=')
         self.interp("a = fcn()")
-        self.check_error('TypeError', 'not enough arg')
-        self.interp("a = fcn(x, bogus=3)")
-        self.check_error('NameError')
+        self.check_error('TypeError', 'takes at least 1 arguments, got 0')
+        self.interp("a = fcn(3,4,5,6,7)")
+        self.check_error('TypeError', 'expected at most 2, got')
+        self.interp("a = fcn(77.0, other='what?')")
+        self.check_error('TypeError', 'extra keyword arguments for')
 
     def test_function_vararg(self):
         """test function with var args"""
