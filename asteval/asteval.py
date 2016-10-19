@@ -754,30 +754,48 @@ class Procedure(object):
     def __call__(self, *args, **kwargs):
         symlocals = {}
         args = list(args)
-        n_args = len(args)
-        n_names = len(self.argnames)
+        nargs = len(args)
+        nkws = len(kwargs)
+        nargs_expected = len(self.argnames)
+        # print("Proc ", self.name)
+        # print(" defn: args, kwargs ", self.argnames, self.kwargs)
+        # print(" defn: vararg, varkws ", self.vararg, self.varkws)
+        # print(" passed args, kws: ", args, kwargs)
 
-        # may need to move kwargs to args if names align!
-        if (n_args < n_names) and kwargs:
-            for name in self.argnames[n_args:]:
+
+        # check for too few arguments, but the correct keyword given
+        if (nargs < nargs_expected) and nkws > 0:
+            for name in self.argnames[nargs:]:
                 if name in kwargs:
                     args.append(kwargs.pop(name))
-            n_args = len(args)
-            n_names = len(self.argnames)
-
-        if self.argnames and kwargs is not None:
-            msg = "multiple values for keyword argument '%s' in Procedure %s"
+            nargs = len(args)
+            nargs_expected = len(self.argnames)
+            nkws = len(kwargs)
+        if nargs < nargs_expected:
+            msg = "%s() takes at least %i arguments, got %i"
+            self.raise_exc(None, exc=TypeError,
+                           msg=msg % (self.name, nargs_expected, nargs))
+            return
+        # check for multiple values for named argument
+        if len(self.argnames) > 0 and kwargs is not None:
+            msg = "%s() got multiple values for keyword argument '%s'"
             for targ in self.argnames:
                 if targ in kwargs:
                     self.raise_exc(None, exc=TypeError,
-                                   msg=msg % (targ, self.name),
-                                   lineno=self.lineno)
+                                   msg=msg % (targ, self.name))
+                    return
 
-        if n_args != n_names:
-            if n_args < n_names:
-                msg = 'not enough arguments for Procedure %s()' % self.name
-                msg = '%s (expected %i, got %i)' % (msg, n_names, n_args)
+        # check more args given than expected, varargs not given
+        if nargs > nargs_expected and self.vararg is None:
+            if nargs - nargs_expected > len(self.kwargs):
+                msg = 'too many arguments for %s() expected at most %i, got %i'
+                msg = msg % (self.name, len(self.kwargs)+nargs_expected, nargs)
                 self.raise_exc(None, exc=TypeError, msg=msg)
+                return
+            for i, xarg in enumerate(args[nargs_expected:]):
+                kw_name = self.kwargs[i][0]
+                if kw_name not in kwargs:
+                    kwargs[kw_name] = xarg
 
         for argname in self.argnames:
             symlocals[argname] = args.pop(0)
