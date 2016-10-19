@@ -216,6 +216,7 @@ class Interpreter:
     def eval(self, expr, lineno=0, show_errors=True):
         """evaluates a single statement"""
         self.lineno = lineno
+        self.error_msg = None
         self.error = []
         self.start = time()
 
