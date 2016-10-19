@@ -814,6 +814,7 @@ class Procedure(object):
                 break
             if self.__asteval__.retval is not None:
                 retval = self.__asteval__.retval
+                self.__asteval__.retval = None
                 if retval is ReturnedNone:
                     retval = None
                 break
