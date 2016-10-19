@@ -758,6 +758,28 @@ class TestEval(TestCase):
         self.interp("o = fcn(1, x=2)")
         self.check_error('TypeError')
 
+    def test_nested_functions(self):
+        setup="""
+        def a(x=10):
+            if x > 5:
+                return 1
+            return -1
+
+        def b():
+            return 2.5
+
+        def c(x=10):
+            x = a(x=x)
+            y = b()
+            return x + y
+        """
+        self.interp(textwrap.dedent(setup))
+        self.interp("o1 = c()")
+        self.interp("o2 = c(x=0)")
+        self.isvalue('o1', 3.5)
+        self.isvalue('o2', 1.5)
+
+
     def test_astdump(self):
         """test ast parsing and dumping"""
         astnode = self.interp.parse('x = 1')
