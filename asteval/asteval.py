@@ -651,7 +651,10 @@ class Interpreter:
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call '%s'" % func
                 self.raise_exception(node, msg=msg)
-            keywords[key.arg] = self.run(key.value)
+            if key.arg is None:   # Py3 **kwargs !
+                keywords.update(self.run(key.value))
+            else:
+                keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
         if kwargs is not None:
