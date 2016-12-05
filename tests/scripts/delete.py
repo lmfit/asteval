@@ -20,7 +20,7 @@ z = [1, 2, 3]
 del z[-1]
 print(z)
 
-# Del list w/stride  (NOT WORKING!!!)
+# Del list w/stride
 a = [1, 2, 3, 4, 5, 6]
 del a[::2]
 print(a)

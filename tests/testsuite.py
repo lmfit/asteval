@@ -312,6 +312,12 @@ class TestCaseRunner(unittest.TestCase):
         def print_out(*args):
             out.write([str(a) for a in args])
 
+        def importer(name):
+            scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
+            import_name = os.path.join(scripts_dir, name + '.py')
+            with open(import_name, 'rb') as f:
+                return import_name, f.read()
+
         this_dir = os.path.dirname(__file__)
         testcases = os.path.abspath(os.path.join(this_dir, "scripts"))
         for f in os.listdir(testcases):
@@ -322,7 +328,7 @@ class TestCaseRunner(unittest.TestCase):
                     script = fobj.read()
 
                 out = StringIO()
-                interp = Interpreter(f, writer=out) #, globals_={'print': interp.print_})
+                interp = Interpreter(f, writer=out, import_hook=importer)
                 interp.set_symbol('print', interp.print_)
                 try:
                     interp(script)

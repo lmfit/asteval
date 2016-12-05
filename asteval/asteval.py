@@ -85,23 +85,26 @@ class Interpreter:
         self.error = None
         self.expr = None
         self.prev_lineno = 0
-        self.frames = []  # [ BUILTINS, GLOBALS, ...function & comprehension frames... ]
-        self.imports = []
+        self.globals_ = globals_
+        self.modules = {}
+        self.current_mod = '__main__'
+        self.last_func = None
 
-        self.push_frame(Frame('Builtins', {'settrace': self.set_trace}))
-
+        self.builtins = {}
         for sym in FROM_PY:
             if sym in builtins:
-                self.set_symbol(sym, builtins[sym])
+                self.builtins[sym] = builtins[sym]
 
         for symname, obj in LOCALFUNCS.items():
-            self.set_symbol(symname, obj)
+            self.builtins['symname'] = obj
 
         for sym in FROM_MATH:
             if hasattr(math, sym):
-                self.set_symbol(sym, getattr(math, sym))
+                self.builtins[sym] = getattr(math, sym)
 
-        self.push_frame(Frame('Globals', globals_, filename=filename))
+        self.builtins['print'] = self.print_
+
+        self.add_module(self.current_mod, filename, extras={'settrace': self.set_trace})
 
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node)) for node in self.supported_nodes))
 
@@ -109,29 +112,40 @@ class Interpreter:
         self.node_handlers['tryexcept'] = self.node_handlers['try']
         self.node_handlers['tryfinally'] = self.node_handlers['try']
 
+    def add_module(self, name, filename, extras=None):
+        mod = Module(name, self, filename)
+        builtin_frame = Frame('Builtins', self.builtins)
+        if extras is not None and isinstance(extras, dict):
+            for k, v in extras.items():
+                builtin_frame.set_symbol(k, v)
+        mod.push_frame(builtin_frame)
+        mod.push_frame(Frame('Globals', self.globals_, filename=filename))
+        self.modules[name] = mod
+        return mod
+
+    def get_main_module(self):
+        return self.modules['main']
+
+    def get_module(self, name):
+        try:
+            return self.modules[name]
+        except KeyError:
+            return
+
+    def get_current_module(self):
+        return self.modules[self.current_mod]
+
     def push_frame(self, frame):
-        self.frames.append(frame)
+        self.get_current_module().frames.append(frame)
 
     def pop_frame(self):
-        assert len(self.frames) > 2
-        return self.frames.pop()
+        return self.get_current_module().frames.pop()
 
     def get_current_frame(self):
-        assert len(self.frames) > 0
-        return self.frames[-1]
+        return self.modules[self.current_mod].frames[-1]
 
     def get_global_frame(self):
-        assert len(self.frames) > 1
-        return self.frames[1]
-
-    def get_builtins_frame(self):
-        assert len(self.frames) > 0
-        return self.frames[0]
-
-    def find_frame_by_id(self, _id):
-        for f in self.frames:
-            if f.get_id() == _id:
-                return f  # make defensive copy?
+        return self.get_current_module().frames[1]
 
     def set_symbol(self, name, val):
         self.get_current_frame().set_symbol(name, val)
@@ -147,7 +161,7 @@ class Interpreter:
 
     def ui_tracer(self, s):
         if self.ui_trace_enabled:
-            self.ui_trace.append("{}:{}".format(self.get_current_frame().get_filename() or 'main', s))
+            self.ui_trace.append("{}:{}".format(self.get_current_frame().get_filename() or '__main__', s))
 
     def get_ui_trace(self):
         return self.ui_trace
@@ -190,7 +204,7 @@ class Interpreter:
             exc = exc.__class__
 
         self.error = exc(msg)
-        self.ui_tracer("Exception `{}` raised: {}".format(get_class_name(exc), msg))
+        self.ui_tracer(" Exception `{}` raised: {}".format(get_class_name(exc), msg))
         raise exc(msg)
 
     def __call__(self, expr, **kw):
@@ -203,12 +217,9 @@ class Interpreter:
         self.cycles = 0
 
         node = self.parse(expr)
-        # print("*"*80)
-        # from pprint import pprint
-        # pprint(self.dump(node))
         ret = self.run(node, expr=expr)
         if self.error is not None:
-            self.ui_tracer("Unhandled exception: {}".format(get_class_name(self.error.exc)))
+            self.ui_tracer(" Unhandled exception: {}".format(get_class_name(self.error.exc)))
         return ret
 
     def parse(self, text):
@@ -281,8 +292,14 @@ class Interpreter:
     # handlers for ast components
     def on_expr(self, node):
         """expression"""
+        self.last_func = None
         val = self.run(node.value)
-        self.ui_tracer("{}Expression returned `{}`.".format(self.get_lineno_label(node), quote(val)))
+        # if self.last_func not in ('pprint', 'jprint', 'xprint', 'print', 'print_'):
+        #     if self.last_func:
+        #         func = '({})'.format(self.last_func)
+        #     else:
+        #         func = ''
+        #     self.ui_tracer("{}Expression returned `{}` {}.".format(self.get_lineno_label(node), quote(val), func))
         return val  # ('value',)
 
     def on_index(self, node):
@@ -375,15 +392,17 @@ class Interpreter:
         if ctx in (ast.Param, ast.Del):
             return str(node.id)
         else:
-            for frame in reversed(self.frames):
+            for frame in reversed(self.get_current_module().frames):
                 if frame.is_symbol(node.id):
                     val = frame.get_symbol(node.id)
                     val_str = repr(val)
                     if not val_str.startswith('<'):
                         if isinstance(val, str):
                             val = val.replace('`', '')
-                        self.ui_tracer("{}Value of `{}` is {}."
-                                       .format(self.get_lineno_label(node), node.id, code_wrap(val)))
+                        if frame.is_modified(node.id):
+                            self.ui_tracer("{}Value of `{}` is {}."
+                                           .format(self.get_lineno_label(node), node.id, code_wrap(val)))
+                            frame.reset_modified(node.id)
                     return val
 
             msg = "name `%s` is not defined" % node.id
@@ -408,9 +427,12 @@ class Interpreter:
             if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
                 self.ui_tracer("{}Assigned value of {} to `{}`."
                                .format(self.get_lineno_label(node), code_wrap(val), node.id))
+
             else:
                 self.ui_tracer("{}Assigned value of {} to `{}`."
                                .format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
+
+            self.get_current_frame().reset_modified(node.id)
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
@@ -424,11 +446,26 @@ class Interpreter:
             xslice = self.run(node.slice)
             if isinstance(node.slice, ast.Index):
                 sym[xslice] = val
+
+                self.get_current_frame().set_modified(node.value.id)
+
+                self.ui_tracer("{}Assigned index/subscript {} of `{}` to {}."
+                               .format(self.get_lineno_label(node), code_wrap(xslice), node.value.id, code_wrap(val)))
+
             elif isinstance(node.slice, ast.Slice):
                 # noinspection PyTypeChecker
-                sym[slice(xslice.start, xslice.stop)] = val
-            elif isinstance(node.slice, ast.ExtSlice):
-                sym[xslice] = val
+                sym[slice(xslice.start, xslice.stop, xslice.step)] = val
+                self.get_current_frame().set_modified(node.value.id)
+                slice_str = '{}:{}{}' \
+                    .format(xslice.start if xslice.start else 0,
+                            xslice.stop if xslice.stop else -1,
+                            ':' + str(xslice.step) if xslice.step else '')
+                self.ui_tracer("{}Assigned slice {} of `{}` to {}."
+                               .format(self.get_lineno_label(node), slice_str, node.value.id, code_wrap(val)))
+
+            # elif isinstance(node.slice, ast.ExtSlice):
+            #     self.get_current_frame().set_modified(node.value.id)
+            #     sym[xslice] = val
 
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
@@ -437,8 +474,9 @@ class Interpreter:
             else:
                 self.raise_exception(node, exc=ValueError, msg='too many values to unpack')
 
-        elif isinstance(node, str):
-            self.set_symbol(node, val)
+        # elif isinstance(node, str):
+        #     #self.get_current_frame().set_modified(node.value.id)
+        #     self.set_symbol(node, val)
 
         else:
             raise ValueError("Invalid node assignment type!")
@@ -457,7 +495,7 @@ class Interpreter:
             return delattr(sym, node.attr)
 
         # ctx is ast.Load
-        fmt = "cannnot access attribute `%s` for `%s`"
+        fmt = "cannot access attribute `%s` for `%s`"
         if node.attr not in UNSAFE_ATTRS:
             fmt = "no attribute `%s` for `%s`"
             try:
@@ -516,6 +554,7 @@ class Interpreter:
         for tnode in node.targets:
             if tnode.ctx.__class__ != ast.Del:
                 break
+
             children = []
             while tnode.__class__ == ast.Attribute:
                 children.append(tnode.attr)
@@ -524,18 +563,34 @@ class Interpreter:
             if tnode.__class__ == ast.Name:
                 children.append(tnode.id)
                 children.reverse()
-                self.get_current_frame().remove_symbol('.'.join(children))
+                child = '.'.join(children)
+                self.get_current_frame().remove_symbol(child)
+                self.ui_tracer("{}Deleted `{}`.".format(self.get_lineno_label(node), child))
 
             elif tnode.__class__ == ast.Subscript:
                 sym = self.run(tnode.value)
                 xslice = self.run(tnode.slice)
                 if isinstance(tnode.slice, ast.Index):
                     del sym[xslice]
+                    self.get_current_frame().set_modified(tnode.value.id)
+                    self.ui_tracer("{}Deleted index/subscript {} of `{}`."
+                                   .format(self.get_lineno_label(node), code_wrap(xslice), tnode.value.id))
+
                 elif isinstance(tnode.slice, ast.Slice):
                     # noinspection PyTypeChecker
                     del sym[slice(xslice.start, xslice.stop, xslice.step)]
+                    self.get_current_frame().set_modified(tnode.value.id)
+
+                    slice_str = '{}:{}{}' \
+                        .format(xslice.start if xslice.start else 0,
+                                xslice.stop if xslice.stop else -1,
+                                ':' + str(xslice.step) if xslice.step else '')
+                    self.ui_tracer("{}Deleted slice {} of `{}`."
+                                   .format(self.get_lineno_label(node), slice_str, tnode.value.id))
+
                 elif isinstance(tnode.slice, ast.ExtSlice):
                     del sym[xslice]
+                    self.get_current_frame().set_modified(tnode.value.id)
             else:
                 msg = "could not delete symbol"
                 self.raise_exception(node, msg=msg)
@@ -593,31 +648,48 @@ class Interpreter:
 
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
-        block = node.body
-        if not self.run(node.test):
+        test = self.run(node.test)
+        self.ui_tracer("{}If statement evaluated as `{}`".format(self.get_lineno_label(node), bool(test)))
+        if test:
+            block = node.body
+        else:
             block = node.orelse
+
         for tnode in block:
             self.run(tnode)
+
         return NoReturn
 
     def on_ifexp(self, node):  # ('test', 'body', 'orelse')
         """if expressions"""
-        expr = node.orelse
-        if self.run(node.test):
+        test = self.run(node.test)
+        self.ui_tracer("{}If else expression evaluated as `{}`".format(self.get_lineno_label(node), test))
+        if test:
             expr = node.body
+        else:
+            expr = node.orelse
+
         return self.run(expr)
 
     def on_while(self, node):  # ('test', 'body', 'orelse')
         """while blocks"""
+        self.ui_tracer("{}Executing `while` loop...".format(self.get_lineno_label(node)))
         while self.run(node.test):
             self._interrupt = None
             for tnode in node.body:
                 self.run(tnode)
                 if self._interrupt is not None:
                     break
+
             if isinstance(self._interrupt, ast.Break):
+                self.ui_tracer("{}`break` hit in `while` loop, exiting loop...".format(self.get_lineno_label(node)))
                 break
+
+            elif isinstance(self._interrupt, ast.Continue):
+                self.ui_tracer("{}`continue` hit in `while` loop, continuing loop...".format(self.get_lineno_label(node)))
+
         else:
+            self.ui_tracer("{}Executing `else` block for `while` loop.".format(self.get_lineno_label(node)))
             for tnode in node.orelse:
                 self.run(tnode)
 
@@ -626,6 +698,7 @@ class Interpreter:
 
     def on_for(self, node):  # ('target', 'iter', 'body', 'orelse')
         """for blocks"""
+        self.ui_tracer("{}Executing `for` loop...".format(self.get_lineno_label(node)))
         for val in self.run(node.iter):
             self.node_assign(node.target, val)
             self._interrupt = None
@@ -633,9 +706,16 @@ class Interpreter:
                 self.run(tnode)
                 if self._interrupt is not None:
                     break
+
             if isinstance(self._interrupt, ast.Break):
+                self.ui_tracer("{}`break` hit in `for` loop, exiting loop...".format(self.get_lineno_label(node)))
                 break
+
+            elif isinstance(self._interrupt, ast.Continue):
+                self.ui_tracer("{}`continue` hit in `for` loop, restarting loop...".format(self.get_lineno_label(node)))
+
         else:
+            self.ui_tracer("{}Executing `else` block for `for` loop.".format(self.get_lineno_label(node)))
             for tnode in node.orelse:
                 self.run(tnode)
 
@@ -652,7 +732,7 @@ class Interpreter:
     def on_try(self, node):  # ('body', 'handlers', 'orelse', 'finalbody')
         """try/except/else/finally blocks"""
         no_errors, found, exc, last_error = True, False, None, None
-        self.ui_tracer('{}Executing `try` block.'.format(self.get_lineno_label(node)))
+        self.ui_tracer('{}Executing `try` block...'.format(self.get_lineno_label(node)))
         for tnode in node.body:
             try:
                 self.run(tnode)
@@ -686,7 +766,7 @@ class Interpreter:
                 break
 
         if no_errors and hasattr(node, 'orelse') and node.orelse:
-            self.ui_tracer('{}Executing `else` block.'.format(self.get_lineno_label(node.orelse)))
+            self.ui_tracer('{}Executing `else` block...'.format(self.get_lineno_label(node.orelse)))
             for tnode in node.orelse:
                 self.run(tnode)
 
@@ -703,7 +783,7 @@ class Interpreter:
                     break
 
         if hasattr(node, 'finalbody') and node.finalbody:
-            self.ui_tracer('{}Executing `finally` block.'.format(self.get_lineno_label(node)))
+            self.ui_tracer('{}Executing `finally` block...'.format(self.get_lineno_label(node)))
             for tnode in node.finalbody:
                 self.run(tnode)
 
@@ -744,7 +824,19 @@ class Interpreter:
         elif hasattr(func, 'name'):
             name = func.name
 
-        self.ui_tracer("{}Calling function {}()...".format(self.get_lineno_label(node), name))
+        #self.ui_tracer("{}Calling function {}()...".format(self.get_lineno_label(node), name))
+        self.last_func = name
+
+        # node.func.value.id == 'metadata', .ctx=Load
+        # node.func.value = Name
+
+        if hasattr(node.func, 'value') and hasattr(node.func.value, 'id'):
+            # If func is a method call on a mutable, mark it as mutated/modified.
+            # This may not always be correct (method might not mutate object),
+            # but the majority of object.func() calls do mutate... so this
+            # is an approximation of reality
+            # TODO: Track the value of the symbol before/after for better accuracy
+            self.get_current_frame().set_modified(node.func.value.id)
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
@@ -776,6 +868,9 @@ class Interpreter:
 
         arg_str = ', '.join(arg_list)
 
+        if len(arg_str) > 50:
+            arg_str = arg_str[:50] + '...[truncated]'
+
         if self.trace and not isinstance(func, Function):
             self.trace = self.trace(Frame(name), 'call', name)  # builtins, etc. (not user defined Functions)
 
@@ -789,11 +884,11 @@ class Interpreter:
             self.raise_exception(node, exc=e, msg="Error calling `%s()`: `%s`" % (name, str(e)))
             return
 
-        if name not in ('pprint', 'print', 'jprint'):
+        if name not in ('pprint', 'print', 'jprint', 'print_'):
             self.ui_tracer('{}Function `{}({})` returned {}.'
                            .format(self.get_lineno_label(node), name, arg_str, code_wrap(ret)))
-        else:
-            self.ui_tracer('{}Function `{}({})` completed.'.format(self.get_lineno_label(node), name, arg_str))
+        #else:
+        #    self.ui_tracer('{}Function `{}({})` completed.'.format(self.get_lineno_label(node), name, arg_str))
 
         return ret
 
@@ -841,9 +936,12 @@ class Interpreter:
                                             vararg=vararg,
                                             varkws=varkws))
 
+        #self.ui_tracer("{}Defined function `{}`.".format(self.get_lineno_label(node), node.name))
+
         return NoReturn
 
     def on_dictcomp(self, node):  # ('key', 'value', 'generators')
+        """ Dictionary comprehension """
         out = {}
         self.push_frame(Frame('dict_comp', filename=self.get_current_frame().get_filename()))
         try:
@@ -893,19 +991,136 @@ class Interpreter:
             if not script:
                 self.raise_exception(node, ImportError, '{} not found.'.format(import_name))
 
-            self.imports.append(self.get_current_frame().get_filename())
-            self.get_current_frame().set_filename(import_name)
+            mod = self.add_module(import_name, path)
+            self.get_current_frame().set_symbol(import_name, mod)
+            self.prev_mod = self.current_mod
+            self.current_mod = import_name
             try:
                 node = self.parse(script)
                 self.run(node, expr=script)
             finally:
-                self.get_current_frame().set_filename(self.imports.pop())
+                self.current_mod = self.prev_mod
 
         return NoReturn
 
     # noinspection PyMethodMayBeStatic
     def on_importfrom(self, node):  # NOOP (used for PyCharm IDE error quelling)
         return NoReturn
+
+
+class Module:
+    def __init__(self, name, interp, filename):
+        self.name = name
+        self.__name__ = name
+        self.__asteval__ = interp
+        self.filename = filename
+        self.frames = []
+
+    def push_frame(self, frame):
+        self.frames.append(frame)
+
+    def pop_frame(self):
+        assert len(self.frames) > 2
+        return self.frames.pop()
+
+    def get_current_frame(self):
+        assert len(self.frames) > 0
+        return self.frames[-1]
+
+    def get_global_frame(self):
+        assert len(self.frames) > 1
+        return self.frames[1]
+
+    def get_builtins_frame(self):
+        assert len(self.frames) > 0
+        return self.frames[0]
+
+    def find_frame_by_id(self, _id):
+        for f in self.frames:
+            if f.get_id() == _id:
+                return f  # make defensive copy?
+
+    def set_symbol(self, name, val):
+        self.get_current_frame().set_symbol(name, val)
+
+    def __getattr__(self, item):
+        for frame in reversed(self.frames):
+            if frame.is_symbol(item):
+                val = frame.get_symbol(item)
+                return val
+
+    def __repr__(self):
+        return "<Module: name={} fn={} frames={}>".format(self.name, self.filename, self.frames)
+
+
+class Frame:
+    def __init__(self, name, initial_symbols=None, filename=''):
+        if initial_symbols is None:
+            initial_symbols = {}
+        self.__name = name
+        self.__symbols = initial_symbols.copy()
+        self.__modified = {}
+        self.__retval = None
+        self.__id = uuid.uuid1().hex[:8]
+        self.__lineno = 1
+        self.__filename = filename
+
+    def set_symbol(self, name, val):
+        self.__symbols[name] = val
+        self.__modified[name] = True
+
+    def is_modified(self, name):
+        try:
+            return self.__modified[name]
+        except KeyError:
+            return True
+
+    def set_modified(self, name):
+        self.__modified[name] = True
+
+    def reset_modified(self, name):
+        self.__modified[name] = False
+
+    def remove_symbol(self, name):
+        self.__symbols.pop(name)
+        self.__modified[name] = True
+
+    def get_symbol(self, name):
+        return self.__symbols[name]
+
+    def get_symbols(self):
+        return self.__symbols.copy()
+
+    def is_symbol(self, name):
+        return name in self.__symbols
+
+    def get_name(self):
+        return self.__name
+
+    def set_retval(self, retval):
+        self.__retval = retval
+
+    def get_retval(self):
+        return self.__retval
+
+    def get_id(self):
+        return self.__id
+
+    def set_lineno(self, lineno):
+        self.__lineno = lineno
+
+    def get_lineno(self):
+        return self.__lineno
+
+    def set_filename(self, filename):
+        self.__filename = filename
+
+    def get_filename(self):
+        return self.__filename
+
+    def __repr__(self):
+        return "<Frame: name={} id={} fn={} ({}items)>" \
+            .format(self.__name, self.__id, self.__filename, len(self.__symbols))
 
 
 class Function:
@@ -1024,52 +1239,4 @@ class Function:
         return retval
 
 
-class Frame:
-    def __init__(self, name, initial_symbols=None, filename=''):
-        if initial_symbols is None:
-            initial_symbols = {}
-        self.__name = name
-        self.__symbols = initial_symbols.copy()
-        self.__retval = None
-        self.__id = uuid.uuid1().hex[:8]
-        self.__lineno = 1
-        self.__filename = filename
 
-    def set_symbol(self, name, val):
-        self.__symbols[name] = val
-
-    def remove_symbol(self, name):
-        self.__symbols.pop(name)
-
-    def get_symbol(self, name):
-        return self.__symbols[name]
-
-    def get_symbols(self):
-        return self.__symbols.copy()
-
-    def is_symbol(self, name):
-        return name in self.__symbols
-
-    def get_name(self):
-        return self.__name
-
-    def set_retval(self, retval):
-        self.__retval = retval
-
-    def get_retval(self):
-        return self.__retval
-
-    def get_id(self):
-        return self.__id
-
-    def set_lineno(self, lineno):
-        self.__lineno = lineno
-
-    def get_lineno(self):
-        return self.__lineno
-
-    def set_filename(self, filename):
-        self.__filename = filename
-
-    def get_filename(self):
-        return self.__filename
