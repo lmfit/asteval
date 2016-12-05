@@ -1066,8 +1066,8 @@ class Frame:
         self.__filename = filename
 
     def set_symbol(self, name, val):
+        self.__modified[name] = name not in self.__symbols or val != self.__symbols.get(name)
         self.__symbols[name] = val
-        self.__modified[name] = True
 
     def is_modified(self, name):
         try:
