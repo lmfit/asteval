@@ -62,7 +62,7 @@ class Interpreter:
     supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
                        'binop', 'boolop', 'break', 'call', 'compare',
                        'continue', 'delete', 'dict', 'dictcomp', 'ellipsis',
-                       'excepthandler', 'expr', 'extslice', 'for',
+                       'excepthandler', 'expr', 'extslice', 'for', 'set',
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
                        'list', 'listcomp', 'module', 'name', 'nameconstant',
                        'num', 'pass', 'raise', 'repr', 'return',  # 'print'
@@ -1045,6 +1045,14 @@ class Interpreter:
             return out
         finally:
             self.pop_frame()
+
+    def on_set(self, node):  # ('elts',)
+        """
+        Set literals
+        """
+        result = set()
+        [result.add(self.run(val)) for val in node.elts]
+        return result
 
     def on_import(self, node):  # ('names',)
         if self.import_hook is None:

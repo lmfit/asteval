@@ -1,0 +1,10 @@
+print("This is a value %s" % "a")
+print("This is a value {}".format("a"))
+print(format(10.0, "7.3g"))
+a, b, c, d = 1, 2, 3, 4
+print("The story of {0}, {1}, and {c}".format(a, b, c=d))
+print("My name is {0} :-{{}}".format('Fred'))
+print("My name is {0[name]}".format(dict(name='Fred')))
+print("My name is {0:8}".format('Fred'))
+print("{0:{1}}".format(a, b))
+print("{0!r:20}".format("Hello"))
