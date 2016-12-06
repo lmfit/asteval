@@ -148,7 +148,7 @@ class Interpreter:
         return self.get_current_module().frames[1]
 
     def set_symbol(self, name, val):
-        self.get_current_frame().set_symbol(name, val)
+        return self.get_current_frame().set_symbol(name, val)
 
     def set_trace(self, func):
         self.trace = func
@@ -394,15 +394,17 @@ class Interpreter:
         else:
             for frame in reversed(self.get_current_module().frames):
                 if frame.is_symbol(node.id):
-                    val = frame.get_symbol(node.id)
+                    val = frame.get_symbol_value(node.id)
                     val_str = repr(val)
                     if not val_str.startswith('<'):
                         if isinstance(val, str):
                             val = val.replace('`', '')
+
                         if frame.is_modified(node.id):
                             self.ui_tracer("{}Value of `{}` is {}."
                                            .format(self.get_lineno_label(node), node.id, code_wrap(val)))
                             frame.reset_modified(node.id)
+
                     return val
 
             msg = "name `%s` is not defined" % node.id
@@ -413,6 +415,46 @@ class Interpreter:
         """ True, False, None in python >= 3.4 """
         return node.value
 
+    def __get_node_path(self, node):
+        name = node
+        path = []
+        while True:
+            try:
+                name = name.id
+                path.append(name)
+                break
+            except AttributeError:
+                try:
+                    path.append(name.slice.value.n)
+                except AttributeError:
+                    try:
+                        path.append(name.slice.value.s)
+                    except AttributeError:
+                        try:
+                            lower = name.slice.lower.n
+                        except AttributeError:
+                            lower = None
+                        try:
+                            upper = name.slice.upper.n
+                        except AttributeError:
+                            upper = None
+                        try:
+                            step = name.slice.step.n
+                        except AttributeError:
+                            step = None
+
+                        slice_str = '{}:{}{}' \
+                            .format(lower if lower else 0,
+                                    upper if upper else -1,
+                                    ':' + str(step) if step else '')
+
+                        path.append(slice_str)
+
+                name = name.value
+
+        path.reverse()
+        return name, path[0] + ''.join(['[{}]'.format(quote(i)) for i in path[1:-1]])
+
     def node_assign(self, node, val):
         """here we assign a value (not the node.value object) to a node
         this is used by on_assign, but also by for, list comprehension, etc.
@@ -422,17 +464,19 @@ class Interpreter:
                 errmsg = "invalid symbol name (reserved word?) `%s`" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
 
-            self.set_symbol(node.id, val)
+            if self.set_symbol(node.id, val):
+                self.get_current_frame().reset_modified(node.id)
 
-            if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
-                self.ui_tracer("{}Assigned value of {} to `{}`."
-                               .format(self.get_lineno_label(node), code_wrap(val), node.id))
+                if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
+                    self.ui_tracer("{}Assigned value of {} to `{}`."
+                                   .format(self.get_lineno_label(node), code_wrap(val), node.id))
 
-            else:
-                self.ui_tracer("{}Assigned value of {} to `{}`."
-                               .format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
+                else:
+                    self.ui_tracer("{}Assigned value of {} to `{}`."
+                                   .format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
 
-            self.get_current_frame().reset_modified(node.id)
+            # else:
+            #     self.ui_tracer("{}Value of `{}` is unchanged.".format(self.get_lineno_label(node), node.id))
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
@@ -445,27 +489,58 @@ class Interpreter:
             sym = self.run(node.value)
             xslice = self.run(node.slice)
             if isinstance(node.slice, ast.Index):
+                try:
+                    prev_val = sym[xslice]
+                except (IndexError, KeyError):
+                    modified = True
+                else:
+                    modified = val != prev_val
+
                 sym[xslice] = val
 
-                self.get_current_frame().set_modified(node.value.id)
+                name, path = self.__get_node_path(node)
 
-                self.ui_tracer("{}Assigned index/subscript {} of `{}` to {}."
-                               .format(self.get_lineno_label(node), code_wrap(xslice), node.value.id, code_wrap(val)))
+                if name:
+                    if modified:
+                        self.ui_tracer("{}Assigned index/subscript `[{}]` of `{}` to {}."
+                                       .format(self.get_lineno_label(node), quote(xslice),
+                                               path, code_wrap(val)))
+
+                        self.get_current_frame().set_modified(name)
+
+                    # else:
+                    #     self.ui_tracer("{}Value of `{}` is unchanged."
+                    #                    .format(self.get_lineno_label(node), name))
 
             elif isinstance(node.slice, ast.Slice):
                 # noinspection PyTypeChecker
-                sym[slice(xslice.start, xslice.stop, xslice.step)] = val
-                self.get_current_frame().set_modified(node.value.id)
-                slice_str = '{}:{}{}' \
-                    .format(xslice.start if xslice.start else 0,
-                            xslice.stop if xslice.stop else -1,
-                            ':' + str(xslice.step) if xslice.step else '')
-                self.ui_tracer("{}Assigned slice {} of `{}` to {}."
-                               .format(self.get_lineno_label(node), slice_str, node.value.id, code_wrap(val)))
+                try:
+                    prev_val = sym[slice(xslice.start, xslice.stop, xslice.step)]
+                except (IndexError, KeyError):
+                    modified = True
+                else:
+                    modified = val != prev_val
 
-            # elif isinstance(node.slice, ast.ExtSlice):
-            #     self.get_current_frame().set_modified(node.value.id)
-            #     sym[xslice] = val
+                name, path = self.__get_node_path(node)
+
+                sym[slice(xslice.start, xslice.stop, xslice.step)] = val
+
+                if name:
+                    if modified:
+                        slice_str = '{}:{}{}' \
+                            .format(xslice.start if xslice.start else 0,
+                                    xslice.stop if xslice.stop else -1,
+                                    ':' + str(xslice.step) if xslice.step else '')
+
+                        self.ui_tracer("{}Assigned slice `[{}]` of `{}` to {}."
+                                       .format(self.get_lineno_label(node), slice_str,
+                                               path, code_wrap(val)))
+
+                        self.get_current_frame().set_modified(name)
+
+                    # else:
+                    #     self.ui_tracer("{}Value of `{}` is unchanged."
+                    #                    .format(self.get_lineno_label(node), name))
 
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
@@ -473,10 +548,6 @@ class Interpreter:
                     self.node_assign(telem, tval)
             else:
                 self.raise_exception(node, exc=ValueError, msg='too many values to unpack')
-
-        # elif isinstance(node, str):
-        #     #self.get_current_frame().set_modified(node.value.id)
-        #     self.set_symbol(node, val)
 
         else:
             raise ValueError("Invalid node assignment type!")
@@ -572,14 +643,14 @@ class Interpreter:
                 xslice = self.run(tnode.slice)
                 if isinstance(tnode.slice, ast.Index):
                     del sym[xslice]
-                    self.get_current_frame().set_modified(tnode.value.id)
+                    #self.get_current_frame().set_modified(tnode.value.id)
                     self.ui_tracer("{}Deleted index/subscript {} of `{}`."
                                    .format(self.get_lineno_label(node), code_wrap(xslice), tnode.value.id))
 
                 elif isinstance(tnode.slice, ast.Slice):
                     # noinspection PyTypeChecker
                     del sym[slice(xslice.start, xslice.stop, xslice.step)]
-                    self.get_current_frame().set_modified(tnode.value.id)
+                    #self.get_current_frame().set_modified(tnode.value.id)
 
                     slice_str = '{}:{}{}' \
                         .format(xslice.start if xslice.start else 0,
@@ -590,7 +661,7 @@ class Interpreter:
 
                 elif isinstance(tnode.slice, ast.ExtSlice):
                     del sym[xslice]
-                    self.get_current_frame().set_modified(tnode.value.id)
+                    #self.get_current_frame().set_modified(tnode.value.id)
             else:
                 msg = "could not delete symbol"
                 self.raise_exception(node, msg=msg)
@@ -689,9 +760,10 @@ class Interpreter:
                 self.ui_tracer("{}`continue` hit in `while` loop, continuing loop...".format(self.get_lineno_label(node)))
 
         else:
-            self.ui_tracer("{}Executing `else` block for `while` loop.".format(self.get_lineno_label(node)))
-            for tnode in node.orelse:
-                self.run(tnode)
+            if hasattr(node, 'orelse') and node.orelse:
+                self.ui_tracer("{}Executing `else` block for `while` loop.".format(self.get_lineno_label(node)))
+                for tnode in node.orelse:
+                    self.run(tnode)
 
         self._interrupt = None
         return NoReturn
@@ -715,9 +787,10 @@ class Interpreter:
                 self.ui_tracer("{}`continue` hit in `for` loop, restarting loop...".format(self.get_lineno_label(node)))
 
         else:
-            self.ui_tracer("{}Executing `else` block for `for` loop.".format(self.get_lineno_label(node)))
-            for tnode in node.orelse:
-                self.run(tnode)
+            if hasattr(node, 'orelse') and node.orelse:
+                self.ui_tracer("{}Executing `else` block for `for` loop.".format(self.get_lineno_label(node)))
+                for tnode in node.orelse:
+                    self.run(tnode)
 
         self._interrupt = None
         return NoReturn
@@ -824,11 +897,7 @@ class Interpreter:
         elif hasattr(func, 'name'):
             name = func.name
 
-        #self.ui_tracer("{}Calling function {}()...".format(self.get_lineno_label(node), name))
         self.last_func = name
-
-        # node.func.value.id == 'metadata', .ctx=Load
-        # node.func.value = Name
 
         if hasattr(node.func, 'value') and hasattr(node.func.value, 'id'):
             # If func is a method call on a mutable, mark it as mutated/modified.
@@ -836,7 +905,9 @@ class Interpreter:
             # but the majority of object.func() calls do mutate... so this
             # is an approximation of reality
             # TODO: Track the value of the symbol before/after for better accuracy
-            self.get_current_frame().set_modified(node.func.value.id)
+            if name not in ('items', 'keys', 'values', 'sorted', 'reversed', 'index', 'copy', 'count'):
+                sym, _ = self.__get_node_path(node.func)
+                self.get_current_frame().set_modified(sym)  # node.func.value.id
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
@@ -887,8 +958,6 @@ class Interpreter:
         if name not in ('pprint', 'print', 'jprint', 'print_'):
             self.ui_tracer('{}Function `{}({})` returned {}.'
                            .format(self.get_lineno_label(node), name, arg_str, code_wrap(ret)))
-        #else:
-        #    self.ui_tracer('{}Function `{}({})` completed.'.format(self.get_lineno_label(node), name, arg_str))
 
         return ret
 
@@ -1046,11 +1115,23 @@ class Module:
     def __getattr__(self, item):
         for frame in reversed(self.frames):
             if frame.is_symbol(item):
-                val = frame.get_symbol(item)
+                val = frame.get_symbol_value(item)
                 return val
 
     def __repr__(self):
         return "<Module: name={} fn={} frames={}>".format(self.name, self.filename, self.frames)
+
+
+class Symbol:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+        self.modified = True
+
+    def set(self, value):
+        self.modified = value != self.value
+        self.value = value
+        return self.modified
 
 
 class Frame:
@@ -1058,38 +1139,52 @@ class Frame:
         if initial_symbols is None:
             initial_symbols = {}
         self.__name = name
-        self.__symbols = initial_symbols.copy()
-        self.__modified = {}
+        self.__symbols = {}
+        for name, value in initial_symbols.items():
+            self.__symbols[name] = Symbol(name, value)
+
         self.__retval = None
         self.__id = uuid.uuid1().hex[:8]
         self.__lineno = 1
         self.__filename = filename
 
     def set_symbol(self, name, val):
-        self.__modified[name] = name not in self.__symbols or val != self.__symbols.get(name)
-        self.__symbols[name] = val
+        if name in self.__symbols:
+            self.__symbols[name].set(val)
+        else:
+            self.__symbols[name] = Symbol(name, val)
+
+        return self.__symbols[name].modified
 
     def is_modified(self, name):
         try:
-            return self.__modified[name]
+            return self.__symbols[name].modified
         except KeyError:
             return True
 
     def set_modified(self, name):
-        self.__modified[name] = True
+        if name in self.__symbols:
+            self.__symbols[name].modified = True
+        else:
+            self.__symbols[name] = Symbol(name, None)
 
     def reset_modified(self, name):
-        self.__modified[name] = False
+        if name in self.__symbols:
+            self.__symbols[name].modified = False
+        else:
+            self.__symbols[name] = Symbol(name, None)
 
     def remove_symbol(self, name):
         self.__symbols.pop(name)
-        self.__modified[name] = True
+
+    def get_symbol_value(self, name):
+        return self.__symbols[name].value
 
     def get_symbol(self, name):
         return self.__symbols[name]
 
     def get_symbols(self):
-        return self.__symbols.copy()
+        return {name: value.value for name, value in self.__symbols.items()}
 
     def is_symbol(self, name):
         return name in self.__symbols

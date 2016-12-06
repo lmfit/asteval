@@ -75,7 +75,7 @@ class TestCase(unittest.TestCase):
     def isvalue(self, sym, val):
         """assert that a symboltable symbol has a particular value"""
         #return self.assertEquals(self.interp.symtable[sym], val)
-        return self.assertEquals(self.interp.get_global_frame().get_symbol(sym), val)
+        return self.assertEquals(self.interp.get_global_frame().get_symbol_value(sym), val)
 
     def isnear(self, expr, val, places=7):
         """assert that a symboltable symbol is near a particular value"""
