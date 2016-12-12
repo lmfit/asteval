@@ -1,14 +1,17 @@
+# NOTE: Sorted lists added to prevent key ordering from affecting results
+
 x = set()
 print(x)
 
 x.add("a")
 print(x)
 x.add("b")
+print(x)
 
 y = {"a", "c"}
-print(y)
+print(sorted(list(y)))
 
-print(x ^ y)
-print(x | y)
-print(x - y)
-print(y - x)
+print(sorted(list(x ^ y)))
+print(sorted(list(x | y)))
+print(sorted(list(x - y)))
+print(sorted(list(y - x)))

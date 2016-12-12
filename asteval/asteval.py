@@ -62,12 +62,14 @@ class Interpreter:
     supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
                        'binop', 'boolop', 'break', 'call', 'compare',
                        'continue', 'delete', 'dict', 'dictcomp', 'ellipsis',
-                       'excepthandler', 'expr', 'extslice', 'for', 'set',
+                       'excepthandler', 'expr', 'extslice', 'for',
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
                        'list', 'listcomp', 'module', 'name', 'nameconstant',
                        'num', 'pass', 'raise', 'repr', 'return',  # 'print'
-                       'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop', 'while',
-                       'import', 'importfrom',  # these 2 import related nodes are accepted but are NOOPs
+                       'set', 'slice', 'str', 'subscript', 'try', 'tuple',
+                       'unaryop', 'while',
+                       'import',      # used to support importing from other presets
+                       'importfrom',  #  NOOP
                        )
 
     def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME):
@@ -143,6 +145,16 @@ class Interpreter:
 
     def get_current_frame(self):
         return self.modules[self.current_mod].frames[-1]
+
+    def find_frame(self, name):
+        """
+        Find the frame (if any) where the symbol is defined.
+        :param name: Symbol name
+        :return:  frame if found, None otherwise
+        """
+        for frame in reversed(self.get_current_module().frames):
+            if frame.is_symbol(name):
+                return frame
 
     def get_global_frame(self):
         return self.get_current_module().frames[1]
@@ -392,20 +404,20 @@ class Interpreter:
         if ctx in (ast.Param, ast.Del):
             return str(node.id)
         else:
-            for frame in reversed(self.get_current_module().frames):
-                if frame.is_symbol(node.id):
-                    val = frame.get_symbol_value(node.id)
-                    val_str = repr(val)
-                    if not val_str.startswith('<'):
-                        if isinstance(val, str):
-                            val = val.replace('`', '')
+            frame = self.find_frame(node.id)
+            if frame:
+                val = frame.get_symbol_value(node.id)
+                val_str = repr(val)
+                if not val_str.startswith('<'):
+                    if isinstance(val, str):
+                        val = val.replace('`', '')
 
-                        if frame.is_modified(node.id):
-                            self.ui_tracer("{}Value of `{}` is {}."
-                                           .format(self.get_lineno_label(node), node.id, code_wrap(val)))
-                            frame.reset_modified(node.id)
+                    if frame.is_modified(node.id):
+                        self.ui_tracer("{}Value of `{}` is {}."
+                                       .format(self.get_lineno_label(node), node.id, code_wrap(val)))
+                        frame.reset_modified(node.id)
 
-                    return val
+                return val
 
             msg = "name `%s` is not defined" % node.id
             self.raise_exception(node, exc=NameError, msg=msg)
@@ -465,7 +477,9 @@ class Interpreter:
                 self.raise_exception(node, exc=NameError, msg=errmsg)
 
             if self.set_symbol(node.id, val):
-                self.get_current_frame().reset_modified(node.id)
+                frame = self.find_frame(node.id)
+                if frame:
+                    frame.reset_modified(node.id)
 
                 if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
                     self.ui_tracer("{}Assigned value of {} to `{}`."
@@ -506,11 +520,9 @@ class Interpreter:
                                        .format(self.get_lineno_label(node), quote(xslice),
                                                path, code_wrap(val)))
 
-                        self.get_current_frame().set_modified(name)
-
-                    # else:
-                    #     self.ui_tracer("{}Value of `{}` is unchanged."
-                    #                    .format(self.get_lineno_label(node), name))
+                        frame = self.find_frame(name)
+                        if frame:
+                            frame.set_modified(name)
 
             elif isinstance(node.slice, ast.Slice):
                 # noinspection PyTypeChecker
@@ -536,7 +548,9 @@ class Interpreter:
                                        .format(self.get_lineno_label(node), slice_str,
                                                path, code_wrap(val)))
 
-                        self.get_current_frame().set_modified(name)
+                        frame = self.find_frame(name)
+                        if frame:
+                            frame.set_modified(name)
 
                     # else:
                     #     self.ui_tracer("{}Value of `{}` is unchanged."
@@ -643,14 +657,12 @@ class Interpreter:
                 xslice = self.run(tnode.slice)
                 if isinstance(tnode.slice, ast.Index):
                     del sym[xslice]
-                    #self.get_current_frame().set_modified(tnode.value.id)
                     self.ui_tracer("{}Deleted index/subscript {} of `{}`."
                                    .format(self.get_lineno_label(node), code_wrap(xslice), tnode.value.id))
 
                 elif isinstance(tnode.slice, ast.Slice):
                     # noinspection PyTypeChecker
                     del sym[slice(xslice.start, xslice.stop, xslice.step)]
-                    #self.get_current_frame().set_modified(tnode.value.id)
 
                     slice_str = '{}:{}{}' \
                         .format(xslice.start if xslice.start else 0,
@@ -661,7 +673,6 @@ class Interpreter:
 
                 elif isinstance(tnode.slice, ast.ExtSlice):
                     del sym[xslice]
-                    #self.get_current_frame().set_modified(tnode.value.id)
             else:
                 msg = "could not delete symbol"
                 self.raise_exception(node, msg=msg)
@@ -907,7 +918,9 @@ class Interpreter:
             # TODO: Track the value of the symbol before/after for better accuracy
             if name not in ('items', 'keys', 'values', 'sorted', 'reversed', 'index', 'copy', 'count'):
                 sym, _ = self.__get_node_path(node.func)
-                self.get_current_frame().set_modified(sym)  # node.func.value.id
+                frame = self.find_frame(sym)
+                if frame:
+                    frame.set_modified(sym)  # node.func.value.id
 
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "`%s` is not callable!!" % func
