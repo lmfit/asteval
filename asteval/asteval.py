@@ -776,7 +776,6 @@ class Procedure(object):
             msg = "%s() takes at least %i arguments, got %i"
             self.raise_exc(None, exc=TypeError,
                            msg=msg % (self.name, nargs_expected, nargs))
-            return
         # check for multiple values for named argument
         if len(self.argnames) > 0 and kwargs is not None:
             msg = "%s() got multiple values for keyword argument '%s'"
@@ -784,7 +783,6 @@ class Procedure(object):
                 if targ in kwargs:
                     self.raise_exc(None, exc=TypeError,
                                    msg=msg % (targ, self.name))
-                    return
 
         # check more args given than expected, varargs not given
         if nargs > nargs_expected and self.vararg is None:
@@ -792,7 +790,7 @@ class Procedure(object):
                 msg = 'too many arguments for %s() expected at most %i, got %i'
                 msg = msg % (self.name, len(self.kwargs)+nargs_expected, nargs)
                 self.raise_exc(None, exc=TypeError, msg=msg)
-                return
+
             for i, xarg in enumerate(args[nargs_expected:]):
                 kw_name = self.kwargs[i][0]
                 if kw_name not in kwargs:
