@@ -470,7 +470,8 @@ class TestEval(TestCase):
                               ('x = astr * atup', 'TypeError'),
                               ('x = arr.shapx', 'AttributeError'),
                               ('arr.shapx = 4', 'AttributeError'),
-                              ('del arr.shapx', 'KeyError')):
+                              ('del arr.shapx', 'KeyError'),
+                              ('x, y = atup', 'ValueError')):
             failed, errtype, errmsg = False, None, None
             # noinspection PyBroadException
             try:
@@ -698,7 +699,7 @@ class TestEval(TestCase):
     def test_function_kwargs(self):
         """test function with kw args, no **kws"""
         self.interp(textwrap.dedent("""
-            def fcn(square=False, x=0, y=0, z=0, t=0):
+            def fcn(x=0, y=0, z=0, t=0, square=False):
                 'test varargs function'
                 out = 0
                 for i in (x, y, z, t):
@@ -714,10 +715,22 @@ class TestEval(TestCase):
         self.isvalue('o', 6)
         self.interp("o = fcn(x=1, y=2, z=3, square=True)")
         self.isvalue('o', 14)
+        self.interp("o = fcn(3, 4, 5)")
+        self.isvalue('o', 12)
+        self.interp("o = fcn(0, -1, 1)")
+        self.isvalue('o', 0)
+        self.interp("o = fcn(0, -1, 1, square=True)")
+        self.isvalue('o', 2)
+        self.interp("o = fcn(1, -1, 1, 1, True)")
+        self.isvalue('o', 4)
         self.interp("o = fcn(x=1, y=2, z=3, t=-2)")
         self.isvalue('o', 4)
         self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
         self.check_error('TypeError', 'extra keyword arg')
+        self.interp("o = fcn(x=1, y=2, y=3)")
+        self.check_error('SyntaxError')
+        self.interp("o = fcn(0, 1, 2, 3, 4, 5, 6, 7, True)")
+        self.check_error('TypeError', 'too many arguments')
 
     def test_function_kwargs1(self):
         """test function with **kws arg"""
