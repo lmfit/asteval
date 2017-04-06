@@ -1,0 +1,35 @@
+[MASTER]
+
+[MESSAGES CONTROL]
+
+# disable: locally disabled, missing docstring, invalid name, too few public methods
+disable=I0011,C0111,C0103,R0903
+
+[DESIGN]
+# Maximum number of arguments for function / method
+max-args=10
+
+# Maximum number of locals for function / method body
+max-locals=25
+
+# Maximum number of return / yield for function / method body
+max-returns=10
+
+# Maximum number of branch for function / method body
+max-branches=25
+
+# Maximum number of statements in function / method body
+max-statements=100
+
+# Maximum number of attributes for a class (see R0902).
+max-attributes=10
+
+max-nested-blocks=6
+
+[FORMAT]
+max-line-length=120
+
+[TYPECHECK]
+generated-members=__subclasses__,query
+
+ignored-classes=SQLAlchemy, scoped_session
