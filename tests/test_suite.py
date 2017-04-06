@@ -26,7 +26,7 @@ else:
     # noinspection PyUnresolvedReferences
     from cStringIO import StringIO
 
-from asteval import NameFinder, Interpreter
+from asteval.asteval import NameFinder, Interpreter
 
 
 @contextlib.contextmanager
