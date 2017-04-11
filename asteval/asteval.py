@@ -934,7 +934,10 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                 msg = "keyword error in function call `%s`" % func
                 self.raise_exception(node, msg=msg)
 
-            keywords[key.arg] = self.run(key.value)
+            if key.arg is None:
+                keywords.update(self.run(key.value))
+            else:
+                keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
         if kwargs is not None:
