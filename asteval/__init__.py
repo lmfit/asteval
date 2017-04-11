@@ -1,26 +1,23 @@
 """
-   ASTEVAL provides a numpy-aware, safe(ish) "eval" function
-
-   Emphasis is on mathematical expressions, and so numpy ufuncs
-   are used if available.  Symbols are held in the Interpreter
-   symbol table 'symtable':  a simple dictionary supporting a
-   simple, flat namespace.
+   ASTEVAL provides a safe(ish) "eval" function.
 
    Expressions can be compiled into ast node for later evaluation,
    using the values in the symbol table current at evaluation time.
 
-   using python, ast module to parse a python expression.
+   Uses python's ast module to parse a python expression.
 
-   version: 0.9.5
-   last update: 07-June-2015
+   version: 0.9.9
+   last update: 11-Apr-2017
    License:  BSD
    Author:  Matthew Newville <newville@cars.uchicago.edu>
             Center for Advanced Radiation Sources,
             The University of Chicago
+
+            Don Welch <dwelch91@gmail.com>
+            SDVI Corp.
 """
 
 from .asteval import Interpreter
-# from .astutils import NameFinder, valid_symbol_name
 
-__version__ = '0.9.5'
+__version__ = '0.9.9'
 __all__ = ['Interpreter']

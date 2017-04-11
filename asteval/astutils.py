@@ -61,10 +61,10 @@ FROM_MATH = ('ceil', 'floor', 'sqrt', 'trunc')
 def get_class_name(obj):
     try:
         return obj.__name__
-    except:
+    except AttributeError:
         try:
             return obj.__class__.__name__
-        except:
+        except AttributeError:
             return str(obj)
 
 LOCALFUNCS = {}
@@ -124,7 +124,7 @@ OPERATORS = {ast.Is: (lambda a, b: a is b, 'is'),
              ast.Not: (lambda a: not a, 'not'),
              ast.UAdd: (lambda a: +a, '+'),
              ast.USub: (lambda a: -a, '-')
-             }
+            }
 
 
 def valid_symbol_name(name):

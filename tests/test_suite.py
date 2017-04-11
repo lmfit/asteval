@@ -269,16 +269,31 @@ class TestEval(TestCase):
 #         self.check_error('NameError')  # Safe, compile() is not supported
 
     def test_exit_value(self):
-        """test expression eval - last exp. is returned by interpreter"""
-        z = self.interp("True")
+        """
+        Return value of this version of asteval is only set by a top-level `return`... 
+        the last eval. expression does NOT set this value. This is because this version
+        of asteval is script-centric where-as the original asteval was expression-centric.
+        """
+        z = self.interp("return True")
         self.assertTrue(z)
-        z = self.interp("x = 1\ny = 2\ny == x + x\n")
-        self.assertTrue(z)
-        z = self.interp("x = 42\nx")
-        self.assertEqual(z, 42)
-        self.isvalue('x', 42)
-        z = self.interp("""def foo(): return 42\nfoo()""")
-        self.assertEqual(z, 42)
+
+        z = self.interp("True")  # No return, so None
+        self.assertIsNone(z)
+
+        z = self.interp("x = 1\ny = 2\ny == x + x\n")  # No return, so None
+        self.assertIsNone(z)
+
+        z = self.interp("x = 1\ny = 2\ny == x + x\nreturn y\n")
+        self.assertEqual(2, z)
+
+        z = self.interp("x = 42\nx")  # No return, so None
+        self.assertIsNone(z)
+
+        z = self.interp("""def foo(): return 42\nfoo()""")  # No return, so None
+        self.assertIsNone(z)
+
+        z = self.interp("""def foo(): return 42\nreturn foo()""")
+        self.assertEqual(42, z)
 
     def test_errors(self):
         with self.assertRaises(SyntaxError):
@@ -306,6 +321,7 @@ class TestEval(TestCase):
 
 
 EXPECTED_PAT = re.compile("""^#\s*(?:"([^"]+)"|'([^']+)')""")
+
 
 class TestCaseRunner(unittest.TestCase):
     def test_case_runner(self):

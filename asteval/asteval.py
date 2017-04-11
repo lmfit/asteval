@@ -1,16 +1,10 @@
 """
 Safe(ish) evaluator of python expressions, using ast module.
 
-Symbols are held in the Interpreter symtable -- a simple
-dictionary supporting a simple, flat namespace.
-
-Expressions can be compiled into ast node and then evaluated
-later, using the current values in the
 """
 
 from __future__ import division, print_function
 
-import uuid
 from sys import stdout
 import ast
 import math
@@ -21,23 +15,32 @@ from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
                        ReturnedNone, valid_symbol_name, quote,
                        code_wrap, MAX_CYCLES, get_class_name, NoReturn, Empty)
 
+from .frame import Frame
+from .function import Function
+from .module import Module
+
 builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
 MAX_EXEC_TIME = 2  # sec
 
+# pylint: disable=too-many-lines
 
-class Interpreter:
+
+class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-public-methods
     """
   This module compiles expressions and statements to AST representation,
-  using python's ast module, and then executes the AST representation
-  using a dictionary of named object (variable, functions).
+  using python's ast module, and then executes the AST representation.
+
+  This version of asteval has sep. frames of execution for builtins,
+  globals, and funcs and supports hooking by a debugger. It also allows
+  limited importing of "modules" into the global namespace using a modified
+  `import` statement.
 
   The result is a restricted, simplified version of Python that is
-  somewhat safer than 'eval' because some operations (such as 'import' and 'eval')
-  are simply not allowed.  The resulting language uses a flat namespace that works
-  on Python objects, but does not allow new classes to be defined.
+  somewhat safer than 'eval' because some operations (such as 'exec' and 'eval')
+  are simply not allowed.
 
   Many parts of Python syntax are supported, including:
      for loops, while loops, if-then-elif-else conditionals
@@ -49,9 +52,12 @@ class Interpreter:
      dict comprehensions
 
   The following Python syntax elements are not supported:
-      Import, Exec, Lambda, Class, Global, Generators,
-      Yield, Yield From, Decorators, NonLocal, Async, Await,
+      Import*, Exec, Lambda, Class, Global**, Generators,
+      Yield, Yield From, Decorators, NonLocal**, Async, Await,
       Generator Comprehensions, Raise From
+
+      * modified from standard Python.
+      ** planned to be supported in future.
 
   In addition, while many builtin functions are supported, several
   builtin functions are missing ('eval', 'exec', and 'getattr' for
@@ -70,7 +76,7 @@ class Interpreter:
                        'unaryop', 'while',
                        'import',      # used to support importing from other presets
                        'importfrom',  #  NOOP
-                       )
+                      )
 
     def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME):
         self.debugging = True  # Set to True to disable the runtime limiter
@@ -91,6 +97,7 @@ class Interpreter:
         self.modules = {}
         self.current_mod = '__main__'
         self.last_func = None
+        self.prev_mod = None
 
         self.builtins = {}
         for sym in FROM_PY:
@@ -98,16 +105,14 @@ class Interpreter:
                 self.builtins[sym] = builtins[sym]
 
         for symname, obj in LOCALFUNCS.items():
-            self.builtins['symname'] = obj
+            self.builtins[symname] = obj
 
         for sym in FROM_MATH:
             if hasattr(math, sym):
                 self.builtins[sym] = getattr(math, sym)
 
         self.builtins['print'] = self.print_
-
         self.add_module(self.current_mod, filename, extras={'settrace': self.set_trace})
-
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node)) for node in self.supported_nodes))
 
         # to rationalize try/except try/finally for Python2.6 through Python3.3
@@ -203,7 +208,7 @@ class Interpreter:
         if node is not None and hasattr(node, 'lineno'):
             return node.lineno
 
-    def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
+    def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):  # pylint: disable=unused-argument
         """add an exception"""
 
         if lineno is None and node is not None:
@@ -222,16 +227,17 @@ class Interpreter:
     def __call__(self, expr, **kw):
         return self.eval(expr, **kw)
 
-    def eval(self, expr, **kw):
+    def eval(self, expr, **kw):  # pylint: disable=unused-argument
         """evaluates a single or block of statements or whole file"""
         self.error = None
         self.start = time()
         self.cycles = 0
+        self.get_global_frame().reset_retval()
 
         node = self.parse(expr)
         ret = self.run(node, expr=expr)
         if self.error is not None:
-            self.ui_tracer(" Unhandled exception: {}".format(get_class_name(self.error.exc)))
+            self.ui_tracer(" Unhandled exception: {}".format(get_class_name(self.error.exc)))  # pylint: disable=no-member
         return ret
 
     def parse(self, text):
@@ -306,12 +312,6 @@ class Interpreter:
         """expression"""
         self.last_func = None
         val = self.run(node.value)
-        # if self.last_func not in ('pprint', 'jprint', 'xprint', 'print', 'print_'):
-        #     if self.last_func:
-        #         func = '({})'.format(self.last_func)
-        #     else:
-        #         func = ''
-        #     self.ui_tracer("{}Expression returned `{}` {}.".format(self.get_lineno_label(node), quote(val), func))
         return val  # ('value',)
 
     def on_index(self, node):
@@ -335,23 +335,20 @@ class Interpreter:
 
     def on_module(self, node):  # ():('body',)
         """module def"""
-        out = None
         for tnode in node.body:
-            out = self.run(tnode)
+            self.run(tnode)
 
             __ret_val = self.get_current_frame().get_retval()
             if __ret_val is not None:
-                return __ret_val
-
-        return out
+                return None if __ret_val == ReturnedNone else __ret_val
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def on_pass(self, node):
+    def on_pass(self, _):  # pylint: disable=no-self-use
         """pass statement"""
         return NoReturn
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
-    def on_ellipsis(self, node):
+    def on_ellipsis(self, _):  # pylint: disable=no-self-use
         """ellipses"""
         return Ellipsis
 
@@ -389,11 +386,13 @@ class Interpreter:
                      zip(node.keys, node.values)])
 
     # noinspection PyMethodMayBeStatic
+    # pylint: disable=no-self-use
     def on_num(self, node):  # ('n',)
         """return number"""
         return node.n
 
     # noinspection PyMethodMayBeStatic
+    # pylint: disable=no-self-use
     def on_str(self, node):  # ('s',)
         """return string"""
         return node.s
@@ -423,7 +422,7 @@ class Interpreter:
             self.raise_exception(node, exc=NameError, msg=msg)
 
     # noinspection PyMethodMayBeStatic
-    def on_nameconstant(self, node):
+    def on_nameconstant(self, node):  # pylint: disable=no-self-use
         """ True, False, None in python >= 3.4 """
         return node.value
 
@@ -467,7 +466,7 @@ class Interpreter:
         path.reverse()
         return name, path[0] + ''.join(['[{}]'.format(quote(i)) for i in path[1:-1]])
 
-    def node_assign(self, node, val):
+    def node_assign(self, node, val):  # pylint: disable=too-many-branches
         """here we assign a value (not the node.value object) to a node
         this is used by on_assign, but also by for, list comprehension, etc.
         """
@@ -488,9 +487,6 @@ class Interpreter:
                 else:
                     self.ui_tracer("{}Assigned value of {} to `{}`."
                                    .format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
-
-            # else:
-            #     self.ui_tracer("{}Value of `{}` is unchanged.".format(self.get_lineno_label(node), node.id))
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
@@ -526,6 +522,7 @@ class Interpreter:
 
             elif isinstance(node.slice, ast.Slice):
                 # noinspection PyTypeChecker
+                # pylint: disable=no-member
                 try:
                     prev_val = sym[slice(xslice.start, xslice.stop, xslice.step)]
                 except (IndexError, KeyError):
@@ -551,10 +548,6 @@ class Interpreter:
                         frame = self.find_frame(name)
                         if frame:
                             frame.set_modified(name)
-
-                    # else:
-                    #     self.ui_tracer("{}Value of `{}` is unchanged."
-                    #                    .format(self.get_lineno_label(node), name))
 
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
@@ -662,6 +655,7 @@ class Interpreter:
 
                 elif isinstance(tnode.slice, ast.Slice):
                     # noinspection PyTypeChecker
+                    # pylint: disable=no-member
                     del sym[slice(xslice.start, xslice.stop, xslice.step)]
 
                     slice_str = '{}:{}{}' \
@@ -681,7 +675,7 @@ class Interpreter:
 
     def on_unaryop(self, node):  # ('op', 'operand')
         """unary operator"""
-        func, name = op2func(node.op)
+        func, _ = op2func(node.op)
         val = self.run(node.operand)
         ret = func(val)
         return ret
@@ -768,7 +762,8 @@ class Interpreter:
                 break
 
             elif isinstance(self._interrupt, ast.Continue):
-                self.ui_tracer("{}`continue` hit in `while` loop, continuing loop...".format(self.get_lineno_label(node)))
+                self.ui_tracer("{}`continue` hit in `while` loop, continuing loop..."
+                               .format(self.get_lineno_label(node)))
 
         else:
             if hasattr(node, 'orelse') and node.orelse:
@@ -820,7 +815,7 @@ class Interpreter:
         for tnode in node.body:
             try:
                 self.run(tnode)
-            except Exception as ex:
+            except Exception as ex:  # pylint: disable=broad-except
                 exc = ex
                 no_errors = False
                 last_error = exc
@@ -840,7 +835,8 @@ class Interpreter:
                             for t in hnd.type.elts:
                                 if isinstance(exc, builtins.get(t.id)):
                                     if hnd.name is not None:
-                                        self.node_assign(ast.Name(hnd.name, ast.Store(), lineno=node.lineno), last_error)
+                                        self.node_assign(ast.Name(hnd.name, ast.Store(),
+                                                                  lineno=node.lineno), last_error)
                                     self.run(hnd)
                                     found = True
                                     break
@@ -874,7 +870,7 @@ class Interpreter:
         if not no_errors and not found and exc is not None:
             self.ui_tracer("{}Unhandled exception, unrolling stack...".format(self.get_lineno_label(node)))
             self.error = last_error
-            raise exc
+            raise exc  # pylint: disable=raising-bad-type
 
         return NoReturn
 
@@ -886,8 +882,8 @@ class Interpreter:
         out = self.run(excnode)
 
         try:
-            msg = ' '.join(out.args)
-        except TypeError:
+            msg = ' '.join(out.args)  # pylint: disable=no-member
+        except (TypeError, AttributeError):
             msg = ''
 
         msg2 = self.run(msgnode)
@@ -904,9 +900,9 @@ class Interpreter:
 
         name = ''
         if hasattr(func, '__name__'):
-            name = func.__name__
+            name = func.__name__  # pylint: disable=no-member
         elif hasattr(func, 'name'):
-            name = func.name
+            name = func.name  # pylint: disable=no-member
 
         self.last_func = name
 
@@ -961,7 +957,7 @@ class Interpreter:
         # noinspection PyBroadException
         try:
             ret = func(*args, **keywords)
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-except
             self.ui_tracer('{}Function `{}({})` raised on exception: {}.'
                            .format(self.get_lineno_label(node), name, arg_str, str(e)))
 
@@ -1018,8 +1014,6 @@ class Interpreter:
                                             vararg=vararg,
                                             varkws=varkws))
 
-        #self.ui_tracer("{}Defined function `{}`.".format(self.get_lineno_label(node), node.name))
-
         return NoReturn
 
     def on_dictcomp(self, node):  # ('key', 'value', 'generators')
@@ -1064,7 +1058,7 @@ class Interpreter:
         Set literals
         """
         result = set()
-        [result.add(self.run(val)) for val in node.elts]
+        [result.add(self.run(val)) for val in node.elts]  # pylint: disable=expression-not-assigned
         return result
 
     def on_import(self, node):  # ('names',)
@@ -1094,265 +1088,5 @@ class Interpreter:
         return NoReturn
 
     # noinspection PyMethodMayBeStatic
-    def on_importfrom(self, node):  # NOOP (used for PyCharm IDE error quelling)
+    def on_importfrom(self, _):  # NOOP (used for PyCharm IDE error quelling)
         return NoReturn
-
-
-class Module:
-    def __init__(self, name, interp, filename):
-        self.name = name
-        self.__name__ = name
-        self.__asteval__ = interp
-        self.filename = filename
-        self.frames = []
-
-    def push_frame(self, frame):
-        self.frames.append(frame)
-
-    def pop_frame(self):
-        assert len(self.frames) > 2
-        return self.frames.pop()
-
-    def get_current_frame(self):
-        assert len(self.frames) > 0
-        return self.frames[-1]
-
-    def get_global_frame(self):
-        assert len(self.frames) > 1
-        return self.frames[1]
-
-    def get_builtins_frame(self):
-        assert len(self.frames) > 0
-        return self.frames[0]
-
-    def find_frame_by_id(self, _id):
-        for f in self.frames:
-            if f.get_id() == _id:
-                return f  # make defensive copy?
-
-    def set_symbol(self, name, val):
-        self.get_current_frame().set_symbol(name, val)
-
-    def __getattr__(self, item):
-        for frame in reversed(self.frames):
-            if frame.is_symbol(item):
-                val = frame.get_symbol_value(item)
-                return val
-
-    def __repr__(self):
-        return "<Module: name={} fn={} frames={}>".format(self.name, self.filename, self.frames)
-
-
-class Symbol:
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-        self.modified = True
-
-    def set(self, value):
-        self.modified = value != self.value
-        self.value = value
-        return self.modified
-
-
-class Frame:
-    def __init__(self, name, initial_symbols=None, filename=''):
-        if initial_symbols is None:
-            initial_symbols = {}
-        self.__name = name
-        self.__symbols = {}
-        for name, value in initial_symbols.items():
-            self.__symbols[name] = Symbol(name, value)
-
-        self.__retval = None
-        self.__id = uuid.uuid1().hex[:8]
-        self.__lineno = 1
-        self.__filename = filename
-
-    def set_symbol(self, name, val):
-        if name in self.__symbols:
-            self.__symbols[name].set(val)
-        else:
-            self.__symbols[name] = Symbol(name, val)
-
-        return self.__symbols[name].modified
-
-    def is_modified(self, name):
-        try:
-            return self.__symbols[name].modified
-        except KeyError:
-            return True
-
-    def set_modified(self, name):
-        if name in self.__symbols:
-            self.__symbols[name].modified = True
-        else:
-            self.__symbols[name] = Symbol(name, None)
-
-    def reset_modified(self, name):
-        if name in self.__symbols:
-            self.__symbols[name].modified = False
-        else:
-            self.__symbols[name] = Symbol(name, None)
-
-    def remove_symbol(self, name):
-        self.__symbols.pop(name)
-
-    def get_symbol_value(self, name):
-        return self.__symbols[name].value
-
-    def get_symbol(self, name):
-        return self.__symbols[name]
-
-    def get_symbols(self):
-        return {name: value.value for name, value in self.__symbols.items()}
-
-    def is_symbol(self, name):
-        return name in self.__symbols
-
-    def get_name(self):
-        return self.__name
-
-    def set_retval(self, retval):
-        self.__retval = retval
-
-    def get_retval(self):
-        return self.__retval
-
-    def get_id(self):
-        return self.__id
-
-    def set_lineno(self, lineno):
-        self.__lineno = lineno
-
-    def get_lineno(self):
-        return self.__lineno
-
-    def set_filename(self, filename):
-        self.__filename = filename
-
-    def get_filename(self):
-        return self.__filename
-
-    def __repr__(self):
-        return "<Frame: name={} id={} fn={} ({}items)>" \
-            .format(self.__name, self.__id, self.__filename, len(self.__symbols))
-
-
-class Function:
-    """Procedure: user-defined function for asteval
-
-    This stores the parsed ast nodes as from the
-    'functiondef' ast node for later evaluation.
-    """
-
-    def __init__(self, name, interp, filename, doc=None, lineno=0, body=None, args=None, kwargs=None, vararg=None, varkws=None):
-        self.name = name
-        self.__name__ = name
-        self.__asteval__ = interp
-        self.raise_exc = self.__asteval__.raise_exception
-        self.__doc__ = doc
-        self.body = body
-        self.argnames = args
-        self.kwargs = kwargs
-        self.vararg = vararg
-        self.varkws = varkws
-        self.lineno = lineno
-        self.filename = filename
-
-    def __repr__(self):
-        sig = ""
-        if self.argnames:
-            sig = "%s%s" % (sig, ', '.join(self.argnames))
-
-        if self.vararg is not None:
-            sig = "%s, *%s" % (sig, self.vararg)
-
-        if self.kwargs:
-            if sig:
-                sig = "%s, " % sig
-            _kw = ["%s=%s" % (k, v) for k, v in self.kwargs]
-            sig = "%s%s" % (sig, ', '.join(_kw))
-
-        if self.varkws is not None:
-            sig = "%s, **%s" % (sig, self.varkws)
-
-        return "<Function %s(%s)>" % (self.name, sig)
-
-    def __call__(self, *args, **kwargs):
-        symlocals = {}
-        args = list(args)
-        n_args = len(args)
-        n_names = len(self.argnames)
-
-        # may need to move kwargs to args if names align!
-        if n_args < n_names and kwargs:
-            for name in self.argnames[n_args:]:
-                if name in kwargs:
-                    args.append(kwargs.pop(name))
-            n_args = len(args)
-            n_names = len(self.argnames)
-
-        if self.argnames and kwargs is not None:
-            msg = "multiple values for keyword argument `{}`"
-            for targ in self.argnames:
-                if targ in kwargs:
-                    self.raise_exc(None, exc=TypeError,
-                                   msg=msg.format(targ),
-                                   lineno=self.lineno)
-
-        msg = '[expected `{}`, got `{}`]'.format(n_names, n_args)
-        if n_args < n_names:
-            self.raise_exc(None, exc=TypeError, msg="not enough positional parameters {}".format(msg))
-
-        elif n_args > n_names and not self.vararg:
-            self.raise_exc(None, exc=TypeError, msg="too many positional parameters {}".format(msg))
-
-        for argname in self.argnames:
-            symlocals[argname] = args.pop(0)
-
-        try:
-            if self.vararg is not None:
-                symlocals[self.vararg] = tuple(args)
-
-            for key, val in self.kwargs:
-                if key in kwargs:
-                    val = kwargs.pop(key)
-                symlocals[key] = val
-
-            if self.varkws is not None:
-                symlocals[self.varkws] = kwargs
-
-            elif kwargs:
-                self.raise_exc(None, msg='extra keyword arguments (`{}`)'.format(','.join(list(kwargs.keys()))),
-                               exc=TypeError, lineno=self.lineno)
-
-        except (ValueError, LookupError, TypeError, NameError, AttributeError) as ex:
-            self.raise_exc(None, exc=ex, msg='incorrect arguments', lineno=self.lineno)
-
-        frame = Frame(self.name, symlocals, filename=self.filename)
-        self.__asteval__.push_frame(frame)
-        if self.__asteval__.trace:
-            self.__asteval__.trace = self.__asteval__.trace(frame, 'call', self.name)
-
-        retval = None
-
-        try:
-            # evaluate script of function
-            for node in self.body:
-                self.__asteval__.run(node, expr='<>')
-                if self.__asteval__.error:
-                    break
-
-                __ret_val = self.__asteval__.get_current_frame().get_retval()
-                if __ret_val is not None:
-                    retval = None if __ret_val == ReturnedNone else __ret_val
-                    break
-
-        finally:
-            self.__asteval__.pop_frame()
-
-        return retval
-
-
-
