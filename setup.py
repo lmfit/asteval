@@ -2,16 +2,6 @@
 from setuptools import setup
 import asteval
 
-long_description = """ASTEVAL provides a numpy-aware, safe(ish) 'eval' function
-
-Emphasis is on mathematical expressions, and so numpy ufuncs
-are used if available.  Symbols are held in the Interpreter
-symbol table 'symtable':  a simple dictionary supporting a
-simple, flat namespace.
-
-Expressions can be compiled into ast node for later evaluation,
-using the values in the symbol table current at evaluation time.
-"""
 
 setup(name='asteval',
       version=asteval.__version__,
@@ -20,7 +10,7 @@ setup(name='asteval',
       url='http://github.com/newville/asteval',
       license='BSD',
       description="Safe, minimalistic evaluator of python expression using ast module",
-      long_description=long_description,
+      long_description="""ASTEVAL provides a safe(ish) 'eval' function""",
       packages=['asteval'],
       classifiers=[
           'Intended Audience :: End Users/Desktop',
