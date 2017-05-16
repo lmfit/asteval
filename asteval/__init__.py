@@ -6,18 +6,18 @@
 
    Uses python's ast module to parse a python expression.
 
-   version: 0.9.9
-   last update: 11-Apr-2017
+   version: 0.9.10 (SDVI)
+   last update: 15-May-2017
    License:  BSD
-   Author:  Matthew Newville <newville@cars.uchicago.edu>
-            Center for Advanced Radiation Sources,
-            The University of Chicago
+   Authors:  Matthew Newville <newville@cars.uchicago.edu>
+             Center for Advanced Radiation Sources,
+             The University of Chicago
 
-            Don Welch <dwelch91@gmail.com>
-            SDVI Corp.
+             Don Welch <dwelch91@gmail.com>
+             SDVI Corp.
 """
 
 from .asteval import Interpreter
 
-__version__ = '0.9.9'
+__version__ = '0.9.10'
 __all__ = ['Interpreter']

@@ -95,7 +95,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         self.prev_lineno = 0
         self.globals_ = globals_
         self.modules = {}
-        self.current_mod = '__main__'
+        self.mod_stack = []
         self.last_func = None
         self.prev_mod = None
 
@@ -112,7 +112,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                 self.builtins[sym] = getattr(math, sym)
 
         self.builtins['print'] = self.print_
-        self.add_module(self.current_mod, filename, extras={'settrace': self.set_trace})
+        self.mod_stack.append('__main__')
+        self.add_module('__main__', filename, extras={'settrace': self.set_trace})
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node)) for node in self.supported_nodes))
 
         # to rationalize try/except try/finally for Python2.6 through Python3.3
@@ -140,7 +141,13 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             return
 
     def get_current_module(self):
-        return self.modules[self.current_mod]
+        return self.modules[self.mod_stack[-1]]
+
+    def enter_module(self, name):
+        self.mod_stack.append(name)
+
+    def leave_module(self):
+        self.mod_stack.pop()
 
     def push_frame(self, frame):
         self.get_current_module().frames.append(frame)
@@ -149,7 +156,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         return self.get_current_module().frames.pop()
 
     def get_current_frame(self):
-        return self.modules[self.current_mod].frames[-1]
+        return self.get_current_module().frames[-1]
 
     def find_frame(self, name):
         """
@@ -1008,6 +1015,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
         self.set_symbol(node.name, Function(node.name,
                                             self,
+                                            self.get_current_module().name,
                                             self.get_current_frame().get_filename(),
                                             doc=doc,
                                             lineno=node.lineno,
@@ -1080,13 +1088,12 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
             mod = self.add_module(import_name, path)
             self.get_current_frame().set_symbol(import_name, mod)
-            self.prev_mod = self.current_mod
-            self.current_mod = import_name
+            self.enter_module(import_name)
             try:
                 node = self.parse(script)
                 self.run(node, expr=script)
             finally:
-                self.current_mod = self.prev_mod
+                self.leave_module()
 
         return NoReturn
 

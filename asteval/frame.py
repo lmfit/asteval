@@ -12,6 +12,12 @@ class Symbol:
         self.value = value
         return self.modified
 
+    def __repr__(self):
+        return "<Symbol {}: val={}, mod?={}>".format(self.name, self.value, self.modified)
+
+    def __str__(self):
+        return repr(self)
+
 
 class Frame:
     def __init__(self, name, initial_symbols=None, filename=''):
@@ -102,5 +108,8 @@ class Frame:
         return self.__filename
 
     def __repr__(self):
-        return "<Frame: name={} id={} fn={} ({}items)>" \
+        return "<Frame {}: id={}, fn={}, ({} items)>" \
             .format(self.__name, self.__id, self.__filename, len(self.__symbols))
+
+    def __str__(self):
+        return repr(self)

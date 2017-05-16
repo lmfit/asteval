@@ -3,6 +3,7 @@ from .frame import Frame
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments
 
+
 class Function:
     """Procedure: user-defined function for asteval
 
@@ -10,7 +11,7 @@ class Function:
     'functiondef' ast node for later evaluation.
     """
 
-    def __init__(self, name, interp, filename, doc=None, lineno=0, body=None, args=None,
+    def __init__(self, name, interp, mod, filename, doc=None, lineno=0, body=None, args=None,
                  kwargs=None, vararg=None, varkws=None):
         self.name = name
         self.__name__ = name
@@ -24,6 +25,7 @@ class Function:
         self.varkws = varkws
         self.lineno = lineno
         self.filename = filename
+        self.mod = mod
 
     def __repr__(self):
         sig = ""
@@ -43,6 +45,9 @@ class Function:
             sig = "%s, **%s" % (sig, self.varkws)
 
         return "<Function %s(%s)>" % (self.name, sig)
+
+    def __str__(self):
+        return repr(self)
 
     def __call__(self, *args, **kwargs):
         symlocals = {}
@@ -95,6 +100,7 @@ class Function:
         except (ValueError, LookupError, TypeError, NameError, AttributeError) as ex:
             self.raise_exc(None, exc=ex, msg='incorrect arguments', lineno=self.lineno)
 
+        self.__asteval__.enter_module(self.mod)
         frame = Frame(self.name, symlocals, filename=self.filename)
         self.__asteval__.push_frame(frame)
         if self.__asteval__.trace:
@@ -103,6 +109,7 @@ class Function:
         retval = None
 
         try:
+
             # evaluate script of function
             for node in self.body:
                 self.__asteval__.run(node, expr='<>')
@@ -116,5 +123,6 @@ class Function:
 
         finally:
             self.__asteval__.pop_frame()
+            self.__asteval__.leave_module()
 
         return retval

@@ -325,11 +325,14 @@ EXPECTED_PAT = re.compile("""^#\s*(?:"([^"]+)"|'([^']+)')""")
 
 class TestCaseRunner(unittest.TestCase):
     def test_case_runner(self):
+        scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
+
+        sys.path.insert(0, scripts_dir)
+
         def print_out(*args):
             out.write([str(a) for a in args])
 
         def importer(name):
-            scripts_dir = os.path.join(os.path.dirname(__file__), 'scripts')
             import_name = os.path.join(scripts_dir, name + '.py')
             with open(import_name, 'rb') as f:
                 return import_name, f.read()
@@ -365,6 +368,90 @@ class TestCaseRunner(unittest.TestCase):
                 print("Fingerprint: {!r}".format(actual.replace('\n', '|')))
 
 
+class TestImport(unittest.TestCase):
+    def test_import(self):
+        def importer(name):
+            path = "importer.py"
+            script = dedent("""
+            x = 1
+            def foo(y):
+                return 42 + x + y
+            """)
+            return path, script
+
+        out = StringIO()
+        interp = Interpreter('main.py', writer=out, import_hook=importer)
+        interp.set_symbol('print', interp.print_)
+        script = dedent(
+        """
+        import importer
+        
+        print(importer.x)
+        importer.y = 2
+        print(importer.foo(1))
+        print(importer.y)
+        
+        """)
+        interp(script)
+        self.assertEqual('1\n44\n2\n', out.getvalue())
+
+    def test_import_2(self):
+        def importer(name):
+            if name == 'importer1':
+                path = "importer1.py"
+                script = dedent("""
+                x = 1
+                def foo(y):
+                    return 42 + x + y
+                """)
+            elif name == 'importer0':
+                path = 'importer0.py'
+                script = dedent("""
+                import importer1
+                
+                x = importer1.x
+                def bar(z):
+                    return importer1.foo(z)
+                """)
+            return path, script
+
+        out = StringIO()
+        interp = Interpreter('main.py', writer=out, import_hook=importer)
+        interp.set_symbol('print', interp.print_)
+        script = dedent(
+            """
+            import importer0
+    
+            print(importer0.x)
+            importer0.y = 2
+            print(importer0.bar(1))
+            print(importer0.y)
+    
+            """)
+        interp(script)
+        self.assertEqual('1\n44\n2\n', out.getvalue())
+
+
+class TestObjectAccess(unittest.TestCase):
+    def test(self):
+        class Class:
+            def __init__(self, x):
+                self.x = x
+                self.y = 0
+
+            def foo(self):
+                return self.x
+
+        out = StringIO()
+        interp = Interpreter('main.py', writer=out, globals_={'Class': Class})
+        script = dedent("""
+        c = Class(1)
+        print(c.x)
+        c.y = 2
+        print(c.y)
+        """)
+        interp(script)
+        self.assertEqual("1\n2\n", out.getvalue())
 
 if __name__ == '__main__':  # pragma: no cover
     for suite in (TestEval, TestCaseRunner):

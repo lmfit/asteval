@@ -40,4 +40,7 @@ class Module:
                 return val
 
     def __repr__(self):
-        return "<Module: name={} fn={} frames={}>".format(self.name, self.filename, self.frames)
+        return "<Module {}: fn={}, frames={}>".format(self.name, self.filename, self.frames)
+
+    def __str__(self):
+        return repr(self)
