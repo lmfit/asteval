@@ -1,4 +1,1 @@
-##
-## pip requirements file.  To install dependencies, use
-##
-##  pip install -r requirements.txt
+requests==2.7.0

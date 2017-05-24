@@ -4,6 +4,7 @@ Base TestCase for asteval
 """
 import ast
 import contextlib
+import json
 import os
 import re
 import time
@@ -13,8 +14,11 @@ from tempfile import NamedTemporaryFile
 from textwrap import dedent
 
 import sys
+import requests
 
 from math import sqrt
+
+import requests
 
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
@@ -347,7 +351,7 @@ class TestCaseRunner(unittest.TestCase):
                     script = fobj.read()
 
                 out = StringIO()
-                interp = Interpreter(f, writer=out, import_hook=importer)
+                interp = Interpreter(f, writer=out, import_hook=importer, globals_={'requests': requests})
                 interp.set_symbol('print', interp.print_)
                 try:
                     interp(script)
@@ -361,7 +365,7 @@ class TestCaseRunner(unittest.TestCase):
                 print(trace)
 
                 with stdoutIO() as s:
-                    exec(script, dict())
+                    exec(script, {'requests': requests})
 
                 expected = s.getvalue()
                 self.assertEqual(expected, actual, msg="AstEval {!r} != CPython {!r} in {}".format(actual, expected, f))
@@ -453,7 +457,19 @@ class TestObjectAccess(unittest.TestCase):
         interp(script)
         self.assertEqual("1\n2\n", out.getvalue())
 
+
+class TestRequests(unittest.TestCase):
+    def test_requests(self):
+        out = StringIO()
+        interp = Interpreter('main.py', writer=out, globals_={'requests': requests})
+        script = dedent("""
+                return requests.get('https://httpbin.org/ip').text
+                """)
+        result = json.loads(interp(script))
+        self.assertIn('origin', result)
+
+
 if __name__ == '__main__':  # pragma: no cover
-    for suite in (TestEval, TestCaseRunner):
+    for suite in (TestEval, TestCaseRunner, TestObjectAccess, TestRequests):
         suite = unittest.TestLoader().loadTestsFromTestCase(suite)
         unittest.TextTestRunner(verbosity=2).run(suite)
