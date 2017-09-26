@@ -9,6 +9,8 @@ import re
 import ast
 from sys import exc_info
 
+from math import radians, degrees, cos, acos, cosh, acosh, sin, asin, sinh, asinh, tan, atan, atan2, tanh, atanh
+
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
@@ -143,6 +145,7 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
 
+
 def _open(filename, mode='r', buffering=0):
     """read only version of open()"""
     if mode not in ('r', 'rb', 'rU'):
@@ -151,8 +154,66 @@ def _open(filename, mode='r', buffering=0):
         raise RuntimeError("Invalid buffering value, max buffer size is {}".format(MAX_OPEN_BUFFER))
     return open(filename, mode, buffering)
 
+def cosd(deg):
+    return cos(radians(deg))
 
-LOCALFUNCS = {'open': _open}
+def acosd(rto):
+    return degrees(acos(rto))
+
+def coshd(deg):
+    return cosh(radians(deg))
+
+def acoshd(rto):
+    return degrees(acosh(rto))
+
+
+def sind(deg):
+    return sin(radians(deg))
+
+def asind(rto):
+    return degrees(asin(rto))
+
+def sinhd(deg):
+    return sinh(radians(deg))
+
+def asinhd(rto):
+    return degrees(asinh(rto))
+
+
+def tand(deg):
+    return tan(radians(deg))
+
+def atand(rto):
+    return degrees(atan(rto))
+
+def atan2d(rto):
+    return degrees(atan2(rto))
+
+def tanhd(deg):
+    return tanh(radians(deg))
+
+def atanhd(rto):
+    return degrees(atanh(rto))
+
+
+LOCALFUNCS = {'open': _open,
+
+    'cos_d': cosd,
+    'acos_d': acosd,
+    'cosh_d': coshd,
+    'acosh_d': acoshd,
+
+    'sin_d': sind,
+    'asin_d': asind,
+    'sinh_d': sinhd,
+    'asinh_d': asinhd,
+
+    'tan_d': tand,
+    'atan_d': atand,
+    'atan2_d': atan2d,
+    'tanh_d': tanhd,
+    'atanh_d': atanhd
+}
 
 
 # Safe versions of functions to prevent denial of service issues
