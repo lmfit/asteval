@@ -155,7 +155,7 @@ def _type(obj, *varargs, **varkws):
     """type that prevents varargs and varkws"""
     return type(obj)
 
-LOCALFUNCS = {'open': _open, 'type', _type}
+LOCALFUNCS = {'open': _open, 'type': _type}
 
 
 # Safe versions of functions to prevent denial of service issues
