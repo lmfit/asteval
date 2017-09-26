@@ -403,18 +403,19 @@ class Interpreter:
             return delattr(sym, node.attr)
 
         # ctx is ast.Load
-        fmt = "cannnot access attribute '%s' for %s"
-        if node.attr not in UNSAFE_ATTRS:
-            fmt = "no attribute '%s' for %s"
-            try:
-                return getattr(sym, node.attr)
-            except AttributeError:
-                pass
+        errfmt = "'%s' object has not attribute '%s'"
 
-        # AttributeError or accessed unsafe attribute
-        obj = self.run(node.value)
-        msg = fmt % (node.attr, obj)
-        self.raise_exception(node, exc=AttributeError, msg=msg)
+        if (node.attr in UNSAFE_ATTRS or
+            (isinstance(sym, Procedure) and node.attr not in dir(sym))):
+            self.raise_exception(node, exc=AttributeError,
+                                 msg=errfmt % (sym, node.attr))
+
+        try:
+            return getattr(sym, node.attr)
+        except AttributeError:
+            self.raise_exception(node, exc=AttributeError,
+                                 msg=errfmt % (sym, node.attr))
+
 
     def on_assign(self, node):  # ('targets', 'value')
         """simple assignment"""
@@ -722,6 +723,7 @@ class Procedure(object):
     def __init__(self, name, interp, doc=None, lineno=0,
                  body=None, args=None, kwargs=None,
                  vararg=None, varkws=None):
+        self.__ininit__ = True
         self.name = name
         self.__asteval__ = interp
         self.raise_exc = self.__asteval__.raise_exception
@@ -732,6 +734,16 @@ class Procedure(object):
         self.vararg = vararg
         self.varkws = varkws
         self.lineno = lineno
+        self.__ininit__ = False
+
+    def __setattr__(self, attr, val):
+        if not getattr(self, '__ininit__', True):
+            self.raise_exc(None, exc=TypeError,
+                           msg= "procedure is read-only")
+        self.__dict__[attr] = val
+
+    def __dir__(self):
+        return ['name']
 
     def __repr__(self):
         sig = ""
@@ -758,12 +770,6 @@ class Procedure(object):
         nargs = len(args)
         nkws = len(kwargs)
         nargs_expected = len(self.argnames)
-        # print("Proc ", self.name)
-        # print(" defn: args, kwargs ", self.argnames, self.kwargs)
-        # print(" defn: vararg, varkws ", self.vararg, self.varkws)
-        # print(" passed args, kws: ", args, kwargs)
-
-
         # check for too few arguments, but the correct keyword given
         if (nargs < nargs_expected) and nkws > 0:
             for name in self.argnames[nargs:]:
