@@ -7,7 +7,7 @@
    Uses python's ast module to parse a python expression.
 
    version: 0.9.10 (SDVI)
-   last update: 15-May-2017
+   last update: 15-May-2017 (Forked)
    License:  BSD
    Authors:  Matthew Newville <newville@cars.uchicago.edu>
              Center for Advanced Radiation Sources,
@@ -19,5 +19,5 @@
 
 from .asteval import Interpreter
 
-__version__ = '0.9.11'
+__version__ = '1.0.0'
 __all__ = ['Interpreter']

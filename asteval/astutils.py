@@ -12,7 +12,8 @@ MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
-MAX_CYCLES = 100000
+MAX_CYCLES = 10 ** 7
+MAX_EXEC_TIME = 30  # sec
 
 RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
                   'def', 'del', 'elif', 'else', 'except', 'exec',
@@ -203,3 +204,5 @@ def code_wrap(s, lang=''):
     newlines = '\n' if multiline else ''
     lang = lang if multiline else ''
     return ''.join([newlines, ticks, lang, newlines, s, newlines, ticks, newlines])
+
+

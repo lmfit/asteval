@@ -5,16 +5,15 @@ Safe(ish) evaluator of python expressions, using ast module.
 
 from __future__ import division, print_function
 
-from sys import stdout
 import ast
 import math
+from sys import stdout
 from time import time
 
 from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
-                       LOCALFUNCS, op2func,
+                       LOCALFUNCS, op2func, MAX_EXEC_TIME,
                        ReturnedNone, valid_symbol_name, quote,
                        code_wrap, MAX_CYCLES, get_class_name, NoReturn, Empty)
-
 from .frame import Frame
 from .function import Function
 from .module import Module
@@ -23,7 +22,6 @@ builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
-MAX_EXEC_TIME = 2  # sec
 
 # pylint: disable=too-many-lines
 
@@ -78,13 +76,15 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                        'importfrom',  #  NOOP
                       )
 
-    def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME):
+    def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME,
+                 max_cycles=MAX_CYCLES):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.filename = filename
         self.start = 0
         self.cycles = 0
         self.max_time = max_time
+        self.max_cycles = max_cycles
         self.import_hook = import_hook
         self.ui_trace_enabled = True
         self.ui_trace = []
@@ -260,8 +260,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
 
         self.cycles += 1
-        if self.cycles > MAX_CYCLES:
-            raise RuntimeError("Max cycles exceeded, max is {}.".format(MAX_CYCLES))
+        if self.cycles > self.max_cycles:
+            raise RuntimeError("Max cycles exceeded, max is {}.".format(self.max_cycles))
 
         if self.error is not None:
             # Skip over statements if there's a pending exception

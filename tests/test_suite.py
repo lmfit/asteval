@@ -14,6 +14,8 @@ from tempfile import NamedTemporaryFile
 from textwrap import dedent
 
 import sys
+from unittest import skip
+
 import requests
 
 from math import sqrt
@@ -47,7 +49,7 @@ class TestCase(unittest.TestCase):
     """testing of asteval"""
 
     def setUp(self):
-        self.interp = Interpreter(max_time=3)
+        self.interp = Interpreter(max_time=3, max_cycles=10000)
         self.interp.set_symbol('print', self.interp.print_)
         self.set_stdout()
 
@@ -241,40 +243,46 @@ class TestEval(TestCase):
         with self.assertRaises(RuntimeError):
             self.interp("1<<1001")
 
-#     def test_dos(self):
-#         self.interp("""for x in range(2<<21): pass""")
-#         self.check_error('RuntimeError', 'Max cycles')
-#         self.interp("""while True:\n    pass""")
-#         self.check_error('RuntimeError', 'Max cycles')
-#         # self.interp("""while 1: pass""")
-#         # self.check_error('RuntimeError', 'time limit')
-#         self.interp("""def foo(): return foo()\nfoo()""")
-#         self.check_error('RuntimeError')  # Stack overflow... is caught, but with MemoryError. A bit concerning...
-#
-#     def test_kaboom(self):
-#         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
-#         self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
-#     fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
-# )()""")
-#         self.check_error('NotImplementedError', 'Lambda')  # Safe, lambda is not supported
-#
-#         self.interp(
-#             """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
-#         if PY3:
-#             self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
-#         else:
-#             self.check_error('SyntaxError')
-#         self.interp("9**9**9**9**9**9**9**9")
-#         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
-#         self.interp(
-#             "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
-#         self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
-#         self.interp("compile('xxx')")
-#         self.check_error('NameError')  # Safe, compile() is not supported
+    @skip
+    def test_dos(self):
+        with self.assertRaises(RuntimeError):
+            self.interp("""for x in range(2<<21): pass""")
+
+        with self.assertRaises(RuntimeError):
+            self.interp("""while True:\n    pass""")
+
+        with self.assertRaises(RuntimeError):
+            self.interp("""while 1: pass""")
+
+        with self.assertRaises(RuntimeError): # Stack overflow... is caught, but with MemoryError. A bit concerning...
+            self.interp("""def foo(): return foo()\nfoo()""")
+
+    @skip
+    def test_kaboom(self):
+        with self.assertRaises(NotImplementedError):  # Safe, lambda is not supported
+            """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
+            self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() """
+                        """if c.__name__ == n][0]): fc("function")(fc("code")"""
+                        """(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})())()""")
+
+        with self.assertRaises(AttributeError):
+            self.interp(
+                """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
+
+        with self.assertRaises(RuntimeError):
+            self.interp("9**9**9**9**9**9**9**9")
+
+        with self.assertRaises(MemoryError):  # Hmmm, this is caught, but its still concerning...
+            self.interp(
+            "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1"
+            "))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
+
+        with self.assertRaises(NameError):  # Safe, compile() is not supported
+            self.interp("compile('xxx')")
 
     def test_exit_value(self):
         """
-        Return value of this version of asteval is only set by a top-level `return`... 
+        Return value of this version of asteval is only set by a top-level `return`...
         the last eval. expression does NOT set this value. This is because this version
         of asteval is script-centric where-as the original asteval was expression-centric.
         """
