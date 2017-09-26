@@ -122,8 +122,9 @@ class Interpreter:
                                    for node in self.supported_nodes))
 
         # to rationalize try/except try/finally for Python2.6 through Python3.3
-        self.node_handlers['tryexcept'] = self.node_handlers['try']
-        self.node_handlers['tryfinally'] = self.node_handlers['try']
+        if 'try' in self.node_handlers:
+            self.node_handlers['tryexcept'] = self.node_handlers['try']
+            self.node_handlers['tryfinally'] = self.node_handlers['try']
 
         self.no_deepcopy = []
         for key, val in symtable.items():
