@@ -408,7 +408,7 @@ class Interpreter:
         errfmt = "'%s' object has not attribute '%s'"
 
         if (node.attr in UNSAFE_ATTRS or
-            (isinstance(sym, six.string_types) and node.attr == 'format') or
+            (isinstance(sym, six.string_types) and 'format' in node.attr) or
             (isinstance(sym, Procedure) and node.attr not in dir(sym))):
             self.raise_exception(node, exc=AttributeError,
                                  msg=errfmt % (sym, node.attr))
