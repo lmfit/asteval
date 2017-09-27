@@ -30,7 +30,7 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
                 '__getattribute__', '__subclasshook__', '__new__',
                 '__init__', 'func_globals', 'func_code', 'func_closure',
                 'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
-                '__asteval__', 'f_locals')
+                '__asteval__', 'f_locals', '__mro__')
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -52,7 +52,7 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'hash', 'hex', 'id', 'int', 'isinstance', 'len', 'list', 'map',
            'max', 'min', 'oct', 'ord', 'pow', 'range', 'repr',
            'reversed', 'round', 'set', 'slice', 'sorted', 'str', 'sum',
-           'tuple', 'type', 'zip')
+           'tuple', 'zip')
 
 # inherit these from python's math
 FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
@@ -151,8 +151,11 @@ def _open(filename, mode='r', buffering=0):
         raise RuntimeError("Invalid buffering value, max buffer size is {}".format(MAX_OPEN_BUFFER))
     return open(filename, mode, buffering)
 
+def _type(obj, *varargs, **varkws):
+    """type that prevents varargs and varkws"""
+    return type(obj)
 
-LOCALFUNCS = {'open': _open}
+LOCALFUNCS = {'open': _open, 'type': _type}
 
 
 # Safe versions of functions to prevent denial of service issues
