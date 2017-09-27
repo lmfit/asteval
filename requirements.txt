@@ -3,3 +3,4 @@
 ## 
 ##  pip install -r requirements.txt
 numpy>=1.6
+six

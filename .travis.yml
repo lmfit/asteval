@@ -18,7 +18,7 @@ before_install:
     - conda info -a
 
 install:
-    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy nose
+    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy nose six
     - source activate test_env
     - python setup.py install
 
