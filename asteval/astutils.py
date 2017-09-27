@@ -153,7 +153,8 @@ def _open(filename, mode='r', buffering=0):
 
 def _type(obj, *varargs, **varkws):
     """type that prevents varargs and varkws"""
-    return type(obj)
+    return type(obj).__name__
+
 
 LOCALFUNCS = {'open': _open, 'type': _type}
 
