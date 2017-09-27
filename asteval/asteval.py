@@ -112,6 +112,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                 self.builtins[sym] = getattr(math, sym)
 
         self.builtins['print'] = self.print_
+        self.builtins['vars'] = self.vars_
         self.mod_stack.append('__main__')
         self.add_module('__main__', filename, extras={'settrace': self.set_trace})
         self.node_handlers = dict(((node, getattr(self, "on_%s" % node)) for node in self.supported_nodes))
@@ -728,6 +729,10 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         """generic print function"""
         print(*objects, file=self.writer, sep=sep, end=end)
         return NoReturn
+
+    def vars_(self, obj=None):
+        var_dict = self.get_current_frame().get_symbols().copy()
+        return {k: v for k, v in var_dict.items() if not repr(v).startswith(('<module', '<bound'))}
 
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
