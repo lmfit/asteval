@@ -37,6 +37,14 @@ builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
+ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
+             'boolop', 'break', 'call', 'compare', 'continue', 'delete',
+             'dict', 'ellipsis', 'excepthandler', 'expr', 'extslice',
+             'for', 'functiondef', 'if', 'ifexp', 'index', 'interrupt',
+             'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
+             'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
+             'subscript', 'try', 'tuple', 'unaryop', 'while']
+
 
 # noinspection PyIncorrectDocstring
 class Interpreter:
@@ -72,17 +80,13 @@ class Interpreter:
 
   """
 
-    supported_nodes = ('arg', 'assert', 'assign', 'attribute', 'augassign',
-                       'binop', 'boolop', 'break', 'call', 'compare',
-                       'continue', 'delete', 'dict', 'ellipsis',
-                       'excepthandler', 'expr', 'extslice', 'for',
-                       'functiondef', 'if', 'ifexp', 'index', 'interrupt',
-                       'list', 'listcomp', 'module', 'name', 'nameconstant',
-                       'num', 'pass', 'print', 'raise', 'repr', 'return',
-                       'slice', 'str', 'subscript', 'try', 'tuple', 'unaryop',
-                       'while')
+    def __init__(self, symtable=None, writer=None, use_numpy=True,
+                 err_writer=None, with_if=True, with_for=True,
+                 with_while=True, with_try=True, with_functiondef=True,
+                 with_ifexp=True, with_assert=True, with_delete=True,
+                 with_raise=True, with_print=True, with_listcomp=True,
+                 with_augassign=True, max_time=5):
 
-    def __init__(self, symtable=None, writer=None, use_numpy=True, err_writer=None, max_time=5):
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
         self.start = 0
@@ -119,8 +123,35 @@ class Interpreter:
                 if hasattr(numpy, sym):
                     symtable[name] = getattr(numpy, sym)
 
-        self.node_handlers = dict(((node, getattr(self, "on_%s" % node))
-                                   for node in self.supported_nodes))
+        nodes = ALL_NODES[:]
+        if not with_if:
+            nodes.remove('if')
+        if not with_for:
+            nodes.remove('for')
+        if not with_while:
+            nodes.remove('while')
+        if not with_try:
+            nodes.remove('try')
+        if not with_functiondef:
+            nodes.remove('functiondef')
+        if not with_ifexp:
+            nodes.remove('ifexp')
+        if not with_assert:
+            nodes.remove('assert')
+        if not with_delete:
+            nodes.remove('delete')
+        if not with_raise:
+            nodes.remove('raise')
+        if not with_print:
+            nodes.remove('print')
+        if not with_listcomp:
+            nodes.remove('listcomp')
+        if not with_augassign:
+            nodes.remove('augassign')
+
+        self.node_handlers = {}
+        for node in nodes:
+            self.node_handlers[node] = getattr(self, "on_%s" % node)
 
         # to rationalize try/except try/finally for Python2.6 through Python3.3
         if 'try' in self.node_handlers:
