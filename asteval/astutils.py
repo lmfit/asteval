@@ -136,7 +136,8 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'uint64', 'uint8', 'uintc', 'uintp', 'ulonglong', 'union1d',
               'unique', 'unravel_index', 'unsignedinteger', 'unwrap',
               'ushort', 'vander', 'var', 'vdot', 'vectorize', 'vsplit',
-              'vstack', 'where', 'who', 'zeros', 'zeros_like')
+              'vstack', 'where', 'who', 'zeros', 'zeros_like',
+              'fft', 'linalg', 'polynomial', 'random')
 
 NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
