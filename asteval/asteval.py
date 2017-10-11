@@ -963,8 +963,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
         arg_str = ', '.join(arg_list)
 
-        if len(arg_str) > 50:
-            arg_str = arg_str[:50] + '...[truncated]'
+        if len(arg_str) > 128:
+            arg_str = arg_str[:128] + '...[truncated]'
 
         if self.trace and not isinstance(func, Function):
             self.trace = self.trace(Frame(name), 'call', name)  # builtins, etc. (not user defined Functions)
@@ -976,7 +976,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             self.ui_tracer('{}Function `{}({})` raised on exception: {}.'
                            .format(self.get_lineno_label(node), name, arg_str, str(e)))
 
-            self.raise_exception(node, exc=e, msg="Error calling `%s()`: `%s`" % (name, str(e)))
+            self.raise_exception(node, exc=e, msg="Error calling `%s()`: %s" % (name, str(e)))
             return
 
         if name not in ('pprint', 'print', 'jprint', 'print_'):
