@@ -27,7 +27,7 @@ asteval.pdf: latex
 	cd $(BUILDDIR)/latex && make all-pdf
 	cp -pr $(BUILDDIR)/latex/asteval.pdf ./asteval.pdf
 
-all: html asteval.pdf
+all: html
 
 install: all
 	cp -pr $(BUILDDIR)/latex/asteval.pdf $(INSTALLDIR)/asteval.pdf

@@ -21,7 +21,9 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.napoleon',
+              'sphinx.ext.todo',
               'sphinx.ext.coverage',
               'sphinx.ext.mathjax', 'sphinx.ext.intersphinx']
 
@@ -134,7 +136,7 @@ html_static_path = ['_static']
 
 # If true, SmartyPants will be used to convert quotes and dashes to
 # typographically correct entities.
-html_use_smartypants = False # True
+# html_use_smartypants = False # True
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {'index': ['indexsidebar.html','searchbox.html']}
