@@ -9,8 +9,8 @@ Downloading and Installation
 Requirements
 ~~~~~~~~~~~~~~~
 
-The asteval package is supported for use with Python 2.7, 3.3, 3.4, and 3.5.
-The package may work for Python 2.6, and Python 3.2, but no testing is done
+The asteval package is supported for use with Python 2.7, 3.4, 3.5, and 3.6.
+The package may work for Python 2.6, and Python 3.3, but no testing is done
 for these out-dated versions.  Asteval will make use of the `numpy`_ module
 if available.
 
@@ -18,7 +18,7 @@ if available.
 Download and Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The latest stable version of asteval is 0.9.7 and is available at `PyPI`_ or as
+The latest stable version of asteval is 0.9.9 and is available at `PyPI`_ or as
 a conda package.  That is, you should be able to install asteval with::
 
    pip install asteval
