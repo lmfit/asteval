@@ -2,13 +2,22 @@
 Using asteval
 ================
 
-The asteval module is very easy to use.   Import the module and create an Interpreter:
+This chapter gives a quick overview of asteval, showing basic usage and the
+most important features.  Further details can be found in the next chapter
+(:ref:`asteval_api`).
+
+
+creating and using an asteval Interpreter
+=============================================
+
+
+The asteval module is very easy to use.  Import the module and create an Interpreter:
 
     >>> from asteval import Interpreter
     >>> aeval = Interpreter()
 
 and now you have an embedded interpreter for a procedural, mathematical language
-that es very much like python, ready for use::
+that is very much like python::
 
     >>> aeval('x = sqrt(3)')
     >>> aeval('print x')
@@ -30,12 +39,12 @@ that es very much like python, ready for use::
 
 
 accessing the symbol table
-===========================
+=============================
 
-The symbol table (that is, the mapping between variable and
-function names and the underlying objects) is a simple dictionary
-held in the :attr:`symtable` attribute of the interpreter.  Of
-course, this can be read or written to by the python program:
+The symbol table (that is, the mapping between variable and function names
+and the underlying objects) is a simple dictionary held in the
+:attr:`symtable` attribute of the interpreter, and can be read or written
+to::
 
     >>> aeval('x = sqrt(3)')
     >>> aeval.symtable['x']
@@ -44,19 +53,21 @@ course, this can be read or written to by the python program:
     >>> aeval('print y/8')
     12.5
 
-(Note the use of true division even though the operands are integers).
+Note here the use of true division even though the operands are integers.
 
-Certain names are reserved in Python, and cannot be used within
-the asteval interpreter.  These reserved words are:
+As with Python itself, valid symbol names must match the basic regular
+expression pattern::
+
+   valid_name = [a-zA-Z_][a-zA-Z0-9_]*
+
+In addition, certain names are reserved in Python, and cannot be used
+within the asteval interpreter.  These reserved words are:
 
     and, as, assert, break, class, continue, def, del, elif, else,
     except, exec, finally, for, from, global, if, import, in, is,
     lambda, not, or, pass, print, raise, return, try, while, with,
     True, False, None, eval, execfile, __import__, __package__
 
-Valid symbol names must match the basic regular expression pattern::
-
-   valid_name = [a-zA-Z_][a-zA-Z0-9_]*
 
 
 built-in functions
@@ -122,9 +133,9 @@ exactly as they do in python.  Thus:
 printing
 ===============
 
-For printing, asteval emulates Python's native :func:`print` function and
-:data:`print` statement (for python 2).  That is, the behavior mimics the
-version of python used.
+For printing, asteval emulates Python's native :func:`print` function (for
+Python 3) and :data:`print` statement (for Python 2).  That is, the
+behavior mimics the version of Python used.
 
 You can change where output is sent with the ``writer`` argument when
 creating the interpreter.  By default, outputs are sent to
@@ -173,4 +184,3 @@ REPL loop, you'd want to do something similar to
    >>>             print(err.get_error())
    >>>     else:
    >>>         print(result)
-
