@@ -47,49 +47,87 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
 
 
 # noinspection PyIncorrectDocstring
-class Interpreter:
-    """mathematical expression compiler and interpreter.
+class Interpreter(object):
+    """create an asteval Interpreter: a restricted, simplified interpreter
+    of mathematical expressions using Python syntax.
 
-  This module compiles expressions and statements to AST representation,
-  using python's ast module, and then executes the AST representation
-  using a dictionary of named object (variable, functions).
+    The interpreter uses a simple, flat namespace.  Many builtin Python
+    functions, functions from the `math` module, and functions from `numpy`
+    (if available) are pre-loaded into the namespace. Several builtin
+    functions such as 'eval', 'exec', and 'getattr' are not included, as
+    these are considered unsafe.
 
-  The result is a restricted, simplified version of Python meant for
-  numerical caclulations that is somewhat safer than 'eval' because some
-  operations (such as 'import' and 'eval') are simply not allowed.  The
-  resulting language uses a flat namespace that works on Python objects,
-  but does not allow new classes to be defined.
+    Many Python features aresupported by default, including
+       advanced slicing:    a[::-1], array[-3:, :, ::2]
+       if-then-elif-else conditionals
+       for loops
+       while loops
+       try-except-finally blocks
+       function definitions
+       if-expressions:      x = a if TEST else b
+       list comprehension:   out = [sqrt(i) for i in values]
 
-  Many parts of Python syntax are supported, including:
-     for loops, while loops, if-then-elif-else conditionals
-     try-except (including 'finally')
-     function definitions with def
-     advanced slicing:    a[::-1], array[-3:, :, ::2]
-     if-expressions:      out = one_thing if TEST else other
-     list comprehension   out = [sqrt(i) for i in values]
+    with the exception of slicing, each of these features can be turned off
+    if desired.
 
-  The following Python syntax elements are not supported:
-      Import, Exec, Lambda, Class, Global, Generators,
-      Yield, Decorators
+    Many Python syntax elements are not supported at all:
+        Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators
 
-  In addition, while many builtin functions are supported, several
-  builtin functions are missing ('eval', 'exec', and 'getattr' for
-  example) that can be considered unsafe.
+    Parameters
+    ----------
+    symtable : dict or `None`
+        dictionary to use as symbol table (if `None`, one will be created).
+    use_numpy : bool
+        whether to use functions from numpy.
+    writer : file-like or `None`
+        callable file-like object where standard output will be sent.
+    err_writer : file-like or `None`
+        callable file-like object where standard error will be sent.
+    minimal : bool
+        whether to make a minimal interpreter, with many options turned off (see Note 1).
+    no_if : bool
+        whether to support `if` blocks
+    no_for : bool
+        whether to support `for` blocks.
+    no_while : bool
+        whether to support `while` blocks.
+    no_try : bool
+        whether to support `try` blocks.
+    no_functiondef : bool
+        whether to support user-defined functions.
+    no_ifexp : bool
+        whether to support if expressions.
+    no_listcomp : bool
+        whether to support list comprehension.
+    no_augassign : bool
+        whether to support augemented assigments (`a += 1`, etc).
+    no_assert : bool
+        whether to support `assert`.
+    no_delete : bool
+        whether to support `del`.
+    no_raise : bool
+        whether to support `raise`.
+    no_print : bool
+        whether to support `print`.
+    max_time : float
+        deprecated.  maximum time (in seconds) to run (see Note 2)
 
-  If numpy is installed, many numpy functions are also imported.
-
-  """
+    Notes
+    -----
+    1. setting `minimal=True` is equivalent to setting all `no_***` options to `True`.
+    2. the max_time option is easily broken and not supportable.
+    """
 
     def __init__(self, symtable=None, writer=None, use_numpy=True,
-                 err_writer=None, with_if=True, with_for=True,
-                 with_while=True, with_try=True, with_functiondef=True,
-                 with_ifexp=True, with_assert=True, with_delete=True,
-                 with_raise=True, with_print=True, with_listcomp=True,
-                 with_augassign=True, max_time=5):
+                 err_writer=None, minimal=False, no_if=False, no_for=False,
+                 no_while=False, no_try=False, no_functiondef=False,
+                 no_ifexp=False, no_listcomp=False, no_augassign=False,
+                 no_assert=False, no_delete=False, no_raise=False,
+                 no_print=False, max_time=30):
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
-        self.start = 0
+        self.start = time()
         self.max_time = max_time
 
         if symtable is None:
@@ -124,30 +162,19 @@ class Interpreter:
                     symtable[name] = getattr(numpy, sym)
 
         nodes = ALL_NODES[:]
-        if not with_if:
-            nodes.remove('if')
-        if not with_for:
-            nodes.remove('for')
-        if not with_while:
-            nodes.remove('while')
-        if not with_try:
-            nodes.remove('try')
-        if not with_functiondef:
-            nodes.remove('functiondef')
-        if not with_ifexp:
-            nodes.remove('ifexp')
-        if not with_assert:
-            nodes.remove('assert')
-        if not with_delete:
-            nodes.remove('delete')
-        if not with_raise:
-            nodes.remove('raise')
-        if not with_print:
-            nodes.remove('print')
-        if not with_listcomp:
-            nodes.remove('listcomp')
-        if not with_augassign:
-            nodes.remove('augassign')
+
+        if minimal or no_if:           nodes.remove('if')
+        if minimal or no_for:          nodes.remove('for')
+        if minimal or no_while:        nodes.remove('while')
+        if minimal or no_try:          nodes.remove('try')
+        if minimal or no_functiondef:  nodes.remove('functiondef')
+        if minimal or no_ifexp:        nodes.remove('ifexp')
+        if minimal or no_assert:       nodes.remove('assert')
+        if minimal or no_delete:       nodes.remove('delete')
+        if minimal or no_raise:        nodes.remove('raise')
+        if minimal or no_print:        nodes.remove('print')
+        if minimal or no_listcomp:     nodes.remove('listcomp')
+        if minimal or no_augassign:    nodes.remove('augassign')
 
         self.node_handlers = {}
         for node in nodes:
