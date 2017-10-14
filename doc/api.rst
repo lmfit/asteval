@@ -1,3 +1,5 @@
+.. _asteval_api:
+
 ===================
 asteval reference
 ===================
@@ -9,16 +11,7 @@ interpreter.  There is also a convenience function :func:`valid_symbol_name`
 
 .. module:: asteval
 
-.. class:: Interpreter(symtable=None[, writer=None[, use_numpy=True]])
-
-   create an asteval interpreter.
-
-   :param symtable: a Symbol table (if ``None``, one will be created).
-   :type symtable: ``None`` or dict.
-   :param writer: callable file-like object where standard output will be sent.
-   :type writer:  file-like.
-   :param use_numpy: whether to use functions from `numpy`_.
-   :type use_numpy:   boolean (``True`` / ``False``)
+.. autoclass:: Interpreter
 
 The symbol table will be loaded with several built in functions, several
 functions from the :py:mod:`math` module and, if available and requested,
@@ -79,4 +72,3 @@ The ``use_numpy`` argument can be used to control whether functions from
    the most recent error message.
 
 .. autofunction:: valid_symbol_name
-
