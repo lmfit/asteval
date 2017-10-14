@@ -1,33 +1,32 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    
     <title>asteval reference &#8212; ASTEVAL: Minimal Python AST evaluator</title>
-    
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.8',
+        VERSION:     '0.9.9',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
       };
     </script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
-    <link rel="top" title="ASTEVAL: Minimal Python AST evaluator" href="index.html" />
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
     <link rel="prev" title="Using asteval" href="basics.html" /> 
   </head>
-  <body role="document">
+  <body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -51,7 +50,7 @@
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
-      <li><a href="_sources/api.txt"
+      <li><a href="_sources/api.rst.txt"
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
@@ -74,26 +73,69 @@
           <div class="body" role="main">
             
   <div class="section" id="asteval-reference">
-<h1>asteval reference<a class="headerlink" href="#asteval-reference" title="Permalink to this headline">¶</a></h1>
+<span id="asteval-api"></span><h1>asteval reference<a class="headerlink" href="#asteval-reference" title="Permalink to this headline">¶</a></h1>
 <p>The asteval module provides an <code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code> class, which creates an
 interpreter.  There is also a convenience function <code class="xref py py-func docutils literal"><span class="pre">valid_symbol_name()</span></code></p>
 <span class="target" id="module-asteval"></span><dl class="class">
 <dt id="asteval.Interpreter">
-<em class="property">class </em><code class="descclassname">asteval.</code><code class="descname">Interpreter</code><span class="sig-paren">(</span><em>symtable=None</em><span class="optional">[</span>, <em>writer=None</em><span class="optional">[</span>, <em>use_numpy=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
-<dd><p>create an asteval interpreter.</p>
+<em class="property">class </em><code class="descclassname">asteval.</code><code class="descname">Interpreter</code><span class="sig-paren">(</span><em>symtable=None</em>, <em>writer=None</em>, <em>use_numpy=True</em>, <em>err_writer=None</em>, <em>minimal=False</em>, <em>no_if=False</em>, <em>no_for=False</em>, <em>no_while=False</em>, <em>no_try=False</em>, <em>no_functiondef=False</em>, <em>no_ifexp=False</em>, <em>no_listcomp=False</em>, <em>no_augassign=False</em>, <em>no_assert=False</em>, <em>no_delete=False</em>, <em>no_raise=False</em>, <em>no_print=False</em>, <em>max_time=30</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
+<dd><p>create an asteval Interpreter: a restricted, simplified interpreter
+of mathematical expressions using Python syntax.</p>
+<p>The interpreter uses a simple, flat namespace.  Many builtin Python
+functions, functions from the <cite>math</cite> module, and functions from <cite>numpy</cite>
+(if available) are pre-loaded into the namespace. Several builtin
+functions such as ‘eval’, ‘exec’, and ‘getattr’ are not included, as
+these are considered unsafe.</p>
+<dl class="docutils">
+<dt>Many Python features aresupported by default, including</dt>
+<dd>advanced slicing:    a[::-1], array[-3:, :, ::2]
+if-then-elif-else conditionals
+for loops
+while loops
+try-except-finally blocks
+function definitions
+if-expressions:      x = a if TEST else b
+list comprehension:   out = [sqrt(i) for i in values]</dd>
+</dl>
+<p>with the exception of slicing, each of these features can be turned off
+if desired.</p>
+<dl class="docutils">
+<dt>Many Python syntax elements are not supported at all:</dt>
+<dd>Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators</dd>
+</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>symtable</strong> (<code class="docutils literal"><span class="pre">None</span></code> or dict.) -- a Symbol table (if <code class="docutils literal"><span class="pre">None</span></code>, one will be created).</li>
-<li><strong>writer</strong> (<em>file-like.</em>) -- callable file-like object where standard output will be sent.</li>
-<li><strong>use_numpy</strong> (boolean (<code class="docutils literal"><span class="pre">True</span></code> / <code class="docutils literal"><span class="pre">False</span></code>)) -- whether to use functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</li>
+<li><strong>symtable</strong> (dict or <cite>None</cite>) – dictionary to use as symbol table (if <cite>None</cite>, one will be created).</li>
+<li><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to use functions from numpy.</li>
+<li><strong>writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard output will be sent.</li>
+<li><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</li>
+<li><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to make a minimal interpreter, with many options turned off (see Note 1).</li>
+<li><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</li>
+<li><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</li>
+<li><strong>no_while</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>while</cite> blocks.</li>
+<li><strong>no_try</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>try</cite> blocks.</li>
+<li><strong>no_functiondef</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support user-defined functions.</li>
+<li><strong>no_ifexp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support if expressions.</li>
+<li><strong>no_listcomp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support list comprehension.</li>
+<li><strong>no_augassign</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support augemented assigments (<cite>a += 1</cite>, etc).</li>
+<li><strong>no_assert</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>assert</cite>.</li>
+<li><strong>no_delete</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>del</cite>.</li>
+<li><strong>no_raise</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>raise</cite>.</li>
+<li><strong>no_print</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>print</cite>.</li>
+<li><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) – deprecated.  maximum time (in seconds) to run (see Note 2)</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>setting <cite>minimal=True</cite> is equivalent to setting all <cite>no_***</cite> options to <cite>True</cite>.</li>
+<li>the max_time option is easily broken and not supportable.</li>
+</ol>
 </dd></dl>
 
 <p>The symbol table will be loaded with several built in functions, several
@@ -114,9 +156,9 @@ course, to send output to <a class="reference external" href="https://docs.pytho
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/2/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) -- code to evaluate.</li>
-<li><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) -- line number (for error messages).</li>
-<li><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) -- whether to print error messages or leave them
+<li><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/2/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) – code to evaluate.</li>
+<li><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – line number (for error messages).</li>
+<li><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to print error messages or leave them
 in the <code class="xref py py-attr docutils literal"><span class="pre">errors</span></code> list.</li>
 </ul>
 </td>
@@ -201,7 +243,7 @@ regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_][a-
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
 </html>
