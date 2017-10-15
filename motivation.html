@@ -127,16 +127,19 @@ cases (see <a class="reference external" href="https://stackoverflow.com/questio
 and numpy can approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
 <div class="section" id="how-safe-is-asteval">
 <h2>How Safe is asteval?<a class="headerlink" href="#how-safe-is-asteval" title="Permalink to this headline">¶</a></h2>
-<p>Asteval definitely avoids many of the exploits that make <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> is
-dangerous. For reference, see, <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and
-the comments and links therein.  Clearly, making <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> perfectly
-safe from malicious user input is a difficult prospect.  Basically, if one
-can cause Python to seg-fault, safety cannot be guaranteed. That said, we
-cannot guarantee that asteval is completely safe from malicious code.  We
-claim only that it is safer than the builtin <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, and that you
-might find it useful.</p>
-<p>Asteval tries to avoid many known exploits and unsafe actions.  Some of the
-things not  allowed in the asteval interpreter for safety reasons include:</p>
+<p>Asteval avoids the known exploits that make <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> dangerous. For
+reference, see, <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and
+the comments and links therein.  From this discussion it is apparent that
+not only is <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> unsafe, but that it is a difficult prospect to
+make any program that takes user input perfectly safe.  In particular, if a
+user can cause Python to crash with a segmentation fault, safety cannot be
+guaranteed.  Asteval explicitly forbids the exploits described in the above
+link, and works hard to prevent malicious code from crashing Python or
+accessing the underlying operating system.  That said, we cannot guarantee
+that asteval is completely safe from malicious code.  We claim only that it
+is safer than the builtin <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, and that you might find it
+useful.</p>
+<p>Some of the things not allowed in the asteval interpreter for safety reasons include:</p>
 <blockquote>
 <div><ul class="simple">
 <li>importing modules.  Neither ‘import’ nor ‘__import__’ are supported.</li>
@@ -154,12 +157,12 @@ __self__, __module__, __dict__, __class__, __call__, __get__,
 __getattribute__, __subclasshook__, __new__, __init__, func_globals,
 func_code, func_closure, im_class, im_func, im_self, gi_code, gi_frame
 f_locals, __mro__</div></blockquote>
-<p>Of course, this approach of making a blacklist cannot be guaranteed to be
-complete, but it does eliminate classes of attacks to seg-fault the Python
-interpreter.  On the other hand, asteval will typically expose numpy ufuncs
-from the numpy module, and several of these can seg-fault Python without
-too much trouble.  If you’re paranoid about safe user input that can never
-cause a segmentation fault, you’ll want to disable the use of numpy.</p>
+<p>This approach of making a blacklist cannot be guaranteed to be complete,
+but it does eliminate classes of attacks known to seg-fault the Python.  On
+the other hand, asteval will typically expose numpy ufuncs from the numpy
+module, and several of these can seg-fault Python without too much trouble.
+If you’re paranoid about safe user input that can never cause a
+segmentation fault, you’ll want to disable the use of numpy.</p>
 <p>There are important categories of safety that asteval does not even attempt
 to address. The most important of these is resource hogging, which might be
 used for a denial-of-service attack.  There is no guaranteed timeout on any
