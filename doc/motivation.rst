@@ -49,18 +49,21 @@ and numpy can approach the speed of `eval` and the `numexpr` modules.
 How Safe is asteval?
 =======================
 
-Asteval definitely avoids many of the exploits that make :py:func:`eval` is
-dangerous. For reference, see, `Eval is really dangerous
+Asteval avoids the known exploits that make :py:func:`eval` dangerous. For
+reference, see, `Eval is really dangerous
 <http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html>`_ and
-the comments and links therein.  Clearly, making :py:func:`eval` perfectly
-safe from malicious user input is a difficult prospect.  Basically, if one
-can cause Python to seg-fault, safety cannot be guaranteed. That said, we
-cannot guarantee that asteval is completely safe from malicious code.  We
-claim only that it is safer than the builtin :py:func:`eval`, and that you
-might find it useful.
+the comments and links therein.  From this discussion it is apparent that
+not only is :py:func:`eval` unsafe, but that it is a difficult prospect to
+make any program that takes user input perfectly safe.  In particular, if a
+user can cause Python to crash with a segmentation fault, safety cannot be
+guaranteed.  Asteval explicitly forbids the exploits described in the above
+link, and works hard to prevent malicious code from crashing Python or
+accessing the underlying operating system.  That said, we cannot guarantee
+that asteval is completely safe from malicious code.  We claim only that it
+is safer than the builtin :py:func:`eval`, and that you might find it
+useful.
 
-Asteval tries to avoid many known exploits and unsafe actions.  Some of the
-things not  allowed in the asteval interpreter for safety reasons include:
+Some of the things not allowed in the asteval interpreter for safety reasons include:
 
   * importing modules.  Neither 'import' nor '__import__' are supported.
   * create classes or modules.
@@ -77,12 +80,12 @@ attributes are blacklisted for all objects, and cannot be accessed:
    func_code, func_closure, im_class, im_func, im_self, gi_code, gi_frame
    f_locals, __mro__
 
-Of course, this approach of making a blacklist cannot be guaranteed to be
-complete, but it does eliminate classes of attacks to seg-fault the Python
-interpreter.  On the other hand, asteval will typically expose numpy ufuncs
-from the numpy module, and several of these can seg-fault Python without
-too much trouble.  If you're paranoid about safe user input that can never
-cause a segmentation fault, you'll want to disable the use of numpy.
+This approach of making a blacklist cannot be guaranteed to be complete,
+but it does eliminate classes of attacks known to seg-fault the Python.  On
+the other hand, asteval will typically expose numpy ufuncs from the numpy
+module, and several of these can seg-fault Python without too much trouble.
+If you're paranoid about safe user input that can never cause a
+segmentation fault, you'll want to disable the use of numpy.
 
 There are important categories of safety that asteval does not even attempt
 to address. The most important of these is resource hogging, which might be
