@@ -34,9 +34,6 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="installation.html" title="Downloading and Installation"
              accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li> 
@@ -46,17 +43,20 @@
         <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
 <p>Current version: <b>0.9.9</b></p>
 <p>Downloads:
-<a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
-
-<p> try <tt>pip install asteval</tt>
-
+<ul>
+  <li>&nbsp; &nbsp; <a href="http://cars.uchicago.edu/software/python/asteval/src/">cars.uchicago.edu</a>
+  <li>&nbsp; &nbsp; <a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a> <p>
+       try <tt>easy_install -U asteval</tt>
+</ul>
 <p>
-Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/asteval/">github.com</a>
 
+Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/asteval/">github.com</a> <br>
+
+<h3>Documentation</h3>
+
+ <a href="asteval.pdf">  PDF Format</a>
 <hr>
-
-
-
+<p>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="search.html" method="get">
@@ -77,74 +77,54 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
             
   <div class="section" id="asteval-minimal-python-ast-evaluator">
 <h1>ASTEVAL: Minimal Python AST Evaluator<a class="headerlink" href="#asteval-minimal-python-ast-evaluator" title="Permalink to this headline">¶</a></h1>
-<p>The asteval package evaluates mathematical expressions and statements,
-providing a safer alternative to Python’s builtin <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a> and a
-richer, easier to use alternative to <a class="reference external" href="https://docs.python.org/2/library/ast.html#ast.literal_eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">ast.literal_eval()</span></code></a>.  It does
-this by building an embedded interpreter for a subset of the Python
-language using Python’s <a class="reference external" href="https://docs.python.org/2/library/ast.html#module-ast" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">ast</span></code></a> module.  The emphasis here and main
-area of application is the evaluation of mathematical expressions. Because
-of this, mathematical functions from Python’s <a class="reference external" href="https://docs.python.org/2/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module are
-available, and a large number of functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> will be available
-if it is installed on your system.</p>
-<p>In addition to basic mathematical expressions, many parts of the Python
-language are supported by default, including array slicing and
-subscripting, if-then-else conditionals, while loops, for loops, try-except
-blocks, list comprehension, and user-defined functions.  All objects in the
-asteval interpreter are truly python objects, and all built-in data
-structures (strings, dictionaries, tuple, lists, numpy arrays), are
-supported. That is, the asteval mini-language will look and act very much
-like Python itself.</p>
-<p>Still, there are important differences and missing features compared to
-Python. Asteval is by no means an attempt to reproduce Python with its own
-<a class="reference external" href="https://docs.python.org/2/library/ast.html#module-ast" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">ast</span></code></a> module.  Some of the main differences and absences include:</p>
+<p>ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
+using Python’s ast module.  The idea is to provide a simple, safe, and
+robust miniature mathematical language that can handle user-input in cases
+where one might be tempted to use Python’s <em>eval</em>.  The emphasis here is on
+mathematical expressions, so numpy functions are imported and used if
+available.</p>
+<p>While much of Python’s constructs are supported, there are important
+absences and differences, and this is by no means an attempt to reproduce
+Python with its own ast module.  Important differences and absences are:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li>Variable and function symbol names are held in a simple symbol
-table - a single dictionary - giving a flat namespace.</li>
-<li>creating classes is not allowed.</li>
-<li>importing modules is not allowed.</li>
-<li>function decorators, generators, yield, and lambda are not supported.</li>
-<li>several builtins (<a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/2/library/functions.html#execfile" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">execfile()</span></code></a>,
-<a class="reference external" href="https://docs.python.org/2/library/functions.html#getattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/2/library/functions.html#hasattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/2/library/functions.html#setattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/2/library/functions.html#delattr" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">delattr()</span></code></a>) are not allowed.</li>
-<li>Accessing several private object attributes that can provide access to
-the python interpreter are not allowed.</li>
+table (a single dictionary), giving a flat namespace.</li>
+<li>creating classes is not supported.</li>
+<li>importing modules is not supported.</li>
+<li>function decorators, yield, lambda, and exec are not supported.</li>
 </ol>
 </div></blockquote>
-<p>The result of this makes asteval a decidedly restricted and limited language
-that is focused on mathematical calculations.</p>
-<p>Because asteval is suitable for evaluating user-supplied input strings,
-safety against malicious user input is an important concern.  Asteval tries
-as hard as possible to prevent user-supplied input from crashing the Python
-interpreter or from returning exploitable parts of the Python interpreter.
-In this sense asteval is certainly safer than using <a class="reference external" href="https://docs.python.org/2/library/functions.html#eval" title="(in Python v2.7)"><code class="xref py py-func docutils literal"><span class="pre">eval()</span></code></a>.
-However, asteval is an open source project written by volunteers, and we
-cannot guarantee that it is safe against malicious attacks.</p>
+<p>Many built-in python syntactical components (if-then-else, while loops, for
+loops, try-except blocks, list comprehension, slicing, subscripting), and
+built-in data structures (dictionaries, tuple, lists, numpy arrays,
+strings) are fully supported.  In addition, many built-in functions are
+supported, including the standard builtin python functions, and all
+mathemetical functions from the math module.  As mentioned above, if numpy
+is available, many of its functions will also be available.  Users can
+define their own functions, but given the restrictions of not being able to
+define classes or import modules, the language is decidedly limited.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Downloading and Installation</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#download-and-installation">Download and Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#downloads">Downloads</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#development-version">Development Version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#license">License</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">Using asteval</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#accessing-the-symbol-table">accessing the symbol table</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#built-in-functions">built-in functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#conditionals-and-loops">conditionals and loops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#writing-functions">writing functions</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for asteval</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="motivation.html#how-safe-is-asteval">How Safe is asteval?</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html">Using asteval</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#accessing-the-symbol-table">accessing the symbol table</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#built-in-functions">built-in functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#conditionals-and-loops">conditionals and loops</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#printing">printing</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#writing-functions">writing functions</a></li>
-<li class="toctree-l2"><a class="reference internal" href="basics.html#exceptions">exceptions</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">asteval reference</a></li>
 </ul>
 </div>
 </div>
@@ -162,16 +142,13 @@ cannot guarantee that it is safe against malicious attacks.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
           <a href="installation.html" title="Downloading and Installation"
              >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2011, Matthew Newville, The University of Chicago.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
