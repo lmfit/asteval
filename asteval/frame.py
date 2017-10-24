@@ -28,7 +28,6 @@ class Frame:
         for name, value in initial_symbols.items():
             self.__symbols[name] = Symbol(name, value)
 
-        self.__retval = None
         self.__id = uuid.uuid1().hex[:8]
         self.__lineno = 1
         self.__filename = filename
@@ -76,21 +75,6 @@ class Frame:
 
     def get_name(self):
         return self.__name
-
-    def set_retval(self, retval):
-        self.__retval = retval
-
-    def reset_retval(self):
-        self.__retval = None
-
-    def get_retval(self):
-        """
-        None - not set (end up returning None - but needed to affect control flow)
-        ReturnedNone - return None
-        other value - return value
-        :return:
-        """
-        return self.__retval
 
     def get_id(self):
         return self.__id

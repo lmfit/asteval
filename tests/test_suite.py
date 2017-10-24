@@ -18,10 +18,6 @@ from unittest import skip
 
 import requests
 
-from math import sqrt
-
-import requests
-
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
 
@@ -32,7 +28,7 @@ else:
     # noinspection PyUnresolvedReferences
     from cStringIO import StringIO
 
-from asteval.asteval import Interpreter #, NameFinder
+from asteval.asteval import Interpreter
 
 
 @contextlib.contextmanager
@@ -330,6 +326,87 @@ class TestEval(TestCase):
             z = [foo(x) for x in range(3)]
             print("ok!")
         """))
+
+    def test_early_return(self):
+        z = self.interp(dedent("""
+            def foo():
+                y = 0
+                return y
+                y += 1
+                return y
+                
+            x = foo()  # line 8
+            if x == 0:
+                x += 1
+                return x  # x=1, y=0, z=1 (correct!)
+                x += 1
+                return x  # x=2, y=0, z=2 (bzzzzz!)
+                
+            return x  # x=0, y=1, z=0 (bzzzzz!)
+            """))
+
+        self.assertEqual(1, z)
+
+    def test_early_return_2(self):
+        z = self.interp(dedent("""
+            return 1
+            return 2
+            """))
+
+        self.assertEqual(1, z)
+
+    def test_early_return_3(self):
+        z = self.interp(dedent("""
+            def foo():
+                return 1
+                return 2
+            return foo()
+            """))
+
+        self.assertEqual(1, z)
+
+    def test_early_return_4(self):
+        z = self.interp(dedent("""
+            def foo():
+                if 1:
+                    if 1:
+                        return 1
+                        return 2
+            return foo()
+            """))
+
+        self.assertEqual(1, z)
+
+    def test_early_return_5(self):
+        z = self.interp(dedent("""
+            if 1:
+                if 1:
+                    return 1
+                    return 2
+            """))
+
+        self.assertEqual(1, z)
+
+    def test_early_return_6(self):
+        z = self.interp(dedent("""
+            while 1:
+                while 1:
+                    return 1
+                    return 2
+            """))
+
+        self.assertEqual(1, z)
+
+    def test_early_return_7(self):
+        z = self.interp(dedent("""
+            return 1
+            while 1:
+                while 1:
+                    return 2
+                    return 3
+            """))
+
+        self.assertEqual(1, z)
 
 
 EXPECTED_PAT = re.compile("""^#\s*(?:"([^"]+)"|'([^']+)')""")

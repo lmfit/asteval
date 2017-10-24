@@ -13,7 +13,7 @@ from time import time
 from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
                        LOCALFUNCS, op2func, MAX_EXEC_TIME,
                        ReturnedNone, valid_symbol_name, quote,
-                       code_wrap, MAX_CYCLES, get_class_name, NoReturn, Empty)
+                       code_wrap, MAX_CYCLES, get_class_name, NoReturn, Empty, Return)
 from .frame import Frame
 from .function import Function
 from .module import Module
@@ -240,7 +240,6 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         self.error = None
         self.start = time()
         self.cycles = 0
-        self.get_global_frame().reset_retval()
 
         node = self.parse(expr)
         ret = self.run(node, expr=expr)
@@ -328,14 +327,13 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
     def on_return(self, node):  # ('value',)
         """return statement: look for None, return special sentinel"""
-        __retval = self.run(node.value)
+        retval = self.run(node.value)
 
         if self.trace:
-            self.trace = self.trace(self.get_current_frame(), 'return', __retval)
+            self.trace = self.trace(self.get_current_frame(), 'return', retval)
 
-        self.ui_tracer("{}Returning value: `{}`".format(self.get_lineno_label(node), quote(__retval)))
-        self.get_current_frame().set_retval(__retval if __retval is not None else ReturnedNone)
-        return __retval
+        self.ui_tracer("{}Returning value: `{}`".format(self.get_lineno_label(node), quote(retval)))
+        raise Return(retval if retval is not None else ReturnedNone)
 
     def on_repr(self, node):
         """repr """
@@ -344,11 +342,10 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
     def on_module(self, node):  # ():('body',)
         """module def"""
         for tnode in node.body:
-            self.run(tnode)
-
-            __ret_val = self.get_current_frame().get_retval()
-            if __ret_val is not None:
-                return None if __ret_val == ReturnedNone else __ret_val
+            try:
+                self.run(tnode)
+            except Return as return_:
+                return None if return_.value == ReturnedNone else return_.value
 
     # noinspection PyMethodMayBeStatic,PyUnusedLocal
     def on_pass(self, _):  # pylint: disable=no-self-use
