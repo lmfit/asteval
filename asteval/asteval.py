@@ -13,25 +13,14 @@ later, using the current values in the
 from __future__ import division, print_function
 from sys import exc_info, stdout, stderr, version_info
 import ast
-import math
 from time import time
 
 import sys
 import six
 
-from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       LOCALFUNCS, NUMPY_RENAMES, op2func,
+from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symtable, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
 
-HAS_NUMPY = False
-try:
-    # noinspection PyUnresolvedReferences
-    import numpy
-
-    HAS_NUMPY = True
-except ImportError:
-    # print("Warning: numpy not available... functionality will be limited.")
-    pass
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -44,6 +33,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
+
 
 
 # noinspection PyIncorrectDocstring
@@ -83,6 +73,8 @@ class Interpreter(object):
         callable file-like object where standard output will be sent.
     err_writer : file-like or `None`
         callable file-like object where standard error will be sent.
+    usersyms : dict or `None`
+        dictionary of user-defined symbols to add to symbol table.
     minimal : bool
         whether to make a minimal interpreter, with many options turned off (see Note 1).
     no_if : bool
@@ -117,21 +109,22 @@ class Interpreter(object):
     1. setting `minimal=True` is equivalent to setting all `no_***` options to `True`.
     2. the max_time option is easily broken and not supportable.
     """
-
     def __init__(self, symtable=None, writer=None, use_numpy=True,
-                 err_writer=None, minimal=False, no_if=False, no_for=False,
-                 no_while=False, no_try=False, no_functiondef=False,
-                 no_ifexp=False, no_listcomp=False, no_augassign=False,
-                 no_assert=False, no_delete=False, no_raise=False,
-                 no_print=False, max_time=30):
+                 usersyms=None, err_writer=None, minimal=False,
+                 no_if=False, no_for=False, no_while=False, no_try=False,
+                 no_functiondef=False, no_ifexp=False, no_listcomp=False,
+                 no_augassign=False, no_assert=False, no_delete=False,
+                 no_raise=False, no_print=False, max_time=30):
 
-        self.writer = writer or stdout
-        self.err_writer = err_writer or stderr
+        # self.writer = writer or stdout
+        # self.err_writer = err_writer or stderr
         self.start = time()
         self.max_time = max_time
 
+        print(" a ---- sym ", symtable)
         if symtable is None:
-            symtable = {}
+            symtable = make_symtable(use_numpy=use_numpy, **usersyms)
+
         self.symtable = symtable
         self._interrupt = None
         self.error = []
@@ -142,24 +135,6 @@ class Interpreter(object):
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self._printer
-        for sym in FROM_PY:
-            if sym in builtins:
-                symtable[sym] = builtins[sym]
-
-        for symname, obj in LOCALFUNCS.items():
-            symtable[symname] = obj
-
-        for sym in FROM_MATH:
-            if hasattr(math, sym):
-                symtable[sym] = getattr(math, sym)
-
-        if self.use_numpy:
-            for sym in FROM_NUMPY:
-                if hasattr(numpy, sym):
-                    symtable[sym] = getattr(numpy, sym)
-            for name, sym in NUMPY_RENAMES.items():
-                if hasattr(numpy, sym):
-                    symtable[name] = getattr(numpy, sym)
 
         nodes = ALL_NODES[:]
 

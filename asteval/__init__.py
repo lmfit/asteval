@@ -20,7 +20,7 @@
 """
 
 from .asteval import Interpreter
-from .astutils import NameFinder, valid_symbol_name
+from .astutils import NameFinder, valid_symbol_name, make_symbol_table
 
 __version__ = '0.9.9'
-__all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name']
+__all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name', 'make_symbol_table']
