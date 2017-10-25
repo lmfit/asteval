@@ -121,8 +121,10 @@ class Interpreter(object):
         self.start = time()
         self.max_time = max_time
 
-        print(" a ---- sym ", symtable)
+
         if symtable is None:
+            if usersyms is None:
+                usersyms = {}
             symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
         self.symtable = symtable
