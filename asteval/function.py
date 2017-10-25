@@ -1,4 +1,4 @@
-from asteval.astutils import ReturnedNone
+from asteval.astutils import ReturnedNone, Return
 from .frame import Frame
 
 # pylint: disable=too-many-instance-attributes, too-many-arguments
@@ -112,13 +112,13 @@ class Function:
 
             # evaluate script of function
             for node in self.body:
-                self.__asteval__.run(node, expr='<>')
-                if self.__asteval__.error:
+                try:
+                    self.__asteval__.run(node, expr='<>')
+                except Return as return_:
+                    retval = None if return_.value == ReturnedNone else return_.value
                     break
 
-                __ret_val = self.__asteval__.get_current_frame().get_retval()
-                if __ret_val is not None:
-                    retval = None if __ret_val == ReturnedNone else __ret_val
+                if self.__asteval__.error:
                     break
 
         finally:

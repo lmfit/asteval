@@ -163,6 +163,12 @@ ReturnedNone = Empty()
 NoReturn = Empty()
 
 
+class Return(Exception):
+    """ Used internally to allow `return` to break out of the current block no matter how deeply nested. """
+    def __init__(self, value):
+        self.value = value
+
+
 class NameFinder(ast.NodeVisitor):
     """find all symbol names used by a parsed node"""
 
