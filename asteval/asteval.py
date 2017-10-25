@@ -18,7 +18,7 @@ from time import time
 import sys
 import six
 
-from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symtable, op2func,
+from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
 
 
@@ -123,7 +123,7 @@ class Interpreter(object):
 
         print(" a ---- sym ", symtable)
         if symtable is None:
-            symtable = make_symtable(use_numpy=use_numpy, **usersyms)
+            symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
         self.symtable = symtable
         self._interrupt = None
