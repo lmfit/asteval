@@ -833,6 +833,7 @@ class TestEval(TestCase):
         self.check_error('RuntimeError')
 
     def test_dos(self):
+        self.interp.max_time = 3
         self.interp("""for x in range(2<<21): pass""")
         self.check_error('RuntimeError', 'time limit')
         self.interp("""while True: pass""")
