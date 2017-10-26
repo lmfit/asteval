@@ -10,7 +10,6 @@ import unittest
 
 from sys import version_info
 from tempfile import NamedTemporaryFile
-import nose
 
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
@@ -885,10 +884,3 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
-
-
-if __name__ == '__main__':  # pragma: no cover
-    nose.main()
-    #for suite in (TestEval,):
-    #    suite = unittest.TestLoader().loadTestsFromTestCase(suite)
-    #    unittest.TextTestRunner(verbosity=2).run(suite)
