@@ -7,31 +7,25 @@ Symbols are held in the Interpreter symtable -- a simple
 dictionary supporting a simple, flat namespace.
 
 Expressions can be compiled into ast node and then evaluated
-later, using the current values in the
+later, using the current values in the symboltable
 """
 
 from __future__ import division, print_function
 from sys import exc_info, stdout, stderr, version_info
 import ast
-import math
 from time import time
-
 import sys
 import six
 
-from .astutils import (FROM_PY, FROM_MATH, FROM_NUMPY, UNSAFE_ATTRS,
-                       LOCALFUNCS, NUMPY_RENAMES, op2func,
+ndarray = NotImplementedError
+try:
+    from numpy import ndarray
+except ImportError:
+    pass
+
+from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
 
-HAS_NUMPY = False
-try:
-    # noinspection PyUnresolvedReferences
-    import numpy
-
-    HAS_NUMPY = True
-except ImportError:
-    # print("Warning: numpy not available... functionality will be limited.")
-    pass
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -83,6 +77,8 @@ class Interpreter(object):
         callable file-like object where standard output will be sent.
     err_writer : file-like or `None`
         callable file-like object where standard error will be sent.
+    usersyms : dict or `None`
+        dictionary of user-defined symbols to add to symbol table.
     minimal : bool
         whether to make a minimal interpreter, with many options turned off (see Note 1).
     no_if : bool
@@ -117,13 +113,12 @@ class Interpreter(object):
     1. setting `minimal=True` is equivalent to setting all `no_***` options to `True`.
     2. the max_time option is easily broken and not supportable.
     """
-
     def __init__(self, symtable=None, writer=None, use_numpy=True,
-                 err_writer=None, minimal=False, no_if=False, no_for=False,
-                 no_while=False, no_try=False, no_functiondef=False,
-                 no_ifexp=False, no_listcomp=False, no_augassign=False,
-                 no_assert=False, no_delete=False, no_raise=False,
-                 no_print=False, max_time=30):
+                 usersyms=None, err_writer=None, minimal=False,
+                 no_if=False, no_for=False, no_while=False, no_try=False,
+                 no_functiondef=False, no_ifexp=False, no_listcomp=False,
+                 no_augassign=False, no_assert=False, no_delete=False,
+                 no_raise=False, no_print=False, max_time=30):
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -131,7 +126,10 @@ class Interpreter(object):
         self.max_time = max_time
 
         if symtable is None:
-            symtable = {}
+            if usersyms is None:
+                usersyms = {}
+            symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
+
         self.symtable = symtable
         self._interrupt = None
         self.error = []
@@ -142,24 +140,6 @@ class Interpreter(object):
         self.use_numpy = HAS_NUMPY and use_numpy
 
         symtable['print'] = self._printer
-        for sym in FROM_PY:
-            if sym in builtins:
-                symtable[sym] = builtins[sym]
-
-        for symname, obj in LOCALFUNCS.items():
-            symtable[symname] = obj
-
-        for sym in FROM_MATH:
-            if hasattr(math, sym):
-                symtable[sym] = getattr(math, sym)
-
-        if self.use_numpy:
-            for sym in FROM_NUMPY:
-                if hasattr(numpy, sym):
-                    symtable[sym] = getattr(numpy, sym)
-            for name, sym in NUMPY_RENAMES.items():
-                if hasattr(numpy, sym):
-                    symtable[name] = getattr(numpy, sym)
 
         nodes = ALL_NODES[:]
 
@@ -185,15 +165,45 @@ class Interpreter(object):
             self.node_handlers['tryexcept'] = self.node_handlers['try']
             self.node_handlers['tryfinally'] = self.node_handlers['try']
 
-        self.no_deepcopy = []
-        for key, val in symtable.items():
-            if callable(val) or 'numpy.lib.index_tricks' in repr(val):
-                self.no_deepcopy.append(key)
+        self.no_deepcopy = [key for key, val in symtable.items()
+                            if (callable(val)
+                                or 'numpy.lib.index_tricks' in repr(val))]
+
+    def remove_nodehandler(self, node):
+        """remove support for a node
+        returns current node handler, so that it
+        might be re-added with add_nodehandler()
+        """
+        if node in self.node_handlers:
+            return self.node_handlers.pop(node)
+
+    def set_nodehandler(self, node, handler):
+        """set node handler"""
+        self.node_handlers[node] = handler
+
+    def user_defined_symbols(self):
+        """Return a set of symbols that have been added to symtable after
+        construction.
+
+        I.e., the symbols from self.symtable that are not in
+        self.no_deepcopy.
+
+        Returns
+        -------
+        unique_symbols : set
+            symbols in symtable that are not in self.no_deepcopy
+
+        """
+        sym_in_current = set(self.symtable.keys())
+        sym_from_construction = set(self.no_deepcopy)
+        unique_symbols = sym_in_current.difference(sym_from_construction)
+        return unique_symbols
 
     def unimplemented(self, node):
         """unimplemented nodes"""
         self.raise_exception(node, exc=NotImplementedError,
-                             msg="'%s' not supported" % node.__class__.__name__)
+                             msg="'%s' not supported" %
+                             (node.__class__.__name__))
 
     def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """add an exception"""
@@ -398,6 +408,10 @@ class Interpreter(object):
         """return string"""
         return node.s
 
+    def on_nameconstant(self, node):   # ('value',)
+        """named constant"""
+        return node.value
+
     def on_name(self, node):  # ('id', 'ctx')
         """ Name node """
         ctx = node.ctx.__class__
@@ -416,8 +430,11 @@ class Interpreter(object):
         return node.value
 
     def node_assign(self, node, val):
-        """here we assign a value (not the node.value object) to a node
-        this is used by on_assign, but also by for, list comprehension, etc.
+        """Assign a value (not the node.value object) to a node.
+
+        This is used by on_assign, but also by for, list comprehension,
+        etc.
+
         """
         if node.__class__ == ast.Name:
             if not valid_symbol_name(node.id):
@@ -562,7 +579,7 @@ class Interpreter(object):
             rval = self.run(rnode)
             out = op2func(op)(lval, rval)
             lval = rval
-            if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
+            if self.use_numpy and isinstance(out, ndarray) and out.any():
                 break
             elif not out:
                 break
@@ -700,8 +717,8 @@ class Interpreter(object):
         """function execution"""
         #  ('func', 'args', 'keywords', and 'starargs', 'kwargs' in py < 3.5)
         func = self.run(node.func)
-        if not hasattr(func, '__call__') and not isinstance(func, type):
-            msg = "'%s' is not callable!!" % func
+        if not callable(func):
+            msg = "'%s' is not callable!!" % (func)
             self.raise_exception(node, exc=TypeError, msg=msg)
 
         args = [self.run(targ) for targ in node.args]
@@ -710,9 +727,12 @@ class Interpreter(object):
             args = args + self.run(starargs)
 
         keywords = {}
+        if six.PY3 and func == print:
+            keywords['file'] = self.writer
+
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
-                msg = "keyword error in function call '%s'" % func
+                msg = "keyword error in function call '%s'" % (func)
                 self.raise_exception(node, msg=msg)
             if key.arg is None:   # Py3 **kwargs !
                 keywords.update(self.run(key.value))
@@ -727,7 +747,7 @@ class Interpreter(object):
         try:
             return func(*args, **keywords)
         except:
-            self.raise_exception(node, msg="Error running %s" % func)
+            self.raise_exception(node, msg="Error running %s" % (func))
 
     # noinspection PyMethodMayBeStatic
     def on_arg(self, node):  # ('test', 'msg')
@@ -744,7 +764,7 @@ class Interpreter(object):
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
             defval = self.run(defnode)
-            keyval = self.run(node.args.args[idef + offset])
+            keyval = self.run(node.args.args[idef+offset])
             kwargs.append((keyval, defval))
 
         if version_info[0] == 3:
@@ -845,13 +865,21 @@ class Procedure(object):
                            msg=msg % (self.name, nargs_expected, nargs))
         # check for multiple values for named argument
         if len(self.argnames) > 0 and kwargs is not None:
-            msg = "%s() got multiple values for keyword argument '%s'"
+            msg = "multiple values for keyword argument '%s' in Procedure %s"
             for targ in self.argnames:
                 if targ in kwargs:
                     self.raise_exc(None, exc=TypeError,
-                                   msg=msg % (targ, self.name))
+                                   msg=msg % (targ, self.name),
+                                   lineno=self.lineno)
 
         # check more args given than expected, varargs not given
+        if nargs != nargs_expected:
+            msg = None
+            if nargs < nargs_expected:
+                msg = 'not enough arguments for Procedure %s()' % self.name
+                msg = '%s (expected %i, got %i)' % (msg, nargs_expected, nargs)
+                self.raise_exc(None, exc=TypeError, msg=msg)
+
         if nargs > nargs_expected and self.vararg is None:
             if nargs - nargs_expected > len(self.kwargs):
                 msg = 'too many arguments for %s() expected at most %i, got %i'

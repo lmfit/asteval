@@ -7,7 +7,15 @@ utility functions for asteval
 from __future__ import division, print_function
 import re
 import ast
+import math
 from sys import exc_info
+
+HAS_NUMPY = False
+try:
+    import numpy
+    HAS_NUMPY = True
+except ImportError:
+    pass
 
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
@@ -299,3 +307,44 @@ class NameFinder(ast.NodeVisitor):
             if node.ctx.__class__ == ast.Load and node.id not in self.names:
                 self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)
+
+builtins = __builtins__
+if not isinstance(builtins, dict):
+    builtins = builtins.__dict__
+
+def make_symbol_table(use_numpy=True, **kws):
+    """create a default symboltable, taking dict of user-defined symbols
+
+    Arguments
+    ---------
+    numpy : bool, optional
+       whether to include symbols from numpy
+    kws :  optional
+       additional symbol name, value pairs to include in symbol table
+
+    Returns:
+    --------
+      dict to be used as symbol table for asteval
+    """
+    symtable = {}
+
+    for sym in FROM_PY:
+        if sym in builtins:
+            symtable[sym] = builtins[sym]
+
+    for sym in FROM_MATH:
+        if hasattr(math, sym):
+            symtable[sym] = getattr(math, sym)
+
+    if HAS_NUMPY and use_numpy:
+        for sym in FROM_NUMPY:
+            if hasattr(numpy, sym):
+                symtable[sym] = getattr(numpy, sym)
+        for name, sym in NUMPY_RENAMES.items():
+            if hasattr(numpy, sym):
+                symtable[name] = getattr(numpy, sym)
+
+    symtable.update(LOCALFUNCS)
+    symtable.update(kws)
+
+    return symtable
