@@ -7,6 +7,7 @@ import os
 import textwrap
 import time
 import unittest
+
 from sys import version_info
 from tempfile import NamedTemporaryFile
 import nose
@@ -24,26 +25,20 @@ else:
 
 from asteval import NameFinder, Interpreter
 
-HAS_NUMPY = False
-try:
-    # noinspection PyUnresolvedReferences
-    import numpy as np
-    HAS_NUMPY = True
-except ImportError:
-    print("Warning: numpy not available... functionality will be limited.")
-    pass
+import numpy as np
+from numpy.testing import (assert_, decorators, assert_raises,
+                           assert_almost_equal, assert_equal,
+                           assert_allclose)
+
 
 
 class TestCase(unittest.TestCase):
     """testing of asteval"""
-
     def setUp(self):
         self.interp = Interpreter()
         self.symtable = self.interp.symtable
         self.set_stdout()
         self.set_stderr()
-        if not HAS_NUMPY:
-            self.interp("arange = range")
 
     def set_stdout(self):
         self.stdout = NamedTemporaryFile('w', delete=False, prefix='astevaltest')
@@ -93,25 +88,21 @@ class TestCase(unittest.TestCase):
     # noinspection PyUnresolvedReferences
     def isvalue(self, sym, val):
         """assert that a symboltable symbol has a particular value"""
-        if HAS_NUMPY and isinstance(val, np.ndarray):
-            return self.assertTrue(np.all(self.interp.symtable[sym] == val))
+        tval = self.interp.symtable[sym]
+        if isinstance(val, np.ndarray):
+            assert_allclose(tval, val, rtol=0.01)
         else:
-            return self.assertTrue(self.interp.symtable[sym] == val)
+            assert(tval == val)
 
-    def isnear(self, expr, val, places=7):
-        """assert that a symboltable symbol is near a particular value"""
-        oval = self.interp(expr)
-        if HAS_NUMPY and isinstance(val, np.ndarray):
-            for x, y in zip(oval, val):
-                self.assertAlmostEqual(x, y, places=places)
-        else:
-            return self.assertAlmostEqual(oval, val, places=places)
+    def isnear(self, expr, val):
+        tval = self.interp(expr)
+        assert_allclose(tval, val, rtol=1.e-4, atol=1.e-4)
 
     # noinspection PyUnresolvedReferences
     def istrue(self, expr):
         """assert that an expression evaluates to True"""
         val = self.interp(expr)
-        if HAS_NUMPY and isinstance(val, np.ndarray):
+        if isinstance(val, np.ndarray):
             val = np.all(val)
         return self.assertTrue(val)
 
@@ -119,7 +110,7 @@ class TestCase(unittest.TestCase):
     def isfalse(self, expr):
         """assert that an expression evaluates to False"""
         val = self.interp(expr)
-        if HAS_NUMPY and isinstance(val, np.ndarray):
+        if isinstance(val, np.ndarray):
             val = np.all(val)
         return self.assertFalse(val)
 
@@ -175,21 +166,19 @@ class TestEval(TestCase):
 
     def test_ndarray_index(self):
         """nd array indexing"""
-        if HAS_NUMPY:
-            self.interp("a_ndarray = 5*arange(20)")
-            self.istrue("a_ndarray[2] == 10")
-            self.istrue("a_ndarray[4] == 20")
+        self.interp("a_ndarray = 5*arange(20)")
+        assert(self.interp("a_ndarray[2]")  == 10)
+        assert(self.interp("a_ndarray[4]")  == 20)
 
     def test_ndarrayslice(self):
         """array slicing"""
-        if HAS_NUMPY:
-            self.interp("a_ndarray = arange(200).reshape(10, 20)")
-            self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
-            self.interp("y = arange(20).reshape(4, 5)")
-            self.istrue("y[:,3]  == array([3, 8, 13, 18])")
-            self.istrue("y[...,1]  == array([1, 6, 11, 16])")
-            self.interp("y[...,1] = array([2, 2, 2, 2])")
-            self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
+        self.interp("a_ndarray = arange(200).reshape(10, 20)")
+        self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
+        self.interp("y = arange(20).reshape(4, 5)")
+        self.istrue("y[:,3]  == array([3, 8, 13, 18])")
+        self.istrue("y[...,1]  == array([1, 6, 11, 16])")
+        self.interp("y[...,1] = array([2, 2, 2, 2])")
+        self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
 
     def test_while(self):
         """while loops"""
@@ -409,11 +398,10 @@ class TestEval(TestCase):
         self.isvalue("s1", "a string")
         self.interp('b = (1,2,3)')
         self.isvalue("b", (1, 2, 3))
-        if HAS_NUMPY:
-            self.interp('a = 1.*arange(10)')
-            self.isvalue("a", np.arange(10))
-            self.interp('a[1:5] = 1 + 0.5 * arange(4)')
-            self.isnear("a", np.array([0., 1., 1.5, 2., 2.5, 5., 6., 7., 8., 9.]))
+        self.interp('a = 1.*arange(10)')
+        self.isvalue("a", np.arange(10))
+        self.interp('a[1:5] = 1 + 0.5 * arange(4)')
+        self.isnear("a", np.array([0., 1., 1.5, 2., 2.5, 5., 6., 7., 8., 9.]))
 
     def test_names(self):
         """names test"""
@@ -485,25 +473,24 @@ class TestEval(TestCase):
     # noinspection PyUnresolvedReferences
     def test_ndarrays(self):
         """simple ndarrays"""
-        if HAS_NUMPY:
-            self.interp('n = array([11, 10, 9])')
-            self.istrue("isinstance(n, ndarray)")
-            self.istrue("len(n) == 3")
-            self.isvalue("n", np.array([11, 10, 9]))
-            self.interp('n = arange(20).reshape(5, 4)')
-            self.istrue("isinstance(n, ndarray)")
-            self.istrue("n.shape == (5, 4)")
-            self.interp("myx = n.shape")
-            self.interp("n.shape = (4, 5)")
-            self.istrue("n.shape == (4, 5)")
-            self.interp("a = arange(20)")
-            self.interp("gg = a[1:13:3]")
-            self.isvalue('gg', np.array([1, 4, 7, 10]))
-            self.interp("gg[:2] = array([0,2])")
-            self.isvalue('gg', np.array([0, 2, 7, 10]))
-            self.interp('a, b, c, d = gg')
-            self.isvalue('c', 7)
-            self.istrue('(a, b, d) == (0, 2, 10)')
+        self.interp('n = array([11, 10, 9])')
+        self.istrue("isinstance(n, ndarray)")
+        self.istrue("len(n) == 3")
+        self.isvalue("n", np.array([11, 10, 9]))
+        self.interp('n = arange(20).reshape(5, 4)')
+        self.istrue("isinstance(n, ndarray)")
+        self.istrue("n.shape == (5, 4)")
+        self.interp("myx = n.shape")
+        self.interp("n.shape = (4, 5)")
+        self.istrue("n.shape == (4, 5)")
+        self.interp("a = arange(20)")
+        self.interp("gg = a[1:13:3]")
+        self.isvalue('gg', np.array([1, 4, 7, 10]))
+        self.interp("gg[:2] = array([0,2])")
+        self.isvalue('gg', np.array([0, 2, 7, 10]))
+        self.interp('a, b, c, d = gg')
+        self.isvalue('c', 7)
+        self.istrue('(a, b, d) == (0, 2, 10)')
 
     def test_binop(self):
         """test binary ops"""
@@ -540,8 +527,7 @@ class TestEval(TestCase):
         self.isnear('sin(pi/2)', 1)
         self.isnear('cos(pi/2)', 0)
         self.istrue('exp(0) == 1')
-        if HAS_NUMPY:
-            self.isnear('exp(1)', np.e)
+        self.isnear('exp(1)', np.e)
 
     def test_namefinder(self):
         """test namefinder"""
@@ -579,10 +565,9 @@ class TestEval(TestCase):
         self.interp('l[0:2] = [-1, -2]')
         self.isvalue('l', [-1, -2, 3, -1, 5])
         self.interp('x[1] = 99')
-        if HAS_NUMPY:
-            self.isvalue('x', np.array([0, 99, 2, 3, 4, 5, 6, 7, 8, 9]))
-            self.interp('x[0:2] = [9,-9]')
-            self.isvalue('x', np.array([9, -9, 2, 3, 4, 5, 6, 7, 8, 9]))
+        self.isvalue('x', np.array([0, 99, 2, 3, 4, 5, 6, 7, 8, 9]))
+        self.interp('x[0:2] = [9,-9]')
+        self.isvalue('x', np.array([9, -9, 2, 3, 4, 5, 6, 7, 8, 9]))
 
     def test_reservedwords(self):
         """test reserved words"""
@@ -831,7 +816,7 @@ class TestEval(TestCase):
         self.interp('open("foo2", "rb")')
         self.check_error('FileNotFoundError' if PY33Plus else 'IOError')
         self.interp('open("foo3", "rb", 2<<18)')
-        self.check_error('FileNotFoundError' if PY33Plus else 'RuntimeError')
+        self.check_error('RuntimeError')
 
     def test_dos(self):
         self.interp.max_time = 3
