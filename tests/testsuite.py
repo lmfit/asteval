@@ -825,12 +825,12 @@ class TestEval(TestCase):
         self.check_error('RuntimeError')
 
     def test_safe_open(self):
-        self.interp('open("foo", "wb")')
+        self.interp('open("foo1", "wb")')
         self.check_error('RuntimeError')
-        self.interp('open("foo", "rb")')
+        self.interp('open("foo2", "rb")')
         self.check_error('FileNotFoundError' if PY33Plus else 'IOError')
-        self.interp('open("foo", "rb", 2<<18)')
-        self.check_error('RuntimeError')
+        self.interp('open("foo3", "rb", 2<<18)')
+        self.check_error('FileNotFoundError' if PY33Plus else 'RuntimeError')
 
     def test_dos(self):
         self.interp.max_time = 3
@@ -883,9 +883,3 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
-
-
-if __name__ == '__main__':  # pragma: no cover
-    for suite in (TestEval,):
-        suite = unittest.TestLoader().loadTestsFromTestCase(suite)
-        unittest.TextTestRunner(verbosity=2).run(suite)
