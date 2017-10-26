@@ -9,7 +9,11 @@ python:
     - 3.6
 
 before_install:
-    - wget http://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+    - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+          wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
+      else
+          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+      fi
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
@@ -18,10 +22,14 @@ before_install:
     - conda info -a
 
 install:
-    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy pytest six
+    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy pytest six coverage
     - source activate test_env
     - python setup.py install
 
 script:
     - cd tests
     - pytest
+    - coverage run --source=asteval test_asteval.py
+
+after_success:
+  - coveralls
