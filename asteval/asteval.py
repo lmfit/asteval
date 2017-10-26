@@ -14,9 +14,14 @@ from __future__ import division, print_function
 from sys import exc_info, stdout, stderr, version_info
 import ast
 from time import time
-
 import sys
 import six
+
+ndarray = NotImplementedError
+try:
+    from numpy import ndarray
+except ImportError:
+    pass
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, op2func,
                        ExceptionHolder, ReturnedNone, valid_symbol_name)
@@ -33,7 +38,6 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
-
 
 
 # noinspection PyIncorrectDocstring
@@ -116,11 +120,10 @@ class Interpreter(object):
                  no_augassign=False, no_assert=False, no_delete=False,
                  no_raise=False, no_print=False, max_time=30):
 
-        # self.writer = writer or stdout
-        # self.err_writer = err_writer or stderr
+        self.writer = writer or stdout
+        self.err_writer = err_writer or stderr
         self.start = time()
         self.max_time = max_time
-
 
         if symtable is None:
             if usersyms is None:
@@ -164,7 +167,7 @@ class Interpreter(object):
 
         self.no_deepcopy = []
         for key, val in symtable.items():
-            if callable(val) or 'numpy.lib.index_tricks' in repr(val):
+            if callable(val) or 'lib.index_tricks' in repr(val):
                 self.no_deepcopy.append(key)
 
     def unimplemented(self, node):
@@ -539,7 +542,7 @@ class Interpreter(object):
             rval = self.run(rnode)
             out = op2func(op)(lval, rval)
             lval = rval
-            if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
+            if self.use_numpy and isinstance(out, ndarray) and out.any():
                 break
             elif not out:
                 break
