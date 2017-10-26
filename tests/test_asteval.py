@@ -26,10 +26,7 @@ else:
 from asteval import NameFinder, Interpreter
 
 import numpy as np
-from numpy.testing import (assert_, decorators, assert_raises,
-                           assert_almost_equal, assert_equal,
-                           assert_allclose)
-
+from numpy.testing import assert_allclose
 
 
 class TestCase(unittest.TestCase):
@@ -859,6 +856,25 @@ class TestEval(TestCase):
         self.isvalue('x', 42)
         z = self.interp("""def foo(): return 42\nfoo()""")
         self.assertEqual(z, 42)
+
+    def test_removenodehandler(self):
+        handler = self.interp.remove_nodehandler('ifexp')
+        self.interp('testval = 300')
+        self.interp('bogus = 3 if testval > 100 else 1')
+        self.check_error('NotImplementedError')
+
+        self.interp.set_nodehandler('ifexp', handler)
+        self.interp('bogus = 3 if testval > 100 else 1')
+        self.isvalue('bogus', 3)
+
+
+    def test_get_user_symbols(self):
+        self.interp("x = 1.1\ny = 2.5\nz = 788\n")
+        usersyms = self.interp.user_defined_symbols()
+        assert('x' in usersyms)
+        assert('y' in usersyms)
+        assert('z' in usersyms)
+        assert('foo' not in usersyms)
 
 
 class TestCase2(unittest.TestCase):
