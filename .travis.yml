@@ -1,7 +1,7 @@
 # Config file for automatic testing at travis-ci.org
 
 language: python
-sudo: false
+sudo: falses
 
 python:
     - 2.7
@@ -22,14 +22,16 @@ before_install:
     - conda info -a
 
 install:
-    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy pytest six coverage
+    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy six pip pytest coverage
     - source activate test_env
     - python setup.py install
+    - pip install codecov
 
 script:
     - cd tests
     - pytest
     - coverage run --source=asteval test_asteval.py
+    - coverage report -m
 
 after_success:
-  - coveralls
+    - codecov
