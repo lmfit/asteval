@@ -7,6 +7,8 @@ import os
 import textwrap
 import time
 import unittest
+import pytest
+
 
 from sys import version_info
 from tempfile import NamedTemporaryFile
@@ -884,3 +886,6 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
+
+if __name__ == '__main__':
+    pytest.main(['-v', '-x', '-s'])
