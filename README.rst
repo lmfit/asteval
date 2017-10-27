@@ -7,8 +7,9 @@ ASTEVAL
 .. image:: https://zenodo.org/badge/4185/newville/asteval.svg
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
 
-.. image:: https://coveralls.io/repos/github/newville/asteval/badge.svg?branch=master
-   :target: https://coveralls.io/github/newville/asteval?branch=master
+.. image:: https://codecov.io/gh/newville/asteval/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/newville/asteval
+
 
 Links
 -----
