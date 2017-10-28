@@ -24,7 +24,7 @@ else:
     # noinspection PyUnresolvedReferences
     from cStringIO import StringIO
 
-from asteval import NameFinder, Interpreter
+from asteval import NameFinder, Interpreter, make_symbol_table
 
 import numpy as np
 from numpy.testing import assert_allclose
@@ -868,7 +868,6 @@ class TestEval(TestCase):
         self.interp('bogus = 3 if testval > 100 else 1')
         self.isvalue('bogus', 3)
 
-
     def test_get_user_symbols(self):
         self.interp("x = 1.1\ny = 2.5\nz = 788\n")
         usersyms = self.interp.user_defined_symbols()
@@ -876,6 +875,36 @@ class TestEval(TestCase):
         assert('y' in usersyms)
         assert('z' in usersyms)
         assert('foo' not in usersyms)
+
+    def test_custom_symtable(self):
+        "test making and using a custom symbol table"
+        def cosd(x):
+            "cos with angle in degrees"
+            return np.cos(np.radians(x))
+
+        def sind(x):
+            "sin with angle in degrees"
+            return np.sin(np.radians(x))
+
+        def tand(x):
+            "tan with angle in degrees"
+            return np.tan(np.radians(x))
+
+        sym_table = make_symbol_table(cosd=cosd, sind=sind, tand=tand)
+
+        aeval = Interpreter(symtable=sym_table)
+        aeval("x1 = sind(30)")
+        aeval("x2 = cosd(30)")
+        aeval("x3 = tand(45)")
+
+        x1 = aeval.symtable['x1']
+        x2 = aeval.symtable['x2']
+        x3 = aeval.symtable['x3']
+
+        assert_allclose(x1, 0.50,     rtol=0.001)
+        assert_allclose(x2, 0.866025, rtol=0.001)
+        assert_allclose(x3, 1.00,     rtol=0.001)
+
 
 
 class TestCase2(unittest.TestCase):
