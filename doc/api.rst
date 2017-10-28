@@ -1,15 +1,28 @@
 .. _asteval_api:
 
-===================
+========================
 asteval reference
-===================
-
-The asteval module provides an :class:`Interpreter` class, which creates an
-interpreter.  There is also a convenience function :func:`valid_symbol_name`
+========================
 
 .. _numpy: http://docs.scipy.org/doc/numpy
 
 .. module:: asteval
+
+
+The asteval module is pretty simple, providing an :class:`Interpreter`
+class which creates an Interpreter of expressions and code.  There are a
+few options available to control what language features to support, how to
+deal with writing to standard output and standard error, and specifying the
+symbol table.  There are also a few convenience functions that are useful
+for tesing the validity of symbol names and creating custom symbol tables.
+
+
+:func:`valid_symbol_name`
+:func:`make_symbol_table`
+
+
+The :class:`Interpreter` class
+=========================================
 
 .. autoclass:: Interpreter
 
@@ -71,4 +84,11 @@ The ``use_numpy`` argument can be used to control whether functions from
 
    the most recent error message.
 
+
+
+Utility Functions
+====================
+
 .. autofunction:: valid_symbol_name
+
+.. autofunction:: make_symbol_table
