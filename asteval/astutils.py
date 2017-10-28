@@ -234,10 +234,11 @@ def valid_symbol_name(name):
 
     Returns
     --------
-       bool, whether name is a a valid symbol name
+      valid :  bool
+        whether name is a a valid symbol name
 
-    This checks for reserved words in Python, and checks that the name matches
-    the  regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
+    This checks for Python reserved words and that the name matches
+    the regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
     """
     if name in RESERVED_WORDS:
         return False
@@ -331,7 +332,8 @@ def make_symbol_table(use_numpy=True, **kws):
 
     Returns
     --------
-      dict to be used as symbol table for asteval
+    symbol_table : dict
+       a symbol table that can be used in `asteval.Interpereter`
 
     """
     symtable = {}
