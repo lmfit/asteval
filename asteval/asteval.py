@@ -45,28 +45,6 @@ class Interpreter(object):
     """create an asteval Interpreter: a restricted, simplified interpreter
     of mathematical expressions using Python syntax.
 
-    The interpreter uses a simple, flat namespace.  Many builtin Python
-    functions, functions from the `math` module, and functions from `numpy`
-    (if available) are pre-loaded into the namespace. Several builtin
-    functions such as 'eval', 'exec', and 'getattr' are not included, as
-    these are considered unsafe.
-
-    Many Python features aresupported by default, including
-       advanced slicing:    a[::-1], array[-3:, :, ::2]
-       if-then-elif-else conditionals
-       for loops
-       while loops
-       try-except-finally blocks
-       function definitions
-       if-expressions:      x = a if TEST else b
-       list comprehension:   out = [sqrt(i) for i in values]
-
-    with the exception of slicing, each of these features can be turned off
-    if desired.
-
-    Many Python syntax elements are not supported at all:
-        Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators
-
     Parameters
     ----------
     symtable : dict or `None`
