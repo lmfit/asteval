@@ -227,10 +227,17 @@ OPERATORS = {ast.Is: lambda a, b: a is b,
 def valid_symbol_name(name):
     """determines whether the input symbol name is a valid name
 
-    This checks for reserved words, and that the name matches the
-    regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
-    :param name: symbol name to test
-    :return True if valid, False otherwise
+    Arguments
+    ---------
+      name  : str
+         name to check for validity.
+
+    Returns
+    --------
+       bool, whether name is a a valid symbol name
+
+    This checks for reserved words in Python, and checks that the name matches
+    the  regular expression ``[a-zA-Z_][a-zA-Z0-9_]``
     """
     if name in RESERVED_WORDS:
         return False
@@ -322,9 +329,10 @@ def make_symbol_table(use_numpy=True, **kws):
     kws :  optional
        additional symbol name, value pairs to include in symbol table
 
-    Returns:
+    Returns
     --------
       dict to be used as symbol table for asteval
+
     """
     symtable = {}
 
