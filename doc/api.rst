@@ -25,7 +25,6 @@ The :class:`Interpreter` class
 .. autoclass:: Interpreter
 
 
-
 By default, the symbol table will be created with :func:`make_symbol_table`
 that will include several standard python builtin functions, several
 functions from the :py:mod:`math` module and (if available and not turned off)
@@ -44,9 +43,9 @@ By default, the interpreter will support many Python language constructs,
 including
 
   *  advanced slicing:    ``a[::-1], array[-3:, :, ::2]``
-  *  if-then-elif-else conditionals
-  *  for loops
-  *  while loops
+  *  if-elif-else conditionals
+  *  for loops, with ``else``
+  *  while loops, with ``else``
   *  try-except-finally blocks
   *  function definitions
   *  augmented assignments:  ``x += 1``
