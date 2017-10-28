@@ -11,7 +11,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '0.9.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -44,6 +44,15 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">asteval reference</a><ul>
+<li><a class="reference internal" href="#the-interpreter-class">The <code class="docutils literal"><span class="pre">Interpreter</span></code> class</a></li>
+<li><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="basics.html"
                         title="previous chapter">Using asteval</a></p>
@@ -74,44 +83,31 @@
             
   <div class="section" id="asteval-reference">
 <span id="asteval-api"></span><h1>asteval reference<a class="headerlink" href="#asteval-reference" title="Permalink to this headline">¶</a></h1>
-<p>The asteval module provides an <code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code> class, which creates an
-interpreter.  There is also a convenience function <code class="xref py py-func docutils literal"><span class="pre">valid_symbol_name()</span></code></p>
-<span class="target" id="module-asteval"></span><dl class="class">
+<span class="target" id="module-asteval"></span><p>The asteval module has a pretty simple interface, providing an
+<a class="reference internal" href="#asteval.Interpreter" title="asteval.Interpreter"><code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code></a> class which creates an Interpreter of expressions and
+code.  There are a few options available to control what language features
+to support, how to deal with writing to standard output and standard error,
+and specifying the symbol table.  There are also a few convenience
+functions: <a class="reference internal" href="#asteval.valid_symbol_name" title="asteval.valid_symbol_name"><code class="xref py py-func docutils literal"><span class="pre">valid_symbol_name()</span></code></a> is useful for tesing the validity of
+symbol names, and <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal"><span class="pre">make_symbol_table()</span></code></a> is useful for creating symbol
+tables that may be pre-loaded with custom symbols and functions.</p>
+<div class="section" id="the-interpreter-class">
+<h2>The <a class="reference internal" href="#asteval.Interpreter" title="asteval.Interpreter"><code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code></a> class<a class="headerlink" href="#the-interpreter-class" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="asteval.Interpreter">
-<em class="property">class </em><code class="descclassname">asteval.</code><code class="descname">Interpreter</code><span class="sig-paren">(</span><em>symtable=None</em>, <em>writer=None</em>, <em>use_numpy=True</em>, <em>err_writer=None</em>, <em>minimal=False</em>, <em>no_if=False</em>, <em>no_for=False</em>, <em>no_while=False</em>, <em>no_try=False</em>, <em>no_functiondef=False</em>, <em>no_ifexp=False</em>, <em>no_listcomp=False</em>, <em>no_augassign=False</em>, <em>no_assert=False</em>, <em>no_delete=False</em>, <em>no_raise=False</em>, <em>no_print=False</em>, <em>max_time=30</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">asteval.</code><code class="descname">Interpreter</code><span class="sig-paren">(</span><em>symtable=None</em>, <em>usersyms=None</em>, <em>writer=None</em>, <em>err_writer=None</em>, <em>use_numpy=True</em>, <em>minimal=False</em>, <em>no_if=False</em>, <em>no_for=False</em>, <em>no_while=False</em>, <em>no_try=False</em>, <em>no_functiondef=False</em>, <em>no_ifexp=False</em>, <em>no_listcomp=False</em>, <em>no_augassign=False</em>, <em>no_assert=False</em>, <em>no_delete=False</em>, <em>no_raise=False</em>, <em>no_print=False</em>, <em>max_time=30</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an asteval Interpreter: a restricted, simplified interpreter
 of mathematical expressions using Python syntax.</p>
-<p>The interpreter uses a simple, flat namespace.  Many builtin Python
-functions, functions from the <cite>math</cite> module, and functions from <cite>numpy</cite>
-(if available) are pre-loaded into the namespace. Several builtin
-functions such as ‘eval’, ‘exec’, and ‘getattr’ are not included, as
-these are considered unsafe.</p>
-<dl class="docutils">
-<dt>Many Python features aresupported by default, including</dt>
-<dd>advanced slicing:    a[::-1], array[-3:, :, ::2]
-if-then-elif-else conditionals
-for loops
-while loops
-try-except-finally blocks
-function definitions
-if-expressions:      x = a if TEST else b
-list comprehension:   out = [sqrt(i) for i in values]</dd>
-</dl>
-<p>with the exception of slicing, each of these features can be turned off
-if desired.</p>
-<dl class="docutils">
-<dt>Many Python syntax elements are not supported at all:</dt>
-<dd>Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators</dd>
-</dl>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>symtable</strong> (dict or <cite>None</cite>) – dictionary to use as symbol table (if <cite>None</cite>, one will be created).</li>
-<li><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to use functions from numpy.</li>
+<li><strong>usersyms</strong> (dict or <cite>None</cite>) – dictionary of user-defined symbols to add to symbol table.</li>
 <li><strong>writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard output will be sent.</li>
 <li><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</li>
+<li><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to use functions from numpy.</li>
 <li><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to make a minimal interpreter, with many options turned off (see Note 1).</li>
 <li><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</li>
 <li><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</li>
@@ -138,15 +134,46 @@ if desired.</p>
 </ol>
 </dd></dl>
 
-<p>The symbol table will be loaded with several built in functions, several
-functions from the <a class="reference external" href="https://docs.python.org/2/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and, if available and requested,
-several functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.  This will happen even for a symbol table
-explicitly provided.</p>
+<p>By default, the symbol table will be created with <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal"><span class="pre">make_symbol_table()</span></code></a>
+that will include several standard python builtin functions, several
+functions from the <a class="reference external" href="https://docs.python.org/2/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and (if available and not turned off)
+several functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</p>
 <p>The <code class="docutils literal"><span class="pre">writer</span></code> argument can be used to provide a place to send all output
 that would normally go to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  The default is, of
-course, to send output to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.</p>
+course, to send output to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  Similarly, <code class="docutils literal"><span class="pre">err_writer</span></code>
+will be used for output that will otherwise be sent to
+<a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stderr" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stderr</span></code></a>.</p>
 <p>The <code class="docutils literal"><span class="pre">use_numpy</span></code> argument can be used to control whether functions from
 <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> are loaded into the symbol table.</p>
+<p>By default, the interpreter will support many Python language constructs,
+including</p>
+<blockquote>
+<div><ul class="simple">
+<li>advanced slicing:    <code class="docutils literal"><span class="pre">a[::-1],</span> <span class="pre">array[-3:,</span> <span class="pre">:,</span> <span class="pre">::2]</span></code></li>
+<li>if-elif-else conditionals</li>
+<li>for loops, with <code class="docutils literal"><span class="pre">else</span></code></li>
+<li>while loops, with <code class="docutils literal"><span class="pre">else</span></code></li>
+<li>try-except-finally blocks</li>
+<li>function definitions</li>
+<li>augmented assignments:  <code class="docutils literal"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">1</span></code></li>
+<li>if-expressions:      <code class="docutils literal"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">if</span> <span class="pre">TEST</span> <span class="pre">else</span> <span class="pre">b</span></code></li>
+<li>list comprehension:  <code class="docutils literal"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">[sqrt(i)</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">values]</span></code></li>
+</ul>
+</div></blockquote>
+<p>with the exception of slicing, each of these features can be turned off
+with the appropriate <code class="docutils literal"><span class="pre">no_XXX</span></code> option.  To turn off all these optional
+constructs, and create a simple expression calculator, use
+<code class="docutils literal"><span class="pre">minimal=True</span></code>.</p>
+<p>Many Python syntax elements are not supported at all, including:</p>
+<blockquote>
+<div>Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators</div></blockquote>
+<p>In addition, many actions that are known to be unsafe (such as inspecting
+objects to get at their base classes) are also not allowed.</p>
+<p>An Interpreter instance has many methods, but most of them are
+implementation details for how to handle particular AST nodes, and should
+not be considered as part of the usable API.  The methods described be low,
+and the examples elsewhere in this documentation should be used as the
+stable API.</p>
 <dl class="method">
 <dt id="asteval.eval">
 <code class="descclassname">asteval.</code><code class="descname">eval</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.eval" title="Permalink to this definition">¶</a></dt>
@@ -170,7 +197,7 @@ in the <code class="xref py py-attr docutils literal"><span class="pre">errors</
 <dl class="method">
 <dt id="asteval.__call__">
 <code class="descclassname">asteval.</code><code class="descname">__call__</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
-<dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code></a>.  That is one can do:</p>
+<dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code></a>.  That is:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">(</span><span class="s1">&#39;x = 1&#39;</span><span class="p">)</span>
@@ -208,16 +235,76 @@ of Exceptions raised.</p>
 <dd><p>the most recent error message.</p>
 </dd></dl>
 
+</div>
+<div class="section" id="utility-functions">
+<h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="asteval.valid_symbol_name">
 <code class="descclassname">asteval.</code><code class="descname">valid_symbol_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.valid_symbol_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>determines whether the input symbol name is a valid name</p>
-<p>This checks for reserved words, and that the name matches the
-regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_][a-zA-Z0-9_]</span></code>
-:param name: symbol name to test
-:return True if valid, False otherwise</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – name to check for validity.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>valid</strong> – whether name is a a valid symbol name</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
+</tr>
+</tbody>
+</table>
+<p>This checks for Python reserved words and that the name matches
+the regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_][a-zA-Z0-9_]</span></code></p>
 </dd></dl>
 
+<dl class="function">
+<dt id="asteval.make_symbol_table">
+<code class="descclassname">asteval.</code><code class="descname">make_symbol_table</code><span class="sig-paren">(</span><em>use_numpy=True</em>, <em>**kws</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.make_symbol_table" title="Permalink to this definition">¶</a></dt>
+<dd><p>create a default symboltable, taking dict of user-defined symbols</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy</li>
+<li><strong>kws</strong> (<em>optional</em>) – additional symbol name, value pairs to include in symbol table</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>symbol_table</strong> – a symbol table that can be used in <cite>asteval.Interpereter</cite></p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<p>To make and use a custom symbol table, one might do this:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span><span class="p">,</span> <span class="n">make_symbol_table</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">def</span> <span class="nf">cosd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="s2">&quot;cos with angle in degrees&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">sind</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="s2">&quot;sin with angle in degrees&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">tand</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="s2">&quot;tan with angle in degrees&quot;</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">tan</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">radians</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+
+<span class="n">syms</span> <span class="o">=</span> <span class="n">make_symbol_table</span><span class="p">(</span><span class="n">use_numpy</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">cosd</span><span class="o">=</span><span class="n">cosd</span><span class="p">,</span> <span class="n">sind</span><span class="o">=</span><span class="n">sind</span><span class="p">,</span> <span class="n">tand</span><span class="o">=</span><span class="n">tand</span><span class="p">)</span>
+
+<span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">symtable</span><span class="o">=</span><span class="n">syms</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">aeval</span><span class="p">(</span><span class="s2">&quot;sind(30)&quot;</span><span class="p">)))</span>
+</pre></div>
+</div>
+<p>which will print <code class="docutils literal"><span class="pre">0.5</span></code>.</p>
+</div>
 </div>
 
 

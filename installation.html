@@ -11,7 +11,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.9',
+        VERSION:     '0.9.10',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -24,7 +24,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using asteval" href="basics.html" />
+    <link rel="next" title="Motivation for asteval" href="motivation.html" />
     <link rel="prev" title="ASTEVAL: Minimal Python AST Evaluator" href="index.html" /> 
   </head>
   <body>
@@ -35,7 +35,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="basics.html" title="Using asteval"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="motivation.html" title="Motivation for asteval"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="ASTEVAL: Minimal Python AST Evaluator"
@@ -48,8 +51,8 @@
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Downloading and Installation</a><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-<li><a class="reference internal" href="#downloads">Downloads</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#download-and-installation">Download and Installation</a></li>
 <li><a class="reference internal" href="#development-version">Development Version</a></li>
 <li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
@@ -61,8 +64,8 @@
   <p class="topless"><a href="index.html"
                         title="previous chapter">ASTEVAL: Minimal Python AST Evaluator</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="basics.html"
-                        title="next chapter">Using asteval</a></p>
+  <p class="topless"><a href="motivation.html"
+                        title="next chapter">Motivation for asteval</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -90,48 +93,28 @@
             
   <div class="section" id="downloading-and-installation">
 <h1>Downloading and Installation<a class="headerlink" href="#downloading-and-installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<p>The asteval package requires Python 2.6 and higher.  Extensive test with
-version compatibility has not been done yet.  Initial tests work with
-Python 3.2.  No testing has been done with 64-bit architectures, but as
-this package is pure Python, no significant troubles are expected.</p>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>The asteval package is supported for use with Python 2.7, 3.4, 3.5, and 3.6.
+The package may work for Python 2.6, and Python 3.3, but no testing is done
+for these out-dated versions.  Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module
+if available.</p>
 </div>
-<div class="section" id="downloads">
-<h2>Downloads<a class="headerlink" href="#downloads" title="Permalink to this headline">¶</a></h2>
-<p>The latest stable version is available from PyPI or CARS (Univ of Chicago):</p>
-<table border="1" class="docutils">
-<colgroup>
-<col width="26%" />
-<col width="21%" />
-<col width="52%" />
-</colgroup>
-<thead valign="bottom">
-<tr class="row-odd"><th class="head">Download Option</th>
-<th class="head">Python Versions</th>
-<th class="head">Location</th>
-</tr>
-</thead>
-<tbody valign="top">
-<tr class="row-even"><td>Source Kit</td>
-<td>2.6, 2.7, 3.2</td>
-<td><ul class="first last simple">
-<li><a class="reference external" href="http://pypi.python.org/packages/source/l/asteval/asteval-0.3.tar.gz">asteval-0.3.tar.gz (PyPI)</a></li>
-<li><a class="reference external" href="http://cars9.uchicago.edu/software/asteval/src/asteval-0.3.tar.gz">asteval-0.3.tar.gz (CARS)</a></li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-<p>if you have <a class="reference external" href="http://pypi.python.org/pypi/setuptools">Python Setup Tools</a>  installed, you can download and install
-the asteval Package simply with:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">easy_install</span> <span class="o">-</span><span class="n">U</span> <span class="n">asteval</span>
+<div class="section" id="download-and-installation">
+<h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this headline">¶</a></h2>
+<p>The latest stable version of asteval is 0.9.9 and is available at <a class="reference external" href="http://pypi.python.org/pypi/asteval/">PyPI</a> or as
+a conda package.  That is, you should be able to install asteval with:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
+</pre></div>
+</div>
+<p>or:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">install</span> <span class="o">-</span><span class="n">c</span> <span class="n">newville</span> <span class="n">asteval</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="development-version">
 <h2>Development Version<a class="headerlink" href="#development-version" title="Permalink to this headline">¶</a></h2>
-<p>To get the latest development version, use:</p>
+<p>The latest development version can be found at the <a class="reference external" href="http://github.com/newville/asteval">github</a> repository, and cloned with:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">newville</span><span class="o">/</span><span class="n">asteval</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
@@ -147,7 +130,7 @@ the asteval Package simply with:</p>
 <h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
 <p>The ASTEVAL code is distribution under the following license:</p>
 <blockquote>
-<div><p>Copyright (c) 2012 Matthew Newville, The University of Chicago</p>
+<div><p>Copyright (c) 2016 Matthew Newville, The University of Chicago</p>
 <p>Permission to use and redistribute the source code or binary forms of this
 software and its documentation, with or without modification is hereby
 granted provided that the above notice of copyright, these terms of use,
@@ -179,7 +162,10 @@ DEALINGS IN THIS SOFTWARE.</p>
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="basics.html" title="Using asteval"
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="motivation.html" title="Motivation for asteval"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="ASTEVAL: Minimal Python AST Evaluator"
@@ -188,7 +174,7 @@ DEALINGS IN THIS SOFTWARE.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2011, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2014, Matthew Newville, The University of Chicago.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
     </div>
   </body>
