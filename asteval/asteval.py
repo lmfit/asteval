@@ -71,14 +71,14 @@ class Interpreter(object):
     ----------
     symtable : dict or `None`
         dictionary to use as symbol table (if `None`, one will be created).
-    use_numpy : bool
-        whether to use functions from numpy.
+    usersyms : dict or `None`
+        dictionary of user-defined symbols to add to symbol table.
     writer : file-like or `None`
         callable file-like object where standard output will be sent.
     err_writer : file-like or `None`
         callable file-like object where standard error will be sent.
-    usersyms : dict or `None`
-        dictionary of user-defined symbols to add to symbol table.
+    use_numpy : bool
+        whether to use functions from numpy.
     minimal : bool
         whether to make a minimal interpreter, with many options turned off (see Note 1).
     no_if : bool
@@ -113,8 +113,8 @@ class Interpreter(object):
     1. setting `minimal=True` is equivalent to setting all `no_***` options to `True`.
     2. the max_time option is easily broken and not supportable.
     """
-    def __init__(self, symtable=None, writer=None, use_numpy=True,
-                 usersyms=None, err_writer=None, minimal=False,
+    def __init__(self, symtable=None, usersyms=None, writer=None,
+                 err_writer=None, use_numpy=True, minimal=False,
                  no_if=False, no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
