@@ -2,11 +2,15 @@ Installation instructions for asteval
 ========================================
 
 To install the asteval module, use::
+   python setup.py install
 
-   python setup.py nstall
+or 
+   pip install asteval
 
-This assumes that Python 2.7 or higher is installed.
-In addition, numpy is highly recommended.
+Asteval require Python 2.7 or Python 3.4 or higher.
+If installed, many functions and constants from numpy 
+will be used by default.
 
 Matt Newville <newville@cars.uchicago.edu>
-Last Update:  10-April-2016
+Last Update:  28-Oct-2017
+
