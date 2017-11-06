@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
-import asteval
+import versioneer
 
 long_description = """ASTEVAL provides a numpy-aware, safe(ish) 'eval' function
 
@@ -14,7 +14,8 @@ using the values in the symbol table current at evaluation time.
 """
 
 setup(name='asteval',
-      version=asteval.__version__,
+      version=versioneer.get_version(),
+      cmdclass=versioneer.get_cmdclass(),
       author='Matthew Newville',
       author_email='newville@cars.uchicago.edu',
       url='http://github.com/newville/asteval',

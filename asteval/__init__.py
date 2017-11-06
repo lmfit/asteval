@@ -9,8 +9,8 @@
    Expressions can be compiled into ast node for later evaluation,
    using the values in the symbol table current at evaluation time.
 
-   version: 0.9.10
-   last update: 28-Oct-2017
+   version: 0.9.11
+   last update: 2017-Nov-5
    License:  MIT
    Author:  Matthew Newville <newville@cars.uchicago.edu>
             Center for Advanced Radiation Sources,
@@ -19,6 +19,9 @@
 
 from .asteval import Interpreter
 from .astutils import NameFinder, valid_symbol_name, make_symbol_table
+from ._version import get_versions
 
-__version__ = '0.9.10'
 __all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name', 'make_symbol_table']
+
+__version__ = get_versions()['version']
+del get_versions

@@ -6,3 +6,5 @@ recursive-include tests *.py
 recursive-include doc *
 recursive-exclude doc/_build *
 recursive-exclude doc *.pdf
+include versioneer.py
+include asteval/_version.py
