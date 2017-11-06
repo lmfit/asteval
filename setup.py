@@ -19,7 +19,7 @@ setup(name='asteval',
       author='Matthew Newville',
       author_email='newville@cars.uchicago.edu',
       url='http://github.com/newville/asteval',
-      license='BSD',
+      license='MIT',
       description="Safe, minimalistic evaluator of python expression using ast module",
       long_description=long_description,
       packages=['asteval'],
@@ -36,5 +36,9 @@ setup(name='asteval',
           'Programming Language :: Python :: 3.3',
           'Programming Language :: Python :: 3.4',
           'Programming Language :: Python :: 3.5',
+      ],
+      install_requires=[
+            'numpy>=1.6',
+            'six'
       ],
       )
