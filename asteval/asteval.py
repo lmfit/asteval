@@ -1,5 +1,6 @@
+# coding=utf-8
 """
-Safe(ish) evaluator of python expressions, using ast module.
+Safe(ish) evaluator of python scripts, using ast module.
 
 """
 
@@ -10,10 +11,8 @@ import math
 from sys import stdout
 from time import time
 
-from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,
-                       LOCALFUNCS, op2func, MAX_EXEC_TIME,
-                       ReturnedNone, valid_symbol_name, quote,
-                       code_wrap, MAX_CYCLES, get_class_name, NoReturn, Empty, Return)
+from .astutils import (FROM_PY, FROM_MATH, UNSAFE_ATTRS,LOCALFUNCS, op2func, MAX_EXEC_TIME,
+                       ReturnedNone, valid_symbol_name, MAX_CYCLES, get_class_name, NoReturn, Empty, Return)
 from .frame import Frame
 from .function import Function
 from .module import Module
@@ -77,7 +76,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                       )
 
     def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME,
-                 max_cycles=MAX_CYCLES):
+                 max_cycles=MAX_CYCLES, truncate_traces=False):
         self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.filename = filename
@@ -88,7 +87,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         self.import_hook = import_hook
         self.ui_trace_enabled = True
         self.ui_trace = []
-        self.trace = None  # à la sys.settrace()
+        self.trace = None   # à la sys.settrace()
         self._interrupt = None
         self.error = None
         self.expr = None
@@ -98,6 +97,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         self.mod_stack = []
         self.last_func = None
         self.prev_mod = None
+        self.truncate_traces = truncate_traces  # False or int. for max length before truncation
 
         self.builtins = {}
         for sym in FROM_PY:
@@ -120,6 +120,24 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         # to rationalize try/except try/finally for Python2.6 through Python3.3
         self.node_handlers['tryexcept'] = self.node_handlers['try']
         self.node_handlers['tryfinally'] = self.node_handlers['try']
+
+    def truncate(self, s):
+        if self.truncate_traces and isinstance(s, str) and len(s) >= self.truncate_traces:
+            return "{}...[truncated]".format(s[:self.truncate_traces])
+        return s
+
+    def code_wrap(self, s, lang=''):
+        s = self.quote(s)
+        multiline = '\n' in s
+        ticks = '```' if multiline else '`'
+        newlines = '\n' if multiline else ''
+        lang = lang if multiline else ''
+        return ''.join([newlines, ticks, lang, newlines, s, newlines, ticks, newlines])
+
+    def quote(self, s):
+        if isinstance(s, str):
+            return "'{}'".format(self.truncate(s))
+        return self.truncate(str(s))
 
     def add_module(self, name, filename, extras=None):
         mod = Module(name, self, filename)
@@ -332,7 +350,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         if self.trace:
             self.trace = self.trace(self.get_current_frame(), 'return', retval)
 
-        self.ui_tracer("{}Returning value: `{}`".format(self.get_lineno_label(node), quote(retval)))
+        self.ui_tracer("{}Returning value: `{}`".format(self.get_lineno_label(node), self.quote(retval)))
         raise Return(retval if retval is not None else ReturnedNone)
 
     def on_repr(self, node):
@@ -418,7 +436,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
                     if frame.is_modified(node.id):
                         self.ui_tracer("{}Value of `{}` is {}."
-                                       .format(self.get_lineno_label(node), node.id, code_wrap(val)))
+                                       .format(self.get_lineno_label(node), node.id, self.code_wrap(val)))
                         frame.reset_modified(node.id)
 
                 return val
@@ -469,7 +487,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                 name = name.value
 
         path.reverse()
-        return name, path[0] + ''.join(['[{}]'.format(quote(i)) for i in path[1:-1]])
+        return name, path[0] + ''.join(['[{}]'.format(self.quote(i)) for i in path[1:-1]])
 
     def node_assign(self, node, val):  # pylint: disable=too-many-branches
         """here we assign a value (not the node.value object) to a node
@@ -487,11 +505,11 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
                 if val is None or isinstance(val, (str, bool, int, float, tuple, list, dict)):
                     self.ui_tracer("{}Assigned value of {} to `{}`."
-                                   .format(self.get_lineno_label(node), code_wrap(val), node.id))
+                                   .format(self.get_lineno_label(node), self.code_wrap(val), node.id))
 
                 else:
                     self.ui_tracer("{}Assigned value of {} to `{}`."
-                                   .format(self.get_lineno_label(node), code_wrap(repr(val)), node.id))
+                                   .format(self.get_lineno_label(node), self.code_wrap(repr(val)), node.id))
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
@@ -518,8 +536,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                 if name:
                     if modified:
                         self.ui_tracer("{}Assigned index/subscript `[{}]` of `{}` to {}."
-                                       .format(self.get_lineno_label(node), quote(xslice),
-                                               path, code_wrap(val)))
+                                       .format(self.get_lineno_label(node), self.quote(xslice),
+                                               path, self.code_wrap(val)))
 
                         frame = self.find_frame(name)
                         if frame:
@@ -548,7 +566,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
                         self.ui_tracer("{}Assigned slice `[{}]` of `{}` to {}."
                                        .format(self.get_lineno_label(node), slice_str,
-                                               path, code_wrap(val)))
+                                               path, self.code_wrap(val)))
 
                         frame = self.find_frame(name)
                         if frame:
@@ -656,7 +674,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                 if isinstance(tnode.slice, ast.Index):
                     del sym[xslice]
                     self.ui_tracer("{}Deleted index/subscript {} of `{}`."
-                                   .format(self.get_lineno_label(node), code_wrap(xslice), tnode.value.id))
+                                   .format(self.get_lineno_label(node), self.code_wrap(xslice), tnode.value.id))
 
                 elif isinstance(tnode.slice, ast.Slice):
                     # noinspection PyTypeChecker
@@ -691,7 +709,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         left, right = self.run(node.left), self.run(node.right)
         ret = func(left, right)
         self.ui_tracer("{}Operation `{} {} {}` returned `{}`."
-                       .format(self.get_lineno_label(node), quote(left), name, quote(right), quote(ret)))
+                       .format(self.get_lineno_label(node), self.quote(left), name, self.quote(right), self.quote(ret)))
         return ret
 
     def on_boolop(self, node):  # ('op', 'values')
@@ -716,7 +734,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             func, name = op2func(op)
             out = func(lval, rval)
             self.ui_tracer("{}Comparison `{} {} {}` returned `{}`."
-                           .format(self.get_lineno_label(node), quote(lval), name, quote(rval), quote(out)))
+                           .format(self.get_lineno_label(node), self.quote(lval), name, self.quote(rval),
+                                   self.quote(out)))
             lval = rval
             if not out:
                 break
@@ -954,14 +973,11 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
         arg_list = []
         if args:
-            arg_list.append(', '.join([quote(arg) for arg in args]))
+            arg_list.append(', '.join([self.quote(arg) for arg in args]))
         if keywords:
-            arg_list.append(', '.join(['{}={}'.format(k, quote(v)) for (k, v) in keywords.items()]))
+            arg_list.append(', '.join(['{}={}'.format(k, self.quote(v)) for (k, v) in keywords.items()]))
 
         arg_str = ', '.join(arg_list)
-
-        if len(arg_str) > 128:
-            arg_str = arg_str[:128] + '...[truncated]'
 
         if self.trace and not isinstance(func, Function):
             self.trace = self.trace(Frame(name), 'call', name)  # builtins, etc. (not user defined Functions)
@@ -971,14 +987,14 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             ret = func(*args, **keywords)
         except Exception as e:  # pylint: disable=broad-except
             self.ui_tracer('{}Function `{}({})` raised on exception: {}.'
-                           .format(self.get_lineno_label(node), name, arg_str, str(e)))
+                           .format(self.get_lineno_label(node), name, self.truncate(arg_str), str(e)))
 
             self.raise_exception(node, exc=e, msg="Error calling `%s()`: %s" % (name, str(e)))
             return
 
         if name not in ('pprint', 'print', 'jprint', 'print_'):
             self.ui_tracer('{}Function `{}({})` returned {}.'
-                           .format(self.get_lineno_label(node), name, arg_str, code_wrap(ret)))
+                           .format(self.get_lineno_label(node), name, self.truncate(arg_str), self.code_wrap(ret)))
 
         return ret
 

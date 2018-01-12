@@ -6,7 +6,7 @@
 
    Uses python's ast module to parse a python expression.
 
-   version: 0.9.10 (SDVI)
+   version: 0.9.10
    last update: 15-May-2017 (Forked)
    License:  BSD
    Authors:  Matthew Newville <newville@cars.uchicago.edu>
@@ -19,5 +19,5 @@
 
 from .asteval import Interpreter
 
-__version__ = '1.0.3'
+__version__ = '1.0.4'
 __all__ = ['Interpreter']
