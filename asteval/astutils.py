@@ -11,8 +11,10 @@ import math
 from sys import exc_info
 
 HAS_NUMPY = False
+ndarray = NotImplementedError
 try:
     import numpy
+    from numpy import ndarray
     HAS_NUMPY = True
 except ImportError:
     pass
@@ -113,9 +115,9 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'log1p', 'log2', 'logaddexp', 'logaddexp2', 'logical_and',
               'logical_not', 'logical_or', 'logical_xor', 'logspace',
               'long', 'longcomplex', 'longdouble', 'longfloat', 'longlong',
-              'mafromtxt', 'mask_indices', 'mat', 'matrix', 'max',
+              'mafromtxt', 'mask_indices', 'mat', 'matrix',
               'maximum', 'maximum_sctype', 'may_share_memory', 'mean',
-              'median', 'memmap', 'meshgrid', 'mgrid', 'min', 'minimum',
+              'median', 'memmap', 'meshgrid', 'mgrid', 'minimum',
               'mintypecode', 'mirr', 'mod', 'modf', 'msort', 'multiply',
               'nan', 'nan_to_num', 'nanargmax', 'nanargmin', 'nanmax',
               'nanmin', 'nansum', 'ndarray', 'ndenumerate', 'ndfromtxt',
@@ -146,6 +148,7 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'ushort', 'vander', 'var', 'vdot', 'vectorize', 'vsplit',
               'vstack', 'where', 'who', 'zeros', 'zeros_like',
               'fft', 'linalg', 'polynomial', 'random')
+
 
 NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
@@ -225,7 +228,7 @@ OPERATORS = {ast.Is: lambda a, b: a is b,
 
 
 def valid_symbol_name(name):
-    """determines whether the input symbol name is a valid name
+    """Determine whether the input symbol name is a valid name.
 
     Arguments
     ---------
@@ -246,20 +249,19 @@ def valid_symbol_name(name):
 
 
 def op2func(op):
-    """return function for operator nodes
-    :param op:
-    """
+    """Return function for operator nodes."""
     return OPERATORS[op.__class__]
 
 
 class Empty:
-    """empty class"""
+    """Empty class."""
 
     def __init__(self):
+        """TODO: docstring in public method."""
         pass
 
-    # noinspection PyMethodMayBeStatic
     def __nonzero__(self):
+        """TODO: docstring in magic method."""
         return False
 
 
@@ -267,9 +269,10 @@ ReturnedNone = Empty()
 
 
 class ExceptionHolder(object):
-    """basic exception handler"""
+    """Basic exception handler."""
 
     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
+        """TODO: docstring in public method."""
         self.node = node
         self.expr = expr
         self.msg = msg
@@ -282,7 +285,7 @@ class ExceptionHolder(object):
             self.msg = self.exc_info[1]
 
     def get_error(self):
-        """retrieve error data"""
+        """Retrieve error data."""
         col_offset = -1
         if self.node is not None:
             try:
@@ -298,19 +301,21 @@ class ExceptionHolder(object):
 
         out = ["   %s" % self.expr]
         if col_offset > 0:
-            out.append("    %s^^^" % (col_offset * ' '))
+            out.append("    %s^^^" % ((col_offset)*' '))
         out.append(str(self.msg))
-        return exc_name, '\n'.join(out)
+        return (exc_name, '\n'.join(out))
 
 
 class NameFinder(ast.NodeVisitor):
-    """find all symbol names used by a parsed node"""
+    """Find all symbol names used by a parsed node."""
 
     def __init__(self):
+        """TODO: docstring in public method."""
         self.names = []
         ast.NodeVisitor.__init__(self)
 
     def generic_visit(self, node):
+        """TODO: docstring in public method."""
         if node.__class__.__name__ == 'Name':
             if node.ctx.__class__ == ast.Load and node.id not in self.names:
                 self.names.append(node.id)
@@ -320,8 +325,15 @@ builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
+def get_ast_names(astnode):
+    """Return symbol Names from an AST node."""
+    finder = NameFinder()
+    finder.generic_visit(astnode)
+    return finder.names
+
+
 def make_symbol_table(use_numpy=True, **kws):
-    """create a default symboltable, taking dict of user-defined symbols
+    """Create a default symboltable, taking dict of user-defined symbols.
 
     Arguments
     ---------
@@ -353,6 +365,7 @@ def make_symbol_table(use_numpy=True, **kws):
         for name, sym in NUMPY_RENAMES.items():
             if hasattr(numpy, sym):
                 symtable[name] = getattr(numpy, sym)
+
 
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
