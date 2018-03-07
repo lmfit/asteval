@@ -11,21 +11,14 @@ later, using the current values in the symboltable
 """
 
 from __future__ import division, print_function
-from sys import exc_info, stdout, stderr, version_info
+
 import ast
-from time import time
-import sys
 import six
+from sys import exc_info, stdout, stderr, version_info
 
-ndarray = NotImplementedError
-try:
-    from numpy import ndarray
-except ImportError:
-    pass
-
-from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, op2func,
-                       ExceptionHolder, ReturnedNone, valid_symbol_name)
-
+from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, ndarray,
+                       op2func, ExceptionHolder, ReturnedNone,
+                       valid_symbol_name)
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -39,69 +32,98 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
 
-
 # noinspection PyIncorrectDocstring
 class Interpreter(object):
-    """create an asteval Interpreter: a restricted, simplified interpreter
-    of mathematical expressions using Python syntax.
+    """Mathematical expression compiler and interpreter.
 
-    Parameters
-    ----------
-    symtable : dict or `None`
-        dictionary to use as symbol table (if `None`, one will be created).
-    usersyms : dict or `None`
-        dictionary of user-defined symbols to add to symbol table.
-    writer : file-like or `None`
-        callable file-like object where standard output will be sent.
-    err_writer : file-like or `None`
-        callable file-like object where standard error will be sent.
-    use_numpy : bool
-        whether to use functions from numpy.
-    minimal : bool
-        whether to make a minimal interpreter, with many options turned off (see Note 1).
-    no_if : bool
-        whether to support `if` blocks
-    no_for : bool
-        whether to support `for` blocks.
-    no_while : bool
-        whether to support `while` blocks.
-    no_try : bool
-        whether to support `try` blocks.
-    no_functiondef : bool
-        whether to support user-defined functions.
-    no_ifexp : bool
-        whether to support if expressions.
-    no_listcomp : bool
-        whether to support list comprehension.
-    no_augassign : bool
-        whether to support augemented assigments (`a += 1`, etc).
-    no_assert : bool
-        whether to support `assert`.
-    no_delete : bool
-        whether to support `del`.
-    no_raise : bool
-        whether to support `raise`.
-    no_print : bool
-        whether to support `print`.
-    max_time : float
-        deprecated.  maximum time (in seconds) to run (see Note 2)
+    This module compiles expressions and statements to AST representation,
+    using python's ast module, and then executes the AST representation
+    using a dictionary of named object (variable, functions).
 
-    Notes
-    -----
-    1. setting `minimal=True` is equivalent to setting all `no_***` options to `True`.
-    2. the max_time option is easily broken and not supportable.
+    The result is a restricted, simplified version of Python meant for
+    numerical caclulations that is somewhat safer than 'eval' because
+    some operations (such as 'import' and 'eval') are simply not allowed.
+    The resulting language uses a flat namespace that works on Python
+    objects, but does not allow new classes to be defined.
+
+    Many parts of Python syntax are supported, including:
+        for loops, while loops, if-then-elif-else conditionals
+        try-except (including 'finally')
+        function definitions with def
+        advanced slicing:    a[::-1], array[-3:, :, ::2]
+        if-expressions:      out = one_thing if TEST else other
+        list comprehension   out = [sqrt(i) for i in values]
+
+    The following Python syntax elements are not supported:
+        Import, Exec, Lambda, Class, Global, Generators,
+        Yield, Decorators
+
+    In addition, while many builtin functions are supported, several
+    builtin functions are missing ('eval', 'exec', and 'getattr' for
+    example) that can be considered unsafe.
+
+    If numpy is installed, many numpy functions are also imported.
     """
     def __init__(self, symtable=None, usersyms=None, writer=None,
                  err_writer=None, use_numpy=True, minimal=False,
-                 no_if=False, no_for=False, no_while=False, no_try=False,
-                 no_functiondef=False, no_ifexp=False, no_listcomp=False,
-                 no_augassign=False, no_assert=False, no_delete=False,
-                 no_raise=False, no_print=False, max_time=30):
+                 no_if=False, no_for=False, no_while=False,
+                 no_try=False, no_functiondef=False, no_ifexp=False,
+                 no_listcomp=False, no_augassign=False,
+                 no_assert=False, no_delete=False, no_raise=False,
+                 no_print=False, max_time=30):
 
+        """create an asteval Interpreter: a restricted, simplified interpreter
+        of mathematical expressions using Python syntax.
+
+        Parameters
+        ----------
+        symtable : dict or `None`
+            dictionary to use as symbol table (if `None`, one will be created).
+        usersyms : dict or `None`
+            dictionary of user-defined symbols to add to symbol table.
+        writer : file-like or `None`
+            callable file-like object where standard output will be sent.
+        err_writer : file-like or `None`
+            callable file-like object where standard error will be sent.
+        use_numpy : bool
+            whether to use functions from numpy.
+        minimal : bool
+            create a minimal interpreter: disable all options (see Note 1).
+        no_if : bool
+            whether to support `if` blocks
+        no_for : bool
+            whether to support `for` blocks.
+        no_while : bool
+            whether to support `while` blocks.
+        no_try : bool
+            whether to support `try` blocks.
+        no_functiondef : bool
+            whether to support user-defined functions.
+        no_ifexp : bool
+            whether to support if expressions.
+        no_listcomp : bool
+            whether to support list comprehension.
+        no_augassign : bool
+            whether to support augemented assigments (`a += 1`, etc).
+        no_assert : bool
+            whether to support `assert`.
+        no_delete : bool
+            whether to support `del`.
+        no_raise : bool
+            whether to support `raise`.
+        no_print : bool
+            whether to support `print`.
+        max_time : float
+            deprecated.  no longer used (see Note 2)
+
+        Notes
+        -----
+        1. setting `minimal=True` is equivalent to setting all
+           `no_***` options to `True`.
+        2. max_time is no longer supported.
+        """
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
-        self.start = time()
-        self.max_time = max_time
 
         if symtable is None:
             if usersyms is None:
@@ -226,8 +248,6 @@ class Interpreter(object):
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        if time() - self.start > self.max_time:
-            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(self.max_time))
         if self.error:
             return
         if node is None:
@@ -266,7 +286,6 @@ class Interpreter(object):
         self.lineno = lineno
         self.error_msg = None
         self.error = []
-        self.start = time()
 
         # noinspection PyBroadException
         try:
