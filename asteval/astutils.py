@@ -11,10 +11,8 @@ import math
 from sys import exc_info
 
 HAS_NUMPY = False
-ndarray = NotImplementedError
 try:
     import numpy
-    from numpy import ndarray
     HAS_NUMPY = True
 except ImportError:
     pass
@@ -174,24 +172,28 @@ LOCALFUNCS = {'open': _open, 'type': _type}
 # Safe versions of functions to prevent denial of service issues
 
 def safe_pow(base, exp):
+    """safe version of pow"""
     if exp > MAX_EXPONENT:
         raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
     return base ** exp
 
 
 def safe_mult(a, b):
+    """safe version of multiply"""
     if isinstance(a, str) and isinstance(b, int) and len(a) * b > MAX_STR_LEN:
         raise RuntimeError("String length exceeded, max string length is {}".format(MAX_STR_LEN))
     return a * b
 
 
 def safe_add(a, b):
+    """safe version of add"""
     if isinstance(a, str) and isinstance(b, str) and len(a) + len(b) > MAX_STR_LEN:
         raise RuntimeError("String length exceeded, max string length is {}".format(MAX_STR_LEN))
     return a + b
 
 
 def safe_lshift(a, b):
+    """safe version of lshift"""
     if b > MAX_SHIFT:
         raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
     return a << b
