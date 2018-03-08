@@ -11,7 +11,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.9.11',
+        VERSION:     '0.9.12',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true,
@@ -107,21 +107,21 @@ of mathematical expressions using Python syntax.</p>
 <li><strong>usersyms</strong> (dict or <cite>None</cite>) – dictionary of user-defined symbols to add to symbol table.</li>
 <li><strong>writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard output will be sent.</li>
 <li><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</li>
-<li><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to use functions from numpy.</li>
-<li><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to make a minimal interpreter, with many options turned off (see Note 1).</li>
-<li><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</li>
-<li><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</li>
-<li><strong>no_while</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>while</cite> blocks.</li>
-<li><strong>no_try</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>try</cite> blocks.</li>
-<li><strong>no_functiondef</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support user-defined functions.</li>
-<li><strong>no_ifexp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support if expressions.</li>
-<li><strong>no_listcomp</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support list comprehension.</li>
-<li><strong>no_augassign</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support augemented assigments (<cite>a += 1</cite>, etc).</li>
-<li><strong>no_assert</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>assert</cite>.</li>
-<li><strong>no_delete</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>del</cite>.</li>
-<li><strong>no_raise</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>raise</cite>.</li>
-<li><strong>no_print</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to support <cite>print</cite>.</li>
-<li><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#float" title="(in Python v2.7)"><em>float</em></a>) – deprecated.  maximum time (in seconds) to run (see Note 2)</li>
+<li><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to use functions from numpy.</li>
+<li><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – create a minimal interpreter: disable all options (see Note 1).</li>
+<li><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</li>
+<li><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</li>
+<li><strong>no_while</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>while</cite> blocks.</li>
+<li><strong>no_try</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>try</cite> blocks.</li>
+<li><strong>no_functiondef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support user-defined functions.</li>
+<li><strong>no_ifexp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support if expressions.</li>
+<li><strong>no_listcomp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support list comprehension.</li>
+<li><strong>no_augassign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support augemented assigments (<cite>a += 1</cite>, etc).</li>
+<li><strong>no_assert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>assert</cite>.</li>
+<li><strong>no_delete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>del</cite>.</li>
+<li><strong>no_raise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>raise</cite>.</li>
+<li><strong>no_print</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to support <cite>print</cite>.</li>
+<li><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.6)"><em>float</em></a>) – deprecated.  max run time in seconds (see Note 2) [30.0]</li>
 </ul>
 </td>
 </tr>
@@ -129,20 +129,21 @@ of mathematical expressions using Python syntax.</p>
 </table>
 <p class="rubric">Notes</p>
 <ol class="arabic simple">
-<li>setting <cite>minimal=True</cite> is equivalent to setting all <cite>no_***</cite> options to <cite>True</cite>.</li>
-<li>the max_time option is easily broken and not supportable.</li>
+<li>setting <cite>minimal=True</cite> is equivalent to setting all
+<cite>no_***</cite> options to <cite>True</cite>.</li>
+<li>max_time is not reliable and support may be dropped soon.</li>
 </ol>
 </dd></dl>
 
 <p>By default, the symbol table will be created with <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal"><span class="pre">make_symbol_table()</span></code></a>
 that will include several standard python builtin functions, several
-functions from the <a class="reference external" href="https://docs.python.org/2/library/math.html#module-math" title="(in Python v2.7)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and (if available and not turned off)
+functions from the <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.6)"><code class="xref py py-mod docutils literal"><span class="pre">math</span></code></a> module and (if available and not turned off)
 several functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</p>
 <p>The <code class="docutils literal"><span class="pre">writer</span></code> argument can be used to provide a place to send all output
-that would normally go to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  The default is, of
-course, to send output to <a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stdout" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  Similarly, <code class="docutils literal"><span class="pre">err_writer</span></code>
+that would normally go to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  The default is, of
+course, to send output to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.  Similarly, <code class="docutils literal"><span class="pre">err_writer</span></code>
 will be used for output that will otherwise be sent to
-<a class="reference external" href="https://docs.python.org/2/library/sys.html#sys.stderr" title="(in Python v2.7)"><code class="xref py py-data docutils literal"><span class="pre">sys.stderr</span></code></a>.</p>
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">sys.stderr</span></code></a>.</p>
 <p>The <code class="docutils literal"><span class="pre">use_numpy</span></code> argument can be used to control whether functions from
 <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> are loaded into the symbol table.</p>
 <p>By default, the interpreter will support many Python language constructs,
@@ -183,9 +184,9 @@ stable API.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/2/library/string.html#module-string" title="(in Python v2.7)"><em>string</em></a>) – code to evaluate.</li>
-<li><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) – line number (for error messages).</li>
-<li><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a>) – whether to print error messages or leave them
+<li><strong>expression</strong> (<a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.6)"><em>string</em></a>) – code to evaluate.</li>
+<li><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.6)"><em>int</em></a>) – line number (for error messages).</li>
+<li><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a>) – whether to print error messages or leave them
 in the <code class="xref py py-attr docutils literal"><span class="pre">errors</span></code> list.</li>
 </ul>
 </td>
@@ -241,16 +242,16 @@ of Exceptions raised.</p>
 <dl class="function">
 <dt id="asteval.valid_symbol_name">
 <code class="descclassname">asteval.</code><code class="descname">valid_symbol_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.valid_symbol_name" title="Permalink to this definition">¶</a></dt>
-<dd><p>determines whether the input symbol name is a valid name</p>
+<dd><p>Determine whether the input symbol name is a valid name.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) – name to check for validity.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.6)"><em>str</em></a>) – name to check for validity.</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>valid</strong> – whether name is a a valid symbol name</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)">bool</a></td>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)">bool</a></td>
 </tr>
 </tbody>
 </table>
@@ -261,13 +262,13 @@ the regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_
 <dl class="function">
 <dt id="asteval.make_symbol_table">
 <code class="descclassname">asteval.</code><code class="descname">make_symbol_table</code><span class="sig-paren">(</span><em>use_numpy=True</em>, <em>**kws</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.make_symbol_table" title="Permalink to this definition">¶</a></dt>
-<dd><p>create a default symboltable, taking dict of user-defined symbols</p>
+<dd><p>Create a default symboltable, taking dict of user-defined symbols.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#bool" title="(in Python v2.7)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy</li>
+<li><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.6)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy</li>
 <li><strong>kws</strong> (<em>optional</em>) – additional symbol name, value pairs to include in symbol table</li>
 </ul>
 </td>
@@ -275,7 +276,7 @@ the regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>symbol_table</strong> – a symbol table that can be used in <cite>asteval.Interpereter</cite></p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)">dict</a></p>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.6)">dict</a></p>
 </td>
 </tr>
 </tbody>
@@ -330,7 +331,7 @@ the regular expression <code class="docutils literal"><span class="pre">[a-zA-Z_
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
     </div>
   </body>
 </html>
