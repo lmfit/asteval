@@ -13,6 +13,7 @@ later, using the current values in the symboltable.
 from __future__ import division, print_function
 
 import ast
+import time
 import inspect
 import six
 from sys import exc_info, stdout, stderr, version_info
@@ -114,13 +115,13 @@ class Interpreter(object):
         no_print : bool
             whether to support `print`.
         max_time : float
-            deprecated.  no longer used (see Note 2)
+            deprecated.  max run time in seconds (see Note 2) [30.0]
 
         Notes
         -----
         1. setting `minimal=True` is equivalent to setting all
            `no_***` options to `True`.
-        2. max_time is no longer supported.
+        2. max_time is not reliable and support may be dropped soon.
         """
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -139,6 +140,8 @@ class Interpreter(object):
         self.expr = None
         self.retval = None
         self.lineno = 0
+        self.start_time = time.time()
+        self.max_time = max_time
         self.use_numpy = HAS_NUMPY and use_numpy
 
         nodes = ALL_NODES[:]
@@ -248,6 +251,8 @@ class Interpreter(object):
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
+        if time.time() - self.start_time > self.max_time:
+            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(self.max_time))
         if len(self.error) > 0:
             return
         if node is None:
@@ -285,6 +290,7 @@ class Interpreter(object):
         """Evaluate a single statement."""
         self.lineno = lineno
         self.error = []
+        self.start_time = time.time()
         try:
             node = self.parse(expr)
         except:
