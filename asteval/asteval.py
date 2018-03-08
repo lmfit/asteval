@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """Safe(ish) evaluation of mathematical expression using Python's ast
 module.
 
@@ -43,10 +42,11 @@ from __future__ import division, print_function
 import ast
 import time
 import inspect
-import six
 from sys import exc_info, stdout, stderr, version_info
 
-from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, ndarray,
+import six
+
+from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
                        valid_symbol_name)
 
@@ -61,6 +61,8 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
+
+ERR_MAX_TIME = "Execution exceeded time limit, max runtime is {}s"
 
 class Interpreter(object):
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -144,18 +146,30 @@ class Interpreter(object):
 
         nodes = ALL_NODES[:]
 
-        if minimal or no_if:           nodes.remove('if')
-        if minimal or no_for:          nodes.remove('for')
-        if minimal or no_while:        nodes.remove('while')
-        if minimal or no_try:          nodes.remove('try')
-        if minimal or no_functiondef:  nodes.remove('functiondef')
-        if minimal or no_ifexp:        nodes.remove('ifexp')
-        if minimal or no_assert:       nodes.remove('assert')
-        if minimal or no_delete:       nodes.remove('delete')
-        if minimal or no_raise:        nodes.remove('raise')
-        if minimal or no_print:        nodes.remove('print')
-        if minimal or no_listcomp:     nodes.remove('listcomp')
-        if minimal or no_augassign:    nodes.remove('augassign')
+        if minimal or no_if:
+            nodes.remove('if')
+        if minimal or no_for:
+            nodes.remove('for')
+        if minimal or no_while:
+            nodes.remove('while')
+        if minimal or no_try:
+            nodes.remove('try')
+        if minimal or no_functiondef:
+            nodes.remove('functiondef')
+        if minimal or no_ifexp:
+            nodes.remove('ifexp')
+        if minimal or no_assert:
+            nodes.remove('assert')
+        if minimal or no_delete:
+            nodes.remove('delete')
+        if minimal or no_raise:
+            nodes.remove('raise')
+        if minimal or no_print:
+            nodes.remove('print')
+        if minimal or no_listcomp:
+            nodes.remove('listcomp')
+        if minimal or no_augassign:
+            nodes.remove('augassign')
 
         self.node_handlers = {}
         for node in nodes:
@@ -176,8 +190,10 @@ class Interpreter(object):
         returns current node handler, so that it
         might be re-added with add_nodehandler()
         """
+        out = None
         if node in self.node_handlers:
-            return self.node_handlers.pop(node)
+            out = self.node_handlers.pop(node)
+        return out
 
     def set_nodehandler(self, node, handler):
         """set node handler"""
@@ -239,22 +255,25 @@ class Interpreter(object):
         """Parse statement/expression to Ast representation."""
         self.expr = text
         try:
-            return ast.parse(text)
+            out = ast.parse(text)
         except SyntaxError:
             self.raise_exception(None, msg='Syntax Error', expr=text)
         except:
             self.raise_exception(None, msg='Runtime Error', expr=text)
+
+        return out
 
     def run(self, node, expr=None, lineno=None, with_raise=True):
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
         if time.time() - self.start_time > self.max_time:
-            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(self.max_time))
+            raise RuntimeError(ERR_MAX_TIME.format(self.max_time))
+        out = None
         if len(self.error) > 0:
-            return
+            return out
         if node is None:
-            return
+            return out
         if isinstance(node, str):
             node = self.parse(node)
         if lineno is not None:
@@ -570,7 +589,7 @@ class Interpreter(object):
             rval = self.run(rnode)
             out = op2func(op)(lval, rval)
             lval = rval
-            if self.use_numpy and isinstance(out, ndarray) and out.any():
+            if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
                 break
             elif not out:
                 break
@@ -812,7 +831,7 @@ class Procedure(object):
     def __setattr__(self, attr, val):
         if not getattr(self, '__ininit__', True):
             self.raise_exc(None, exc=TypeError,
-                           msg= "procedure is read-only")
+                           msg="procedure is read-only")
         self.__dict__[attr] = val
 
     def __dir__(self):
