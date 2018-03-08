@@ -11,6 +11,7 @@ import math
 from sys import exc_info
 
 HAS_NUMPY = False
+numpy = None
 try:
     import numpy
     HAS_NUMPY = True
