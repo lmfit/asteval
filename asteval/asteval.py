@@ -131,9 +131,8 @@ class Interpreter(object):
                 usersyms = {}
             symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
-        symtable['print'] = self._printer
-
-        self.symtable = symtable
+        self.symtable = symtable.copy()
+        self.symtable['print'] = self._printer
         self._interrupt = None
         self.error = []
         self.error_msg = None
