@@ -825,10 +825,8 @@ class TestEval(TestCase):
         self.interp("""while True: pass""")
         self.check_error('RuntimeError', 'time limit')
         self.interp("""def foo(): return foo()\nfoo()""")
-        if PY36Plus:
+        if PY35Plus:
             self.check_error('RecursionError')
-        elif PY35:
-            self.check_error('AttributeError')
         else:
             self.check_error('RuntimeError')
 
