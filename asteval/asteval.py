@@ -758,8 +758,8 @@ class Interpreter(object):
             return func(*args, **keywords)
         except Exception as ex:
             self.raise_exception(
-                node, msg="Error running function call '%s': %s"
-                % (func.__name__, ex))
+                node, msg="Error running function call '%s' with args %s and "
+                "kwargs %s: %s" % (func.__name__, args, keywords, ex))
 
     def on_arg(self, node):    # ('test', 'msg')
         """Arg for function definitions."""
@@ -819,6 +819,7 @@ class Procedure(object):
         """TODO: docstring in public method."""
         self.__ininit__ = True
         self.name = name
+        self.__name__ = self.name
         self.__asteval__ = interp
         self.raise_exc = self.__asteval__.raise_exception
         self.__doc__ = doc
