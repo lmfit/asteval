@@ -756,8 +756,10 @@ class Interpreter(object):
 
         try:
             return func(*args, **keywords)
-        except:
-            self.raise_exception(node, msg="Error running %s" % (func))
+        except Exception as ex:
+            self.raise_exception(
+                node, msg="Error running function call '%s': %s"
+                % (func.__name__, ex))
 
     def on_arg(self, node):    # ('test', 'msg')
         """Arg for function definitions."""
