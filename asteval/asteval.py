@@ -237,7 +237,7 @@ class Interpreter(object):
         self._interrupt = ast.Break()
         self.error.append(err)
         if self.error_msg is None:
-            self.error_msg = "%s in expr='%s'" % (msg, self.expr)
+            self.error_msg = "at expr='%s'" % (self.expr)
         elif len(msg) > 0:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
         if exc is None:
