@@ -16,6 +16,8 @@ from tempfile import NamedTemporaryFile
 PY3 = version_info[0] == 3
 PY33Plus = PY3 and version_info[1] >= 3
 PY35Plus = PY3 and version_info[1] >= 5
+PY35     = PY3 and version_info[1] == 5
+PY36Plus = PY3 and version_info[1] >= 6
 
 if PY3:
     # noinspection PyUnresolvedReferences
@@ -823,7 +825,13 @@ class TestEval(TestCase):
         self.interp("""while True: pass""")
         self.check_error('RuntimeError', 'time limit')
         self.interp("""def foo(): return foo()\nfoo()""")
-        self.check_error('RecursionError' if PY35Plus else 'RuntimeError')
+        if PY36Plus:
+            self.check_error('RecursionError')
+        # elif PY35:
+        #     self.check_error('AttributeError')
+        else:
+            self.check_error('RuntimeError')
+
 
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
