@@ -827,8 +827,8 @@ class TestEval(TestCase):
         self.interp("""def foo(): return foo()\nfoo()""")
         if PY36Plus:
             self.check_error('RecursionError')
-        # elif PY35:
-        #     self.check_error('AttributeError')
+        elif PY35:
+            self.check_error('AttributeError')
         else:
             self.check_error('RuntimeError')
 
