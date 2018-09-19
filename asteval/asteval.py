@@ -110,7 +110,7 @@ class Interpreter(object):
         deprecated.  max run time in seconds (see Note 2) [30.0]
     symblacklist : iterable or `None`
         symbols that the user can not assign to
-    blacklist_buildins : bool
+    blacklist_builtins : bool
         whether to blacklist all symbols that are in the initial symtable
 
     Notes
@@ -126,7 +126,7 @@ class Interpreter(object):
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
                  no_raise=False, no_print=False, max_time=30,
-                 symblacklist=None, blacklist_buildins=False):
+                 symblacklist=None, blacklist_builtins=False):
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -190,7 +190,7 @@ class Interpreter(object):
         else:
             self.symblacklist = set(symblacklist)
 
-        if blacklist_buildins:
+        if blacklist_builtins:
             self.symblacklist |= set(self.symtable)
 
         self.no_deepcopy = [key for key, val in symtable.items()
