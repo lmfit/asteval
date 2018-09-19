@@ -566,7 +566,7 @@ class Interpreter(object):
                 children.append(tnode.attr)
                 tnode = tnode.value
 
-            if tnode.__class__ == ast.Name:
+            if tnode.__class__ == ast.Name and tnode.id not in self.symblacklist:
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
