@@ -108,9 +108,9 @@ class Interpreter(object):
         whether to support `print`.
     max_time : float
         deprecated.  max run time in seconds (see Note 2) [30.0]
-    symblacklist : iterable or `None`
+    readonly_symbols : iterable or `None`
         symbols that the user can not assign to
-    blacklist_builtins : bool
+    builtins_readonly : bool
         whether to blacklist all symbols that are in the initial symtable
 
     Notes
@@ -126,7 +126,7 @@ class Interpreter(object):
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
                  no_raise=False, no_print=False, max_time=30,
-                 symblacklist=None, blacklist_builtins=False):
+                 readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -185,13 +185,13 @@ class Interpreter(object):
             self.node_handlers['tryexcept'] = self.node_handlers['try']
             self.node_handlers['tryfinally'] = self.node_handlers['try']
 
-        if symblacklist is None:
-            self.symblacklist = set()
+        if readonly_symbols is None:
+            self.readonly_symbols = set()
         else:
-            self.symblacklist = set(symblacklist)
+            self.readonly_symbols = set(readonly_symbols)
 
-        if blacklist_builtins:
-            self.symblacklist |= set(self.symtable)
+        if builtins_readonly:
+            self.readonly_symbols |= set(self.symtable)
 
         self.no_deepcopy = [key for key, val in symtable.items()
                             if (callable(val)
@@ -463,7 +463,7 @@ class Interpreter(object):
 
         """
         if node.__class__ == ast.Name:
-            if not valid_symbol_name(node.id) or node.id in self.symblacklist:
+            if not valid_symbol_name(node.id) or node.id in self.readonly_symbols:
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
@@ -566,7 +566,7 @@ class Interpreter(object):
                 children.append(tnode.attr)
                 tnode = tnode.value
 
-            if tnode.__class__ == ast.Name and tnode.id not in self.symblacklist:
+            if tnode.__class__ == ast.Name and tnode.id not in self.readonly_symbols:
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
