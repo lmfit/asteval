@@ -910,6 +910,60 @@ class TestEval(TestCase):
         assert_allclose(x1, 0.50,     rtol=0.001)
         assert_allclose(x2, 0.866025, rtol=0.001)
         assert_allclose(x3, 1.00,     rtol=0.001)
+    
+    def test_readonly_symbols(self):
+        
+        def foo():
+            return 31
+        
+        
+        usersyms = {
+            "a": 10,
+            "b": 11,
+            "c": 12,
+            "d": 13,
+            "foo": foo,
+            "bar": foo,
+            "x": 5,
+            "y": 7
+        }
+        
+        aeval = Interpreter(usersyms=usersyms, readonly_symbols={"a", "b", "c", "d", "foo", "bar"})
+        
+        aeval("a = 20")
+        aeval("def b(): return 100")
+        aeval("c += 1")
+        aeval("del d")
+        aeval("def foo(): return 55")
+        aeval("bar = None")
+        aeval("x = 21")
+        aeval("y += a")
+        
+        assert(aeval("a") == 10)
+        assert(aeval("b") == 11)
+        assert(aeval("c") == 12)
+        assert(aeval("d") == 13)
+        assert(aeval("foo()") == 31)
+        assert(aeval("bar()") == 31)
+        assert(aeval("x") == 21)
+        assert(aeval("y") == 17)
+        
+        
+        assert(aeval("abs(8)") == 8)
+        assert(aeval("abs(-8)") == 8)
+        aeval("def abs(x): return x*2")
+        assert(aeval("abs(8)") == 16)
+        assert(aeval("abs(-8)") == -16)
+        
+        aeval2 = Interpreter(builtins_readonly=True)
+        
+        assert(aeval2("abs(8)") == 8)
+        assert(aeval2("abs(-8)") == 8)
+        aeval2("def abs(x): return x*2")
+        assert(aeval2("abs(8)") == 8)
+        assert(aeval2("abs(-8)") == 8)
+        
+        
 
 
 
