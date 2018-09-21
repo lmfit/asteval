@@ -49,6 +49,8 @@ import six
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
                        valid_symbol_name)
+from .exceptions import (EvalError, TimeOutError, UserError,
+                         RaisedError, BuiltinError)
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -63,6 +65,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
 
 ERR_MAX_TIME = "Execution exceeded time limit, max runtime is {}s"
+
 
 class Interpreter(object):
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -220,32 +223,10 @@ class Interpreter(object):
 
     def unimplemented(self, node):
         """Unimplemented nodes."""
-        self.raise_exception(node, exc=NotImplementedError,
-                             msg="'%s' not supported" %
-                             (node.__class__.__name__))
-
-    def raise_exception(self, node, exc=None, msg='', expr=None,
-                        lineno=None):
-        """Add an exception."""
-        if self.error is None:
-            self.error = []
-        if expr is None:
-            expr = self.expr
-        if len(self.error) > 0 and not isinstance(node, ast.Module):
-            msg = '%s' % msg
-        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
-        self._interrupt = ast.Break()
-        self.error.append(err)
-        if self.error_msg is None:
-            self.error_msg = "at expr='%s'" % (self.expr)
-        elif len(msg) > 0:
-            self.error_msg = "%s\n %s" % (self.error_msg, msg)
-        if exc is None:
-            try:
-                exc = self.error[0].exc
-            except:
-                exc = RuntimeError
-        raise exc(self.error_msg)
+        raise UserError(
+            NotImplementedError("'%s' not supported" %
+                (node.__class__.__name__)))
+        
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
@@ -254,21 +235,16 @@ class Interpreter(object):
     def parse(self, text):
         """Parse statement/expression to Ast representation."""
         self.expr = text
-        try:
-            out = ast.parse(text)
-        except SyntaxError:
-            self.raise_exception(None, msg='Syntax Error', expr=text)
-        except:
-            self.raise_exception(None, msg='Runtime Error', expr=text)
+        out = ast.parse(text)
 
         return out
 
-    def run(self, node, expr=None, lineno=None, with_raise=True):
+    def run(self, node, expr=None, lineno=None):
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
         if time.time() - self.start_time > self.max_time:
-            raise RuntimeError(ERR_MAX_TIME.format(self.max_time))
+            raise TimeOutError(ERR_MAX_TIME.format(self.max_time))
         out = None
         if len(self.error) > 0:
             return out
@@ -290,14 +266,10 @@ class Interpreter(object):
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
-        try:
-            ret = handler(node)
-            if isinstance(ret, enumerate):
-                ret = list(ret)
-            return ret
-        except:
-            if with_raise:
-                self.raise_exception(node, expr=expr)
+        ret = handler(node)
+        if isinstance(ret, enumerate):
+            ret = list(ret)
+        return ret
 
     def __call__(self, expr, **kw):
         """Call class instance as function."""
@@ -308,34 +280,8 @@ class Interpreter(object):
         self.lineno = lineno
         self.error = []
         self.start_time = time.time()
-        try:
-            node = self.parse(expr)
-        except:
-            errmsg = exc_info()[1]
-            if len(self.error) > 0:
-                errmsg = "\n".join(self.error[0].get_error())
-            if not show_errors:
-                try:
-                    exc = self.error[0].exc
-                except:
-                    exc = RuntimeError
-                raise exc(errmsg)
-            print(errmsg, file=self.err_writer)
-            return
-        try:
-            return self.run(node, expr=expr, lineno=lineno)
-        except:
-            errmsg = exc_info()[1]
-            if len(self.error) > 0:
-                errmsg = "\n".join(self.error[0].get_error())
-            if not show_errors:
-                try:
-                    exc = self.error[0].exc
-                except:
-                    exc = RuntimeError
-                raise exc(errmsg)
-            print(errmsg, file=self.err_writer)
-            return
+        node = self.parse(expr)
+        return self.run(node, expr=expr, lineno=lineno)
 
     @staticmethod
     def dump(node, **kw):
@@ -398,7 +344,7 @@ class Interpreter(object):
     def on_assert(self, node):    # ('test', 'msg')
         """Assert statement."""
         if not self.run(node.test):
-            self.raise_exception(node, exc=AssertionError, msg=node.msg)
+            raise UserError(AssertionError(node.msg))
         return True
 
     def on_list(self, node):    # ('elt', 'ctx')
@@ -436,7 +382,7 @@ class Interpreter(object):
                 return self.symtable[node.id]
             else:
                 msg = "name '%s' is not defined" % node.id
-                self.raise_exception(node, exc=NameError, msg=msg)
+                raise UserError(NameError(msg))
 
     def on_nameconstant(self, node):
         """ True, False, None in python >= 3.4 """
@@ -452,7 +398,7 @@ class Interpreter(object):
         if node.__class__ == ast.Name:
             if not valid_symbol_name(node.id):
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
-                self.raise_exception(node, exc=NameError, msg=errmsg)
+                raise UserError(NameError(errmsg))
             self.symtable[node.id] = val
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
@@ -460,7 +406,7 @@ class Interpreter(object):
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
                 msg = "cannot assign to attribute %s" % node.attr
-                self.raise_exception(node, exc=AttributeError, msg=msg)
+                raise UserError(AttributeError(msg))
 
             setattr(self.run(node.value), node.attr, val)
 
@@ -478,14 +424,14 @@ class Interpreter(object):
                 for telem, tval in zip(node.elts, val):
                     self.node_assign(telem, tval)
             else:
-                raise ValueError('too many values to unpack')
+                raise UserError(ValueError('too many values to unpack'))
 
     def on_attribute(self, node):    # ('value', 'attr', 'ctx')
         """Extract attribute."""
         ctx = node.ctx.__class__
         if ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
-            self.raise_exception(node, exc=RuntimeError, msg=msg)
+            raise UserError(RuntimError(msg))
 
         sym = self.run(node.value)
         if ctx == ast.Del:
@@ -498,12 +444,10 @@ class Interpreter(object):
             try:
                 return getattr(sym, node.attr)
             except AttributeError:
-                pass
-
-        # AttributeError or accessed unsafe attribute
-        obj = self.run(node.value)
-        msg = fmt % (node.attr, obj)
-        self.raise_exception(node, exc=AttributeError, msg=msg)
+                # AttributeError or accessed unsafe attribute
+                obj = self.run(node.value)
+                msg = fmt % (node.attr, obj)
+                raise UserError(AttributeError(msg))
 
     def on_assign(self, node):    # ('targets', 'value')
         """Simple assignment."""
@@ -541,7 +485,7 @@ class Interpreter(object):
                 return val[nslice]
         else:
             msg = "subscript with unknown context"
-            self.raise_exception(node, msg=msg)
+            raise UserError(Exception(msg))
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
@@ -559,7 +503,7 @@ class Interpreter(object):
                 self.symtable.pop('.'.join(children))
             else:
                 msg = "could not delete symbol"
-                self.raise_exception(node, msg=msg)
+                raise UserError(NameError(msg))
 
     def on_unaryop(self, node):    # ('op', 'operand')
         """Unary operator."""
@@ -687,9 +631,33 @@ class Interpreter(object):
 
     def on_try(self, node):    # ('body', 'handlers', 'orelse', 'finalbody')
         """Try/except/else/finally blocks."""
+        try:
+            for tnode in node.body:
+                self.run(tnode)
+        except UserError as uerr:
+            err = UserError.get_error()
+            for handler in node.handlers:
+                htype = self.symtable.get(handler.type)
+                if handler.type is None or isinstance(err, htype):
+                    if handler.name is not None:
+                        self.node_assign(handler.name, err)
+                    for tline in handler.body:
+                        self.run(tline)
+                    break
+        else:
+            if hasattr(node, 'orelse'):
+                for tnode in node.orelse:
+                    self.run(tnode)
+        finally:
+            if hasattr(node, 'finalbody'):
+                for tnode in node.finalbody:
+                    self.run(tnode)
+        return
+        
+        
         no_errors = True
         for tnode in node.body:
-            self.run(tnode, with_raise=False)
+            self.run(tnode)
             no_errors = no_errors and len(self.error) == 0
             if len(self.error) > 0:
                 e_type, e_value, e_tback = self.error[-1].exc_info
@@ -720,12 +688,32 @@ class Interpreter(object):
         else:
             excnode = node.type
             msgnode = node.inst
-        out = self.run(excnode)
-        msg = ' '.join(out.args)
-        msg2 = self.run(msgnode)
-        if msg2 not in (None, 'None'):
-            msg = "%s: %s" % (msg, msg2)
-        self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
+        if excnode is None:
+            ex = exc_info()
+            if ex is None:
+                if version_info[0] == 3:
+                    exception = RuntimeError("No active exception to raise")
+                else:
+                    exception = None # will fail type check later
+            extype, exception, strace = ex
+        else:
+            exception = self.run(excnode)
+        
+        if not isinstance(exception, BaseException):
+            raise UserError(TypeError("exceptions must derive from BaseException"))
+        
+        if msgnode is not None:
+            cause = self.run(msgnode)
+        else:
+            cause = None
+        
+        if cause is None:
+            raise RaisedError(exception)
+        else:
+            if not isinstance(cause, BaseException):
+                raise UserError(TypeError("exception causes must derive from BaseException"))
+            raise RaisedError(exception, cause)
+        
 
     def on_call(self, node):
         """Function execution."""
@@ -733,7 +721,7 @@ class Interpreter(object):
         func = self.run(node.func)
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "'%s' is not callable!!" % (func)
-            self.raise_exception(node, exc=TypeError, msg=msg)
+            raise UserError(TypeError(msg))
 
         args = [self.run(targ) for targ in node.args]
         starargs = getattr(node, 'starargs', None)
@@ -747,7 +735,7 @@ class Interpreter(object):
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call '%s'" % (func)
-                self.raise_exception(node, msg=msg)
+                raise UserError(Exception(msg))
             keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
@@ -757,9 +745,13 @@ class Interpreter(object):
         try:
             return func(*args, **keywords)
         except Exception as ex:
-            self.raise_exception(
-                node, msg="Error running function call '%s' with args %s and "
-                "kwargs %s: %s" % (func.__name__, args, keywords, ex))
+            if isinstance(func, Procedure):
+                raise BuiltinError(ex)
+            #self.raise_exception(
+                #node, msg="Error running function call '%s' with args %s and "
+                #"kwargs %s: %s" % (func.__name__, args, keywords, ex))
+            else:
+                raise
 
     def on_arg(self, node):    # ('test', 'msg')
         """Arg for function definitions."""
@@ -821,7 +813,6 @@ class Procedure(object):
         self.name = name
         self.__name__ = self.name
         self.__asteval__ = interp
-        self.raise_exc = self.__asteval__.raise_exception
         self.__doc__ = doc
         self.body = body
         self.argnames = args
@@ -833,8 +824,7 @@ class Procedure(object):
 
     def __setattr__(self, attr, val):
         if not getattr(self, '__ininit__', True):
-            self.raise_exc(None, exc=TypeError,
-                           msg="procedure is read-only")
+            raise UserError(TypeError("procedure is read-only"))
         self.__dict__[attr] = val
 
     def __dir__(self):
@@ -876,17 +866,14 @@ class Procedure(object):
             nargs_expected = len(self.argnames)
             nkws = len(kwargs)
         if nargs < nargs_expected:
-            msg = "%s() takes at least %i arguments, got %i"
-            self.raise_exc(None, exc=TypeError,
-                           msg=msg % (self.name, nargs_expected, nargs))
+            msg = "%s() takes at least %i arguments, got %i" % (self.name, nargs_expected, nargs)
+            raise UserError(TypeError(msg))
         # check for multiple values for named argument
         if len(self.argnames) > 0 and kwargs is not None:
             msg = "multiple values for keyword argument '%s' in Procedure %s"
             for targ in self.argnames:
                 if targ in kwargs:
-                    self.raise_exc(None, exc=TypeError,
-                                   msg=msg % (targ, self.name),
-                                   lineno=self.lineno)
+                    raise UserError(TypeError(msg % (targ, self.name)))
 
         # check more args given than expected, varargs not given
         if nargs != nargs_expected:
@@ -894,13 +881,13 @@ class Procedure(object):
             if nargs < nargs_expected:
                 msg = 'not enough arguments for Procedure %s()' % self.name
                 msg = '%s (expected %i, got %i)' % (msg, nargs_expected, nargs)
-                self.raise_exc(None, exc=TypeError, msg=msg)
+                raise UserError(TypeError(msg))
 
         if nargs > nargs_expected and self.vararg is None:
             if nargs - nargs_expected > len(self.kwargs):
                 msg = 'too many arguments for %s() expected at most %i, got %i'
                 msg = msg % (self.name, len(self.kwargs)+nargs_expected, nargs)
-                self.raise_exc(None, exc=TypeError, msg=msg)
+                raise UserError(TypeError(msg))
 
             for i, xarg in enumerate(args[nargs_expected:]):
                 kw_name = self.kwargs[i][0]
@@ -925,13 +912,13 @@ class Procedure(object):
             elif len(kwargs) > 0:
                 msg = 'extra keyword arguments for Procedure %s (%s)'
                 msg = msg % (self.name, ','.join(list(kwargs.keys())))
-                self.raise_exc(None, msg=msg, exc=TypeError,
-                               lineno=self.lineno)
+                raise UserError(TypeError(msg))
 
         except (ValueError, LookupError, TypeError,
-                NameError, AttributeError):
-            msg = 'incorrect arguments for Procedure %s' % self.name
-            self.raise_exc(None, msg=msg, lineno=self.lineno)
+                NameError, AttributeError) as err:
+            raise UserError(err)
+            #msg = 'incorrect arguments for Procedure %s' % self.name
+            #self.raise_exc(None, msg=msg, lineno=self.lineno)
 
         save_symtable = self.__asteval__.symtable.copy()
         self.__asteval__.symtable.update(symlocals)

@@ -20,6 +20,8 @@
 from .asteval import Interpreter
 from .astutils import (NameFinder, valid_symbol_name,
                        make_symbol_table, get_ast_names)
+from .exceptions import (EvalError, TimeOutError, UserError,
+                         RaisedError, BuiltinError)
 from ._version import get_versions
 
 __all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name',
