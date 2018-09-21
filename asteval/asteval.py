@@ -240,6 +240,8 @@ class Interpreter(object):
             self.error_msg = "at expr='%s'" % (self.expr)
         elif len(msg) > 0:
             self.error_msg = "%s\n %s" % (self.error_msg, msg)
+        if len(self.error_msg) > 10000:
+            self.error_msg = '<snip'> + self.error_msg[-10000:]
         if exc is None:
             try:
                 exc = self.error[0].exc
@@ -757,9 +759,9 @@ class Interpreter(object):
         try:
             return func(*args, **keywords)
         except Exception as ex:
-            self.raise_exception(
-                node, msg="Error running function call '%s' with args %s and "
-                "kwargs %s: %s" % (func.__name__, args, keywords, ex))
+            msg = "Error running function call '%s' with args %s and kwargs %s: %s"
+            msg = msg % (func.__name__, args, keywords, ex)
+            self.raise_exception(node, msg=msg)
 
     def on_arg(self, node):    # ('test', 'msg')
         """Arg for function definitions."""
