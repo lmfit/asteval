@@ -245,7 +245,7 @@ class Interpreter(object):
                 exc = self.error[0].exc
             except:
                 exc = RuntimeError
-        raise exc(self.error_msg)
+        raise exc(msg)
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
@@ -295,9 +295,9 @@ class Interpreter(object):
             if isinstance(ret, enumerate):
                 ret = list(ret)
             return ret
-        except:
+        except Exception as ex:
             if with_raise:
-                self.raise_exception(node, expr=expr)
+                self.raise_exception(node, msg=str(ex), expr=expr)
 
     def __call__(self, expr, **kw):
         """Call class instance as function."""
@@ -324,10 +324,12 @@ class Interpreter(object):
             return
         try:
             return self.run(node, expr=expr, lineno=lineno)
-        except:
-            errmsg = exc_info()[1]
-            if len(self.error) > 0:
-                errmsg = "\n".join(self.error[0].get_error())
+        except Exception as ex:
+            errmsg = str(ex)
+            if len(errmsg) < 1:
+                errmsg = exc_info()[1]
+                if len(self.error) > 0:
+                    errmsg = "\n".join(self.error[0].get_error())
             if not show_errors:
                 try:
                     exc = self.error[0].exc
@@ -759,7 +761,7 @@ class Interpreter(object):
         except Exception as ex:
             self.raise_exception(
                 node, msg="Error running function call '%s' with args %s and "
-                "kwargs %s: %s" % (func.__name__, args, keywords, ex))
+                "kwargs %s:\n%s" % (func.__name__, args, keywords, ex))
 
     def on_arg(self, node):    # ('test', 'msg')
         """Arg for function definitions."""
