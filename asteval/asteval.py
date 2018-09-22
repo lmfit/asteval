@@ -652,33 +652,6 @@ class Interpreter(object):
             if hasattr(node, 'finalbody'):
                 for tnode in node.finalbody:
                     self.run(tnode)
-        return
-        
-        
-        no_errors = True
-        for tnode in node.body:
-            self.run(tnode)
-            no_errors = no_errors and len(self.error) == 0
-            if len(self.error) > 0:
-                e_type, e_value, e_tback = self.error[-1].exc_info
-                for hnd in node.handlers:
-                    htype = None
-                    if hnd.type is not None:
-                        htype = builtins.get(hnd.type.id, None)
-                    if htype is None or isinstance(e_type(), htype):
-                        self.error = []
-                        if hnd.name is not None:
-                            self.node_assign(hnd.name, e_value)
-                        for tline in hnd.body:
-                            self.run(tline)
-                        break
-        if no_errors and hasattr(node, 'orelse'):
-            for tnode in node.orelse:
-                self.run(tnode)
-
-        if hasattr(node, 'finalbody'):
-            for tnode in node.finalbody:
-                self.run(tnode)
 
     def on_raise(self, node):    # ('type', 'inst', 'tback')
         """Raise statement: note difference for python 2 and 3."""
@@ -699,7 +672,7 @@ class Interpreter(object):
         else:
             exception = self.run(excnode)
         
-        if not isinstance(exception, BaseException):
+        if not (isinstance(exception, BaseException) or issubclass(exception, BaseException)):
             raise UserError(TypeError("exceptions must derive from BaseException"))
         
         if msgnode is not None:
@@ -710,7 +683,7 @@ class Interpreter(object):
         if cause is None:
             raise RaisedError(exception)
         else:
-            if not isinstance(cause, BaseException):
+            if not (isinstance(cause, BaseException) or issubclass(cause, BaseException)):
                 raise UserError(TypeError("exception causes must derive from BaseException"))
             raise RaisedError(exception, cause)
         
@@ -747,9 +720,6 @@ class Interpreter(object):
         except Exception as ex:
             if not isinstance(func, Procedure):
                 raise BuiltinError(ex)
-            #self.raise_exception(
-                #node, msg="Error running function call '%s' with args %s and "
-                #"kwargs %s: %s" % (func.__name__, args, keywords, ex))
             else:
                 raise
 
@@ -917,8 +887,6 @@ class Procedure(object):
         except (ValueError, LookupError, TypeError,
                 NameError, AttributeError) as err:
             raise UserError(err)
-            #msg = 'incorrect arguments for Procedure %s' % self.name
-            #self.raise_exc(None, msg=msg, lineno=self.lineno)
 
         save_symtable = self.__asteval__.symtable.copy()
         self.__asteval__.symtable.update(symlocals)
