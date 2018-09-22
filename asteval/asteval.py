@@ -745,7 +745,7 @@ class Interpreter(object):
         try:
             return func(*args, **keywords)
         except Exception as ex:
-            if isinstance(func, Procedure):
+            if not isinstance(func, Procedure):
                 raise BuiltinError(ex)
             #self.raise_exception(
                 #node, msg="Error running function call '%s' with args %s and "
