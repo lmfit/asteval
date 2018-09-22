@@ -5,7 +5,7 @@ class EvalError(Exception):
 
 class UserError(EvalError):
     
-    def get_error():
+    def get_error(self):
         if len(self.args):
             return self.args[0]
         else:
