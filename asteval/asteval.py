@@ -108,6 +108,10 @@ class Interpreter(object):
         whether to support `print`.
     max_time : float
         deprecated.  max run time in seconds (see Note 2) [30.0]
+    readonly_symbols : iterable or `None`
+        symbols that the user can not assign to
+    builtins_readonly : bool
+        whether to blacklist all symbols that are in the initial symtable
 
     Notes
     -----
@@ -121,7 +125,8 @@ class Interpreter(object):
                  no_if=False, no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
-                 no_raise=False, no_print=False, max_time=30):
+                 no_raise=False, no_print=False, max_time=30,
+                 readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -179,6 +184,14 @@ class Interpreter(object):
         if 'try' in self.node_handlers:
             self.node_handlers['tryexcept'] = self.node_handlers['try']
             self.node_handlers['tryfinally'] = self.node_handlers['try']
+
+        if readonly_symbols is None:
+            self.readonly_symbols = set()
+        else:
+            self.readonly_symbols = set(readonly_symbols)
+
+        if builtins_readonly:
+            self.readonly_symbols |= set(self.symtable)
 
         self.no_deepcopy = [key for key, val in symtable.items()
                             if (callable(val)
@@ -452,7 +465,7 @@ class Interpreter(object):
 
         """
         if node.__class__ == ast.Name:
-            if not valid_symbol_name(node.id):
+            if not valid_symbol_name(node.id) or node.id in self.readonly_symbols:
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
@@ -555,7 +568,7 @@ class Interpreter(object):
                 children.append(tnode.attr)
                 tnode = tnode.value
 
-            if tnode.__class__ == ast.Name:
+            if tnode.__class__ == ast.Name and tnode.id not in self.readonly_symbols:
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
@@ -773,6 +786,10 @@ class Interpreter(object):
         if node.decorator_list:
             raise Warning("decorated procedures not supported!")
         kwargs = []
+        
+        if not valid_symbol_name(node.name) or node.name in self.readonly_symbols:
+            errmsg = "invalid function name (reserved word?) %s" % node.name
+            self.raise_exception(node, exc=NameError, msg=errmsg)
 
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
