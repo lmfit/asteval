@@ -317,7 +317,7 @@ class Interpreter(object):
         return self.eval(expr, **kw)
 
     def eval(self, expr, lineno=0, show_errors=True):
-        """Evaluate a single statement."""
+        """Evaluate a string."""
         self.lineno = lineno
         self.error = []
         self.start_time = time.time()
@@ -335,8 +335,17 @@ class Interpreter(object):
                 raise exc(errmsg)
             print(errmsg, file=self.err_writer)
             return
+        return self.eval_ast(node, self.lineno, expr, show_errors, self.start_time)
+    
+    def eval_ast(self, astexpr, lineno=0, expr=None, show_errors=True, start_time=None):
+        """Evaluate an AST."""
+        self.lineno = lineno
+        self.error = []
+        self.start_time = start_time
+        if self.start_time is None:
+            self.start_time = time.time()
         try:
-            return self.run(node, expr=expr, lineno=lineno)
+            return self.run(astexpr, expr=expr, lineno=lineno)
         except:
             errmsg = exc_info()[1]
             if len(self.error) > 0:

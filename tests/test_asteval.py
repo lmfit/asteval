@@ -963,7 +963,10 @@ class TestEval(TestCase):
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
         
-        
+    def test_manual_ast(self):
+        tree = ast.parse("2 + 3")
+        assert(type(tree) == ast.Module)
+        assert(self.interp.eval_ast(tree) == 5)
 
 
 
