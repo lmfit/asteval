@@ -749,7 +749,7 @@ class Interpreter(object):
         
         if not valid_symbol_name(node.name) or node.name in self.readonly_symbols:
             errmsg = "invalid function name (reserved word?) %s" % node.name
-            self.raise_exception(node, exc=NameError, msg=errmsg)
+            raise UserError(NameError(errmsg))
 
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
