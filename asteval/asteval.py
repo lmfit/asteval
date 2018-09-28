@@ -648,9 +648,11 @@ class Interpreter(object):
             for tnode in node.body:
                 self.run(tnode)
         except UserError as uerr:
-            err = UserError.get_error()
+            err = uerr.get_error()
             for handler in node.handlers:
-                htype = self.symtable.get(handler.type)
+                htype = self.run(handler.type)
+                if not (isinstance(htype, BaseException) or issubclass(htype, BaseException)):
+                    raise UserError(TypeError("catching classes that do not inherit from BaseException is not allowed"))
                 if handler.type is None or isinstance(err, htype):
                     if handler.name is not None:
                         self.node_assign(handler.name, err)
