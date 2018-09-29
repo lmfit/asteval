@@ -150,6 +150,7 @@ class Interpreter(object):
         self.start_time = time.time()
         self.max_time = max_time
         self.use_numpy = HAS_NUMPY and use_numpy
+        self.errors = []
 
         nodes = ALL_NODES[:]
 
@@ -305,6 +306,7 @@ class Interpreter(object):
         self.start_time = time.time()
         self.filename = filename
         self.scope = None
+        self.errors = []
         return self.run(node)
 
     @staticmethod
@@ -696,35 +698,43 @@ class Interpreter(object):
 
     def on_try(self, node):    # ('body', 'handlers', 'orelse', 'finalbody')
         """Try/except/else/finally blocks."""
+        current_errors = list(self.errors)
         try:
             for tnode in node.body:
                 self.run(tnode)
         except UserError as uerr:
             err = uerr.error
-            for handler in node.handlers:
-                htype = self.run(handler.type)
-                if handler.type is not None and not is_exception(htype):
-                    self.raise_exception(UserError, TypeError("catching classes that do not inherit from BaseException is not allowed"), node)
-                if handler.type is None or isinstance(err, htype):
-                    if handler.name is not None:
-                        if isinstance(handler.name, str):
-                            # in python3 this is a string
-                            try:
-                                # todo: make this assignment local to exception scope
-                                self.str_assign(handler.name, err)
-                            except NameError as nerr:
-                                self.raise_exception(UserError, nerr, handler)
-                        else:
-                            # in python2 this is of type ast.Name
-                            self.node_assign(handler.name, err)
-                    for tline in handler.body:
-                        self.run(tline)
-                    break
+            self.errors.append(err)
+            if hasattr(node, 'handlers'):
+                for handler in node.handlers:
+                    htype = self.run(handler.type)
+                    if handler.type is not None and not is_exception(htype):
+                        self.raise_exception(UserError, TypeError("catching classes that do not inherit from BaseException is not allowed"), node)
+                    if handler.type is None or isinstance(err, htype):
+                        if handler.name is not None:
+                            if isinstance(handler.name, str):
+                                # in python3 this is a string
+                                try:
+                                    # todo: make this assignment local to exception scope
+                                    self.str_assign(handler.name, err)
+                                except NameError as nerr:
+                                    self.raise_exception(UserError, nerr, handler)
+                            else:
+                                # in python2 this is of type ast.Name
+                                self.node_assign(handler.name, err)
+                        for tline in handler.body:
+                            self.run(tline)
+                        break
+                else:
+                    raise
+            else:
+                raise
         else:
             if hasattr(node, 'orelse'):
                 for tnode in node.orelse:
                     self.run(tnode)
         finally:
+            self.errors = current_errors
             if hasattr(node, 'finalbody'):
                 for tnode in node.finalbody:
                     self.run(tnode)
@@ -738,14 +748,13 @@ class Interpreter(object):
             excnode = node.type
             msgnode = node.inst
         if excnode is None:
-            ex = exc_info()
-            if ex is None or ex[1] is None:
+            if len(self.errors) == 0:
                 if version_info[0] == 3:
                     exception = RuntimeError("No active exception to raise")
                 else:
                     exception = None # will fail type check later
             else:
-                extype, exception, strace = ex
+                exception = self.errors[-1]
         else:
             exception = self.run(excnode)
         

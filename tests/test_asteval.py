@@ -642,6 +642,32 @@ class TestEval(TestCase):
         assert type(err) == IndexError
         assert str(err) == ""
         
+        with raises(asteval.RaisedError) as errinf:
+            self.interp(textwrap.dedent("""
+                try:
+                    raise IndexError()
+                except IndexError:
+                    raise
+                """))
+        self.check_user_error(errinf, IndexError)
+        
+        with raises(asteval.RaisedError) as errinf:
+            self.interp(textwrap.dedent("""
+                try:
+                    raise IndexError()
+                except IndexError:
+                    raise AttributeError()
+                """))
+        self.check_user_error(errinf, AttributeError)
+        
+        with raises(asteval.RaisedError) as errinf:
+            self.interp(textwrap.dedent("""
+                try:
+                    raise NameError()
+                except RuntimeError:
+                    pass
+                """))
+        self.check_user_error(errinf, NameError)
         
 
     def test_tryelsefinally(self):
@@ -669,6 +695,20 @@ class TestEval(TestCase):
         self.isvalue("val", -1)
         self.isvalue("ok", False)
         self.isvalue("clean", True)
+        
+        with raises(asteval.RaisedError) as errinf:
+            self.interp(textwrap.dedent("""
+                x = 1
+                try:
+                    raise IndexError()
+                except IndexError:
+                    x = x + 10
+                    raise AttributeError()
+                finally:
+                    x = x * 2
+                """))
+        self.check_user_error(errinf, AttributeError)
+        self.isvalue("x", 22)
 
     def test_function1(self):
         """test function definition and running"""
