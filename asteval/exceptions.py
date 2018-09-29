@@ -20,5 +20,8 @@ class RaisedError(UserError):
 class BuiltinError(UserError):
     pass
 
+class OperatorError(BuiltinError):
+    pass
+
 class TimeOutError(EvalError):
     pass

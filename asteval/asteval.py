@@ -50,7 +50,7 @@ from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
                        valid_symbol_name, is_recursion_error)
 from .exceptions import (EvalError, TimeOutError, UserError,
-                         RaisedError, BuiltinError)
+                         RaisedError, BuiltinError, OperatorError)
 from .scope import Scope
 
 builtins = __builtins__
@@ -539,12 +539,22 @@ class Interpreter(object):
 
     def on_unaryop(self, node):    # ('op', 'operand')
         """Unary operator."""
-        return op2func(node.op)(self.run(node.operand))
+        operand = self.run(node.operand)
+        func = op2func(node.op)
+        try:
+            return func(operand)
+        except Exception as err:
+            self.raise_exception(OperatorError, err, node)
 
     def on_binop(self, node):    # ('left', 'op', 'right')
         """Binary operator."""
-        return op2func(node.op)(self.run(node.left),
-                                self.run(node.right))
+        left = self.run(node.left)
+        right = self.run(node.right)
+        func = op2func(node.op)
+        try:
+            return func(left, right)
+        except Exception as err:
+            self.raise_exception(OperatorError, err, node)
 
     def on_boolop(self, node):    # ('op', 'values')
         """Boolean operator."""
@@ -552,7 +562,12 @@ class Interpreter(object):
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
             for n in node.values[1:]:
-                val = op2func(node.op)(val, self.run(n))
+                op = self.run(n)
+                func = op2func(node.op)
+                try:
+                    val = func(val, op)
+                except Exception as err:
+                    self.raise_exception(OperatorError, err, node)
                 if (is_and and not val) or (not is_and and val):
                     break
         return val
@@ -563,7 +578,11 @@ class Interpreter(object):
         out = True
         for op, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
-            out = op2func(op)(lval, rval)
+            func = op2func(op)
+            try:
+                out = func(lval, rval)
+            except Exception as err:
+                self.raise_exception(OperatorError, err, node)
             lval = rval
             if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
                 break
