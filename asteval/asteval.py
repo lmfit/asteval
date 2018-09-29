@@ -300,7 +300,7 @@ class Interpreter(object):
         node = ast.parse(expr)
         return self.eval_ast(node, expr, *args, **kwargs)
     
-    def eval_ast(self, node, expr="", lineno=0, show_errors=True, filename=""):
+    def eval_ast(self, node, expr="", lineno=0, filename=""):
         self.expr = expr
         self.lineno = lineno
         self.start_time = time.time()
@@ -437,8 +437,11 @@ class Interpreter(object):
             if node.ctx.__class__ == ast.Load:
                 msg = "cannot assign to attribute %s" % node.attr
                 self.raise_exception(UserError, AttributeError(msg), node)
-
-            setattr(self.run(node.value), node.attr, val)
+            obj = self.run(node.value)
+            try:
+                setattr(obj, node.attr, val)
+            except AttributeError as aerr:
+                self.raise_exception(UserError, aerr, node)
 
         elif node.__class__ == ast.Subscript:
             sym = self.run(node.value)
@@ -532,7 +535,11 @@ class Interpreter(object):
             if tnode.__class__ == ast.Name and tnode.id not in self.readonly_symbols:
                 children.append(tnode.id)
                 children.reverse()
-                self.symtable.pop('.'.join(children))
+                symbol = '.'.join(children)
+                try:
+                    self.symtable.pop(symbol)
+                except KeyError as kerr:
+                    self.raise_exception(UserError, kerr, node)
             else:
                 msg = "could not delete symbol"
                 self.raise_exception(UserError, NameError(msg), node)
@@ -686,7 +693,7 @@ class Interpreter(object):
             for tnode in node.body:
                 self.run(tnode)
         except UserError as uerr:
-            err = uerr.error()
+            err = uerr.error
             for handler in node.handlers:
                 htype = self.run(handler.type)
                 if not (isinstance(htype, BaseException) or issubclass(htype, BaseException)):
@@ -779,13 +786,10 @@ class Interpreter(object):
             else:
                 line = ""
             raise eex.extend_traceback("File \"%s\", line %d, in %s%s" % (self.filename, lineno, self.scope.name, line))
-        except RuntimeError as rex:
-            if is_recursion_error(rex):
-                self.raise_exception(UserError, rex, node)
-            else:
-                raise
         except Exception as ex:
-            if not isinstance(func, Procedure):
+            if is_recursion_error(ex):
+                self.raise_exception(UserError, ex, node)
+            elif not isinstance(func, Procedure):
                 self.raise_exception(BuiltinError, ex, node)
             else:
                 raise
