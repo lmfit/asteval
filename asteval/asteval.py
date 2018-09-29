@@ -722,17 +722,21 @@ class Interpreter(object):
             msgnode = node.inst
         if excnode is None:
             ex = exc_info()
-            if ex is None:
+            if ex is None or ex[1] is None:
                 if version_info[0] == 3:
                     exception = RuntimeError("No active exception to raise")
                 else:
                     exception = None # will fail type check later
-            extype, exception, strace = ex
+            else:
+                extype, exception, strace = ex
         else:
             exception = self.run(excnode)
         
         if not is_exception(exception):
             self.raise_exception(UserError, TypeError("exceptions must derive from BaseException"), node)
+        
+        if isinstance(exception, type):
+            exception = exception()
         
         if msgnode is not None:
             cause = self.run(msgnode)
@@ -744,6 +748,8 @@ class Interpreter(object):
         else:
             if not is_exception(cause):
                 self.raise_exception(UserError, TypeError("exception causes must derive from BaseException"))
+            if isinstance(cause, type):
+                cause = cause()
             self.raise_exception(RaisedError, exception, node, cause)
         
 

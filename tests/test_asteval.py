@@ -575,6 +575,21 @@ class TestEval(TestCase):
         with raises(asteval.RaisedError) as errinf:
             self.interp("raise NameError('bob')")
         self.check_user_error(errinf, NameError, 'bob')
+        
+        with raises(asteval.UserError) as errinf:
+            self.interp("raise 'error'")
+        self.check_user_error(errinf, TypeError, "from BaseException")
+        
+        with raises(asteval.UserError) as errinf:
+            self.interp("raise")
+        if PY3:
+            self.check_user_error(errinf, RuntimeError, "No active exception to raise")
+        else:
+            self.check_user_error(errinf, TypeError, "from BaseException")
+        
+        with raises(asteval.RaisedError) as errinf:
+            self.interp("raise IndexError")
+        self.check_user_error(errinf, IndexError)
 
     def test_tryexcept(self):
         """test try/except"""
