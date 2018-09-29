@@ -344,6 +344,11 @@ class TestEval(TestCase):
         self.isfalse("3 == 4")
         self.isfalse("3 > 5")
         self.isfalse("5 < 3")
+        
+        if PY3:
+            with raises(asteval.OperatorError) as errinfo:
+                self.interp("1 > '3'")
+            self.check_user_error(errinfo, TypeError)
 
     def test_bool(self):
         """boolean logic"""
@@ -478,6 +483,10 @@ class TestEval(TestCase):
         self.isnear("a-b", 4.0)
         self.istrue("a/(b-1) == 2.0")
         self.istrue("a*b     == 60.0")
+        
+        with raises(asteval.OperatorError) as errinfo:
+            self.interp("1/0")
+        self.check_user_error(errinfo, ZeroDivisionError)
 
     def test_unaryop(self):
         """test binary ops"""
@@ -485,6 +494,10 @@ class TestEval(TestCase):
         self.interp('b = -6.0')
         self.isnear("a", -10.0)
         self.isnear("b", -6.0)
+        
+        with raises(asteval.OperatorError) as errinfo:
+            self.interp("-'a'")
+        self.check_user_error(errinfo, TypeError, "bad operant type")
 
     def test_del(self):
         """test del function"""
@@ -590,6 +603,14 @@ class TestEval(TestCase):
         with raises(asteval.RaisedError) as errinf:
             self.interp("raise IndexError")
         self.check_user_error(errinf, IndexError)
+        
+        with raises(asteval.RaisedError) as errinf:
+            if PY3:
+                self.interp("raise IndexError from NameError()")
+            else:
+                self.interp("raise IndexError, NameError()")
+        self.check_user_error(errinf, IndexError)
+        assert type(errinf.value.cause) == NameError
 
     def test_tryexcept(self):
         """test try/except"""
@@ -668,6 +689,15 @@ class TestEval(TestCase):
                     pass
                 """))
         self.check_user_error(errinf, NameError)
+        
+        with raises(asteval.UserError) as errinf:
+            self.interp(textwrap.dedent("""
+                try:
+                    raise IndexError()
+                except "everything":
+                    pass
+                """))
+        self.check_user_error(errinf, TypeError)
         
 
     def test_tryelsefinally(self):

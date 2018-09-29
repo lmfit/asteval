@@ -578,12 +578,7 @@ class Interpreter(object):
         is_and = ast.And == node.op.__class__
         if (is_and and val) or (not is_and and not val):
             for n in node.values[1:]:
-                op = self.run(n)
-                func = op2func(node.op)
-                try:
-                    val = func(val, op)
-                except Exception as err:
-                    self.raise_exception(OperatorError, err, node)
+                val = op2func(node.op)(val, self.run(n))
                 if (is_and and not val) or (not is_and and val):
                     break
         return val
