@@ -622,6 +622,28 @@ class TestEval(TestCase):
             """))
         self.isvalue('x', 15)
 
+        self.interp(textwrap.dedent("""
+            try:
+                raise RuntimeError("hello")
+            except Exception as ex:
+                err = ex
+            """))
+        err = self.interp.symtable.get("err")
+        assert type(err) == RuntimeError
+        assert str(err) == "hello"
+        
+        self.interp(textwrap.dedent("""
+            try:
+                raise IndexError
+            except IndexError as ex:
+                err = ex
+            """))
+        err = self.interp.symtable.get("err")
+        assert type(err) == IndexError
+        assert str(err) == ""
+        
+        
+
     def test_tryelsefinally(self):
 
         self.interp(textwrap.dedent("""

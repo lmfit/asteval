@@ -416,6 +416,14 @@ class Interpreter(object):
     def on_nameconstant(self, node):
         """ True, False, None in python >= 3.4 """
         return node.value
+    
+    def str_assign(self, name, val):
+        if not valid_symbol_name(name) or name in self.readonly_symbols:
+            errmsg = "invalid symbol name (reserved word?) %s" % name
+            raise NameError(errmsg)
+        self.symtable[name] = val
+        if name in self.no_deepcopy:
+            self.no_deepcopy.remove(name)
 
     def node_assign(self, node, val):
         """Assign a value (not the node.value object) to a node.
@@ -425,12 +433,10 @@ class Interpreter(object):
 
         """
         if node.__class__ == ast.Name:
-            if not valid_symbol_name(node.id) or node.id in self.readonly_symbols:
-                errmsg = "invalid symbol name (reserved word?) %s" % node.id
-                self.raise_exception(UserError, NameError(errmsg), node)
-            self.symtable[node.id] = val
-            if node.id in self.no_deepcopy:
-                self.no_deepcopy.remove(node.id)
+            try:
+                self.str_assign(node.id, val)
+            except NameError as nerr:
+                self.raise_exception(UserError, nerr, node)
 
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
@@ -457,6 +463,8 @@ class Interpreter(object):
                     self.node_assign(telem, tval)
             else:
                 self.raise_exception(UserError, ValueError('too many values to unpack'), node)
+        else:
+            raise TypeError("Can not assign to type {}".format(node.__class__.__name__))
 
     def on_attribute(self, node):    # ('value', 'attr', 'ctx')
         """Extract attribute."""
@@ -699,7 +707,16 @@ class Interpreter(object):
                     self.raise_exception(UserError, TypeError("catching classes that do not inherit from BaseException is not allowed"), node)
                 if handler.type is None or isinstance(err, htype):
                     if handler.name is not None:
-                        self.node_assign(handler.name, err)
+                        if isinstance(handler.name, str):
+                            # in python3 this is a string
+                            try:
+                                # todo: make this assignment local to exception scope
+                                self.str_assign(handler.name, err)
+                            except NameError as nerr:
+                                self.raise_exception(UserError, nerr, handler)
+                        else:
+                            # in python2 this is of type ast.Name
+                            self.node_assign(handler.name, err)
                     for tline in handler.body:
                         self.run(tline)
                     break
