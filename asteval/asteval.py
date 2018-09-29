@@ -506,6 +506,8 @@ class Interpreter(object):
     def on_subscript(self, node):    # ('value', 'slice', 'ctx')
         """Subscript handling -- one of the tricky parts."""
         val = self.run(node.value)
+        if not hasattr(val, "__getitem__"):
+            self.raise_exception(UserError, TypeError("'%s' object is not subscriptable" % val.__class__.__name__), node)
         nslice = self.run(node.slice)
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
