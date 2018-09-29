@@ -5,7 +5,7 @@ class EvalError(Exception):
         self.error = error
         self.traceback = traceback
         self.cause = cause
-        self.args = [self.error, self.traceback, self.cause, *args]
+        self.args = (self.error, self.traceback, self.cause) + args
     
     def extend_traceback(self, tb_msg):
         return self.__class__(self.error, tb_msg + '\n' + self.traceback, *self.args[2:])

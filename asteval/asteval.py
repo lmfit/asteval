@@ -949,8 +949,6 @@ class Procedure(object):
             # evaluate script of function
             for node in self.body:
                 self.__asteval__.run(node)
-                if len(self.__asteval__.error) > 0:
-                    break
                 if self.__asteval__.retval is not None:
                     retval = self.__asteval__.retval
                     self.__asteval__.retval = None
@@ -959,7 +957,6 @@ class Procedure(object):
                     break
         finally:
             self.__asteval__.scope = current_scope
-        return out
 
         self.__asteval__.symtable = save_symtable
         symlocals = None
