@@ -51,6 +51,7 @@ from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        valid_symbol_name)
 from .exceptions import (EvalError, TimeOutError, UserError,
                          RaisedError, BuiltinError)
+from .scope import Scope
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -143,11 +144,10 @@ class Interpreter(object):
 
         self.symtable = symtable
         self._interrupt = None
-        self.error = []
-        self.error_msg = None
         self.expr = None
         self.retval = None
         self.lineno = 0
+        self.filename = None
         self.start_time = time.time()
         self.max_time = max_time
         self.use_numpy = HAS_NUMPY and use_numpy
@@ -242,33 +242,24 @@ class Interpreter(object):
         
 
     # main entry point for Ast node evaluation
-    #  parse:  text of statements -> ast
-    #  run:    ast -> result
-    #  eval:   string statement -> result = run(parse(statement))
+    #  eval_ast:    ast -> result
+    #  eval:   string statement -> result = eval_ast(parse(statement))
     def parse(self, text):
         """Parse statement/expression to Ast representation."""
-        self.expr = text
         out = ast.parse(text)
-
         return out
 
-    def run(self, node, expr=None, lineno=None):
+    def run(self, node):
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
         if time.time() - self.start_time > self.max_time:
             raise TimeOutError(ERR_MAX_TIME.format(self.max_time))
         out = None
-        if len(self.error) > 0:
-            return out
         if node is None:
             return out
         if isinstance(node, str):
             node = self.parse(node)
-        if lineno is not None:
-            self.lineno = lineno
-        if expr is not None:
-            self.expr = expr
 
         # get handler for this node:
         #   on_xxx with handle nodes of type 'xxx', etc
@@ -288,13 +279,18 @@ class Interpreter(object):
         """Call class instance as function."""
         return self.eval(expr, **kw)
 
-    def eval(self, expr, lineno=0, show_errors=True):
+    def eval(self, expr, *args, **kwargs):
         """Evaluate a single statement."""
+        node = ast.parse(expr)
+        return self.eval_ast(node, expr, *args, **kwargs)
+    
+    def eval_ast(self, node, expr="", lineno=0, show_errors=True, filename=""):
+        self.expr = expr
         self.lineno = lineno
-        self.error = []
         self.start_time = time.time()
-        node = self.parse(expr)
-        return self.run(node, expr=expr, lineno=lineno)
+        self.filename = filename
+        self.scope = None
+        return self.run(node)
 
     @staticmethod
     def dump(node, **kw):
@@ -324,8 +320,13 @@ class Interpreter(object):
     def on_module(self, node):    # ():('body',)
         """Module def."""
         out = None
-        for tnode in node.body:
-            out = self.run(tnode)
+        current_scope = self.scope
+        try:
+            self.scope = Scope("<module>", current_scope)
+            for tnode in node.body:
+                out = self.run(tnode)
+        finally:
+            self.scope = current_scope
         return out
 
     def on_expression(self, node):
@@ -564,7 +565,7 @@ class Interpreter(object):
         if node.nl:
             end = '\n'
         out = [self.run(tnode) for tnode in node.values]
-        if out and len(self.error) == 0:
+        if out:
             self._printer(*out, file=dest, end=end)
 
     def _printer(self, *out, **kws):
@@ -648,7 +649,7 @@ class Interpreter(object):
             for tnode in node.body:
                 self.run(tnode)
         except UserError as uerr:
-            err = uerr.get_error()
+            err = uerr.error()
             for handler in node.handlers:
                 htype = self.run(handler.type)
                 if not (isinstance(htype, BaseException) or issubclass(htype, BaseException)):
@@ -729,12 +730,21 @@ class Interpreter(object):
         kwargs = getattr(node, 'kwargs', None)
         if kwargs is not None:
             keywords.update(self.run(kwargs))
-
+        
         try:
             return func(*args, **keywords)
+        except EvalError as eex:
+            lineno = self.lineno + node.lineno
+            # note: lineno is 1-indexed
+            lines = self.expr.splitlines()
+            if len(lines) >= lineno:
+                line = "\n    %s" % (lines[lineno-1].strip())
+            else:
+                line = ""
+            raise eex.extend_traceback("File \"%s\", line %d, in %s%s" % (self.filename, lineno, self.scope.name, line))
         except Exception as ex:
             if not isinstance(func, Procedure):
-                raise BuiltinError(ex)
+                raise BuiltinError(ex, "File \"%s\", line %d in built-in function %s" % (self.filename, self.lineno + node.lineno, func.name))
             else:
                 raise
 
@@ -778,7 +788,6 @@ class Interpreter(object):
                 varkws = varkws.arg
 
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
-                                             lineno=self.lineno,
                                              body=node.body,
                                              args=args, kwargs=kwargs,
                                              vararg=vararg, varkws=varkws)
@@ -794,7 +803,7 @@ class Procedure(object):
 
     """
 
-    def __init__(self, name, interp, doc=None, lineno=0,
+    def __init__(self, name, interp, doc=None,
                  body=None, args=None, kwargs=None,
                  vararg=None, varkws=None):
         """TODO: docstring in public method."""
@@ -808,7 +817,6 @@ class Procedure(object):
         self.kwargs = kwargs
         self.vararg = vararg
         self.varkws = varkws
-        self.lineno = lineno
         self.__ininit__ = False
 
     def __setattr__(self, attr, val):
@@ -911,18 +919,26 @@ class Procedure(object):
         self.__asteval__.symtable.update(symlocals)
         self.__asteval__.retval = None
         retval = None
-
-        # evaluate script of function
-        for node in self.body:
-            self.__asteval__.run(node, expr='<>', lineno=self.lineno)
-            if len(self.__asteval__.error) > 0:
-                break
-            if self.__asteval__.retval is not None:
-                retval = self.__asteval__.retval
-                self.__asteval__.retval = None
-                if retval is ReturnedNone:
-                    retval = None
-                break
+        
+        
+        current_scope = self.__asteval__.scope
+        try:
+            self.__asteval__.scope = Scope(self.name, current_scope)
+            
+            # evaluate script of function
+            for node in self.body:
+                self.__asteval__.run(node)
+                if len(self.__asteval__.error) > 0:
+                    break
+                if self.__asteval__.retval is not None:
+                    retval = self.__asteval__.retval
+                    self.__asteval__.retval = None
+                    if retval is ReturnedNone:
+                        retval = None
+                    break
+        finally:
+            self.__asteval__.scope = current_scope
+        return out
 
         self.__asteval__.symtable = save_symtable
         symlocals = None

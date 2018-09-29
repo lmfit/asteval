@@ -1,15 +1,18 @@
 
 
 class EvalError(Exception):
-    pass
+    def __init__(self, error=None, traceback="", cause=None, *args):
+        self.error = error
+        self.traceback = traceback
+        self.cause = cause
+        self.args = [self.error, self.traceback, self.cause, *args]
+    
+    def extend_traceback(self, tb_msg):
+        return self.__class__(self.error, tb_msg + '\n' + self.traceback, *self.args[2:])
+        
 
 class UserError(EvalError):
-    
-    def get_error(self):
-        if len(self.args):
-            return self.args[0]
-        else:
-            return None
+    pass
 
 class RaisedError(UserError):
     pass
