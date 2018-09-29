@@ -106,8 +106,8 @@ class Interpreter(object):
         whether to support `raise`.
     no_print : bool
         whether to support `print`.
-    max_time : float
-        deprecated.  max run time in seconds (see Note 2) [30.0]
+    max_time : None
+        deprecated.  max run time is not useful and will be dropped soon.
     readonly_symbols : iterable or `None`
         symbols that the user can not assign to
     builtins_readonly : bool
@@ -117,7 +117,7 @@ class Interpreter(object):
     -----
     1. setting `minimal=True` is equivalent to setting all
        `no_***` options to `True`.
-    2. max_time is not reliable and support may be dropped soon.
+    2. max_time is not reliable and no longer supported -- the keyword will be dropped soon.
     """
 
     def __init__(self, symtable=None, usersyms=None, writer=None,
@@ -125,7 +125,7 @@ class Interpreter(object):
                  no_if=False, no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
-                 no_raise=False, no_print=False, max_time=30,
+                 no_raise=False, no_print=False, max_time=None,
                  readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
@@ -145,8 +145,6 @@ class Interpreter(object):
         self.expr = None
         self.retval = None
         self.lineno = 0
-        self.start_time = time.time()
-        self.max_time = max_time
         self.use_numpy = HAS_NUMPY and use_numpy
 
         nodes = ALL_NODES[:]
@@ -280,8 +278,6 @@ class Interpreter(object):
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        if time.time() - self.start_time > self.max_time:
-            raise RuntimeError(ERR_MAX_TIME.format(self.max_time))
         out = None
         if len(self.error) > 0:
             return out
@@ -320,7 +316,6 @@ class Interpreter(object):
         """Evaluate a single statement."""
         self.lineno = lineno
         self.error = []
-        self.start_time = time.time()
         try:
             node = self.parse(expr)
         except:
@@ -785,7 +780,7 @@ class Interpreter(object):
         if node.decorator_list:
             raise Warning("decorated procedures not supported!")
         kwargs = []
-        
+
         if not valid_symbol_name(node.name) or node.name in self.readonly_symbols:
             errmsg = "invalid function name (reserved word?) %s" % node.name
             self.raise_exception(node, exc=NameError, msg=errmsg)
