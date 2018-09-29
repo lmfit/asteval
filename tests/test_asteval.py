@@ -1003,6 +1003,14 @@ class TestEval(TestCase):
         with raises(asteval.UserError) as errinf:
             aeval("bar = None")
         self.check_user_error(errinf, NameError)
+        with raises(asteval.UserError) as errinf:
+            aeval(textwrap.dedent("""
+                try:
+                    raise Exception
+                except Exception as a:
+                    pass
+                """))
+        self.check_user_error(errinf, NameError)
         aeval("x = 21")
         aeval("y += a")
 
