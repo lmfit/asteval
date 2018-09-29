@@ -106,8 +106,8 @@ class Interpreter(object):
         whether to support `raise`.
     no_print : bool
         whether to support `print`.
-    max_time : None
-        deprecated.  max run time is not useful and will be dropped soon.
+    max_time : float
+        deprecated, unreliable. max_time will be dropped soon. (default 86400)
     readonly_symbols : iterable or `None`
         symbols that the user can not assign to
     builtins_readonly : bool
@@ -125,7 +125,7 @@ class Interpreter(object):
                  no_if=False, no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
-                 no_raise=False, no_print=False, max_time=None,
+                 no_raise=False, no_print=False, max_time=86400,
                  readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
@@ -145,6 +145,8 @@ class Interpreter(object):
         self.expr = None
         self.retval = None
         self.lineno = 0
+        self.start_time = time.time()
+        self.max_time = max_time
         self.use_numpy = HAS_NUMPY and use_numpy
 
         nodes = ALL_NODES[:]
@@ -278,6 +280,8 @@ class Interpreter(object):
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
+        if time.time() - self.start_time > self.max_time:
+            raise RuntimeError(ERR_MAX_TIME.format(self.max_time))
         out = None
         if len(self.error) > 0:
             return out
@@ -316,6 +320,7 @@ class Interpreter(object):
         """Evaluate a single statement."""
         self.lineno = lineno
         self.error = []
+        self.start_time = time.time()
         try:
             node = self.parse(expr)
         except:
