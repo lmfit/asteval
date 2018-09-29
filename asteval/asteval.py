@@ -48,7 +48,7 @@ import six
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
-                       valid_symbol_name)
+                       valid_symbol_name, is_recursion_error)
 from .exceptions import (EvalError, TimeOutError, UserError,
                          RaisedError, BuiltinError)
 from .scope import Scope
@@ -758,6 +758,11 @@ class Interpreter(object):
             else:
                 line = ""
             raise eex.extend_traceback("File \"%s\", line %d, in %s%s" % (self.filename, lineno, self.scope.name, line))
+        except RuntimeError as rex:
+            if is_recursion_error(rex):
+                self.raise_exception(UserError, rex, node)
+            else:
+                raise
         except Exception as ex:
             if not isinstance(func, Procedure):
                 self.raise_exception(BuiltinError, ex, node)

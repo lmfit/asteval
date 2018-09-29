@@ -8,6 +8,7 @@ from __future__ import division, print_function
 import re
 import ast
 import math
+import sys
 from sys import exc_info
 
 HAS_NUMPY = False
@@ -374,3 +375,12 @@ def make_symbol_table(use_numpy=True, **kws):
     symtable.update(kws)
 
     return symtable
+
+def is_recursion_error(error):
+    if sys.version_info >= (3, 5):
+        if isinstance(error, RecursionError):
+            return True
+    else:
+        if str(error) == "maximum recursion depth exceeded":
+            return True
+    return False
