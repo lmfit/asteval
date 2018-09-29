@@ -272,44 +272,6 @@ class Empty:
 ReturnedNone = Empty()
 
 
-class ExceptionHolder(object):
-    """Basic exception handler."""
-
-    def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
-        """TODO: docstring in public method."""
-        self.node = node
-        self.expr = expr
-        self.msg = msg
-        self.exc = exc
-        self.lineno = lineno
-        self.exc_info = exc_info()
-        if self.exc is None and self.exc_info[0] is not None:
-            self.exc = self.exc_info[0]
-        if self.msg is '' and self.exc_info[1] is not None:
-            self.msg = self.exc_info[1]
-
-    def get_error(self):
-        """Retrieve error data."""
-        col_offset = -1
-        if self.node is not None:
-            try:
-                col_offset = self.node.col_offset
-            except AttributeError:
-                pass
-        try:
-            exc_name = self.exc.__name__
-        except AttributeError:
-            exc_name = str(self.exc)
-        if exc_name in (None, 'None'):
-            exc_name = 'UnknownError'
-
-        out = ["   %s" % self.expr]
-        if col_offset > 0:
-            out.append("    %s^^^" % ((col_offset)*' '))
-        out.append(str(self.msg))
-        return (exc_name, '\n'.join(out))
-
-
 class NameFinder(ast.NodeVisitor):
     """Find all symbol names used by a parsed node."""
 

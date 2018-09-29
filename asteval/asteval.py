@@ -47,7 +47,7 @@ from sys import exc_info, stdout, stderr, version_info
 import six
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
-                       op2func, ExceptionHolder, ReturnedNone,
+                       op2func, ReturnedNone,
                        valid_symbol_name, is_recursion_error, is_exception)
 from .exceptions import (EvalError, TimeOutError, UserError,
                          RaisedError, BuiltinError, OperatorError)
@@ -81,7 +81,7 @@ class Interpreter(object):
     writer : file-like or `None`
         callable file-like object where standard output will be sent.
     err_writer : file-like or `None`
-        callable file-like object where standard error will be sent.
+        deprecated. Errors will now be raised instead of written to a stream
     use_numpy : bool
         whether to use functions from numpy.
     minimal : bool
@@ -133,7 +133,6 @@ class Interpreter(object):
                  readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
-        self.err_writer = err_writer or stderr
 
         if symtable is None:
             if usersyms is None:
