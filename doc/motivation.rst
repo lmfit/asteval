@@ -106,6 +106,16 @@ is very hard to predict how long the expression `x**y**z` will take to run
 without knowing the values of `x`, `y`, and `z`.   In short, runtime cannot
 be determined lexically.
 
+Unfortunately, there is not a good way to check for a long-running
+calculation within a single Python process.  For example, the double
+exponential example above will be stuck deep inside C-code evaluated by the
+Python interpreter itself, and will not return or allow other threads to
+run until that calculation is done.  That is, from within a single process,
+there is not a foolproof way to tell `asteval` when a calculation has taken
+too long.  The most reliable way to limit run time is to have a second
+process watching the execution time of the asteval process and interrupt
+or kill it.
+
 For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the *recursion limit* when
 executing expressions, with a code like this::
@@ -124,17 +134,15 @@ executing expressions, with a code like this::
     with limited_recursion(100):
         Interpreter().eval(...)
 
-You can also pass in a `max_time` (in seconds) when you create an asteval
-Interpreter, wich will try to limit the amount of time an expression will
-take.  This is actually of limited utility, since the calculation must
-return to the asteval interpreter for the runtime to be checked at all.  Many
-long-running calculations will be stuck deep inside C-code evaluated by the
-Python interpreter itself, and not return or allow other threads to run
-until that calculation is done. That is, from within a single process,
-there really is not a foolproof way to tell asteval to have a maximum
-runtime.  The most reliable way to put a firm limit on runtime is to have a
-second process watching the execution time of the asteval process and
-interrupt or kill it.
+As an addition security concern, the default list of supported functions
+does include Python's `open()` which will allow disk access to the
+untrusted user.  If `numpy` is supported, its `load()` and `loadtxt()`
+functions will also be supported.  This doesn't really elevate permissions,
+but it does allow the user of the `asteval` interpreter to read files with
+the privileges of the calling program.  In some cases, this may not be
+desireable, and you may want to remove some of these functions from the
+symbol table, re-implement them, or ensure that your program cannot access
+information on disk that should be kept private.
 
 In summary, while asteval attempts to be safe and is definitely safer than
 using :py:func:`eval`, there are many ways that asteval could be considered
