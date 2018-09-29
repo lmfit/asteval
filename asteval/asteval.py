@@ -233,17 +233,33 @@ class Interpreter(object):
         sym_from_construction = set(self.no_deepcopy)
         unique_symbols = sym_in_current.difference(sym_from_construction)
         return unique_symbols
+    
+    def raise_exception(self, extype, userex, node, cause=None):
+        """set the appropriate stack trace for the exception"""
+        # todo: what if node doesn't have a lineno?
+        lineno = self.lineno + node.lineno
+        # note: lineno is 1-indexed
+        lines = self.expr.splitlines()
+        if len(lines) >= node.lineno:
+            line = "\n    %s" % (lines[node.lineno-1].strip())
+        else:
+            line = ""
+        raise extype(userex, "File \"%s\", line %d, in %s%s" % (self.filename, lineno, self.scope.name, line), cause)
 
     def unimplemented(self, node):
         """Unimplemented nodes."""
-        raise UserError(
+        self.raise_exception(
+            UserError,
             NotImplementedError("'%s' not supported" %
-                (node.__class__.__name__)))
+                (node.__class__.__name__)),
+            node)
         
 
     # main entry point for Ast node evaluation
-    #  eval_ast:    ast -> result
-    #  eval:   string statement -> result = eval_ast(parse(statement))
+    #  parse:     string statement -> ast
+    #  eval_ast:  ast -> result
+    #  eval:      string statement -> result = eval_ast(parse(statement))
+    
     def parse(self, text):
         """Parse statement/expression to Ast representation."""
         out = ast.parse(text)
@@ -254,7 +270,7 @@ class Interpreter(object):
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
         if time.time() - self.start_time > self.max_time:
-            raise TimeOutError(ERR_MAX_TIME.format(self.max_time))
+            self.raise_exception(TimeOutError, ERR_MAX_TIME.format(self.max_time), node)
         out = None
         if node is None:
             return out
@@ -358,7 +374,7 @@ class Interpreter(object):
     def on_assert(self, node):    # ('test', 'msg')
         """Assert statement."""
         if not self.run(node.test):
-            raise UserError(AssertionError(node.msg))
+            self.raise_exception(UserError, AssertionError(node.msg), node)
         return True
 
     def on_list(self, node):    # ('elt', 'ctx')
@@ -396,7 +412,7 @@ class Interpreter(object):
                 return self.symtable[node.id]
             else:
                 msg = "name '%s' is not defined" % node.id
-                raise UserError(NameError(msg))
+                self.raise_exception(UserError, NameError(msg), node)
 
     def on_nameconstant(self, node):
         """ True, False, None in python >= 3.4 """
@@ -412,7 +428,7 @@ class Interpreter(object):
         if node.__class__ == ast.Name:
             if not valid_symbol_name(node.id) or node.id in self.readonly_symbols:
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
-                raise UserError(NameError(errmsg))
+                self.raise_exception(UserError, NameError(errmsg), node)
             self.symtable[node.id] = val
             if node.id in self.no_deepcopy:
                 self.no_deepcopy.remove(node.id)
@@ -420,7 +436,7 @@ class Interpreter(object):
         elif node.__class__ == ast.Attribute:
             if node.ctx.__class__ == ast.Load:
                 msg = "cannot assign to attribute %s" % node.attr
-                raise UserError(AttributeError(msg))
+                self.raise_exception(UserError, AttributeError(msg), node)
 
             setattr(self.run(node.value), node.attr, val)
 
@@ -438,14 +454,14 @@ class Interpreter(object):
                 for telem, tval in zip(node.elts, val):
                     self.node_assign(telem, tval)
             else:
-                raise UserError(ValueError('too many values to unpack'))
+                self.raise_exception(UserError, ValueError('too many values to unpack'), node)
 
     def on_attribute(self, node):    # ('value', 'attr', 'ctx')
         """Extract attribute."""
         ctx = node.ctx.__class__
         if ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
-            raise UserError(RuntimError(msg))
+            self.raise_exception(UserError, RuntimError(msg), node)
 
         sym = self.run(node.value)
         if ctx == ast.Del:
@@ -461,7 +477,7 @@ class Interpreter(object):
                 # AttributeError or accessed unsafe attribute
                 obj = self.run(node.value)
                 msg = fmt % (node.attr, obj)
-                raise UserError(AttributeError(msg))
+                self.raise_exception(UserError, AttributeError(msg), node)
 
     def on_assign(self, node):    # ('targets', 'value')
         """Simple assignment."""
@@ -499,7 +515,7 @@ class Interpreter(object):
                 return val[nslice]
         else:
             msg = "subscript with unknown context"
-            raise UserError(Exception(msg))
+            self.raise_exception(UserError, Exception(msg), node)
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
@@ -517,7 +533,7 @@ class Interpreter(object):
                 self.symtable.pop('.'.join(children))
             else:
                 msg = "could not delete symbol"
-                raise UserError(NameError(msg))
+                self.raise_exception(UserError, NameError(msg), node)
 
     def on_unaryop(self, node):    # ('op', 'operand')
         """Unary operator."""
@@ -653,7 +669,7 @@ class Interpreter(object):
             for handler in node.handlers:
                 htype = self.run(handler.type)
                 if not (isinstance(htype, BaseException) or issubclass(htype, BaseException)):
-                    raise UserError(TypeError("catching classes that do not inherit from BaseException is not allowed"))
+                    self.raise_exception(UserError, TypeError("catching classes that do not inherit from BaseException is not allowed"), node)
                 if handler.type is None or isinstance(err, htype):
                     if handler.name is not None:
                         self.node_assign(handler.name, err)
@@ -689,7 +705,7 @@ class Interpreter(object):
             exception = self.run(excnode)
         
         if not (isinstance(exception, BaseException) or issubclass(exception, BaseException)):
-            raise UserError(TypeError("exceptions must derive from BaseException"))
+            self.raise_exception(UserError, TypeError("exceptions must derive from BaseException"), node)
         
         if msgnode is not None:
             cause = self.run(msgnode)
@@ -697,11 +713,11 @@ class Interpreter(object):
             cause = None
         
         if cause is None:
-            raise RaisedError(exception)
+            self.raise_exception(RaisedError, exception, node)
         else:
             if not (isinstance(cause, BaseException) or issubclass(cause, BaseException)):
-                raise UserError(TypeError("exception causes must derive from BaseException"))
-            raise RaisedError(exception, cause)
+                self.raise_exception(UserError, TypeError("exception causes must derive from BaseException"))
+            self.raise_exception(RaisedError, exception, node, cause)
         
 
     def on_call(self, node):
@@ -710,7 +726,7 @@ class Interpreter(object):
         func = self.run(node.func)
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = "'%s' is not callable!!" % (func)
-            raise UserError(TypeError(msg))
+            self.raise_exception(UserError, TypeError(msg), node)
 
         args = [self.run(targ) for targ in node.args]
         starargs = getattr(node, 'starargs', None)
@@ -724,7 +740,7 @@ class Interpreter(object):
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call '%s'" % (func)
-                raise UserError(Exception(msg))
+                self.raise_exception(UserError, Exception(msg), node)
             keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
@@ -744,7 +760,7 @@ class Interpreter(object):
             raise eex.extend_traceback("File \"%s\", line %d, in %s%s" % (self.filename, lineno, self.scope.name, line))
         except Exception as ex:
             if not isinstance(func, Procedure):
-                raise BuiltinError(ex, "File \"%s\", line %d in built-in function %s" % (self.filename, self.lineno + node.lineno, func.name))
+                self.raise_exception(BuiltinError, ex, node)
             else:
                 raise
 
@@ -761,7 +777,7 @@ class Interpreter(object):
         
         if not valid_symbol_name(node.name) or node.name in self.readonly_symbols:
             errmsg = "invalid function name (reserved word?) %s" % node.name
-            raise UserError(NameError(errmsg))
+            self.raise_exception(UserError, NameError(errmsg), node)
 
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
