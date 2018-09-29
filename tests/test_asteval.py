@@ -618,6 +618,16 @@ class TestEval(TestCase):
             """))
         self.isvalue('x', -1)
 
+        self.interp(textwrap.dedent("""
+            x = 15
+            try:
+                raise Exception()
+                x = 20
+            except:
+                pass
+            """))
+        self.isvalue('x', 15)
+
     def test_tryelsefinally(self):
 
         self.interp(textwrap.dedent("""

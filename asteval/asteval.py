@@ -717,6 +717,7 @@ class Interpreter(object):
                         for tline in hnd.body:
                             self.run(tline)
                         break
+                break
         if no_errors and hasattr(node, 'orelse'):
             for tnode in node.orelse:
                 self.run(tnode)
