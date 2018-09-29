@@ -252,7 +252,7 @@ class Interpreter(object):
         if self.error_msg is None:
             self.error_msg = "at expr='%s'" % (self.expr)
         elif len(msg) > 0:
-            self.error_msg = "%s\n %s" % (self.error_msg, msg)
+            self.error_msg = msg
         if exc is None:
             try:
                 exc = self.error[0].exc
