@@ -381,6 +381,6 @@ def is_recursion_error(error):
         if isinstance(error, RecursionError):
             return True
     else:
-        if isinstance(error, RuntimeError) and str(error) == "maximum recursion depth exceeded":
+        if isinstance(error, RuntimeError) and "maximum recursion depth exceeded" in str(error):
             return True
     return False
