@@ -8,6 +8,7 @@ import textwrap
 import time
 import unittest
 import pytest
+from pytest import raises
 
 
 from sys import version_info
@@ -26,6 +27,7 @@ else:
     # noinspection PyUnresolvedReferences
     from cStringIO import StringIO
 
+import asteval
 from asteval import NameFinder, Interpreter, make_symbol_table
 
 import numpy as np
@@ -122,16 +124,10 @@ class TestCase(unittest.TestCase):
                 return chk_str == out[0]
             return chk_str in out[0]
         return False
-
-    def check_error(self, chk_type='', chk_msg=''):
-        try:
-            errtype, errmsg = self.interp.error[0].get_error()
-            self.assertEqual(errtype, chk_type)
-            if chk_msg:
-                self.assertTrue(chk_msg in errmsg)
-        except IndexError:
-            if chk_type:
-                self.assertTrue(False)
+    
+    def check_user_error(self, errinf, errtype, msg=''):
+        err = errinf.value.error
+        assert type(err) == errtype
 
 
 class TestEval(TestCase):
@@ -262,9 +258,9 @@ class TestEval(TestCase):
         self.interp.error = []
         self.interp('n=6')
         self.interp('assert n==6')
-        self.check_error(None)
-        self.interp('assert n==7')
-        self.check_error('AssertionError')
+        with raises(asteval.UserError) as errinf:
+            self.interp('assert n==7')
+        self.check_user_error(errinf, AssertionError)
 
     def test_for(self):
         """for loops"""
@@ -412,39 +408,26 @@ class TestEval(TestCase):
         """assignment syntax errors test"""
         for expr in ('class = 1', 'for = 1', 'if = 1', 'raise = 1',
                      '1x = 1', '1.x = 1', '1_x = 1'):
-            failed = False
             # noinspection PyBroadException
-            try:
-                self.interp(expr, show_errors=False)
-            except:
-                failed = True
-
-            self.assertTrue(failed)
-            self.check_error('SyntaxError')
+            with raises(SyntaxError):
+                self.interp(expr)
 
     def test_unsupportednodes(self):
         """unsupported nodes"""
         for expr in ('f = lambda x: x*x', 'yield 10'):
             failed = False
             # noinspection PyBroadException
-            try:
-                self.interp(expr, show_errors=False)
-            except:
-                failed = True
-            self.assertTrue(failed)
-            self.check_error('NotImplementedError')
+            with raises(asteval.UserError) as errinf:
+                self.interp(expr)
+            self.check_user_error(errinf, NotImplementedError)
 
     def test_syntaxerrors_2(self):
         """syntax errors test"""
         for expr in ('x = (1/*)', 'x = 1.A', 'x = A.2'):
             failed = False
             # noinspection PyBroadException
-            try:
-                self.interp(expr, show_errors=False)
-            except:  # RuntimeError:
-                failed = True
-            self.assertTrue(failed)
-            self.check_error('SyntaxError')
+            with raises(SyntaxError):
+                self.interp(expr)
 
     def test_runtimeerrors_1(self):
         """runtime errors test"""
@@ -452,23 +435,18 @@ class TestEval(TestCase):
         self.interp("astr ='a string'")
         self.interp("atup = ('a', 'b', 11021)")
         self.interp("arr  = arange(20)")
-        for expr, errname in (('x = 1/zero', 'ZeroDivisionError'),
-                              ('x = zero + nonexistent', 'NameError'),
-                              ('x = zero + astr', 'TypeError'),
-                              ('x = zero()', 'TypeError'),
-                              ('x = astr * atup', 'TypeError'),
-                              ('x = arr.shapx', 'AttributeError'),
-                              ('arr.shapx = 4', 'AttributeError'),
-                              ('del arr.shapx', 'KeyError'),
-                              ('x, y = atup', 'ValueError')):
-            failed, errtype, errmsg = False, None, None
-            # noinspection PyBroadException
-            try:
-                self.interp(expr, show_errors=False)
-            except:
-                failed = True
-            self.assertTrue(failed)
-            self.check_error(errname)
+        for expr, err in (('x = 1/zero', ZeroDivisionError),
+                              ('x = zero + nonexistent', NameError),
+                              ('x = zero + astr', TypeError),
+                              ('x = zero()', TypeError),
+                              ('x = astr * atup', TypeError),
+                              ('x = arr.shapx', AttributeError),
+                              ('arr.shapx = 4', AttributeError),
+                              ('del arr.shapx', KeyError),
+                              ('x, y = atup', ValueError)):
+            with raises(asteval.UserError) as errinf:
+                self.interp(expr)
+            self.check_user_error(errinf, err)
 
     # noinspection PyUnresolvedReferences
     def test_ndarrays(self):
@@ -575,27 +553,28 @@ class TestEval(TestCase):
                   'class', 'del', 'def', 'import', 'None'):
             self.interp.error = []
             # noinspection PyBroadException
-            try:
+            with raises(SyntaxError):
                 self.interp("%s= 2" % w, show_errors=False)
-            except:
-                pass
-
-            self.check_error('SyntaxError')
 
         for w in ('True', 'False'):
-            self.interp.error = []
-            self.interp("%s= 2" % w)
-            self.check_error('SyntaxError' if PY3 else 'NameError')
+            if PY3:
+                with raises(SyntaxError):
+                    self.interp("%s= 2" % w)
+            else:
+                with raises(asteval.UserError) as errinf:
+                    self.interp("%s= 2" % w)
+                self.check_user_error(errinf, NameError)
 
         for w in ('eval', '__import__'):
-            self.interp.error = []
-            self.interp("%s= 2" % w)
-            self.check_error('NameError')
+            with raises(asteval.UserError) as errinf:
+                self.interp("%s= 2" % w)
+            self.check_user_error(errinf, NameError)
 
     def test_raise(self):
         """test raise"""
-        self.interp("raise NameError('bob')")
-        self.check_error('NameError', 'bob')
+        with raises(asteval.RaisedError) as errinf:
+            self.interp("raise NameError('bob')")
+        self.check_user_error(errinf, NameError, 'bob')
 
     def test_tryexcept(self):
         """test try/except"""
@@ -660,12 +639,15 @@ class TestEval(TestCase):
         self.isvalue("a", 3)
         self.interp("print(fcn)")
         self.check_output('<Procedure fcn(x, scale=')
-        self.interp("a = fcn()")
-        self.check_error('TypeError', 'takes at least 1 arguments, got 0')
-        self.interp("a = fcn(3,4,5,6,7)")
-        self.check_error('TypeError', 'expected at most 2, got')
-        self.interp("a = fcn(77.0, other='what?')")
-        self.check_error('TypeError', 'extra keyword arguments for')
+        with raises(asteval.UserError) as errinf:
+            self.interp("a = fcn()")
+        self.check_user_error(errinf, TypeError, 'takes at least 1 arguments, got 0')
+        with raises(asteval.UserError) as errinf:
+            self.interp("a = fcn(3,4,5,6,7)")
+        self.check_user_error(errinf, TypeError, 'expected at most 2, got')
+        with raises(asteval.UserError) as errinf:
+            self.interp("a = fcn(77.0, other='what?')")
+        self.check_user_error(errinf, TypeError, 'extra keyword arguments for')
 
     def test_function_vararg(self):
         """test function with var args"""
@@ -711,12 +693,14 @@ class TestEval(TestCase):
         self.isvalue('o', 4)
         self.interp("o = fcn(x=1, y=2, z=3, t=-2)")
         self.isvalue('o', 4)
-        self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
-        self.check_error('TypeError', 'extra keyword arg')
-        self.interp("o = fcn(x=1, y=2, y=3)")
-        self.check_error('SyntaxError')
-        self.interp("o = fcn(0, 1, 2, 3, 4, 5, 6, 7, True)")
-        self.check_error('TypeError', 'too many arguments')
+        with raises(asteval.UserError) as errinf:
+            self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
+        self.check_user_error(errinf, TypeError, 'extra keyword arg')
+        with raises(SyntaxError) :
+            self.interp("o = fcn(x=1, y=2, y=3)")
+        with raises(asteval.UserError) as errinf:
+            self.interp("o = fcn(0, 1, 2, 3, 4, 5, 6, 7, True)")
+        self.check_user_error(errinf, TypeError, 'too many arguments')
 
     def test_function_kwargs1(self):
         """test function with **kws arg"""
@@ -756,8 +740,9 @@ class TestEval(TestCase):
         self.isvalue('o', 11)
         self.interp("o = fcn(1, y=2)")
         self.isvalue('o', 5)
-        self.interp("o = fcn(1, x=2)")
-        self.check_error('TypeError')
+        with raises(asteval.UserError) as errinf:
+            self.interp("o = fcn(1, x=2)")
+        self.check_user_error(errinf, TypeError)
 
     def test_nested_functions(self):
         setup="""
@@ -796,61 +781,80 @@ class TestEval(TestCase):
     # noinspection PyTypeChecker
     def test_safe_funcs(self):
         self.interp("'*'*(2<<17)")
-        self.check_error(None)
-        self.interp("'*'*(1+2<<17)")
-        self.check_error('RuntimeError')
-        self.interp("'*'*(2<<17) + '*'")
-        self.check_error('RuntimeError')
+        
+        with raises(asteval.OperatorError) as errinf:
+            self.interp("'*'*(1+2<<17)")
+        self.check_user_error(errinf, RuntimeError)
+        with raises(asteval.OperatorError) as errinf:
+            self.interp("'*'*(2<<17) + '*'")
+        self.check_user_error(errinf, RuntimeError)
         self.interp("10**10000")
-        self.check_error(None)
-        self.interp("10**10001")
-        self.check_error('RuntimeError')
+        with raises(asteval.OperatorError) as errinf:
+            self.interp("10**10001")
+        self.check_user_error(errinf, RuntimeError)
         self.interp("1<<1000")
-        self.check_error(None)
-        self.interp("1<<1001")
-        self.check_error('RuntimeError')
+        with raises(asteval.OperatorError) as errinf:
+            self.interp("1<<1001")
+        self.check_user_error(errinf, RuntimeError)
 
     def test_safe_open(self):
-        self.interp('open("foo1", "wb")')
-        self.check_error('RuntimeError')
-        self.interp('open("foo2", "rb")')
-        self.check_error('FileNotFoundError' if PY33Plus else 'IOError')
-        self.interp('open("foo3", "rb", 2<<18)')
-        self.check_error('RuntimeError')
+        with raises(asteval.BuiltinError) as errinf:
+            self.interp('open("foo1", "wb")')
+        self.check_user_error(errinf, RuntimeError)
+        with raises(asteval.BuiltinError) as errinf:
+            self.interp('open("foo2", "rb")')
+        self.check_user_error(errinf, FileNotFoundError if PY33Plus else IOError)
+        with raises(asteval.BuiltinError) as errinf:
+            self.interp('open("foo3", "rb", 2<<18)')
+        self.check_user_error(errinf, RuntimeError)
 
     def test_dos(self):
         self.interp.max_time = 3
-        self.interp("""for x in range(2<<21): pass""")
-        self.check_error('RuntimeError', 'time limit')
-        self.interp("""while True: pass""")
-        self.check_error('RuntimeError', 'time limit')
-        self.interp("""def foo(): return foo()\nfoo()""")
+        with raises(asteval.TimeOutError):
+            self.interp("""for x in range(2<<21): pass""")
+        with raises(asteval.TimeOutError):
+            self.interp("""while True: pass""")
         if PY35Plus:
-            self.check_error('RecursionError')
+            experr = RecursionError
         else:
-            self.check_error('RuntimeError')
+            experr = RuntimeError
+        with raises(asteval.UserError) as errinf:
+            self.interp("""def foo(): return foo()\nfoo()""")
+        self.check_user_error(errinf, experr)
 
 
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
-        self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
+        with raises(asteval.UserError) as errinf:
+            self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
     fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
 )()""")
-        self.check_error('NotImplementedError', 'Lambda')  # Safe, lambda is not supported
+        self.check_user_error(errinf, NotImplementedError, "Lambda")
+        # Safe, lambda is not supported
 
-        self.interp(
-            """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
         if PY3:
-            self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
+            experr = asteval.UserError
         else:
-            self.check_error('SyntaxError')
-        self.interp("9**9**9**9**9**9**9**9")
-        self.check_error('RuntimeError')  # Safe, safe_pow() catches this
-        self.interp(
-            "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
-        self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
-        self.interp("compile('xxx')")
-        self.check_error('NameError')  # Safe, compile() is not supported
+            experr = SyntaxError
+        with raises(experr) as errinf:
+            self.interp(
+                """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
+        if PY3:
+            self.check_user_error(errinf, TypeError)
+        
+        
+        with raises(asteval.UserError) as errinf:
+            self.interp("9**9**9**9**9**9**9**9")
+        self.check_user_error(errinf, RuntimeError) # Safe, safe_pow() catches this
+        
+        with raises(MemoryError):
+            self.interp(
+                "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
+            # Hmmm, this is caught, but its still concerning...
+        
+        with raises(asteval.UserError) as errinf:
+            self.interp("compile('xxx')")
+        self.check_user_error(errinf, NameError)  # Safe, compile() is not supported
 
     def test_exit_value(self):
         """test expression eval - last exp. is returned by interpreter"""
@@ -867,8 +871,9 @@ class TestEval(TestCase):
     def test_removenodehandler(self):
         handler = self.interp.remove_nodehandler('ifexp')
         self.interp('testval = 300')
-        self.interp('bogus = 3 if testval > 100 else 1')
-        self.check_error('NotImplementedError')
+        with raises(asteval.UserError) as errinf:
+            self.interp('bogus = 3 if testval > 100 else 1')
+        self.check_user_error(errinf, NotImplementedError)
 
         self.interp.set_nodehandler('ifexp', handler)
         self.interp('bogus = 3 if testval > 100 else 1')
@@ -930,12 +935,24 @@ class TestEval(TestCase):
         
         aeval = Interpreter(usersyms=usersyms, readonly_symbols={"a", "b", "c", "d", "foo", "bar"})
         
-        aeval("a = 20")
-        aeval("def b(): return 100")
-        aeval("c += 1")
-        aeval("del d")
-        aeval("def foo(): return 55")
-        aeval("bar = None")
+        with raises(asteval.UserError) as errinf:
+            aeval("a = 20")
+        self.check_user_error(errinf, NameError)
+        with raises(asteval.UserError) as errinf:
+            aeval("def b(): return 100")
+        self.check_user_error(errinf, NameError)
+        with raises(asteval.UserError) as errinf:
+            aeval("c += 1")
+        self.check_user_error(errinf, NameError)
+        with raises(asteval.UserError) as errinf:
+            aeval("del d")
+        self.check_user_error(errinf, NameError)
+        with raises(asteval.UserError) as errinf:
+            aeval("def foo(): return 55")
+        self.check_user_error(errinf, NameError)
+        with raises(asteval.UserError) as errinf:
+            aeval("bar = None")
+        self.check_user_error(errinf, NameError)
         aeval("x = 21")
         aeval("y += a")
         
@@ -959,7 +976,9 @@ class TestEval(TestCase):
         
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
-        aeval2("def abs(x): return x*2")
+        with raises(asteval.UserError) as errinf:
+            aeval2("def abs(x): return x*2")
+        self.check_user_error(errinf, NameError)
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
         
