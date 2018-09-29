@@ -597,6 +597,16 @@ class TestEval(TestCase):
             """))
         self.isvalue('x', -1)
 
+        self.interp(textwrap.dedent("""
+            x = 15
+            try:
+                raise Exception()
+                x = 20
+            except:
+                pass
+            """))
+        self.isvalue('x', 15)
+
     def test_tryelsefinally(self):
 
         self.interp(textwrap.dedent("""
@@ -808,12 +818,8 @@ class TestEval(TestCase):
             self.interp('open("foo3", "rb", 2<<18)')
         self.check_user_error(errinf, RuntimeError)
 
-    def test_dos(self):
-        self.interp.max_time = 3
-        with raises(asteval.TimeOutError):
-            self.interp("""for x in range(2<<21): pass""")
-        with raises(asteval.TimeOutError):
-            self.interp("""while True: pass""")
+
+    def test_recursionlimit(self):
         if PY35Plus:
             experr = RecursionError
         else:
@@ -821,6 +827,13 @@ class TestEval(TestCase):
         with raises(asteval.UserError) as errinf:
             self.interp("""def foo(): return foo()\nfoo()""")
         self.check_user_error(errinf, experr)
+
+    def test_runtime(self):
+        self.interp.max_time = 3
+        with raises(asteval.TimeOutError):
+            self.interp("""for x in range(2<<21): pass""")
+        with raises(asteval.TimeOutError):
+            self.interp("""while True: pass""")
 
 
     def test_kaboom(self):
@@ -915,13 +928,13 @@ class TestEval(TestCase):
         assert_allclose(x1, 0.50,     rtol=0.001)
         assert_allclose(x2, 0.866025, rtol=0.001)
         assert_allclose(x3, 1.00,     rtol=0.001)
-    
+
     def test_readonly_symbols(self):
-        
+
         def foo():
             return 31
-        
-        
+
+
         usersyms = {
             "a": 10,
             "b": 11,
@@ -932,7 +945,7 @@ class TestEval(TestCase):
             "x": 5,
             "y": 7
         }
-        
+
         aeval = Interpreter(usersyms=usersyms, readonly_symbols={"a", "b", "c", "d", "foo", "bar"})
         
         with raises(asteval.UserError) as errinf:
@@ -955,7 +968,7 @@ class TestEval(TestCase):
         self.check_user_error(errinf, NameError)
         aeval("x = 21")
         aeval("y += a")
-        
+
         assert(aeval("a") == 10)
         assert(aeval("b") == 11)
         assert(aeval("c") == 12)
@@ -964,16 +977,16 @@ class TestEval(TestCase):
         assert(aeval("bar()") == 31)
         assert(aeval("x") == 21)
         assert(aeval("y") == 17)
-        
-        
+
+
         assert(aeval("abs(8)") == 8)
         assert(aeval("abs(-8)") == 8)
         aeval("def abs(x): return x*2")
         assert(aeval("abs(8)") == 16)
         assert(aeval("abs(-8)") == -16)
-        
+
         aeval2 = Interpreter(builtins_readonly=True)
-        
+
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
         with raises(asteval.UserError) as errinf:
@@ -981,8 +994,8 @@ class TestEval(TestCase):
         self.check_user_error(errinf, NameError)
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
-        
-        
+
+
 
 
 

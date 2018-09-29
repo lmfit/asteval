@@ -48,7 +48,7 @@ import six
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
-                       valid_symbol_name, is_recursion_error)
+                       valid_symbol_name, is_recursion_error, is_exception)
 from .exceptions import (EvalError, TimeOutError, UserError,
                          RaisedError, BuiltinError, OperatorError)
 from .scope import Scope
@@ -111,7 +111,7 @@ class Interpreter(object):
     no_print : bool
         whether to support `print`.
     max_time : float
-        deprecated.  max run time in seconds (see Note 2) [30.0]
+        deprecated, unreliable. max_time will be dropped soon. (default 86400)
     readonly_symbols : iterable or `None`
         symbols that the user can not assign to
     builtins_readonly : bool
@@ -121,7 +121,7 @@ class Interpreter(object):
     -----
     1. setting `minimal=True` is equivalent to setting all
        `no_***` options to `True`.
-    2. max_time is not reliable and support may be dropped soon.
+    2. max_time is not reliable and no longer supported -- the keyword will be dropped soon.
     """
 
     def __init__(self, symtable=None, usersyms=None, writer=None,
@@ -129,7 +129,7 @@ class Interpreter(object):
                  no_if=False, no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
-                 no_raise=False, no_print=False, max_time=30,
+                 no_raise=False, no_print=False, max_time=86400,
                  readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
@@ -696,7 +696,7 @@ class Interpreter(object):
             err = uerr.error
             for handler in node.handlers:
                 htype = self.run(handler.type)
-                if not (isinstance(htype, BaseException) or issubclass(htype, BaseException)):
+                if handler.type is not None and not is_exception(htype):
                     self.raise_exception(UserError, TypeError("catching classes that do not inherit from BaseException is not allowed"), node)
                 if handler.type is None or isinstance(err, htype):
                     if handler.name is not None:
@@ -732,7 +732,7 @@ class Interpreter(object):
         else:
             exception = self.run(excnode)
         
-        if not (isinstance(exception, BaseException) or issubclass(exception, BaseException)):
+        if not is_exception(exception):
             self.raise_exception(UserError, TypeError("exceptions must derive from BaseException"), node)
         
         if msgnode is not None:
@@ -743,7 +743,7 @@ class Interpreter(object):
         if cause is None:
             self.raise_exception(RaisedError, exception, node)
         else:
-            if not (isinstance(cause, BaseException) or issubclass(cause, BaseException)):
+            if not is_exception(cause):
                 self.raise_exception(UserError, TypeError("exception causes must derive from BaseException"))
             self.raise_exception(RaisedError, exception, node, cause)
         
@@ -804,7 +804,7 @@ class Interpreter(object):
         if node.decorator_list:
             raise Warning("decorated procedures not supported!")
         kwargs = []
-        
+
         if not valid_symbol_name(node.name) or node.name in self.readonly_symbols:
             errmsg = "invalid function name (reserved word?) %s" % node.name
             self.raise_exception(UserError, NameError(errmsg), node)
