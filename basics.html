@@ -4,20 +4,12 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript">
-      var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    './',
-        VERSION:     '0.9.12',
-        COLLAPSE_INDEX: false,
-        FILE_SUFFIX: '.html',
-        HAS_SOURCE:  true,
-        SOURCELINK_SUFFIX: '.txt'
-      };
-    </script>
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
@@ -26,8 +18,7 @@
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="asteval reference" href="api.html" />
     <link rel="prev" title="Motivation for asteval" href="motivation.html" /> 
-  </head>
-  <body>
+  </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
       <ul>
@@ -77,12 +68,14 @@
    </div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
+    <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <div><input type="text" name="q" /></div>
-      <div><input type="submit" value="Go" /></div>
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
       <input type="hidden" name="check_keywords" value="yes" />
       <input type="hidden" name="area" value="default" />
     </form>
+    </div>
 </div>
 <script type="text/javascript">$('#searchbox').show(0);</script>
         </div>
@@ -101,13 +94,13 @@ most important features.  Further details can be found in the next chapter
 <div class="section" id="creating-and-using-an-asteval-interpreter">
 <h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Permalink to this headline">¶</a></h2>
 <p>The asteval module is very easy to use.  Import the module and create an Interpreter:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>and now you have an embedded interpreter for a procedural, mathematical language
 that is very much like python:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print x&#39;</span><span class="p">)</span>
 <span class="go">1.73205080757</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;for i in range(10):</span>
@@ -130,9 +123,9 @@ that is very much like python:</p>
 <h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Permalink to this headline">¶</a></h2>
 <p>The symbol table (that is, the mapping between variable and function names
 and the underlying objects) is a simple dictionary held in the
-<code class="xref py py-attr docutils literal"><span class="pre">symtable</span></code> attribute of the interpreter, and can be read or written
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code> attribute of the interpreter, and can be read or written
 to:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="go">1.73205080757</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
@@ -143,7 +136,7 @@ to:</p>
 <p>Note here the use of true division even though the operands are integers.</p>
 <p>As with Python itself, valid symbol names must match the basic regular
 expression pattern:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">valid_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z_</span><span class="p">][</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">*</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">valid_name</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z_</span><span class="p">][</span><span class="n">a</span><span class="o">-</span><span class="n">zA</span><span class="o">-</span><span class="n">Z0</span><span class="o">-</span><span class="mi">9</span><span class="n">_</span><span class="p">]</span><span class="o">*</span>
 </pre></div>
 </div>
 <p>In addition, certain names are reserved in Python, and cannot be used
@@ -193,7 +186,7 @@ imported from <a class="reference external" href="http://docs.scipy.org/doc/nump
 <p>If-then-else blocks, for-loops (including the optional <em>else</em> block) and
 while loops (also including optional <em>else</em> block) are supported, and work
 exactly as they do in python.  Thus:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="go">sum = 0</span>
 <span class="go">for i in range(10):</span>
 <span class="go">    sum += i*sqrt(*1.0)</span>
@@ -208,18 +201,18 @@ exactly as they do in python.  Thus:</p>
 </div>
 <div class="section" id="printing">
 <h2>printing<a class="headerlink" href="#printing" title="Permalink to this headline">¶</a></h2>
-<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.6)"><code class="xref py py-func docutils literal"><span class="pre">print()</span></code></a> function (for
-Python 3) and <code class="xref py py-data docutils literal"><span class="pre">print</span></code> statement (for Python 2).  That is, the
+<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function (for
+Python 3) and <code class="xref py py-data docutils literal notranslate"><span class="pre">print</span></code> statement (for Python 2).  That is, the
 behavior mimics the version of Python used.</p>
-<p>You can change where output is sent with the <code class="docutils literal"><span class="pre">writer</span></code> argument when
+<p>You can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when
 creating the interpreter.  By default, outputs are sent to
-<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.6)"><code class="xref py py-data docutils literal"><span class="pre">sys.stdout</span></code></a>.</p>
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.7)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
 </div>
 <div class="section" id="writing-functions">
 <h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this headline">¶</a></h2>
 <p>User-defined functions can be written and executed, as in python with a
 <em>def</em> block, for example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>
 <span class="gp">... </span><span class="s2">return (a + b)/norm</span>
@@ -235,15 +228,15 @@ creating the interpreter.  By default, outputs are sent to
 <p>asteval monitors and caches exceptions in the evaluated code.  Brief error
 messages are printed (with Python’s print statement or function, and so
 using standard output by default), and the full set of exceptions is kept
-in the <code class="xref py py-attr docutils literal"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal"><span class="pre">Interpreter</span></code> instance.  This
-<code class="xref py py-attr docutils literal"><span class="pre">error</span></code> attribute is a list of instances of the asteval
-<code class="xref py py-class docutils literal"><span class="pre">ExceptionHolder</span></code> class, which is accessed through the
-<code class="xref py py-meth docutils literal"><span class="pre">get_error()</span></code> method.  The <code class="xref py py-attr docutils literal"><span class="pre">error</span></code> attribute is reset to an empty
-list at the beginning of each <code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code>, so that errors are from only
-the most recent <code class="xref py py-meth docutils literal"><span class="pre">eval()</span></code>.</p>
+in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> instance.  This
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute is a list of instances of the asteval
+<code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionHolder</span></code> class, which is accessed through the
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">get_error()</span></code> method.  The <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute is reset to an empty
+list at the beginning of each <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code>, so that errors are from only
+the most recent <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code>.</p>
 <p>Thus, to handle and re-raise exceptions from your Python code in a simple
 REPL loop, you’d want to do something similar to</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">inp_string</span> <span class="o">=</span> <span class="n">raw_input</span><span class="p">(</span><span class="s1">&#39;dsl:&gt;&#39;</span><span class="p">)</span>
@@ -284,7 +277,7 @@ REPL loop, you’d want to do something similar to</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.6.6.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.7.8.
     </div>
   </body>
 </html>
