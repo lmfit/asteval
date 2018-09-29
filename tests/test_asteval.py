@@ -828,17 +828,19 @@ class TestEval(TestCase):
         self.interp('open("foo3", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
-    def test_dos(self):
-        self.interp.max_time = 3
-        self.interp("""for x in range(2<<21): pass""")
-        self.check_error('RuntimeError', 'time limit')
-        self.interp("""while True: pass""")
-        self.check_error('RuntimeError', 'time limit')
+    def test_recursionlimit(self):
         self.interp("""def foo(): return foo()\nfoo()""")
         if PY35Plus:
             self.check_error('RecursionError')
         else:
             self.check_error('RuntimeError')
+
+    def test_runtime(self):
+        self.interp.max_time = 3
+        self.interp("""for x in range(2<<21): pass""")
+        self.check_error('RuntimeError', 'time limit')
+        self.interp("""while True: pass""")
+        self.check_error('RuntimeError', 'time limit')
 
 
     def test_kaboom(self):
@@ -920,13 +922,13 @@ class TestEval(TestCase):
         assert_allclose(x1, 0.50,     rtol=0.001)
         assert_allclose(x2, 0.866025, rtol=0.001)
         assert_allclose(x3, 1.00,     rtol=0.001)
-    
+
     def test_readonly_symbols(self):
-        
+
         def foo():
             return 31
-        
-        
+
+
         usersyms = {
             "a": 10,
             "b": 11,
@@ -937,9 +939,9 @@ class TestEval(TestCase):
             "x": 5,
             "y": 7
         }
-        
+
         aeval = Interpreter(usersyms=usersyms, readonly_symbols={"a", "b", "c", "d", "foo", "bar"})
-        
+
         aeval("a = 20")
         aeval("def b(): return 100")
         aeval("c += 1")
@@ -948,7 +950,7 @@ class TestEval(TestCase):
         aeval("bar = None")
         aeval("x = 21")
         aeval("y += a")
-        
+
         assert(aeval("a") == 10)
         assert(aeval("b") == 11)
         assert(aeval("c") == 12)
@@ -957,23 +959,23 @@ class TestEval(TestCase):
         assert(aeval("bar()") == 31)
         assert(aeval("x") == 21)
         assert(aeval("y") == 17)
-        
-        
+
+
         assert(aeval("abs(8)") == 8)
         assert(aeval("abs(-8)") == 8)
         aeval("def abs(x): return x*2")
         assert(aeval("abs(8)") == 16)
         assert(aeval("abs(-8)") == -16)
-        
+
         aeval2 = Interpreter(builtins_readonly=True)
-        
+
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
         aeval2("def abs(x): return x*2")
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
-        
-        
+
+
 
 
 
