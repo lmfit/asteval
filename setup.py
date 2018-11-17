@@ -12,6 +12,7 @@ simple, flat namespace.
 Expressions can be compiled into ast node for later evaluation,
 using the values in the symbol table current at evaluation time.
 """
+install_reqs = ['numpy', 'six']
 
 setup(name='asteval',
       version=versioneer.get_version(),
@@ -19,26 +20,16 @@ setup(name='asteval',
       author='Matthew Newville',
       author_email='newville@cars.uchicago.edu',
       url='http://github.com/newville/asteval',
-      license='MIT',
+      license = 'OSI Approved :: MIT License',
+      python_requires='>=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*',
       description="Safe, minimalistic evaluator of python expression using ast module",
       long_description=long_description,
       packages=['asteval'],
-      classifiers=[
-          'Intended Audience :: End Users/Desktop',
-          'Intended Audience :: Developers',
-          'Intended Audience :: Science/Research',
-          'License :: OSI Approved :: BSD License',
-          'Operating System :: MacOS :: MacOS X',
-          'Operating System :: Microsoft :: Windows',
-          'Operating System :: POSIX',
-          'Programming Language :: Python',
-          'Programming Language :: Python :: 2.7',
-          'Programming Language :: Python :: 3.3',
-          'Programming Language :: Python :: 3.4',
-          'Programming Language :: Python :: 3.5',
-      ],
-      install_requires=[
-            'numpy>=1.6',
-            'six'
+      install_requires=install_reqs,
+      classifiers=['Intended Audience :: End Users/Desktop',
+                   'Intended Audience :: Developers',
+                   'Intended Audience :: Science/Research',
+                   'Operating System :: OS Independent',
+                   'Programming Language :: Python',
       ],
       )
