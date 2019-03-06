@@ -408,6 +408,11 @@ class TestEval(TestCase):
         self.interp('nx = 1')
         self.interp('nx1 = 1')
 
+        if PY3:
+            # use \u escape b/c python 2 complains about file encoding
+            self.interp('\u03bb = 1')
+            self.interp('\u03bb1 = 1')
+
     def test_syntaxerrors_1(self):
         """assignment syntax errors test"""
         for expr in ('class = 1', 'for = 1', 'if = 1', 'raise = 1',

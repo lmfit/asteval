@@ -5,10 +5,18 @@ utility functions for asteval
    The University of Chicago
 """
 from __future__ import division, print_function
+import io
 import re
 import ast
 import math
-from sys import exc_info
+from sys import exc_info, version_info
+from tokenize import NAME as tk_NAME
+
+if version_info >= (3, 0):
+    from tokenize import tokenize as generate_tokens, ENCODING as tk_ENCODING
+else:
+    from tokenize import generate_tokens
+    tk_ENCODING = None
 
 HAS_NUMPY = False
 numpy = None
@@ -248,7 +256,12 @@ def valid_symbol_name(name):
     """
     if name in RESERVED_WORDS:
         return False
-    return NAME_MATCH(name) is not None
+
+    gen = generate_tokens(io.BytesIO(name.encode('utf-8')).readline)
+    typ, _, start, end, _ = next(gen)
+    if typ == tk_ENCODING:
+        typ, _, start, end, _ = next(gen)
+    return typ == tk_NAME and start == (1, 0) and end == (1, len(name))
 
 
 def op2func(op):
