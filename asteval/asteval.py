@@ -753,7 +753,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
     def on_if(self, node):  # ('test', 'body', 'orelse')
         """regular if-then-else statement"""
         test = self.run(node.test)
-        self.ui_tracer("{}If statement evaluated as `{}`".format(self.get_lineno_label(node), bool(test)))
+        # self.ui_tracer("{}If statement evaluated as `{}`".format(self.get_lineno_label(node), bool(test)))
         if test:
             block = node.body
         else:
@@ -767,7 +767,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
     def on_ifexp(self, node):  # ('test', 'body', 'orelse')
         """if expressions"""
         test = self.run(node.test)
-        self.ui_tracer("{}If else expression evaluated as `{}`".format(self.get_lineno_label(node), test))
+        # self.ui_tracer("{}If else expression evaluated as `{}`".format(self.get_lineno_label(node), test))
         if test:
             expr = node.body
         else:
@@ -989,8 +989,10 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             self.ui_tracer('{}Function `{}({})` raised on exception: {}.'
                            .format(self.get_lineno_label(node), name, self.truncate(arg_str), str(e)))
 
-            self.raise_exception(node, exc=e, msg="Error calling `%s()`: %s" % (name, str(e)))
-            return
+            self.error = e
+            msg = "Error calling `%s()`: %s" % (name, str(e))
+            self.ui_tracer(" Exception `{}` raised: {}".format(get_class_name(e), msg))
+            raise
 
         if name not in ('pprint', 'print', 'jprint', 'print_'):
             self.ui_tracer('{}Function `{}({})` returned {}.'
