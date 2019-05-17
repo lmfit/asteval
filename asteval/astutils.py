@@ -9,6 +9,7 @@ import io
 import re
 import ast
 import math
+import numbers
 from sys import exc_info, version_info
 from tokenize import NAME as tk_NAME
 
@@ -182,8 +183,13 @@ LOCALFUNCS = {'open': _open, 'type': _type}
 
 def safe_pow(base, exp):
     """safe version of pow"""
-    if exp > MAX_EXPONENT:
-        raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
+    if isinstance(exp, numbers.Number):
+        if exp > MAX_EXPONENT:
+            raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
+    elif HAS_NUMPY:
+        if isinstance(exp, numpy.ndarray):
+            if numpy.max(exp) > MAX_EXPONENT:
+                raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
     return base ** exp
 
 
@@ -203,8 +209,13 @@ def safe_add(a, b):
 
 def safe_lshift(a, b):
     """safe version of lshift"""
-    if b > MAX_SHIFT:
-        raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
+    if isinstance(b, numbers.Number):
+        if b > MAX_SHIFT:
+            raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
+    elif HAS_NUMPY:
+        if isinstance(b, numpy.ndarray):
+            if numpy.max(b) > MAX_SHIFT:
+                raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
     return a << b
 
 
