@@ -820,9 +820,17 @@ class TestEval(TestCase):
         self.check_error(None)
         self.interp("10**10001")
         self.check_error('RuntimeError')
+        self.interp("10**array([10000, 10000, 10000])")
+        self.check_error(None)
+        self.interp("10**array([10000, 10000, 10001])")
+        self.check_error('RuntimeError')
         self.interp("1<<1000")
         self.check_error(None)
         self.interp("1<<1001")
+        self.check_error('RuntimeError')
+        self.interp("1<<array([1000, 1000, 1000])")
+        self.check_error(None)
+        self.interp("1<<array([1000, 1000, 1001])")
         self.check_error('RuntimeError')
 
     def test_safe_open(self):
