@@ -820,18 +820,11 @@ class TestEval(TestCase):
         self.check_error(None)
         self.interp("10**10001")
         self.check_error('RuntimeError')
-        self.interp("10**array([10000, 10000, 10000])")
-        self.check_error(None)
-        self.interp("10**array([10000, 10000, 10001])")
-        self.check_error('RuntimeError')
         self.interp("1<<1000")
         self.check_error(None)
         self.interp("1<<1001")
         self.check_error('RuntimeError')
-        self.interp("1<<array([1000, 1000, 1000])")
-        self.check_error(None)
-        self.interp("1<<array([1000, 1000, 1001])")
-        self.check_error('RuntimeError')
+
 
     def test_safe_open(self):
         self.interp('open("foo1", "wb")')
@@ -941,7 +934,6 @@ class TestEval(TestCase):
         def foo():
             return 31
 
-
         usersyms = {
             "a": 10,
             "b": 11,
@@ -989,8 +981,31 @@ class TestEval(TestCase):
         assert(aeval2("abs(-8)") == 8)
 
 
+    def test_chained_compparisons(self):
+        self.interp('a = 7')
+        self.interp('b = 12')
+        self.interp('c = 19')
+        self.interp('d = 30')
+        self.assertTrue(self.interp('a < b < c < d'))
+        self.assertFalse(self.interp('a < b < c/88 < d'))
+        self.assertFalse(self.interp('a < b < c < d/2'))
 
+    def test_array_compparisons(self):
+        self.interp("sarr = arange(8)")
+        sarr = np.arange(8)
+        o1 = self.interp("sarr < 4.3")
+        assert(np.all(o1 == (sarr < 4.3)))
+        o1 = self.interp("sarr == 4")
+        assert(np.all(o1 == (sarr == 4)))
 
+        self.interp('2 < sarr < 5')
+        self.check_error('ValueError')
+
+    def test_minimal(self):
+        aeval = Interpreter(builtins_readonly=True, minimal=True)
+        aeval("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
+        self.assertTrue(aeval("a_dict['a'] == 1"))
+        self.assertTrue(aeval("a_dict['c'] == 3"))
 
 class TestCase2(unittest.TestCase):
     def test_stringio(self):

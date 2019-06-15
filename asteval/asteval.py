@@ -595,17 +595,22 @@ class Interpreter(object):
         return val
 
     def on_compare(self, node):  # ('left', 'ops', 'comparators')
-        """comparison operators"""
+        """comparison operators, including chained comparisons (a<b<c)"""
         lval = self.run(node.left)
-        out = True
+        results = []
         for op, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
-            out = op2func(op)(lval, rval)
+            ret = op2func(op)(lval, rval)
+            results.append(ret)
+            if (self.use_numpy and not isinstance(ret, numpy.ndarray)) and not ret:
+                break
             lval = rval
-            if self.use_numpy and isinstance(out, numpy.ndarray) and out.any():
-                break
-            elif not out:
-                break
+        if len(results) == 1:
+            return results[0]
+        else:
+            out = True
+            for r in results:
+                out = out and r
         return out
 
     def on_print(self, node):    # ('dest', 'values', 'nl')

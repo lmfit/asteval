@@ -1,19 +1,16 @@
 # Config file for automatic testing at travis-ci.org
 
 language: python
-sudo: falses
+sudo: false
 
 python:
     - 2.7
     - 3.5
     - 3.6
+    - 3.7-dev
 
 before_install:
-    - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-          wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh;
-      else
-          wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
-      fi
+    - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
     - bash miniconda.sh -b -p $HOME/miniconda
     - export PATH="$HOME/miniconda/bin:$PATH"
     - hash -r
@@ -22,7 +19,8 @@ before_install:
     - conda info -a
 
 install:
-    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy six pip pytest coverage
+    - if [[ $TRAVIS_PYTHON_VERSION != 3.7-dev ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy six pytest coverage; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.7-dev ]]; then conda create -q -n test_env python=3.7 numpy six pytest coverage; fi
     - source activate test_env
     - python setup.py install
     - pip install codecov
