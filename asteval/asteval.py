@@ -600,8 +600,9 @@ class Interpreter(object):
         results = []
         for op, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
-            results.append(op2func(op)(lval, rval))
-            if (self.use_numpy and not isinstance(out, numpy.ndarray)) and not out:
+            ret = op2func(op)(lval, rval)
+            results.append(ret)
+            if (self.use_numpy and not isinstance(ret, numpy.ndarray)) and not ret:
                 break
             lval = rval
         if len(results) == 1:
