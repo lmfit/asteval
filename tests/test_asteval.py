@@ -934,7 +934,6 @@ class TestEval(TestCase):
         def foo():
             return 31
 
-
         usersyms = {
             "a": 10,
             "b": 11,
@@ -1002,6 +1001,11 @@ class TestEval(TestCase):
         self.interp('2 < sarr < 5')
         self.check_error('ValueError')
 
+    def test_minimal(self):
+        aeval = Interpreter(builtins_readonly=True, minimal=True)
+        aeval("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
+        self.assertTrue(aeval("a_dict['a'] == 1"))
+        self.assertTrue(aeval("a_dict['c'] == 3"))
 
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
