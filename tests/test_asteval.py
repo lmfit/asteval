@@ -841,14 +841,6 @@ class TestEval(TestCase):
         else:
             self.check_error('RuntimeError')
 
-    def test_runtime(self):
-        self.interp.max_time = 3
-        self.interp("""for x in range(2<<21): pass""")
-        self.check_error('RuntimeError', 'time limit')
-        self.interp("""while True: pass""")
-        self.check_error('RuntimeError', 'time limit')
-
-
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
         self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
