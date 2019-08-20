@@ -6,7 +6,11 @@ sudo: false
 python:
     - 3.5
     - 3.6
-    - 3.7-dev
+    - 3.7
+
+env:
+    - version=without_numpy
+    - version=with_numpy
 
 before_install:
     - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
@@ -18,8 +22,10 @@ before_install:
     - conda info -a
 
 install:
-    - if [[ $TRAVIS_PYTHON_VERSION != 3.7-dev ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy six pytest coverage; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == 3.7-dev ]]; then conda create -q -n test_env python=3.7 numpy six pytest coverage; fi
+    - if [[ $version == without_numpy && $TRAVIS_PYTHON_VERSION != 3.7 ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION pytest coverage; fi
+    - if [[ $version == with_numpy    && $TRAVIS_PYTHON_VERSION != 3.7 ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy pytest coverage; fi
+    - if [[ $version == without_numpy && $TRAVIS_PYTHON_VERSION == 3.7 ]]; then conda create -q -n test_env python=3.7 pytest coverage; fi
+    - if [[ $version == with_numpy    && $TRAVIS_PYTHON_VERSION == 3.7 ]]; then conda create -q -n test_env python=3.7 numpy pytest coverage; fi
     - source activate test_env
     - python setup.py install
     - pip install codecov
