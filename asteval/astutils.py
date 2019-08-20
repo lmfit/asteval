@@ -10,14 +10,10 @@ import re
 import ast
 import math
 import numbers
-from sys import exc_info, version_info
+from sys import exc_info
 from tokenize import NAME as tk_NAME
 
-if version_info >= (3, 0):
-    from tokenize import tokenize as generate_tokens, ENCODING as tk_ENCODING
-else:
-    from tokenize import generate_tokens
-    tk_ENCODING = None
+from tokenize import tokenize as generate_tokens, ENCODING as tk_ENCODING
 
 HAS_NUMPY = False
 numpy = None

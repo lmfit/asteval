@@ -42,9 +42,7 @@ from __future__ import division, print_function
 import ast
 import time
 import inspect
-from sys import exc_info, stdout, stderr, version_info
-
-import six
+from sys import exc_info, stdout, stderr
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
@@ -731,13 +729,9 @@ class Interpreter(object):
                 self.run(tnode)
 
     def on_raise(self, node):    # ('type', 'inst', 'tback')
-        """Raise statement: note difference for python 2 and 3."""
-        if version_info[0] == 3:
-            excnode = node.exc
-            msgnode = node.cause
-        else:
-            excnode = node.type
-            msgnode = node.inst
+        """Raise statement:"""
+        excnode = node.exc
+        msgnode = node.cause
         out = self.run(excnode)
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
@@ -759,7 +753,7 @@ class Interpreter(object):
             args = args + self.run(starargs)
 
         keywords = {}
-        if six.PY3 and func == print:
+        if func == print:
             keywords['file'] = self.writer
 
         for key in node.keywords:
@@ -800,11 +794,8 @@ class Interpreter(object):
             keyval = self.run(node.args.args[idef+offset])
             kwargs.append((keyval, defval))
 
-        if version_info[0] == 3:
-            args = [tnode.arg for tnode in node.args.args[:offset]]
-        else:
-            args = [tnode.id for tnode in node.args.args[:offset]]
 
+        args = [tnode.arg for tnode in node.args.args[:offset]]
         doc = None
         nb0 = node.body[0]
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
@@ -812,11 +803,10 @@ class Interpreter(object):
 
         varkws = node.args.kwarg
         vararg = node.args.vararg
-        if version_info[0] == 3:
-            if isinstance(vararg, ast.arg):
-                vararg = vararg.arg
-            if isinstance(varkws, ast.arg):
-                varkws = varkws.arg
+        if isinstance(vararg, ast.arg):
+            vararg = vararg.arg
+        if isinstance(varkws, ast.arg):
+            varkws = varkws.arg
 
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
                                              lineno=self.lineno,
