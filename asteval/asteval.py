@@ -57,7 +57,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'dict', 'ellipsis', 'excepthandler', 'expr', 'extslice',
              'for', 'functiondef', 'if', 'ifexp', 'index', 'interrupt',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
-             'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
+             'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
 
 class Interpreter(object):
@@ -164,8 +164,6 @@ class Interpreter(object):
             nodes.remove('delete')
         if minimal or no_raise:
             nodes.remove('raise')
-        if minimal or no_print:
-            nodes.remove('print')
         if minimal or no_listcomp:
             nodes.remove('listcomp')
         if minimal or no_augassign:
@@ -605,21 +603,6 @@ class Interpreter(object):
             for r in results:
                 out = out and r
         return out
-
-    def on_print(self, node):    # ('dest', 'values', 'nl')
-        """Note: implements Python2 style print statement, not print()
-        function.
-
-        May need improvement....
-
-        """
-        dest = self.run(node.dest) or self.writer
-        end = ''
-        if node.nl:
-            end = '\n'
-        out = [self.run(tnode) for tnode in node.values]
-        if out and len(self.error) == 0:
-            self._printer(*out, file=dest, end=end)
 
     def _nullprinter(self, *out, **kws):
         """swallow print calls"""
