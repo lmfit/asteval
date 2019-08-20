@@ -9,10 +9,11 @@ Downloading and Installation
 Requirements
 ~~~~~~~~~~~~~~~
 
-The asteval package is supported for use with Python 2.7, 3.5, and 3.6.
-The package may work for Python 2.6, and Python 3.4 or earlier, but no testing
-is done for these out-dated versions.  Asteval will make use of the `numpy`_
-module if available.
+Asteval is a pure python module with no required dependencies outside of the
+standard library.   Asteval will make use of the `numpy`_ module if available.
+
+As of version 0.9.15, the asteval package supports Python 3.5 and higher.
+Versions 0.9.14 and earlier supported Python 2.7 and 3.4.
 
 
 Download and Installation
