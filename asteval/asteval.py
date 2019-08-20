@@ -131,7 +131,10 @@ class Interpreter(object):
                 usersyms = {}
             symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
-        symtable['print'] = self._printer
+        if no_print:
+            symtable['print'] = self._nullprinter
+        else:
+            symtable['print'] = self._printer
 
         self.symtable = symtable
         self._interrupt = None
@@ -619,6 +622,10 @@ class Interpreter(object):
         out = [self.run(tnode) for tnode in node.values]
         if out and len(self.error) == 0:
             self._printer(*out, file=dest, end=end)
+
+    def _nullprinter(self, *out, **kws):
+        """swallow print calls"""
+        pass
 
     def _printer(self, *out, **kws):
         """Generic print function."""
