@@ -990,9 +990,6 @@ class TestEval(TestCase):
         o1 = self.interp("sarr == 4")
         assert(np.all(o1 == (sarr == 4)))
 
-        self.interp('2 < sarr < 5')
-        self.check_error('ValueError')
-
     def test_minimal(self):
         aeval = Interpreter(builtins_readonly=True, minimal=True)
         aeval("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
