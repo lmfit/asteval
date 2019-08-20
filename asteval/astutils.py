@@ -19,6 +19,7 @@ HAS_NUMPY = False
 numpy = None
 try:
     import numpy
+    ndarr = numpy.ndarray
     HAS_NUMPY = True
 except ImportError:
     pass
