@@ -161,19 +161,21 @@ class TestEval(TestCase):
 
     def test_ndarray_index(self):
         """nd array indexing"""
-        self.interp("a_ndarray = 5*arange(20)")
-        assert(self.interp("a_ndarray[2]")  == 10)
-        assert(self.interp("a_ndarray[4]")  == 20)
+        if HAS_NUMPY:
+            self.interp("a_ndarray = 5*arange(20)")
+            assert(self.interp("a_ndarray[2]")  == 10)
+            assert(self.interp("a_ndarray[4]")  == 20)
 
     def test_ndarrayslice(self):
         """array slicing"""
-        self.interp("a_ndarray = arange(200).reshape(10, 20)")
-        self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
-        self.interp("y = arange(20).reshape(4, 5)")
-        self.istrue("y[:,3]  == array([3, 8, 13, 18])")
-        self.istrue("y[...,1]  == array([1, 6, 11, 16])")
-        self.interp("y[...,1] = array([2, 2, 2, 2])")
-        self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
+        if HAS_NUMPY:
+            self.interp("a_ndarray = arange(200).reshape(10, 20)")
+            self.istrue("a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
+            self.interp("y = arange(20).reshape(4, 5)")
+            self.istrue("y[:,3]  == array([3, 8, 13, 18])")
+            self.istrue("y[...,1]  == array([1, 6, 11, 16])")
+            self.interp("y[...,1] = array([2, 2, 2, 2])")
+            self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
 
     def test_while(self):
         """while loops"""
@@ -265,24 +267,41 @@ class TestEval(TestCase):
         """for loops"""
         self.interp(textwrap.dedent("""
             n=0
-            for i in arange(10):
+            for i in range(10):
                 n += i
             """))
         self.isvalue('n', 45)
 
         self.interp(textwrap.dedent("""
             n=0
-            for i in arange(10):
+            for i in range(10):
                 n += i
             else:
                 n = -1
             """))
         self.isvalue('n', -1)
 
+        if HAS_NUMPY:
+            self.interp(textwrap.dedent("""
+                n=0
+                for i in arange(10):
+                    n += i
+                """))
+            self.isvalue('n', 45)
+
+            self.interp(textwrap.dedent("""
+                n=0
+                for i in arange(10):
+                    n += i
+                else:
+                    n = -1
+                """))
+            self.isvalue('n', -1)
+
     def test_for_break(self):
         self.interp(textwrap.dedent("""
             n=0
-            for i in arange(10):
+            for i in range(10):
                 n += i
                 if n > 2:
                     break
@@ -290,6 +309,17 @@ class TestEval(TestCase):
                 n = -1
             """))
         self.isvalue('n', 3)
+        if HAS_NUMPY:
+            self.interp(textwrap.dedent("""
+                n=0
+                for i in arange(10):
+                    n += i
+                    if n > 2:
+                        break
+                else:
+                    n = -1
+                """))
+            self.isvalue('n', 3)
 
     def test_if(self):
         """runtime errors test"""
@@ -350,7 +380,7 @@ class TestEval(TestCase):
             yes = True
             no = False
             nottrue = False
-            a = arange(7)"""))
+            a = range(7)"""))
 
         self.istrue("yes")
         self.isfalse("no")
@@ -393,8 +423,8 @@ class TestEval(TestCase):
         self.isvalue("s1", "a string")
         self.interp('b = (1,2,3)')
         self.isvalue("b", (1, 2, 3))
-        self.interp('a = 1.*arange(10)')
         if HAS_NUMPY:
+            self.interp('a = 1.*arange(10)')
             self.isvalue("a", np.arange(10))
             self.interp('a[1:5] = 1 + 0.5 * arange(4)')
             self.isnear("a", np.array([0., 1., 1.5, 2., 2.5, 5., 6., 7., 8., 9.]))
@@ -451,7 +481,7 @@ class TestEval(TestCase):
         self.interp("zero = 0")
         self.interp("astr ='a string'")
         self.interp("atup = ('a', 'b', 11021)")
-        self.interp("arr  = arange(20)")
+        self.interp("arr  = range(20)")
         for expr, errname in (('x = 1/zero', 'ZeroDivisionError'),
                               ('x = zero + nonexistent', 'NameError'),
                               ('x = zero + astr', 'TypeError'),
