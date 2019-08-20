@@ -12,7 +12,8 @@ simple, flat namespace.
 Expressions can be compiled into ast node for later evaluation,
 using the values in the symbol table current at evaluation time.
 """
-install_reqs = ['numpy']
+install_reqs = []
+test_req = ['numpy', 'pytest']
 
 setup(name='asteval',
       version=versioneer.get_version(),
@@ -26,6 +27,7 @@ setup(name='asteval',
       long_description=long_description,
       packages=['asteval'],
       install_requires=install_reqs,
+      test_requires=test_reqs,
       classifiers=['Intended Audience :: End Users/Desktop',
                    'Intended Audience :: Developers',
                    'Intended Audience :: Science/Research',

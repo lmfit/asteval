@@ -1,6 +1,5 @@
 ##
 ## pip requirements file.  To install dependencies, use
-## 
+##
 ##  pip install -r requirements.txt
-numpy>=1.6
-six
+## numpy>=1.6
