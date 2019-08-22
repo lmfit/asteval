@@ -124,7 +124,7 @@ exactly as they do in python.  Thus:
         sum += i*sqrt(*1.0)
         if i % 4 == 0:
             sum = sum + 1
-    print "sum = ", sum
+    print("sum = ", sum)
     """
     >>> aeval(code)
     sum =  114.049534067
@@ -161,7 +161,7 @@ User-defined functions can be written and executed, as in python with a
 exceptions
 ===============
 
-asteval monitors and caches exceptions in the evaluated code.  Brief error
+Asteval monitors and caches exceptions in the evaluated code.  Brief error
 messages are printed (with Python's print statement or function, and so
 using standard output by default), and the full set of exceptions is kept
 in the :attr:`error` attribute of the :class:`Interpreter` instance.  This

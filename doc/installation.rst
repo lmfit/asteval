@@ -22,7 +22,7 @@ Download and Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The latest stable version of asteval is |release| and is available at `PyPI`_ or as
-a conda package.  That is, you should be able to install asteval with::
+a conda package.  You should be able to install asteval with::
 
    pip install asteval
 
