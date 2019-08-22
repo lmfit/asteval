@@ -17,7 +17,7 @@ def check_pyversion():
     version_major, version_minor = version_info[0],  version_info[1]
     if version_major == 3 and version_minor < 5:
         raise SystemError("Python 3.0 to 3.4 are not supported")
-    if version_major == 3 and version_minor < 7:
+    if version_major == 2 and version_minor < 7:
         raise SystemError("Python 2.6 or earlier are not supported")
     return version_major == 3
 
