@@ -22,7 +22,7 @@ PY3 = version_info > (3, 4)
 if PY3:
     from io import StringIO
 else:
-    from cStringIO ipmort StringIO
+    from cStringIO import StringIO
 
 
 HAS_NUMPY = False
