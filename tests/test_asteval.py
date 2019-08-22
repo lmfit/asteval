@@ -12,9 +12,18 @@ import pytest
 from sys import version_info
 from tempfile import NamedTemporaryFile
 
-from io import StringIO
 
 from asteval import NameFinder, Interpreter, make_symbol_table
+
+if version_info < (3, 5):
+    raise SystemError("Python 3.0 to 3.4 are not supported")
+PY3 = version_info > (3, 4)
+
+if PY3:
+    from io import StringIO
+else:
+    from cStringIO ipmort StringIO
+
 
 HAS_NUMPY = False
 try:
@@ -434,9 +443,10 @@ class TestEval(TestCase):
         self.interp('nx = 1')
         self.interp('nx1 = 1')
 
-        # use \u escape b/c python 2 complains about file encoding
-        self.interp('\u03bb = 1')
-        self.interp('\u03bb1 = 1')
+        if PY3:
+            # use \u escape b/c python 2 complains about file encoding
+            self.interp('\u03bb = 1')
+            self.interp('\u03bb1 = 1')
 
     def test_syntaxerrors_1(self):
         """assignment syntax errors test"""
@@ -618,7 +628,7 @@ class TestEval(TestCase):
         for w in ('True', 'False'):
             self.interp.error = []
             self.interp("%s= 2" % w)
-            self.check_error('SyntaxError')
+            self.check_error('SyntaxError' if PY3 else 'NameError')
 
         for w in ('eval', '__import__'):
             self.interp.error = []
@@ -858,13 +868,13 @@ class TestEval(TestCase):
         self.interp('open("foo1", "wb")')
         self.check_error('RuntimeError')
         self.interp('open("foo2", "rb")')
-        self.check_error('FileNotFoundError')
+        self.check_error('FileNotFoundError' if PY3 else 'IOError')
         self.interp('open("foo3", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
     def test_recursionlimit(self):
         self.interp("""def foo(): return foo()\nfoo()""")
-        self.check_error('RecursionError')
+        self.check_error('RecursionError' if PY3 else 'RuntimeError')
 
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
@@ -875,7 +885,10 @@ class TestEval(TestCase):
 
         self.interp(
             """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
-        self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
+        if PY3:
+            self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
+        else:
+            self.check_error('SyntaxError')
         self.interp("9**9**9**9**9**9**9**9")
         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
         self.interp(

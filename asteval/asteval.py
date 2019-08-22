@@ -42,7 +42,7 @@ from __future__ import division, print_function
 import ast
 import time
 import inspect
-from sys import exc_info, stdout, stderr
+from sys import exc_info, stdout, stderr, version_info
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
@@ -59,6 +59,10 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
+
+if version_info < (3, 5):
+    raise SystemError("Python 3.0 to 3.4 are not supported")
+PY3 = version_info > (3, 4)
 
 class Interpreter(object):
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -712,9 +716,13 @@ class Interpreter(object):
                 self.run(tnode)
 
     def on_raise(self, node):    # ('type', 'inst', 'tback')
-        """Raise statement:"""
-        excnode = node.exc
-        msgnode = node.cause
+        """Raise statement: note difference for python 2 and 3."""
+        if PY3:
+            excnode = node.exc
+            msgnode = node.cause
+        else:
+            excnode = node.type
+            msgnode = node.inst
         out = self.run(excnode)
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
@@ -736,7 +744,7 @@ class Interpreter(object):
             args = args + self.run(starargs)
 
         keywords = {}
-        if func == print:
+        if PY3 and func == print:
             keywords['file'] = self.writer
 
         for key in node.keywords:
@@ -777,8 +785,10 @@ class Interpreter(object):
             keyval = self.run(node.args.args[idef+offset])
             kwargs.append((keyval, defval))
 
-
-        args = [tnode.arg for tnode in node.args.args[:offset]]
+        if PY3:
+            args = [tnode.arg for tnode in node.args.args[:offset]]
+        else:
+            args = [tnode.id for tnode in node.args.args[:offset]]
         doc = None
         nb0 = node.body[0]
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
@@ -786,9 +796,9 @@ class Interpreter(object):
 
         varkws = node.args.kwarg
         vararg = node.args.vararg
-        if isinstance(vararg, ast.arg):
+        if PY3 and isinstance(vararg, ast.arg):
             vararg = vararg.arg
-        if isinstance(varkws, ast.arg):
+        if PY3 and isinstance(varkws, ast.arg):
             varkws = varkws.arg
 
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
