@@ -122,7 +122,7 @@ class Interpreter(object):
                  no_if=False, no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
-                 no_raise=False, no_print=False,
+                 no_raise=False, no_print=False, max_time=None,
                  readonly_symbols=None, builtins_readonly=False):
 
         self.writer = writer or stdout
