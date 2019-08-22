@@ -19,7 +19,7 @@
 
 from .asteval import Interpreter
 from .astutils import (NameFinder, valid_symbol_name,
-                       make_symbol_table, get_ast_names)
+                       make_symbol_table, get_ast_names, check_pyversion)
 from ._version import get_versions
 
 __all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name',

@@ -46,7 +46,7 @@ from sys import exc_info, stdout, stderr, version_info
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
-                       valid_symbol_name)
+                       valid_symbol_name, check_pyversion)
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -60,9 +60,8 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while']
 
-if version_info < (3, 5):
-    raise SystemError("Python 3.0 to 3.4 are not supported")
-PY3 = version_info > (3, 4)
+
+PY3 = check_pyversion()
 
 class Interpreter(object):
     """create an asteval Interpreter: a restricted, simplified interpreter

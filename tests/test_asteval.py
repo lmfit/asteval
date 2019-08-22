@@ -13,11 +13,9 @@ from sys import version_info
 from tempfile import NamedTemporaryFile
 
 
-from asteval import NameFinder, Interpreter, make_symbol_table
+from asteval import NameFinder, Interpreter, make_symbol_table, check_pyversion
 
-if version_info < (3, 5):
-    raise SystemError("Python 3.0 to 3.4 are not supported")
-PY3 = version_info > (3, 4)
+PY3 = check_pyversion()
 
 if PY3:
     from io import StringIO
