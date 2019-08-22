@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>ASTEVAL: Minimal Python AST Evaluator &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -35,7 +33,7 @@
     </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
-<p>Current version: <b>0.9.14</b></p>
+<p>Current version: <b>0.9.15</b></p>
 <p>Downloads:
 <a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
 
@@ -49,13 +47,11 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
 
 
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -78,41 +74,45 @@ language using Python’s <a class="reference external" href="https://docs.pytho
 area of application is the evaluation of mathematical expressions. Because
 of this, mathematical functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module are
 available, and a large number of functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> will be available
-if it is installed on your system.</p>
-<p>In addition to basic mathematical expressions, many parts of the Python
-language are supported by default, including array slicing and
-subscripting, if-then-else conditionals, while loops, for loops, try-except
-blocks, list comprehension, and user-defined functions.  All objects in the
-asteval interpreter are truly python objects, and all built-in data
-structures (strings, dictionaries, tuple, lists, numpy arrays), are
-supported. That is, the asteval mini-language will look and act very much
-like Python itself.</p>
-<p>Still, there are important differences and missing features compared to
-Python. Asteval is by no means an attempt to reproduce Python with its own
-<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  Some of the main differences and absences include:</p>
+if <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> is installed on your system.</p>
+<p>While the emphasis is on basic mathematical expressions, many features of the
+Python language are supported by default.  These features include array
+slicing and subscripting, if-then-else conditionals, while loops, for loops,
+try-except blocks, list comprehension, and user-defined functions.  All
+objects in the asteval interpreter are truly python objects, and all basic
+built-in data structures (strings, dictionaries, tuple, lists, numpy arrays)
+are supported.</p>
+<p>However, Asteval is by no means an attempt to reproduce Python with its own
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  There are important differences and missing features
+compared to Python.  Many of these absences are intentionally trying to make a
+safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some are simply due to the reduced
+requirements for a small embedded min-language. Some of the main differences
+and absences include:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li>Variable and function symbol names are held in a simple symbol
-table - a single dictionary - giving a flat namespace.</li>
-<li>creating classes is not allowed.</li>
-<li>importing modules is not allowed.</li>
-<li>function decorators, generators, yield, and lambda are not supported.</li>
-<li>several builtins (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
+<li><p>Variable and function symbol names are held in a simple symbol
+table - a single dictionary - giving a flat namespace.</p></li>
+<li><p>creating classes is not allowed.</p></li>
+<li><p>importing modules is not allowed.</p></li>
+<li><p>function decorators, generators, yield, and lambda are not supported.</p></li>
+<li><p>Many builtins (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</li>
-<li>Accessing several private object attributes that can provide access to
-the python interpreter are not allowed.</li>
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
+<li><p>Accessing several private object attributes that can provide access to
+the python interpreter are not allowed.</p></li>
 </ol>
 </div></blockquote>
-<p>The result of this makes asteval a decidedly restricted and limited language
-that is focused on mathematical calculations.</p>
-<p>Because asteval is suitable for evaluating user-supplied input strings,
-safety against malicious user input is an important concern.  Asteval tries
-as hard as possible to prevent user-supplied input from crashing the Python
-interpreter or from returning exploitable parts of the Python interpreter.
-In this sense asteval is certainly safer than using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.
-However, asteval is an open source project written by volunteers, and we
-cannot guarantee that it is safe against malicious attacks.</p>
+<p>The effect to make the asteval mini-language look and act very much like
+miniature version of Python itself focused on mathematical calculations, and
+with noticeable limitations.</p>
+<p>Because asteval is suitable for evaluating user-supplied input strings, safety
+against malicious or incompetent user input is an important concern.  Asteval
+tries as hard as possible to prevent user-supplied input from crashing the
+Python interpreter or from returning exploitable parts of the Python
+interpreter.  In this sense asteval is certainly safer than using
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  However, asteval is an open source project written by
+volunteers, and we cannot guarantee that it is completely safe against
+malicious attacks.</p>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Downloading and Installation</a><ul>
@@ -138,7 +138,7 @@ cannot guarantee that it is safe against malicious attacks.</p>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="api.html">asteval reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="api.html#the-interpreter-class">The <code class="docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="api.html#the-interpreter-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#utility-functions">Utility Functions</a></li>
 </ul>
 </li>
@@ -169,7 +169,7 @@ cannot guarantee that it is safe against malicious attacks.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>

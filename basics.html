@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -67,13 +65,11 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -142,10 +138,11 @@ expression pattern:</p>
 <p>In addition, certain names are reserved in Python, and cannot be used
 within the asteval interpreter.  These reserved words are:</p>
 <blockquote>
-<div>and, as, assert, break, class, continue, def, del, elif, else,
+<div><p>and, as, assert, break, class, continue, def, del, elif, else,
 except, exec, finally, for, from, global, if, import, in, is,
 lambda, not, or, pass, print, raise, return, try, while, with,
-True, False, None, eval, execfile, __import__, __package__</div></blockquote>
+True, False, None, eval, execfile, __import__, __package__</p>
+</div></blockquote>
 </div>
 <div class="section" id="built-in-functions">
 <h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this headline">¶</a></h2>
@@ -153,14 +150,15 @@ True, False, None, eval, execfile, __import__, __package__</div></blockquote>
 Python’s builtins and the <strong>math</strong> module.   The builtins include
 several basic Python functions:</p>
 <blockquote>
-<div>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
+<div><p>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
 dict, dir, divmod, enumerate, filter, float, format,
 frozenset, hash, hex, id, int, isinstance, len, list, map,
 max, min, oct, ord, pow, range, repr, reversed, round,
-set, slice, sorted, str, sum, tuple, type, zip</div></blockquote>
+set, slice, sorted, str, sum, tuple, type, zip</p>
+</div></blockquote>
 <p>and a large number of named exceptions:</p>
 <blockquote>
-<div>ArithmeticError, AssertionError, AttributeError,
+<div><p>ArithmeticError, AssertionError, AttributeError,
 BaseException, BufferError, BytesWarning, DeprecationWarning,
 EOFError, EnvironmentError, Exception, False,
 FloatingPointError, GeneratorExit, IOError, ImportError,
@@ -171,13 +169,15 @@ ReferenceError, RuntimeError, RuntimeWarning, StopIteration,
 SyntaxError, SyntaxWarning, SystemError, SystemExit, True,
 TypeError, UnboundLocalError, UnicodeDecodeError,
 UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
-UnicodeWarning, ValueError, Warning, ZeroDivisionError</div></blockquote>
+UnicodeWarning, ValueError, Warning, ZeroDivisionError</p>
+</div></blockquote>
 <p>The symbols imported from Python’s <em>math</em> module include:</p>
 <blockquote>
-<div>acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
+<div><p>acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
 cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
 frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
-modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</div></blockquote>
+modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</p>
+</div></blockquote>
 <p>If available, a very large number (~400) additional symbols are
 imported from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</p>
 </div>
@@ -192,7 +192,7 @@ exactly as they do in python.  Thus:</p>
 <span class="go">    sum += i*sqrt(*1.0)</span>
 <span class="go">    if i % 4 == 0:</span>
 <span class="go">        sum = sum + 1</span>
-<span class="go">print &quot;sum = &quot;, sum</span>
+<span class="go">print(&quot;sum = &quot;, sum)</span>
 <span class="go">&quot;&quot;&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 <span class="go">sum =  114.049534067</span>
@@ -225,7 +225,7 @@ creating the interpreter.  By default, outputs are sent to
 </div>
 <div class="section" id="exceptions">
 <h2>exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
-<p>asteval monitors and caches exceptions in the evaluated code.  Brief error
+<p>Asteval monitors and caches exceptions in the evaluated code.  Brief error
 messages are printed (with Python’s print statement or function, and so
 using standard output by default), and the full set of exceptions is kept
 in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> instance.  This
@@ -277,7 +277,7 @@ REPL loop, you’d want to do something similar to</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>

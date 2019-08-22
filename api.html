@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>asteval reference &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -38,7 +36,7 @@
   <h3><a href="index.html">Table of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">asteval reference</a><ul>
-<li><a class="reference internal" href="#the-interpreter-class">The <code class="docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a></li>
+<li><a class="reference internal" href="#the-interpreter-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a></li>
 <li><a class="reference internal" href="#utility-functions">Utility Functions</a></li>
 </ul>
 </li>
@@ -55,13 +53,11 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -88,45 +84,39 @@ tables that may be pre-loaded with custom symbols and functions.</p>
 <h2>The <a class="reference internal" href="#asteval.Interpreter" title="asteval.Interpreter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code></a> class<a class="headerlink" href="#the-interpreter-class" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="asteval.Interpreter">
-<em class="property">class </em><code class="descclassname">asteval.</code><code class="descname">Interpreter</code><span class="sig-paren">(</span><em>symtable=None</em>, <em>usersyms=None</em>, <em>writer=None</em>, <em>err_writer=None</em>, <em>use_numpy=True</em>, <em>minimal=False</em>, <em>no_if=False</em>, <em>no_for=False</em>, <em>no_while=False</em>, <em>no_try=False</em>, <em>no_functiondef=False</em>, <em>no_ifexp=False</em>, <em>no_listcomp=False</em>, <em>no_augassign=False</em>, <em>no_assert=False</em>, <em>no_delete=False</em>, <em>no_raise=False</em>, <em>no_print=False</em>, <em>max_time=86400</em>, <em>readonly_symbols=None</em>, <em>builtins_readonly=False</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">Interpreter</code><span class="sig-paren">(</span><em class="sig-param">symtable=None</em>, <em class="sig-param">usersyms=None</em>, <em class="sig-param">writer=None</em>, <em class="sig-param">err_writer=None</em>, <em class="sig-param">use_numpy=True</em>, <em class="sig-param">minimal=False</em>, <em class="sig-param">no_if=False</em>, <em class="sig-param">no_for=False</em>, <em class="sig-param">no_while=False</em>, <em class="sig-param">no_try=False</em>, <em class="sig-param">no_functiondef=False</em>, <em class="sig-param">no_ifexp=False</em>, <em class="sig-param">no_listcomp=False</em>, <em class="sig-param">no_augassign=False</em>, <em class="sig-param">no_assert=False</em>, <em class="sig-param">no_delete=False</em>, <em class="sig-param">no_raise=False</em>, <em class="sig-param">no_print=False</em>, <em class="sig-param">max_time=None</em>, <em class="sig-param">readonly_symbols=None</em>, <em class="sig-param">builtins_readonly=False</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an asteval Interpreter: a restricted, simplified interpreter
 of mathematical expressions using Python syntax.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>symtable</strong> (dict or <cite>None</cite>) – dictionary to use as symbol table (if <cite>None</cite>, one will be created).</li>
-<li><strong>usersyms</strong> (dict or <cite>None</cite>) – dictionary of user-defined symbols to add to symbol table.</li>
-<li><strong>writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard output will be sent.</li>
-<li><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</li>
-<li><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to use functions from numpy.</li>
-<li><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – create a minimal interpreter: disable all options (see Note 1).</li>
-<li><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</li>
-<li><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</li>
-<li><strong>no_while</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>while</cite> blocks.</li>
-<li><strong>no_try</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>try</cite> blocks.</li>
-<li><strong>no_functiondef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support user-defined functions.</li>
-<li><strong>no_ifexp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support if expressions.</li>
-<li><strong>no_listcomp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support list comprehension.</li>
-<li><strong>no_augassign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support augemented assigments (<cite>a += 1</cite>, etc).</li>
-<li><strong>no_assert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>assert</cite>.</li>
-<li><strong>no_delete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>del</cite>.</li>
-<li><strong>no_raise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>raise</cite>.</li>
-<li><strong>no_print</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>print</cite>.</li>
-<li><strong>max_time</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – deprecated, unreliable. max_time will be dropped soon. (default 86400)</li>
-<li><strong>readonly_symbols</strong> (iterable or <cite>None</cite>) – symbols that the user can not assign to</li>
-<li><strong>builtins_readonly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to blacklist all symbols that are in the initial symtable</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>symtable</strong> (dict or <cite>None</cite>) – dictionary to use as symbol table (if <cite>None</cite>, one will be created).</p></li>
+<li><p><strong>usersyms</strong> (dict or <cite>None</cite>) – dictionary of user-defined symbols to add to symbol table.</p></li>
+<li><p><strong>writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard output will be sent.</p></li>
+<li><p><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</p></li>
+<li><p><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to use functions from numpy.</p></li>
+<li><p><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – create a minimal interpreter: disable all options (see Note 1).</p></li>
+<li><p><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</p></li>
+<li><p><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</p></li>
+<li><p><strong>no_while</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>while</cite> blocks.</p></li>
+<li><p><strong>no_try</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>try</cite> blocks.</p></li>
+<li><p><strong>no_functiondef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support user-defined functions.</p></li>
+<li><p><strong>no_ifexp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support if expressions.</p></li>
+<li><p><strong>no_listcomp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support list comprehension.</p></li>
+<li><p><strong>no_augassign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support augemented assigments (<cite>a += 1</cite>, etc).</p></li>
+<li><p><strong>no_assert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>assert</cite>.</p></li>
+<li><p><strong>no_delete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>del</cite>.</p></li>
+<li><p><strong>no_raise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>raise</cite>.</p></li>
+<li><p><strong>no_print</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to support <cite>print</cite>.</p></li>
+<li><p><strong>readonly_symbols</strong> (iterable or <cite>None</cite>) – symbols that the user can not assign to</p></li>
+<li><p><strong>builtins_readonly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to blacklist all symbols that are in the initial symtable</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 <p class="rubric">Notes</p>
 <ol class="arabic simple">
-<li>setting <cite>minimal=True</cite> is equivalent to setting all
-<cite>no_***</cite> options to <cite>True</cite>.</li>
-<li>max_time is not reliable and no longer supported – the keyword will be dropped soon.</li>
+<li><p>setting <cite>minimal=True</cite> is equivalent to setting all
+<cite>no_***</cite> options to <cite>True</cite>.</p></li>
 </ol>
 </dd></dl>
 
@@ -145,15 +135,15 @@ will be used for output that will otherwise be sent to
 including</p>
 <blockquote>
 <div><ul class="simple">
-<li>advanced slicing:    <code class="docutils literal notranslate"><span class="pre">a[::-1],</span> <span class="pre">array[-3:,</span> <span class="pre">:,</span> <span class="pre">::2]</span></code></li>
-<li>if-elif-else conditionals</li>
-<li>for loops, with <code class="docutils literal notranslate"><span class="pre">else</span></code></li>
-<li>while loops, with <code class="docutils literal notranslate"><span class="pre">else</span></code></li>
-<li>try-except-finally blocks</li>
-<li>function definitions</li>
-<li>augmented assignments:  <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">1</span></code></li>
-<li>if-expressions:      <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">if</span> <span class="pre">TEST</span> <span class="pre">else</span> <span class="pre">b</span></code></li>
-<li>list comprehension:  <code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">[sqrt(i)</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">values]</span></code></li>
+<li><p>advanced slicing:    <code class="docutils literal notranslate"><span class="pre">a[::-1],</span> <span class="pre">array[-3:,</span> <span class="pre">:,</span> <span class="pre">::2]</span></code></p></li>
+<li><p>if-elif-else conditionals</p></li>
+<li><p>for loops, with <code class="docutils literal notranslate"><span class="pre">else</span></code></p></li>
+<li><p>while loops, with <code class="docutils literal notranslate"><span class="pre">else</span></code></p></li>
+<li><p>try-except-finally blocks</p></li>
+<li><p>function definitions</p></li>
+<li><p>augmented assignments:  <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">1</span></code></p></li>
+<li><p>if-expressions:      <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">if</span> <span class="pre">TEST</span> <span class="pre">else</span> <span class="pre">b</span></code></p></li>
+<li><p>list comprehension:  <code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">[sqrt(i)</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">values]</span></code></p></li>
 </ul>
 </div></blockquote>
 <p>with the exception of slicing, each of these features can be turned off
@@ -162,7 +152,8 @@ constructs, and create a simple expression calculator, use
 <code class="docutils literal notranslate"><span class="pre">minimal=True</span></code>.</p>
 <p>Many Python syntax elements are not supported at all, including:</p>
 <blockquote>
-<div>Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators</div></blockquote>
+<div><p>Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators</p>
+</div></blockquote>
 <p>In addition, many actions that are known to be unsafe (such as inspecting
 objects to get at their base classes) are also not allowed.</p>
 <p>An Interpreter instance has many methods, but most of them are
@@ -172,27 +163,23 @@ and the examples elsewhere in this documentation should be used as the
 stable API.</p>
 <dl class="method">
 <dt id="asteval.eval">
-<code class="descclassname">asteval.</code><code class="descname">eval</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.eval" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">eval</code><span class="sig-paren">(</span><em class="sig-param">expression</em><span class="optional">[</span>, <em class="sig-param">lineno=0</em><span class="optional">[</span>, <em class="sig-param">show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.eval" title="Permalink to this definition">¶</a></dt>
 <dd><p>evaluate the expression, returning the result.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>expression</strong> (<em>string</em>) – code to evaluate.</li>
-<li><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – line number (for error messages).</li>
-<li><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to print error messages or leave them
-in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code> list.</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expression</strong> (<em>string</em>) – code to evaluate.</p></li>
+<li><p><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – line number (for error messages).</p></li>
+<li><p><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – whether to print error messages or leave them
+in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code> list.</p></li>
 </ul>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="asteval.__call__">
-<code class="descclassname">asteval.</code><code class="descname">__call__</code><span class="sig-paren">(</span><em>expression</em><span class="optional">[</span>, <em>lineno=0</em><span class="optional">[</span>, <em>show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">expression</em><span class="optional">[</span>, <em class="sig-param">lineno=0</em><span class="optional">[</span>, <em class="sig-param">show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code></a>.  That is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
@@ -207,7 +194,7 @@ in the <code class="xref py py-attr docutils literal notranslate"><span class="p
 
 <dl class="attribute">
 <dt id="asteval.symtable">
-<code class="descclassname">asteval.</code><code class="descname">symtable</code><a class="headerlink" href="#asteval.symtable" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">symtable</code><a class="headerlink" href="#asteval.symtable" title="Permalink to this definition">¶</a></dt>
 <dd><p>the symbol table. A dictionary with symbol names as keys, and object
 values (data and functions).</p>
 <p>For full control of the symbol table, you can simply access the
@@ -218,7 +205,7 @@ the <a class="reference internal" href="#asteval.symtable" title="asteval.symtab
 
 <dl class="attribute">
 <dt id="asteval.error">
-<code class="descclassname">asteval.</code><code class="descname">error</code><a class="headerlink" href="#asteval.error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">error</code><a class="headerlink" href="#asteval.error" title="Permalink to this definition">¶</a></dt>
 <dd><p>a list of error information, filled on exceptions. You can test this
 after each call of the interpreter. It will be empty if the last
 execution was successful.  If an error occurs, this will contain a liste
@@ -227,7 +214,7 @@ of Exceptions raised.</p>
 
 <dl class="attribute">
 <dt id="asteval.error_msg">
-<code class="descclassname">asteval.</code><code class="descname">error_msg</code><a class="headerlink" href="#asteval.error_msg" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">error_msg</code><a class="headerlink" href="#asteval.error_msg" title="Permalink to this definition">¶</a></dt>
 <dd><p>the most recent error message.</p>
 </dd></dl>
 
@@ -236,46 +223,41 @@ of Exceptions raised.</p>
 <h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="asteval.valid_symbol_name">
-<code class="descclassname">asteval.</code><code class="descname">valid_symbol_name</code><span class="sig-paren">(</span><em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.valid_symbol_name" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">valid_symbol_name</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.valid_symbol_name" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determine whether the input symbol name is a valid name.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – name to check for validity.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><strong>valid</strong> – whether name is a a valid symbol name</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – name to check for validity.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>valid</strong> – whether name is a a valid symbol name</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)">bool</a></p>
+</dd>
+</dl>
 <p>This checks for Python reserved words and that the name matches
 the regular expression <code class="docutils literal notranslate"><span class="pre">[a-zA-Z_][a-zA-Z0-9_]</span></code></p>
 </dd></dl>
 
 <dl class="function">
 <dt id="asteval.make_symbol_table">
-<code class="descclassname">asteval.</code><code class="descname">make_symbol_table</code><span class="sig-paren">(</span><em>use_numpy=True</em>, <em>**kws</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.make_symbol_table" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">make_symbol_table</code><span class="sig-paren">(</span><em class="sig-param">use_numpy=True</em>, <em class="sig-param">**kws</em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.make_symbol_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a default symboltable, taking dict of user-defined symbols.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy</li>
-<li><strong>kws</strong> (<em>optional</em>) – additional symbol name, value pairs to include in symbol table</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy</p></li>
+<li><p><strong>kws</strong> (<em>optional</em>) – additional symbol name, value pairs to include in symbol table</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>symbol_table</strong> – a symbol table that can be used in <cite>asteval.Interpereter</cite></p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>symbol_table</strong> – a symbol table that can be used in <cite>asteval.Interpereter</cite></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)">dict</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <p>To make and use a custom symbol table, one might do this:</p>
@@ -326,7 +308,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>

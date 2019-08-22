@@ -1,11 +1,9 @@
 
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html>
 
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
-    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8" />
     <title>Motivation for asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -61,13 +59,11 @@
     </ul>
    </div>
 <div id="searchbox" style="display: none" role="search">
-  <h3>Quick search</h3>
+  <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" />
+      <input type="text" name="q" aria-labelledby="searchlabel" />
       <input type="submit" value="Go" />
-      <input type="hidden" name="check_keywords" value="yes" />
-      <input type="hidden" name="area" value="default" />
     </form>
     </div>
 </div>
@@ -83,73 +79,77 @@
   <div class="section" id="motivation-for-asteval">
 <h1>Motivation for asteval<a class="headerlink" href="#motivation-for-asteval" title="Permalink to this headline">¶</a></h1>
 <p>The asteval module allows you to evaluate a large subset of the Python
-language from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It
-is, in effect, a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>,
-forbidding several actions, and using using a simple dictionary as a flat
-namespace.  A completely fair question is: Why is this desirable?  That
-is, why not simply use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
-<p>The short answer is that sometimes you want to allow evaluation of user
-input, or expose a simple calculator inside a larger application.  For
-this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes <em>all</em> of Python, which
-makes user input difficult to trust.  Since asteval does not support the
-<strong>import</strong> statement (or many other constructs), user code cannot access
-the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any functions or classes
-outside the provided symbol table.</p>
-<p>Other missing features (modules, classes, lambda, yield, generators) are
-similarly motivated by a desire for a safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.
-The idea for asteval is to make a simple procedural, mathematically
-oriented language that can be embedded into larger applications.</p>
+language from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is,
+in effect, a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>,
+forbidding several actions, and using a simple dictionary as a flat namespace.
+A completely fair question is: Why is this desirable?  That is, why not simply
+use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
+<p>The short answer is that sometimes you want to allow evaluation of user input,
+or expose a simple (or even “scientific”) calculator inside a larger
+application.  For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes <em>all</em>
+of Python, which makes user input difficult to trust.  Since asteval does not
+support the <strong>import</strong> statement or many other constructs, user code cannot
+access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any functions or classes
+outside those provided in the symbol table.</p>
+<p>Many of the other missing features (modules, classes, lambda, yield,
+generators) are similarly motivated by a desire for a safer version of
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
+mathematically oriented language that can be embedded into larger
+applications.</p>
 <p>In fact, the asteval module grew out the the need for a simple expression
 evaluator for scientific applications such as the <a class="reference external" href="http://github.com/lmfit/lmfit-py">lmfit</a> and <a class="reference external" href="http://github.com/xraypy/xraylarch">xraylarch</a>
-modules.  A first attempt using the pyparsing module worked but was
-error-prone and difficult to maintain.  It turned out that using the Python
-<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module is so easy that adding more complex programming
-constructs like conditionals, loops, exception handling, complex assignment
-and slicing, and even user-defined functions was fairly simple to
-implement.  Importantly, because parsing is done by the <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a>
-module, whole classes of implementation errors disappear.  Valid python
-expression will be parsed correctly and converted into an Abstract Syntax
-Tree.  Furthermore, the resulting AST is easy to walk through, greatly
-simplifying evaluation over any other approach.  What started as a desire
-for a simple expression evaluator grew into a quite useable procedural
-domain-specific language for mathematical applications.</p>
-<p>Asteval makes no claims about speed. Obviously,  evaluating the ast tree
-involves a lot of function calls, and will likely be slower than Python.
-In preliminary tests, it’s about 4x slower than Python.  For certain use
-cases (see <a class="reference external" href="https://stackoverflow.com/questions/34106484">https://stackoverflow.com/questions/34106484</a>), use of asteval
-and numpy can approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
+modules.  An early attempt using the pyparsing module worked but was
+error-prone and difficult to maintain.  While the simplest of calculators or
+expressiona-evaluators is not hard with pyparsing, it turned out that using
+the Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes for a much easier and feature rich
+simple calculator scientific calculator, including slicing, complex numbers,
+keyword arguments to functions, etc.  In fact, it is so easy that adding more
+complex programming constructs like conditionals, loops, exception handling,
+and even user-defined functions was fairly simple to implement.  Importantly,
+because parsing is done by the <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.7)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module, whole classes of
+implementation errors disappear.  Valid python expression will be parsed
+correctly and converted into an Abstract Syntax Tree.  Furthermore, the
+resulting AST is easy to walk through, greatly simplifying evaluation over any
+other approach.  What started as a desire for a simple expression evaluator
+grew into a quite useable procedural domain-specific language for mathematical
+applications.</p>
+<p>Asteval makes no claims about speed. Evaluating the AST involves many function
+calls, which is going to be slower than Python.  In preliminary tests, it’s
+about 4x slower than Python.  That said, for certain use cases (see
+<a class="reference external" href="https://stackoverflow.com/questions/34106484">https://stackoverflow.com/questions/34106484</a>), use of asteval and numpy can
+approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
 <div class="section" id="how-safe-is-asteval">
 <h2>How Safe is asteval?<a class="headerlink" href="#how-safe-is-asteval" title="Permalink to this headline">¶</a></h2>
-<p>Asteval avoids the known exploits that make <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> dangerous. For
-reference, see, <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and
-the comments and links therein.  From this discussion it is apparent that
-not only is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a difficult prospect to
-make any program that takes user input perfectly safe.  In particular, if a
-user can cause Python to crash with a segmentation fault, safety cannot be
-guaranteed.  Asteval explicitly forbids the exploits described in the above
-link, and works hard to prevent malicious code from crashing Python or
-accessing the underlying operating system.  That said, we cannot guarantee
-that asteval is completely safe from malicious code.  We claim only that it
-is safer than the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it
-useful.</p>
+<p>Asteval avoids all of the exploits we know about that make <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>
+dangerous. For reference, see, <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and the
+comments and links therein.  From this discussion it is apparent that not only
+is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a difficult prospect to make any
+program that takes user input perfectly safe.  In particular, if a user can
+cause Python to crash with a segmentation fault, safety cannot be guaranteed.
+Asteval explicitly forbids the exploits described in the above link, and works
+hard to prevent malicious code from crashing Python or accessing the
+underlying operating system.  That said, we cannot guarantee that asteval is
+completely safe from malicious code.  We claim only that it is safer than the
+builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it useful.</p>
 <p>Some of the things not allowed in the asteval interpreter for safety reasons include:</p>
 <blockquote>
 <div><ul class="simple">
-<li>importing modules.  Neither ‘import’ nor ‘__import__’ are supported.</li>
-<li>create classes or modules.</li>
-<li>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
+<li><p>importing modules.  Neither ‘import’ nor ‘__import__’ are supported.</p></li>
+<li><p>create classes or modules.</p></li>
+<li><p>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</li>
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p></li>
 </ul>
 </div></blockquote>
 <p>In addition (and following the discussion in the link above), the following
 attributes are blacklisted for all objects, and cannot be accessed:</p>
 <blockquote>
-<div>__subclasses__, __bases__, __globals__, __code__, __closure__, __func__,
+<div><p>__subclasses__, __bases__, __globals__, __code__, __closure__, __func__,
 __self__, __module__, __dict__, __class__, __call__, __get__,
 __getattribute__, __subclasshook__, __new__, __init__, func_globals,
 func_code, func_closure, im_class, im_func, im_self, gi_code, gi_frame
-f_locals, __mro__</div></blockquote>
+f_locals, __mro__</p>
+</div></blockquote>
 <p>This approach of making a blacklist cannot be guaranteed to be complete,
 but it does eliminate classes of attacks known to seg-fault the Python.  On
 the other hand, asteval will typically expose numpy ufuncs from the numpy
@@ -170,19 +170,22 @@ calculation, and so a reasonable looking calculation such as:</p>
 </div>
 <p>can take a noticeable amount of CPU time.  It is not hard to come up with
 short program that would run for hundreds of years, which probably exceeds
-anyones threshold for an acceptable run-time.  As a very simple example, it
-is very hard to predict how long the expression <cite>x**y**z</cite> will take to run
-without knowing the values of <cite>x</cite>, <cite>y</cite>, and <cite>z</cite>.   In short, runtime cannot
-be determined lexically.</p>
-<p>Unfortunately, there is not a good way to check for a long-running
-calculation within a single Python process.  For example, the double
-exponential example above will be stuck deep inside C-code evaluated by the
-Python interpreter itself, and will not return or allow other threads to
-run until that calculation is done.  That is, from within a single process,
-there is not a foolproof way to tell <cite>asteval</cite> when a calculation has taken
-too long.  The most reliable way to limit run time is to have a second
-process watching the execution time of the asteval process and interrupt
-or kill it.</p>
+anyones threshold for an acceptable run-time.  But there simply is not an
+obvious way to predict how long any code will take to run from the text of the
+code itself.  As a simple example, consider the expression <cite>x**y**z</cite>.  For
+values of <cite>x</cite>, <cite>y</cite>, and <cite>z</cite>.  For <cite>x=y=z=5</cite>, runtime will be well under 0.001
+seconds.  For <cite>x=y=z=8</cite>, runtime will still be under 1 sec.  For <cite>x=8, y=9,
+z=9</cite>, runtime will several seconds.  But for <cite>x=y=z=9</cite>, runtime may exceed 1
+hour on some machines.  In short, runtime cannot be determined lexically.</p>
+<p>This example also demonstrates there is not a good way to check for a
+long-running calculation within a single Python process.  That calculation is
+not stuck within the Python interpreter – it is stuck deep inside C-code.
+called by the Python interpreter itself, and will not return or allow other
+threads to run until that calculation is done.  That is, from within a single
+process, there is not a foolproof way to tell <cite>asteval</cite> (or really, even
+Python) when a calculation has taken too long.  The most reliable way to limit
+run time is to have a second process watching the execution time of the
+asteval process and interrupt or kill it.</p>
 <p>For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the <em>recursion limit</em> when
 executing expressions, with a code like this:</p>
@@ -243,7 +246,7 @@ improve this situation would be greatly appreciated.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.8.5.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
     </div>
   </body>
 </html>
