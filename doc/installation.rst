@@ -10,9 +10,11 @@ Requirements
 ~~~~~~~~~~~~~~~
 
 Asteval is a pure python module with no required dependencies outside of the
-standard library.   Asteval will make use of the `numpy`_ module if available.
+standard library.  Asteval will make use of the `numpy`_ module if available.
 
-Version 0.9.15 supports Python 2.7, Python 3.5 and higher.
+Version 0.9.15 supports Python 2.7, Python 3.5 and higher.  It is tested with
+Python 2.7, 3.5, 3.6, and 3.7.
+
 Version 0.9.16 will drop support for Python 2.7.
 
 
