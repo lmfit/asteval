@@ -58,7 +58,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'for', 'functiondef', 'if', 'ifexp', 'index', 'interrupt',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
-             'subscript', 'try', 'tuple', 'unaryop', 'while']
+             'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
 
 
 PY3 = check_pyversion()
@@ -422,6 +422,10 @@ class Interpreter(object):
         """Dictionary."""
         return dict([(self.run(k), self.run(v)) for k, v in
                      zip(node.keys, node.values)])
+
+    def on_constant(self, node):   # ('value', 'kind')
+        """Return constant value."""
+        return node.value
 
     def on_num(self, node):   # ('n',)
         """Return number."""
