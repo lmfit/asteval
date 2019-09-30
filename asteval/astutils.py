@@ -319,7 +319,7 @@ class ExceptionHolder(object):
         self.exc_info = exc_info()
         if self.exc is None and self.exc_info[0] is not None:
             self.exc = self.exc_info[0]
-        if self.msg is '' and self.exc_info[1] is not None:
+        if self.msg == '' and self.exc_info[1] is not None:
             self.msg = self.exc_info[1]
 
     def get_error(self):
