@@ -23,17 +23,16 @@ before_install:
     - conda info -a
 
 install:
-    - if [[ $version == without_numpy ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION pytest coverage; fi
-    - if [[ $version == with_numpy    ]]; then conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION numpy pytest coverage; fi
+    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION pytest coverage
     - source activate test_env
+    - if [[ $version == with_numpy ]]; then conda install numpy ; fi
     - python setup.py install
     - pip install codecov
 
 script:
     - cd tests
     - pytest
-    - if [[ $version == with_numpy ]]; then coverage run --source=asteval test_asteval.py
-    - if [[ $version == with_numpy ]]; then coverage report -m
+    - if [[ $version == with_numpy ]]; then coverage run --source=asteval test_asteval.py && coverage report -m ; fi
 
 after_success:
     - codecov
