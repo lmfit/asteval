@@ -69,7 +69,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
                        'list', 'listcomp', 'module', 'name', 'nameconstant',
                        'num', 'pass', 'raise', 'repr', 'return',  # 'print'
-                       'set', 'slice', 'str', 'subscript', 'try', 'tuple',
+                       'set', 'slice', 'starred', 'str', 'subscript', 'try', 'tuple',
                        'unaryop', 'while',
                        'import',      # used to support importing from other presets
                        'importfrom',  #  NOOP
@@ -419,6 +419,9 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
     def on_str(self, node):  # ('s',)
         """return string"""
         return node.s
+
+    def on_starred(self, node):
+        return node
 
     def on_name(self, node):  # ('id', 'ctx')
         """ Name node """
@@ -950,7 +953,15 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
             msg = "`%s` is not callable!!" % func
             self.raise_exception(node, exc=TypeError, msg=msg)
 
-        args = [self.run(targ) for targ in node.args]
+        tmpArgs = [self.run(targ) for targ in node.args]
+
+        # expand Starred
+        args = []
+        for tmpArg in tmpArgs:
+            if tmpArg.__class__.__name__ == 'Starred':
+                args.extend(list(self.run(tmpArg.value)))
+            else:
+                args.append(tmpArg)
 
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
