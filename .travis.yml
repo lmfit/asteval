@@ -35,4 +35,4 @@ script:
     - if [[ $version == with_numpy ]]; then coverage run --source=asteval test_asteval.py && coverage report -m ; fi
 
 after_success:
-    - codecov
+    - if [[ $version == with_numpy ]]; then codecov ; fi
