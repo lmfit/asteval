@@ -306,7 +306,10 @@ class Interpreter(object):
             return ret
         except:
             if with_raise:
-                self.raise_exception(node, expr=expr)
+                if len(self.error) == 0:
+                    # Unhandled exception that didn't go through raise_exception
+                    self.raise_exception(node, expr=expr)
+                raise
 
     def __call__(self, expr, **kw):
         """Call class instance as function."""
