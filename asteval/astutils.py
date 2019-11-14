@@ -4,30 +4,15 @@ utility functions for asteval
    Matthew Newville <newville@cars.uchicago.edu>,
    The University of Chicago
 """
-from __future__ import division, print_function
 import io
 import re
 import ast
 import math
 import numbers
-from sys import exc_info, version_info
-from tokenize import NAME as tk_NAME
-
-def check_pyversion():
-    version_major, version_minor = version_info[0],  version_info[1]
-    if version_major == 3 and version_minor < 5:
-        raise SystemError("Python 3.0 to 3.4 are not supported")
-    if version_major == 2 and version_minor < 7:
-        raise SystemError("Python 2.6 or earlier are not supported")
-    return version_major == 3
-
-
-if version_info > (3, 4):
-    from tokenize import tokenize as generate_tokens, ENCODING as tk_ENCODING
-else:
-    from tokenize import generate_tokens
-    tk_ENCODING = None
-
+from sys import exc_info
+from tokenize import (tokenize as generate_tokens,
+                      ENCODING as tk_ENCODING,
+                      NAME as tk_NAME)
 
 HAS_NUMPY = False
 numpy = None

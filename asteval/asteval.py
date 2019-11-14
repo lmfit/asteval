@@ -36,9 +36,6 @@ In addition, while many builtin functions are supported, several builtin
 functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example)
 """
-
-from __future__ import division, print_function
-
 import ast
 import time
 import inspect
@@ -46,11 +43,12 @@ from sys import exc_info, stdout, stderr, version_info
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
-                       valid_symbol_name, check_pyversion)
+                       valid_symbol_name)
 
-builtins = __builtins__
-if not isinstance(builtins, dict):
-    builtins = builtins.__dict__
+if version_info[0] < 3 or version_info[1] < 5:
+    raise SystemError("Python 3.5 or higher required")
+
+builtins = __builtins__.__dict__
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'call', 'compare', 'continue', 'delete',
@@ -59,9 +57,6 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
-
-
-PY3 = check_pyversion()
 
 class Interpreter(object):
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -132,11 +127,8 @@ class Interpreter(object):
                 usersyms = {}
             symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
-        if no_print:
-            symtable['print'] = self._nullprinter
-        else:
-            symtable['print'] = self._printer
-
+        symtable['print'] = self._printer
+        self.no_print = no_print
         self.symtable = symtable
         self._interrupt = None
         self.error = []
@@ -616,26 +608,10 @@ class Interpreter(object):
                 out = out and r
         return out
 
-
-    def on_print(self, node):    # ('dest', 'values', 'nl')
-        """Note: implements Python2 style print statement, not print()
-        function.
-        May need improvement....
-        """
-        dest = self.run(node.dest) or self.writer
-        end = ''
-        if node.nl:
-            end = '\n'
-        out = [self.run(tnode) for tnode in node.values]
-        if out and len(self.error) == 0:
-            self._printer(*out, file=dest, end=end)
-
-    def _nullprinter(self, *out, **kws):
-        """swallow print calls"""
-        pass
-
     def _printer(self, *out, **kws):
         """Generic print function."""
+        if self.no_print:
+            return
         flush = kws.pop('flush', True)
         fileh = kws.pop('file', self.writer)
         sep = kws.pop('sep', ' ')
@@ -739,12 +715,8 @@ class Interpreter(object):
 
     def on_raise(self, node):    # ('type', 'inst', 'tback')
         """Raise statement: note difference for python 2 and 3."""
-        if PY3:
-            excnode = node.exc
-            msgnode = node.cause
-        else:
-            excnode = node.type
-            msgnode = node.inst
+        excnode = node.exc
+        msgnode = node.cause
         out = self.run(excnode)
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
@@ -766,8 +738,7 @@ class Interpreter(object):
             args = args + self.run(starargs)
 
         keywords = {}
-        if PY3 and func == print:
-            keywords['file'] = self.writer
+        keywords['file'] = self.writer
 
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
@@ -807,10 +778,7 @@ class Interpreter(object):
             keyval = self.run(node.args.args[idef+offset])
             kwargs.append((keyval, defval))
 
-        if PY3:
-            args = [tnode.arg for tnode in node.args.args[:offset]]
-        else:
-            args = [tnode.id for tnode in node.args.args[:offset]]
+        args = [tnode.arg for tnode in node.args.args[:offset]]
         doc = None
         nb0 = node.body[0]
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
@@ -818,9 +786,9 @@ class Interpreter(object):
 
         varkws = node.args.kwarg
         vararg = node.args.vararg
-        if PY3 and isinstance(vararg, ast.arg):
+        if isinstance(vararg, ast.arg):
             vararg = vararg.arg
-        if PY3 and isinstance(varkws, ast.arg):
+        if isinstance(varkws, ast.arg):
             varkws = varkws.arg
 
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
