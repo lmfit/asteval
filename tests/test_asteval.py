@@ -8,19 +8,13 @@ import textwrap
 import time
 import unittest
 import pytest
+from io import StringIO
 
 from sys import version_info
 from tempfile import NamedTemporaryFile
 
+from asteval import NameFinder, Interpreter, make_symbol_table
 
-from asteval import NameFinder, Interpreter, make_symbol_table, check_pyversion
-
-PY3 = check_pyversion()
-
-if PY3:
-    from io import StringIO
-else:
-    from cStringIO import StringIO
 
 
 HAS_NUMPY = False
@@ -440,11 +434,9 @@ class TestEval(TestCase):
         """names test"""
         self.interp('nx = 1')
         self.interp('nx1 = 1')
-
-        if PY3:
-            # use \u escape b/c python 2 complains about file encoding
-            self.interp('\u03bb = 1')
-            self.interp('\u03bb1 = 1')
+        # use \u escape b/c python 2 complains about file encoding
+        self.interp('\u03bb = 1')
+        self.interp('\u03bb1 = 1')
 
     def test_syntaxerrors_1(self):
         """assignment syntax errors test"""
@@ -626,7 +618,7 @@ class TestEval(TestCase):
         for w in ('True', 'False'):
             self.interp.error = []
             self.interp("%s= 2" % w)
-            self.check_error('SyntaxError' if PY3 else 'NameError')
+            self.check_error('SyntaxError')
 
         for w in ('eval', '__import__'):
             self.interp.error = []
@@ -866,13 +858,13 @@ class TestEval(TestCase):
         self.interp('open("foo1", "wb")')
         self.check_error('RuntimeError')
         self.interp('open("foo2", "rb")')
-        self.check_error('FileNotFoundError' if PY3 else 'IOError')
+        self.check_error('FileNotFoundError')
         self.interp('open("foo3", "rb", 2<<18)')
         self.check_error('RuntimeError')
 
     def test_recursionlimit(self):
         self.interp("""def foo(): return foo()\nfoo()""")
-        self.check_error('RecursionError' if PY3 else 'RuntimeError')
+        self.check_error('RecursionError')
 
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
@@ -883,10 +875,8 @@ class TestEval(TestCase):
 
         self.interp(
             """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
-        if PY3:
-            self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
-        else:
-            self.check_error('SyntaxError')
+
+        self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
         self.interp("9**9**9**9**9**9**9**9")
         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
         self.interp(
