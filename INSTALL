@@ -7,10 +7,10 @@ To install the asteval module, use::
 or 
    pip install asteval
 
-Asteval require Python 2.7 or Python 3.4 or higher.
+Asteval require Python 3.5 or higher.
 If installed, many functions and constants from numpy 
 will be used by default.
 
 Matt Newville <newville@cars.uchicago.edu>
-Last Update:  28-Oct-2017
+Last Update:  14-Nov-2019
 
