@@ -129,8 +129,6 @@ class Interpreter(object):
                 usersyms = {}
             symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
-        symtable['print'] = self._printer
-        self.no_print = no_print
         self.symtable = symtable
         self._interrupt = None
         self.error = []
@@ -140,6 +138,9 @@ class Interpreter(object):
         self.lineno = 0
         self.start_time = time.time()
         self.use_numpy = HAS_NUMPY and use_numpy
+
+        symtable['print'] = self._printer
+        self.no_print = no_print or minimal
 
         nodes = ALL_NODES[:]
 
@@ -161,8 +162,6 @@ class Interpreter(object):
             nodes.remove('delete')
         if minimal or no_raise:
             nodes.remove('raise')
-        if minimal or no_print:
-            nodes.remove('print')
         if minimal or no_listcomp:
             nodes.remove('listcomp')
         if minimal or no_augassign:
@@ -740,7 +739,8 @@ class Interpreter(object):
             args = args + self.run(starargs)
 
         keywords = {}
-        keywords['file'] = self.writer
+        if func == print:
+            keywords['file'] = self.writer
 
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
