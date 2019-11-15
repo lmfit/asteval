@@ -57,7 +57,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'dict', 'ellipsis', 'excepthandler', 'expr', 'extslice',
              'for', 'functiondef', 'if', 'ifexp', 'index', 'interrupt',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
-             'pass', 'print', 'raise', 'repr', 'return', 'slice', 'str',
+             'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
 
 class Interpreter(object):
