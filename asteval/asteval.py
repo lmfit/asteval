@@ -782,10 +782,7 @@ class Interpreter(object):
         try:
             return func(*args, **keywords)
         except Exception as ex:
-            try:
-                func_name = func.__name__
-            except AttributeError:
-                func_name = str(func)
+            func_name = getattr(func, '__name__', str(func))
             self.raise_exception(
                 node, msg="Error running function call '%s' with args %s and "
                 "kwargs %s: %s" % (func_name, args, keywords, ex))
