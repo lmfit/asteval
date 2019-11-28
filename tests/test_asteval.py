@@ -3,6 +3,7 @@
 Base TestCase for asteval
 """
 import ast
+import math
 import os
 import textwrap
 import time
@@ -10,6 +11,7 @@ import unittest
 import pytest
 from io import StringIO
 
+from functools import partial
 from sys import version_info
 from tempfile import NamedTemporaryFile
 
@@ -1021,6 +1023,23 @@ class TestEval(TestCase):
         aeval("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
         self.assertTrue(aeval("a_dict['a'] == 1"))
         self.assertTrue(aeval("a_dict['c'] == 3"))
+
+    def test_partial_exception(self):
+        sym_table = make_symbol_table(sqrt=partial(math.sqrt))
+
+        aeval = Interpreter(symtable=sym_table)
+
+        assert aeval("sqrt(4)") == 2
+
+        # Calling sqrt(-1) should raise a ValueError. When the interpreter
+        # encounters an exception, it attempts to form an error string that
+        # uses the function's __name__ attribute. Partials don't have a
+        # __name__ attribute, so we want to make sure that an AttributeError is
+        # not raised.
+    
+        result = aeval("sqrt(-1)")
+        assert aeval.error.pop().exc == ValueError
+
 
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
