@@ -90,17 +90,17 @@ most important features.  Further details can be found in the next chapter
 <div class="section" id="creating-and-using-an-asteval-interpreter">
 <h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Permalink to this headline">¶</a></h2>
 <p>The asteval module is very easy to use.  Import the module and create an Interpreter:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>and now you have an embedded interpreter for a procedural, mathematical language
 that is very much like python:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print x&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print(x)&#39;</span><span class="p">)</span>
 <span class="go">1.73205080757</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;for i in range(10):</span>
-<span class="go">print i, sqrt(i), log(1+1)</span>
+<span class="go">print(i, sqrt(i), log(1+1))</span>
 <span class="go">&#39;&#39;&#39;)</span>
 <span class="go">0 0.0 0.0</span>
 <span class="go">1 1.0 0.69314718056</span>
@@ -125,7 +125,7 @@ to:</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="go">1.73205080757</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print y/8&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print(y/8)&#39;</span><span class="p">)</span>
 <span class="go">12.5</span>
 </pre></div>
 </div>
@@ -186,7 +186,7 @@ imported from <a class="reference external" href="http://docs.scipy.org/doc/nump
 <p>If-then-else blocks, for-loops (including the optional <em>else</em> block) and
 while loops (also including optional <em>else</em> block) are supported, and work
 exactly as they do in python.  Thus:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="go">sum = 0</span>
 <span class="go">for i in range(10):</span>
 <span class="go">    sum += i*sqrt(*1.0)</span>
@@ -201,18 +201,16 @@ exactly as they do in python.  Thus:</p>
 </div>
 <div class="section" id="printing">
 <h2>printing<a class="headerlink" href="#printing" title="Permalink to this headline">¶</a></h2>
-<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function (for
-Python 3) and <code class="xref py py-data docutils literal notranslate"><span class="pre">print</span></code> statement (for Python 2).  That is, the
-behavior mimics the version of Python used.</p>
-<p>You can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when
-creating the interpreter.  By default, outputs are sent to
-<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.8)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
+<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
+can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when creating
+the interpreter, or supreess printing all together with the <code class="docutils literal notranslate"><span class="pre">no_print</span></code>
+option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.8)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
 </div>
 <div class="section" id="writing-functions">
 <h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this headline">¶</a></h2>
 <p>User-defined functions can be written and executed, as in python with a
 <em>def</em> block, for example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>
 <span class="gp">... </span><span class="s2">return (a + b)/norm</span>
@@ -226,9 +224,9 @@ creating the interpreter.  By default, outputs are sent to
 <div class="section" id="exceptions">
 <h2>exceptions<a class="headerlink" href="#exceptions" title="Permalink to this headline">¶</a></h2>
 <p>Asteval monitors and caches exceptions in the evaluated code.  Brief error
-messages are printed (with Python’s print statement or function, and so
-using standard output by default), and the full set of exceptions is kept
-in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> instance.  This
+messages are printed (with Python’s print function, and so using standard
+output by default), and the full set of exceptions is kept in the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute of the <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> instance.  This
 <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute is a list of instances of the asteval
 <code class="xref py py-class docutils literal notranslate"><span class="pre">ExceptionHolder</span></code> class, which is accessed through the
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">get_error()</span></code> method.  The <code class="xref py py-attr docutils literal notranslate"><span class="pre">error</span></code> attribute is reset to an empty
@@ -236,7 +234,7 @@ list at the beginning of each <code class="xref py py-meth docutils literal notr
 the most recent <code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code>.</p>
 <p>Thus, to handle and re-raise exceptions from your Python code in a simple
 REPL loop, you’d want to do something similar to</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
 <span class="gp">&gt;&gt;&gt; </span>    <span class="n">inp_string</span> <span class="o">=</span> <span class="n">raw_input</span><span class="p">(</span><span class="s1">&#39;dsl:&gt;&#39;</span><span class="p">)</span>
@@ -277,7 +275,7 @@ REPL loop, you’d want to do something similar to</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2014, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.1.2.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
     </div>
   </body>
 </html>

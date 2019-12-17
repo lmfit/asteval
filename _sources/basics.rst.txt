@@ -20,10 +20,10 @@ and now you have an embedded interpreter for a procedural, mathematical language
 that is very much like python::
 
     >>> aeval('x = sqrt(3)')
-    >>> aeval('print x')
+    >>> aeval('print(x)')
     1.73205080757
     >>> aeval('''for i in range(10):
-    print i, sqrt(i), log(1+1)
+    print(i, sqrt(i), log(1+1))
     ''')
     0 0.0 0.0
     1 1.0 0.69314718056
@@ -50,7 +50,7 @@ to::
     >>> aeval.symtable['x']
     1.73205080757
     >>> aeval.symtable['y'] = 100
-    >>> aeval('print y/8')
+    >>> aeval('print(y/8)')
     12.5
 
 Note here the use of true division even though the operands are integers.
@@ -133,13 +133,10 @@ exactly as they do in python.  Thus:
 printing
 ===============
 
-For printing, asteval emulates Python's native :func:`print` function (for
-Python 3) and :data:`print` statement (for Python 2).  That is, the
-behavior mimics the version of Python used.
-
-You can change where output is sent with the ``writer`` argument when
-creating the interpreter.  By default, outputs are sent to
-:py:data:`sys.stdout`.
+For printing, asteval emulates Python's native :func:`print` function.  You
+can change where output is sent with the ``writer`` argument when creating
+the interpreter, or supreess printing all together with the ``no_print``
+option.  By default, outputs are sent to :py:data:`sys.stdout`.
 
 
 writing functions
@@ -162,9 +159,9 @@ exceptions
 ===============
 
 Asteval monitors and caches exceptions in the evaluated code.  Brief error
-messages are printed (with Python's print statement or function, and so
-using standard output by default), and the full set of exceptions is kept
-in the :attr:`error` attribute of the :class:`Interpreter` instance.  This
+messages are printed (with Python's print function, and so using standard
+output by default), and the full set of exceptions is kept in the
+:attr:`error` attribute of the :class:`Interpreter` instance.  This
 :attr:`error` attribute is a list of instances of the asteval
 :class:`ExceptionHolder` class, which is accessed through the
 :meth:`get_error` method.  The :attr:`error` attribute is reset to an empty
