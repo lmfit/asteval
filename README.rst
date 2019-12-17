@@ -7,6 +7,12 @@ ASTEVAL
 .. image:: https://codecov.io/gh/newville/asteval/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/newville/asteval
 
+.. image:: https://img.shields.io/pypi/v/asteval.svg
+   :target: https://pypi.org/project/asteval
+
+.. image:: https://img.shields.io/pypi/dm/asteval.svg
+   :target: https://pypi.org/project/asteval
+
 .. image:: https://zenodo.org/badge/4185/newville/asteval.svg
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
 
