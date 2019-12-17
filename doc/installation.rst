@@ -14,6 +14,8 @@ standard library.  Asteval will make use of the `numpy`_ module if available.
 
 Version 0.9.18 supports and is tested with Python 3.5 through 3.8.
 
+Version 0.9.17 was the last version to support Python 2.7.
+
 
 Download and Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
