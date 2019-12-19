@@ -12,37 +12,37 @@ forbidding several actions, and using a simple dictionary as a flat namespace.
 A completely fair question is: Why is this desirable?  That is, why not simply
 use :py:func:`eval`, or just use Python itself?
 
-The short answer is that sometimes you want to allow evaluation of user input,
-or expose a simple (or even "scientific") calculator inside a larger
-application.  For this, :py:func:`eval` is pretty scary, as it exposes *all*
-of Python, which makes user input difficult to trust.  Since asteval does not
-support the **import** statement or many other constructs, user code cannot
-access the :py:mod:`os` and :py:mod:`sys` modules or any functions or classes
-outside those provided in the symbol table.
+The short answer is that sometimes you want to allow evaluation of user
+input, or expose a simple or even scientific calculator inside a larger
+application.  For this, :py:func:`eval` is pretty scary, as it exposes
+*all* of Python, which makes user input difficult to trust.  Since asteval
+does not support the **import** statement or many other constructs, user
+code cannot access the :py:mod:`os` and :py:mod:`sys` modules or any
+functions or classes outside those provided in the symbol table.
 
 Many of the other missing features (modules, classes, lambda, yield,
 generators) are similarly motivated by a desire for a safer version of
 :py:func:`eval`.  The idea for asteval is to make a simple procedural,
-mathematically oriented language that can be embedded into larger
+mathematically-oriented language that can be embedded into larger
 applications.
 
 In fact, the asteval module grew out the the need for a simple expression
 evaluator for scientific applications such as the `lmfit`_ and `xraylarch`_
 modules.  An early attempt using the pyparsing module worked but was
-error-prone and difficult to maintain.  While the simplest of calculators or
-expressiona-evaluators is not hard with pyparsing, it turned out that using
-the Python :py:mod:`ast` module makes for a much easier and feature rich
-simple calculator scientific calculator, including slicing, complex numbers,
-keyword arguments to functions, etc.  In fact, it is so easy that adding more
-complex programming constructs like conditionals, loops, exception handling,
-and even user-defined functions was fairly simple to implement.  Importantly,
-because parsing is done by the :py:mod:`ast` module, whole classes of
-implementation errors disappear.  Valid python expression will be parsed
-correctly and converted into an Abstract Syntax Tree.  Furthermore, the
-resulting AST is easy to walk through, greatly simplifying evaluation over any
-other approach.  What started as a desire for a simple expression evaluator
-grew into a quite useable procedural domain-specific language for mathematical
-applications.
+error-prone and difficult to maintain.  While the simplest of calculators
+or expressiona-evaluators is not hard with pyparsing, it turned out that
+using the Python :py:mod:`ast` module makes it much easier to implement a
+feature-rich scientific calculator, including slicing, complex numbers,
+keyword arguments to functions, etc. In fact, this approach meant that
+adding more complex programming constructs like conditionals, loops,
+exception handling, and even user-defined functions was fairly simple.  An
+important benefit of using the :py:mod:`ast` module is that whole
+categories of implementation errors involving parsing, lexing, and defining a
+grammar disappear.  Any valid python expression will be parsed correctly
+and converted into an Abstract Syntax Tree.  Furthermore, the resulting AST
+is easy to walk through, greatly simplifying the evaluation process.  What
+started as a desire for a simple expression evaluator grew into a quite
+useable procedural domain-specific language for mathematical applications.
 
 Asteval makes no claims about speed. Evaluating the AST involves many function
 calls, which is going to be slower than Python.  In preliminary tests, it's
@@ -105,12 +105,12 @@ calculation, and so a reasonable looking calculation such as::
 can take a noticeable amount of CPU time.  It is not hard to come up with
 short program that would run for hundreds of years, which probably exceeds
 anyones threshold for an acceptable run-time.  But there simply is not an
-obvious way to predict how long any code will take to run from the text of the
-code itself.  As a simple example, consider the expression `x**y**z`.  For
-values of `x`, `y`, and `z`.  For `x=y=z=5`, runtime will be well under 0.001
-seconds.  For `x=y=z=8`, runtime will still be under 1 sec.  For `x=8, y=9,
-z=9`, runtime will several seconds.  But for `x=y=z=9`, runtime may exceed 1
-hour on some machines.  In short, runtime cannot be determined lexically.
+obvious way to predict how long any code will take to run from the text of
+the code itself.  As a simple example, consider the expression `x**y**z`.
+For values `x=y=z=5`, runtime will be well under 0.001 seconds.  For
+`x=y=z=8`, runtime will still be under 1 sec.  For `x=8, y=9, z=9`, runtime
+will several seconds.  But for `x=y=z=9`, runtime may exceed 1 hour on some
+machines.  In short, runtime cannot be determined lexically.
 
 This example also demonstrates there is not a good way to check for a
 long-running calculation within a single Python process.  That calculation is
@@ -146,7 +146,7 @@ untrusted user.  If `numpy` is supported, its `load()` and `loadtxt()`
 functions will also be supported.  This doesn't really elevate permissions,
 but it does allow the user of the `asteval` interpreter to read files with
 the privileges of the calling program.  In some cases, this may not be
-desireable, and you may want to remove some of these functions from the
+desirable, and you may want to remove some of these functions from the
 symbol table, re-implement them, or ensure that your program cannot access
 information on disk that should be kept private.
 

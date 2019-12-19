@@ -181,7 +181,7 @@ in the <code class="xref py py-attr docutils literal notranslate"><span class="p
 <dt id="asteval.__call__">
 <code class="sig-prename descclassname">asteval.</code><code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">expression</em><span class="optional">[</span>, <em class="sig-param">lineno=0</em><span class="optional">[</span>, <em class="sig-param">show_errors=True</em><span class="optional">]</span><span class="optional">]</span><span class="sig-paren">)</span><a class="headerlink" href="#asteval.__call__" title="Permalink to this definition">¶</a></dt>
 <dd><p>same as <a class="reference internal" href="#asteval.eval" title="asteval.eval"><code class="xref py py-meth docutils literal notranslate"><span class="pre">eval()</span></code></a>.  That is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="p">(</span><span class="s1">&#39;x = 1&#39;</span><span class="p">)</span>
 </pre></div>
@@ -261,7 +261,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
 </dd></dl>
 
 <p>To make and use a custom symbol table, one might do this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span><span class="p">,</span> <span class="n">make_symbol_table</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span><span class="p">,</span> <span class="n">make_symbol_table</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="k">def</span> <span class="nf">cosd</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
     <span class="s2">&quot;cos with angle in degrees&quot;</span>
@@ -307,7 +307,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2019, Matthew Newville, The University of Chicago.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
     </div>
   </body>

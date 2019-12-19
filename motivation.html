@@ -84,35 +84,35 @@ in effect, a restricted version of Python’s built-in <a class="reference exter
 forbidding several actions, and using a simple dictionary as a flat namespace.
 A completely fair question is: Why is this desirable?  That is, why not simply
 use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
-<p>The short answer is that sometimes you want to allow evaluation of user input,
-or expose a simple (or even “scientific”) calculator inside a larger
-application.  For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes <em>all</em>
-of Python, which makes user input difficult to trust.  Since asteval does not
-support the <strong>import</strong> statement or many other constructs, user code cannot
-access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any functions or classes
-outside those provided in the symbol table.</p>
+<p>The short answer is that sometimes you want to allow evaluation of user
+input, or expose a simple or even scientific calculator inside a larger
+application.  For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes
+<em>all</em> of Python, which makes user input difficult to trust.  Since asteval
+does not support the <strong>import</strong> statement or many other constructs, user
+code cannot access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any
+functions or classes outside those provided in the symbol table.</p>
 <p>Many of the other missing features (modules, classes, lambda, yield,
 generators) are similarly motivated by a desire for a safer version of
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
-mathematically oriented language that can be embedded into larger
+mathematically-oriented language that can be embedded into larger
 applications.</p>
 <p>In fact, the asteval module grew out the the need for a simple expression
 evaluator for scientific applications such as the <a class="reference external" href="http://github.com/lmfit/lmfit-py">lmfit</a> and <a class="reference external" href="http://github.com/xraypy/xraylarch">xraylarch</a>
 modules.  An early attempt using the pyparsing module worked but was
-error-prone and difficult to maintain.  While the simplest of calculators or
-expressiona-evaluators is not hard with pyparsing, it turned out that using
-the Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes for a much easier and feature rich
-simple calculator scientific calculator, including slicing, complex numbers,
-keyword arguments to functions, etc.  In fact, it is so easy that adding more
-complex programming constructs like conditionals, loops, exception handling,
-and even user-defined functions was fairly simple to implement.  Importantly,
-because parsing is done by the <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module, whole classes of
-implementation errors disappear.  Valid python expression will be parsed
-correctly and converted into an Abstract Syntax Tree.  Furthermore, the
-resulting AST is easy to walk through, greatly simplifying evaluation over any
-other approach.  What started as a desire for a simple expression evaluator
-grew into a quite useable procedural domain-specific language for mathematical
-applications.</p>
+error-prone and difficult to maintain.  While the simplest of calculators
+or expressiona-evaluators is not hard with pyparsing, it turned out that
+using the Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes it much easier to implement a
+feature-rich scientific calculator, including slicing, complex numbers,
+keyword arguments to functions, etc. In fact, this approach meant that
+adding more complex programming constructs like conditionals, loops,
+exception handling, and even user-defined functions was fairly simple.  An
+important benefit of using the <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module is that whole
+categories of implementation errors involving parsing, lexing, and defining a
+grammar disappear.  Any valid python expression will be parsed correctly
+and converted into an Abstract Syntax Tree.  Furthermore, the resulting AST
+is easy to walk through, greatly simplifying the evaluation process.  What
+started as a desire for a simple expression evaluator grew into a quite
+useable procedural domain-specific language for mathematical applications.</p>
 <p>Asteval makes no claims about speed. Evaluating the AST involves many function
 calls, which is going to be slower than Python.  In preliminary tests, it’s
 about 4x slower than Python.  That said, for certain use cases (see
@@ -160,7 +160,7 @@ segmentation fault, you’ll want to disable the use of numpy.</p>
 to address. The most important of these is resource hogging, which might be
 used for a denial-of-service attack.  There is no guaranteed timeout on any
 calculation, and so a reasonable looking calculation such as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
 <span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;nmax = 1e8</span>
 <span class="s2">a = sqrt(arange(nmax))</span>
@@ -171,12 +171,12 @@ calculation, and so a reasonable looking calculation such as:</p>
 <p>can take a noticeable amount of CPU time.  It is not hard to come up with
 short program that would run for hundreds of years, which probably exceeds
 anyones threshold for an acceptable run-time.  But there simply is not an
-obvious way to predict how long any code will take to run from the text of the
-code itself.  As a simple example, consider the expression <cite>x**y**z</cite>.  For
-values of <cite>x</cite>, <cite>y</cite>, and <cite>z</cite>.  For <cite>x=y=z=5</cite>, runtime will be well under 0.001
-seconds.  For <cite>x=y=z=8</cite>, runtime will still be under 1 sec.  For <cite>x=8, y=9,
-z=9</cite>, runtime will several seconds.  But for <cite>x=y=z=9</cite>, runtime may exceed 1
-hour on some machines.  In short, runtime cannot be determined lexically.</p>
+obvious way to predict how long any code will take to run from the text of
+the code itself.  As a simple example, consider the expression <cite>x**y**z</cite>.
+For values <cite>x=y=z=5</cite>, runtime will be well under 0.001 seconds.  For
+<cite>x=y=z=8</cite>, runtime will still be under 1 sec.  For <cite>x=8, y=9, z=9</cite>, runtime
+will several seconds.  But for <cite>x=y=z=9</cite>, runtime may exceed 1 hour on some
+machines.  In short, runtime cannot be determined lexically.</p>
 <p>This example also demonstrates there is not a good way to check for a
 long-running calculation within a single Python process.  That calculation is
 not stuck within the Python interpreter – it is stuck deep inside C-code.
@@ -210,7 +210,7 @@ untrusted user.  If <cite>numpy</cite> is supported, its <cite>load()</cite> and
 functions will also be supported.  This doesn’t really elevate permissions,
 but it does allow the user of the <cite>asteval</cite> interpreter to read files with
 the privileges of the calling program.  In some cases, this may not be
-desireable, and you may want to remove some of these functions from the
+desirable, and you may want to remove some of these functions from the
 symbol table, re-implement them, or ensure that your program cannot access
 information on disk that should be kept private.</p>
 <p>In summary, while asteval attempts to be safe and is definitely safer than
@@ -245,7 +245,7 @@ improve this situation would be greatly appreciated.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2019, Matthew Newville, The University of Chicago.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
     </div>
   </body>

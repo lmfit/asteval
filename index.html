@@ -72,29 +72,31 @@ richer, easier to use alternative to <a class="reference external" href="https:/
 this by building an embedded interpreter for a subset of the Python
 language using Python’s <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  The emphasis here and main
 area of application is the evaluation of mathematical expressions. Because
-of this, mathematical functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module are
-available, and a large number of functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> will be available
-if <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> is installed on your system.</p>
-<p>While the emphasis is on basic mathematical expressions, many features of the
-Python language are supported by default.  These features include array
-slicing and subscripting, if-then-else conditionals, while loops, for loops,
-try-except blocks, list comprehension, and user-defined functions.  All
-objects in the asteval interpreter are truly python objects, and all basic
-built-in data structures (strings, dictionaries, tuple, lists, numpy arrays)
-are supported.</p>
+of this emphasis mathematical functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module
+are built-in to asteval, and a large number of functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> will
+be available if <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> is installed on your system.</p>
+<p>While the primary goal is evaluation of basic mathematical expressions,
+many features and constructs of the Python language are supported by
+default.  These features include array slicing and subscripting,
+if-then-else conditionals, while loops, for loops, try-except blocks, list
+comprehension, and user-defined functions.  All objects in the asteval
+interpreter are truly python objects, and all of the basic built-in data
+structures (strings, dictionaries, tuple, lists, sets, numpy arrays) are
+supported, including the built-in methods for these objects.</p>
 <p>However, Asteval is by no means an attempt to reproduce Python with its own
 <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.8)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  There are important differences and missing features
-compared to Python.  Many of these absences are intentionally trying to make a
-safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some are simply due to the reduced
-requirements for a small embedded min-language. Some of the main differences
-and absences include:</p>
+compared to Python.  Many of these absences are intentional, and part of
+the effort to try to make a safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some
+are simply due to the reduced requirements for an embedded
+mini-language. These differences and absences include:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>Variable and function symbol names are held in a simple symbol
 table - a single dictionary - giving a flat namespace.</p></li>
 <li><p>creating classes is not allowed.</p></li>
 <li><p>importing modules is not allowed.</p></li>
-<li><p>function decorators, generators, yield, and lambda are not supported.</p></li>
+<li><p>f-strings, function decorators, generators, yield, and lambda are not
+supported. (subject to change).</p></li>
 <li><p>Many builtins (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
@@ -102,14 +104,15 @@ table - a single dictionary - giving a flat namespace.</p></li>
 the python interpreter are not allowed.</p></li>
 </ol>
 </div></blockquote>
-<p>The effect to make the asteval mini-language look and act very much like
-miniature version of Python itself focused on mathematical calculations, and
-with noticeable limitations.</p>
-<p>Because asteval is suitable for evaluating user-supplied input strings, safety
-against malicious or incompetent user input is an important concern.  Asteval
-tries as hard as possible to prevent user-supplied input from crashing the
-Python interpreter or from returning exploitable parts of the Python
-interpreter.  In this sense asteval is certainly safer than using
+<p>The resulting “asteval language” acts very much like miniature version of
+Python, focused on mathematical calculations, and with noticeable
+limitations.  It is the kind of toy programming language you might use to
+introduce simple scientific programming concepts.</p>
+<p>Because asteval is designed for evaluating user-supplied input, safety
+against malicious or incompetent user input is an important concern.
+Asteval tries as hard as possible to prevent user-supplied input from
+crashing the Python interpreter or from returning exploitable parts of the
+Python interpreter.  In this sense asteval is certainly safer than using
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  However, asteval is an open source project written by
 volunteers, and we cannot guarantee that it is completely safe against
 malicious attacks.</p>
@@ -168,7 +171,7 @@ malicious attacks.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2014, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2019, Matthew Newville, The University of Chicago.
       Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
     </div>
   </body>
