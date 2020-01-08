@@ -77,7 +77,6 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
     def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME,
                  max_cycles=MAX_CYCLES, truncate_traces=False):
-        self.debugging = True  # Set to True to disable the runtime limiter
         self.writer = writer or stdout
         self.filename = filename
         self.start = 0
@@ -274,8 +273,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         """executes parsed Ast representation for an expression"""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
-        if not self.debugging and time() - self.start > self.max_time:
-            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(MAX_EXEC_TIME))
+        if self.max_time and time() - self.start > self.max_time:
+            raise RuntimeError("Execution exceeded time limit, max runtime is {}s".format(self.max_time))
 
         self.cycles += 1
         if self.cycles > self.max_cycles:
