@@ -22,6 +22,7 @@ if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
 
+
 # pylint: disable=too-many-lines
 
 
@@ -76,7 +77,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                       )
 
     def __init__(self, filename='', writer=None, globals_=None, import_hook=None, max_time=MAX_EXEC_TIME,
-                 max_cycles=MAX_CYCLES, truncate_traces=False):
+                 max_cycles=MAX_CYCLES, truncate_traces=False, funcCheckHook=None):
         self.writer = writer or stdout
         self.filename = filename
         self.start = 0
@@ -84,6 +85,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         self.max_time = max_time
         self.max_cycles = max_cycles
         self.import_hook = import_hook
+        self.funcCheckHook = funcCheckHook
         self.ui_trace_enabled = True
         self.ui_trace = []
         self.trace = None   # à la sys.settrace()
@@ -994,6 +996,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
         # noinspection PyBroadException
         try:
+            if self.funcCheckHook:
+                self.funcCheckHook(func, args=args, kwargs=keywords)
             ret = func(*args, **keywords)
         except Exception as e:  # pylint: disable=broad-except
             self.ui_tracer('{}Function `{}({})` raised on exception: {}.'
