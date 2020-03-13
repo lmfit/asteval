@@ -159,7 +159,7 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
 
-def _open(filename, mode='r', buffering=0):
+def _open(filename, mode='r', buffering=-1):
     """read only version of open()"""
     if mode not in ('r', 'rb', 'rU'):
         raise RuntimeError("Invalid open file mode, must be 'r', 'rb', or 'rU'")
