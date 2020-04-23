@@ -265,6 +265,8 @@ class TestEval(TestCase):
         self.check_error(None)
         self.interp('assert n==7')
         self.check_error('AssertionError')
+        self.interp('assert n==7, "no match"')
+        self.check_error('AssertionError', 'no match')
 
     def test_for(self):
         """for loops"""
