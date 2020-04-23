@@ -403,7 +403,8 @@ class Interpreter(object):
     def on_assert(self, node):    # ('test', 'msg')
         """Assert statement."""
         if not self.run(node.test):
-            self.raise_exception(node, exc=AssertionError, msg=node.msg)
+            msg = node.msg.s if node.msg else ""
+            self.raise_exception(node, exc=AssertionError, msg=msg)
         return True
 
     def on_list(self, node):    # ('elt', 'ctx')
