@@ -143,29 +143,12 @@ class Interpreter(object):
         self.no_print = no_print or minimal
 
         nodes = ALL_NODES[:]
+        no_dict = {key: val for key, val in locals().items() if 'no_' in key}
+        del no_dict['no_print']
 
-        if minimal or no_if:
-            nodes.remove('if')
-        if minimal or no_for:
-            nodes.remove('for')
-        if minimal or no_while:
-            nodes.remove('while')
-        if minimal or no_try:
-            nodes.remove('try')
-        if minimal or no_functiondef:
-            nodes.remove('functiondef')
-        if minimal or no_ifexp:
-            nodes.remove('ifexp')
-        if minimal or no_assert:
-            nodes.remove('assert')
-        if minimal or no_delete:
-            nodes.remove('delete')
-        if minimal or no_raise:
-            nodes.remove('raise')
-        if minimal or no_listcomp:
-            nodes.remove('listcomp')
-        if minimal or no_augassign:
-            nodes.remove('augassign')
+        for key in no_dict:
+            if minimal or no_dict[key]:
+                nodes.remove(key[3:])
 
         self.node_handlers = {}
         for node in nodes:
