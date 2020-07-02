@@ -143,6 +143,8 @@ class Interpreter(object):
         self.no_print = no_print or minimal
 
         nodes = ALL_NODES[:]
+        
+        # Creates a dictionary of instance variables (name: value) that contain 'no_', deleting 'no_print'.
         no_dict = {key: val for key, val in locals().items() if 'no_' in key}
         del no_dict['no_print']
 
