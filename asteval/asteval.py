@@ -238,7 +238,7 @@ class Interpreter(object):
         if len(self.error) > 0 and not isinstance(node, ast.Module):
             msg = '%s' % msg
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
-        self._interrupt = ast.Break()
+        self._interrupt = ast.Raise()
         self.error.append(err)
         if self.error_msg is None:
             self.error_msg = "at expr='%s'" % (self.expr)
@@ -274,6 +274,10 @@ class Interpreter(object):
         out = None
         if len(self.error) > 0:
             return out
+        if self.retval is not None:
+            return self.retval
+        if isinstance(self._interrupt, (ast.Break, ast.Continue)):
+            return self._interrupt
         if node is None:
             return out
         if isinstance(node, str):
