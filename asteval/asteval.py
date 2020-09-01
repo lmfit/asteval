@@ -748,11 +748,14 @@ class Interpreter(object):
         keywords = {}
         if func == print:
             keywords['file'] = self.writer
-
         for key in node.keywords:
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call '%s'" % (func)
                 self.raise_exception(node, msg=msg)
+            if key.arg in keywords:
+                self.raise_exception(node,
+                                     msg="keyword argument repeated: %s" % key.arg,
+                                     exc=SyntaxError)                
             keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
