@@ -761,11 +761,7 @@ class TestEval(TestCase):
         self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
         self.check_error('TypeError', 'extra keyword arg')
         self.interp("o = fcn(x=1, y=2, y=3)")
-        if version_info == (3, 9):
-            self.isvalue('o', 4)
-            self.check_error(None)
-        else:
-            self.check_error('SyntaxError')
+        self.check_error('SyntaxError')
         self.interp("o = fcn(0, 1, 2, 3, 4, 5, 6, 7, True)")
         self.check_error('TypeError', 'too many arguments')
 
