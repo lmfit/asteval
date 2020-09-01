@@ -44,9 +44,9 @@ is easy to walk through, greatly simplifying the evaluation process.  What
 started as a desire for a simple expression evaluator grew into a quite
 useable procedural domain-specific language for mathematical applications.
 
-Asteval makes no claims about speed. Evaluating the AST involves many function
-calls, which is going to be slower than Python.  In preliminary tests, it's
-about 4x slower than Python.  That said, for certain use cases (see
+Asteval makes no claims about speed. Evaluating the AST involves many
+function calls, which is going to be slower than Python - often 4x slower
+than Python.  That said, for certain use cases (see
 https://stackoverflow.com/questions/34106484), use of asteval and numpy can
 approach the speed of `eval` and the `numexpr` modules.
 

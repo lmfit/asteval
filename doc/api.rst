@@ -8,7 +8,6 @@ asteval reference
 
 .. module:: asteval
 
-
 The asteval module has a pretty simple interface, providing an
 :class:`Interpreter` class which creates an Interpreter of expressions and
 code.  There are a few options available to control what language features
