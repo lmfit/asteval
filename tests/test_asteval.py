@@ -17,7 +17,6 @@ from tempfile import NamedTemporaryFile
 
 from asteval import NameFinder, Interpreter, make_symbol_table
 
-
 HAS_NUMPY = False
 try:
     import numpy as np
@@ -26,6 +25,8 @@ try:
 except ImportError:
     HAS_NUMPY = False
 
+
+version_info = (version_info.major, version_info.minor)
 
 class TestCase(unittest.TestCase):
     """testing of asteval"""
@@ -732,7 +733,7 @@ class TestEval(TestCase):
         """test function with kw args, no **kws"""
         self.interp(textwrap.dedent("""
             def fcn(x=0, y=0, z=0, t=0, square=False):
-                'test varargs function'
+                'test kwargs function'
                 out = 0
                 for i in (x, y, z, t):
                     if square:
@@ -760,7 +761,11 @@ class TestEval(TestCase):
         self.interp("o = fcn(x=1, y=2, z=3, t=-12, s=1)")
         self.check_error('TypeError', 'extra keyword arg')
         self.interp("o = fcn(x=1, y=2, y=3)")
-        self.check_error('SyntaxError')
+        if version_info == (3, 9):
+            self.isvalue('o', 4)
+            self.check_error(None)
+        else:
+            self.check_error('SyntaxError')
         self.interp("o = fcn(0, 1, 2, 3, 4, 5, 6, 7, True)")
         self.check_error('TypeError', 'too many arguments')
 
@@ -883,8 +888,12 @@ class TestEval(TestCase):
         self.interp("9**9**9**9**9**9**9**9")
         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
         self.interp(
-            "((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
-        self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
+            "x = ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
+        if version_info == (3, 9):
+            self.isvalue('x', 1)
+            self.check_error(None)
+        else:
+            self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
         self.interp("compile('xxx')")
         self.check_error('NameError')  # Safe, compile() is not supported
 
