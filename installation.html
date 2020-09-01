@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
     <title>Downloading and Installation &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Motivation for asteval" href="motivation.html" />
@@ -71,7 +71,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -85,14 +85,22 @@
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <p>Asteval is a pure python module with no required dependencies outside of the
-standard library.  Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module if available.</p>
-<p>Version 0.9.18 supports and is tested with Python 3.5 through 3.8.</p>
+standard library.  Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module if
+available.  The test suite requires the <cite>pytest</cite> module.</p>
+<p>Version 0.9.19 supports and is tested with Python 3.6 through 3.8. Support
+for Python 3.5 was not deliberately broken, but testing for this version
+has now stopped, and development going forward will assume Python3.6+.</p>
+<p>This version also includes changes to work with Python 3.9beta, and all
+tests pass locally. Python 3.9 is not yet tested automatically, and some
+issues may arise with this version.</p>
+<p>Version 0.9.18 supported and was tested with Python 3.5 through 3.8.</p>
 <p>Version 0.9.17 was the last version to support Python 2.7.</p>
 </div>
 <div class="section" id="download-and-installation">
 <h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this headline">¶</a></h2>
-<p>The latest stable version of asteval is 0.9.18 and is available at <a class="reference external" href="http://pypi.python.org/pypi/asteval/">PyPI</a> or as
-a conda package.  You should be able to install asteval with:</p>
+<p>The latest stable version of asteval is 0.9.19 and is available at
+<a class="reference external" href="http://pypi.python.org/pypi/asteval/">PyPI</a> or as a conda package.  You should be able to install asteval
+with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
 </pre></div>
 </div>
@@ -169,8 +177,8 @@ a conda package.  You should be able to install asteval with:</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2019, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
+        &#169; Copyright 2020, Matthew Newville, The University of Chicago.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.4.
     </div>
   </body>
 </html>

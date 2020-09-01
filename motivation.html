@@ -1,17 +1,17 @@
 
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
     <title>Motivation for asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Using asteval" href="basics.html" />
@@ -67,7 +67,7 @@
     </form>
     </div>
 </div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
 
@@ -113,9 +113,9 @@ and converted into an Abstract Syntax Tree.  Furthermore, the resulting AST
 is easy to walk through, greatly simplifying the evaluation process.  What
 started as a desire for a simple expression evaluator grew into a quite
 useable procedural domain-specific language for mathematical applications.</p>
-<p>Asteval makes no claims about speed. Evaluating the AST involves many function
-calls, which is going to be slower than Python.  In preliminary tests, it’s
-about 4x slower than Python.  That said, for certain use cases (see
+<p>Asteval makes no claims about speed. Evaluating the AST involves many
+function calls, which is going to be slower than Python - often 4x slower
+than Python.  That said, for certain use cases (see
 <a class="reference external" href="https://stackoverflow.com/questions/34106484">https://stackoverflow.com/questions/34106484</a>), use of asteval and numpy can
 approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
 <div class="section" id="how-safe-is-asteval">
@@ -160,7 +160,7 @@ segmentation fault, you’ll want to disable the use of numpy.</p>
 to address. The most important of these is resource hogging, which might be
 used for a denial-of-service attack.  There is no guaranteed timeout on any
 calculation, and so a reasonable looking calculation such as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="k">import</span> <span class="n">Interpreter</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;nmax = 1e8</span>
 <span class="s2">a = sqrt(arange(nmax))</span>
@@ -245,8 +245,8 @@ improve this situation would be greatly appreciated.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2019, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.3.0.
+        &#169; Copyright 2020, Matthew Newville, The University of Chicago.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.4.
     </div>
   </body>
 </html>
