@@ -483,6 +483,8 @@ class Interpreter(object):
             xslice = self.run(node.slice)
             if isinstance(node.slice, ast.Index):
                 sym[xslice] = val
+            elif isinstance(node.slice, ast.Constant):
+                sym[xslice] = val
             elif isinstance(node.slice, ast.Slice):
                 sym[slice(xslice.start, xslice.stop)] = val
             elif isinstance(node.slice, ast.ExtSlice):
@@ -549,9 +551,9 @@ class Interpreter(object):
         nslice = self.run(node.slice)
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
-            if isinstance(node.slice, (ast.Index, ast.Slice, ast.Ellipsis)):
+            if isinstance(node.slice, (ast.Index, ast.Constant, ast.Slice, ast.Ellipsis)):
                 return val.__getitem__(nslice)
-            elif isinstance(node.slice, ast.ExtSlice):
+            elif isinstance(node.slice, (ast.ExtSlice, ast.UnaryOp)):
                 return val[nslice]
         else:
             msg = "subscript with unknown context"
