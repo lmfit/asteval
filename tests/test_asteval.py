@@ -18,7 +18,6 @@ from tempfile import NamedTemporaryFile
 from asteval import NameFinder, Interpreter, make_symbol_table
 
 
-
 HAS_NUMPY = False
 try:
     import numpy as np
@@ -1042,6 +1041,28 @@ class TestEval(TestCase):
         result = aeval("sqrt(-1)")
         assert aeval.error.pop().exc == ValueError
 
+    def test_inner_return(self):
+        self.interp(textwrap.dedent("""
+            def func():
+                loop_cnt = 0
+                for i in range(5):
+                    for k in range(5):
+                        loop_cnt += 1
+                    return (i, k, loop_cnt)
+        """))
+        out = self.interp("func()")
+        assert out == (0, 4, 5)
+
+    def test_nested_break(self):
+        self.interp(textwrap.dedent("""
+        def func_w():
+            for k in range(5):
+                if k == 4:
+                    break
+                    k = 100
+            return k
+        """))
+        assert 4 == self.interp("func_w()")
 
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
