@@ -205,7 +205,8 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
 
     def ui_tracer(self, s):
         if self.ui_trace_enabled:
-            self.ui_trace.append("{}:{}".format(self.get_current_frame().get_filename() or '__main__', s))
+            self.ui_trace.append("{} {}:{}".format(round(time() - self.start, 3),
+                                                   self.get_current_frame().get_filename() or '__main__', s))
 
     def get_ui_trace(self):
         return self.ui_trace
