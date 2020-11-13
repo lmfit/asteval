@@ -481,14 +481,10 @@ class Interpreter(object):
         elif node.__class__ == ast.Subscript:
             sym = self.run(node.value)
             xslice = self.run(node.slice)
-            if isinstance(node.slice, ast.Index):
-                sym[xslice] = val
-            elif isinstance(node.slice, ast.Constant):
+            if isinstance(node.slice, (ast.Tuple, ast.Index, ast.Constant, ast.ExtSlice)):
                 sym[xslice] = val
             elif isinstance(node.slice, ast.Slice):
                 sym[slice(xslice.start, xslice.stop)] = val
-            elif isinstance(node.slice, ast.ExtSlice):
-                sym[xslice] = val
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
                 for telem, tval in zip(node.elts, val):
@@ -553,7 +549,7 @@ class Interpreter(object):
         if ctx in (ast.Load, ast.Store):
             if isinstance(node.slice, (ast.Index, ast.Constant, ast.Slice, ast.Ellipsis)):
                 return val.__getitem__(nslice)
-            elif isinstance(node.slice, (ast.ExtSlice, ast.UnaryOp)):
+            elif isinstance(node.slice, (ast.Tuple, ast.ExtSlice, ast.UnaryOp)):
                 return val[nslice]
         else:
             msg = "subscript with unknown context"
@@ -755,7 +751,7 @@ class Interpreter(object):
             if key.arg in keywords:
                 self.raise_exception(node,
                                      msg="keyword argument repeated: %s" % key.arg,
-                                     exc=SyntaxError)                
+                                     exc=SyntaxError)
             keywords[key.arg] = self.run(key.value)
 
         kwargs = getattr(node, 'kwargs', None)
