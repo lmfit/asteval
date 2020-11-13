@@ -177,6 +177,7 @@ class TestEval(TestCase):
             self.interp("y = arange(20).reshape(4, 5)")
             self.istrue("y[:,3]  == array([3, 8, 13, 18])")
             self.istrue("y[...,1]  == array([1, 6, 11, 16])")
+            self.istrue("y[1,:] == array([5, 6, 7, 8, 9])")
             self.interp("y[...,1] = array([2, 2, 2, 2])")
             self.istrue("y[1,:] == array([5, 2, 7, 8, 9])")
 
@@ -1042,7 +1043,7 @@ class TestEval(TestCase):
         # uses the function's __name__ attribute. Partials don't have a
         # __name__ attribute, so we want to make sure that an AttributeError is
         # not raised.
-    
+
         result = aeval("sqrt(-1)")
         assert aeval.error.pop().exc == ValueError
 
