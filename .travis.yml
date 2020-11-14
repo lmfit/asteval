@@ -7,27 +7,25 @@ python:
     - 3.6
     - 3.7
     - 3.8
-    - 3.9-dev
+    - 3.9
 
 env:
     - version=without_numpy
     - version=with_numpy
 
-before_install:
-    - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
-    - bash miniconda.sh -b -p $HOME/miniconda
-    - export PATH="$HOME/miniconda/bin:$PATH"
-    - hash -r
-    - conda config --set always_yes yes --set changeps1 no
-    - conda update -q conda
-    - conda info -a
+#before_install:
+#    - wget https://repo.continuum.io/miniconda/Miniconda-latest-Linux-x86_64.sh -O miniconda.sh
+#     - bash miniconda.sh -b -p $HOME/miniconda
+#     - export PATH="$HOME/miniconda/bin:$PATH"
+#     - hash -r
+#     - conda config --set always_yes yes --set changeps1 no
+#     - conda update -q conda
+#     - conda info -a
 
 install:
-    - conda create -q -n test_env python=$TRAVIS_PYTHON_VERSION pytest coverage
-    - source activate test_env
-    - if [[ $version == with_numpy ]]; then conda install numpy ; fi
+    - if [[ $version == with_numpy ]]; then pip install numpy ; fi
     - python setup.py install
-    - pip install codecov
+    - pip install codecov pytest
 
 script:
     - cd tests
