@@ -45,13 +45,6 @@ from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
                        valid_symbol_name)
 
-if version_info[0] < 3 or version_info[1] < 5:
-    raise SystemError("Python 3.5 or higher required")
-
-builtins = __builtins__
-if not isinstance(builtins, dict):
-    builtins = builtins.__dict__
-
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'call', 'compare', 'continue', 'delete',
              'dict', 'ellipsis', 'excepthandler', 'expr', 'extslice',
@@ -700,7 +693,7 @@ class Interpreter(object):
                 for hnd in node.handlers:
                     htype = None
                     if hnd.type is not None:
-                        htype = builtins.get(hnd.type.id, None)
+                        htype = __builtins__.get(hnd.type.id, None)
                     if htype is None or isinstance(e_type(), htype):
                         self.error = []
                         if hnd.name is not None:
