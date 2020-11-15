@@ -41,7 +41,9 @@ with::
    pip install asteval
 
 It may also be available on some conda channels, including `conda-forge`,
-but no effort is 
+but as it is a pure Python package with no dependencies or OS-specific
+extensions, using `pip` should be the preferred method on all platforms and
+environments.
 
 Development Version
 ~~~~~~~~~~~~~~~~~~~~~~~~
