@@ -141,6 +141,22 @@ class TestEval(TestCase):
         self.istrue("a_dict['a'] == 1")
         self.istrue("a_dict['d'] == 4")
 
+    def test_dict_set_index(self):
+        """dictionary indexing"""
+        self.interp("a_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4}")
+        self.interp("a_dict['a'] = -4")
+        self.interp("a_dict['e'] = 73")
+
+        self.istrue("a_dict['a'] == -4")
+        self.istrue("a_dict['e'] == 73")
+
+        self.interp("b_dict = {}")
+        self.interp("keyname = 'a'")
+        self.interp("b_dict[keyname] = (1, -1, 'x')")
+        self.istrue("b_dict[keyname] ==  (1, -1, 'x')")
+
+
+
     def test_list_index(self):
         """list indexing"""
         self.interp("a_list = ['a', 'b', 'c', 'd', 'o']")
