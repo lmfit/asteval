@@ -472,12 +472,8 @@ class Interpreter(object):
             setattr(self.run(node.value), node.attr, val)
 
         elif node.__class__ == ast.Subscript:
-            sym = self.run(node.value)
-            xslice = self.run(node.slice)
-            if isinstance(node.slice, (ast.Tuple, ast.Index, ast.Constant, ast.ExtSlice)):
-                sym[xslice] = val
-            elif isinstance(node.slice, ast.Slice):
-                sym[slice(xslice.start, xslice.stop)] = val
+            self.run(node.value)[self.run(node.slice)] = val
+
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
                 for telem, tval in zip(node.elts, val):
@@ -540,10 +536,7 @@ class Interpreter(object):
         nslice = self.run(node.slice)
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
-            if isinstance(node.slice, (ast.Index, ast.Constant, ast.Slice, ast.Ellipsis)):
-                return val.__getitem__(nslice)
-            elif isinstance(node.slice, (ast.Tuple, ast.ExtSlice, ast.UnaryOp)):
-                return val[nslice]
+            return val[nslice]
         else:
             msg = "subscript with unknown context"
             self.raise_exception(node, msg=msg)
