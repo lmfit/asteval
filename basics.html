@@ -4,6 +4,7 @@
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -32,50 +33,10 @@
         <li class="right" >
           <a href="motivation.html" title="Motivation for asteval"
              accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Using asteval</a></li> 
       </ul>
-    </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Using asteval</a><ul>
-<li><a class="reference internal" href="#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
-<li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
-<li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
-<li><a class="reference internal" href="#conditionals-and-loops">conditionals and loops</a></li>
-<li><a class="reference internal" href="#printing">printing</a></li>
-<li><a class="reference internal" href="#writing-functions">writing functions</a></li>
-<li><a class="reference internal" href="#exceptions">exceptions</a></li>
-</ul>
-</li>
-</ul>
-
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="motivation.html"
-                        title="previous chapter">Motivation for asteval</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="api.html"
-                        title="next chapter">asteval reference</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/basics.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script>$('#searchbox').show(0);</script>
-        </div>
-      </div>
+    </div>  
 
     <div class="document">
       <div class="documentwrapper">
@@ -201,10 +162,10 @@ exactly as they do in python.  Thus:</p>
 </div>
 <div class="section" id="printing">
 <h2>printing<a class="headerlink" href="#printing" title="Permalink to this headline">¶</a></h2>
-<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.8)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
+<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
 can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when creating
 the interpreter, or supreess printing all together with the <code class="docutils literal notranslate"><span class="pre">no_print</span></code>
-option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.8)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
+option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.9)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
 </div>
 <div class="section" id="writing-functions">
 <h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this headline">¶</a></h2>
@@ -250,7 +211,49 @@ REPL loop, you’d want to do something similar to</p>
 </div>
 
 
+            <div class="clearer"></div>
           </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Using asteval</a><ul>
+<li><a class="reference internal" href="#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
+<li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
+<li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
+<li><a class="reference internal" href="#conditionals-and-loops">conditionals and loops</a></li>
+<li><a class="reference internal" href="#printing">printing</a></li>
+<li><a class="reference internal" href="#writing-functions">writing functions</a></li>
+<li><a class="reference internal" href="#exceptions">exceptions</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="motivation.html"
+                        title="previous chapter">Motivation for asteval</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="api.html"
+                        title="next chapter">asteval reference</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/basics.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -270,12 +273,13 @@ REPL loop, you’d want to do something similar to</p>
         <li class="right" >
           <a href="motivation.html" title="Motivation for asteval"
              >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li> 
+        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Using asteval</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2020, Matthew Newville, The University of Chicago.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.0.4.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
     </div>
   </body>
 </html>
