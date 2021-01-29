@@ -823,6 +823,24 @@ class TestEval(TestCase):
         self.interp("o = fcn(1, x=2)")
         self.check_error('TypeError')
 
+    def test_kwargx(self):
+        """test passing and chaining in **kwargs"""
+        self.interp(textwrap.dedent("""
+            def inner(foo=None, bar=None):
+                return (foo, bar)
+                
+            def outer(**kwargs):
+                return inner(**kwargs)
+            """))
+
+        ret = self.interp("inner(foo='a', bar=2)")
+        assert(ret == ('a', 2))
+        ret = self.interp("outer(foo='a', bar=7)")
+        assert(ret == ('a', 7))        
+        ret = self.interp("outer(**dict(foo='b', bar=3))") 
+        assert(ret == ('b', 3))        
+
+
     def test_nested_functions(self):
         setup="""
         def a(x=10):

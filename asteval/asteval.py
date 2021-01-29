@@ -734,13 +734,18 @@ class Interpreter(object):
             if not isinstance(key, ast.keyword):
                 msg = "keyword error in function call '%s'" % (func)
                 self.raise_exception(node, msg=msg)
-            if key.arg in keywords:
+            if key.arg is None:
+                keywords.update(self.run(key.value))
+            elif key.arg in keywords:
                 self.raise_exception(node,
                                      msg="keyword argument repeated: %s" % key.arg,
                                      exc=SyntaxError)
-            keywords[key.arg] = self.run(key.value)
+            else:
+                keywords[key.arg] = self.run(key.value)
+
 
         kwargs = getattr(node, 'kwargs', None)
+
         if kwargs is not None:
             keywords.update(self.run(kwargs))
 
