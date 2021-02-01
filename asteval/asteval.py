@@ -17,7 +17,7 @@ compiled into ast node and then evaluated later, using the current values
 in the symbol table.
 
 The result is a restricted, simplified version of Python meant for
-numerical caclulations that is somewhat safer than 'eval' because many
+numerical calculations that is somewhat safer than 'eval' because many
 unsafe operations (such as 'import' and 'eval') are simply not allowed.
 
 Many parts of Python syntax are supported, including:
@@ -86,7 +86,7 @@ class Interpreter:
     no_listcomp : bool
         whether to support list comprehension.
     no_augassign : bool
-        whether to support augemented assigments (`a += 1`, etc).
+        whether to support augemented assignments (`a += 1`, etc).
     no_assert : bool
         whether to support `assert`.
     no_delete : bool
@@ -353,7 +353,7 @@ class Interpreter:
         return self.run(node.value)  # ('value',)
 
     def on_return(self, node):  # ('value',)
-        """Return statement: look for None, return special sentinal."""
+        """Return statement: look for None, return special sentinel."""
         self.retval = self.run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
@@ -488,7 +488,7 @@ class Interpreter:
             return delattr(sym, node.attr)
 
         # ctx is ast.Load
-        fmt = "cannnot access attribute '%s' for %s"
+        fmt = "cannot access attribute '%s' for %s"
         if node.attr not in UNSAFE_ATTRS:
             fmt = "no attribute '%s' for %s"
             try:
