@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
+
 import versioneer
 
 long_description = """ASTEVAL provides a numpy-aware, safe(ish) 'eval' function

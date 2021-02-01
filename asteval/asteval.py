@@ -37,13 +37,12 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example)
 """
 import ast
-import time
 import inspect
-from sys import exc_info, stdout, stderr
+from sys import exc_info, stderr, stdout
+import time
 
-from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
-                       op2func, ExceptionHolder, ReturnedNone,
-                       valid_symbol_name)
+from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
+                       make_symbol_table, numpy, op2func, valid_symbol_name)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'call', 'compare', 'continue', 'delete',

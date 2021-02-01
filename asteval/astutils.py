@@ -4,15 +4,15 @@ utility functions for asteval
    Matthew Newville <newville@cars.uchicago.edu>,
    The University of Chicago
 """
-import io
-import re
 import ast
+import io
 import math
 import numbers
+import re
 from sys import exc_info
-from tokenize import (tokenize as generate_tokens,
-                      ENCODING as tk_ENCODING,
-                      NAME as tk_NAME)
+from tokenize import ENCODING as tk_ENCODING
+from tokenize import NAME as tk_NAME
+from tokenize import tokenize as generate_tokens
 
 HAS_NUMPY = False
 numpy = None

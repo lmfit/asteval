@@ -3,19 +3,19 @@
 Base TestCase for asteval
 """
 import ast
+from functools import partial
+from io import StringIO
 import math
 import os
+from sys import version_info
+from tempfile import NamedTemporaryFile
 import textwrap
 import time
 import unittest
+
 import pytest
-from io import StringIO
 
-from functools import partial
-from sys import version_info
-from tempfile import NamedTemporaryFile
-
-from asteval import NameFinder, Interpreter, make_symbol_table
+from asteval import Interpreter, NameFinder, make_symbol_table
 
 HAS_NUMPY = False
 try:
