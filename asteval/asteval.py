@@ -429,10 +429,6 @@ class Interpreter:
         """Return string."""
         return node.s
 
-    def on_nameconstant(self, node):   # ('value',)
-        """named constant"""
-        return node.value
-
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
         ctx = node.ctx.__class__
@@ -446,7 +442,7 @@ class Interpreter:
                 self.raise_exception(node, exc=NameError, msg=msg)
 
     def on_nameconstant(self, node):
-        """ True, False, None in python >= 3.4 """
+        """True, False, or None"""
         return node.value
 
     def node_assign(self, node, val):
