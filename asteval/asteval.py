@@ -53,7 +53,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
 
-class Interpreter(object):
+class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
     of mathematical expressions using Python syntax.
 
@@ -414,8 +414,8 @@ class Interpreter(object):
 
     def on_dict(self, node):    # ('keys', 'values')
         """Dictionary."""
-        return dict([(self.run(k), self.run(v)) for k, v in
-                     zip(node.keys, node.values)])
+        return {self.run(k): self.run(v) for k, v in
+                zip(node.keys, node.values)}
 
     def on_constant(self, node):   # ('value', 'kind')
         """Return constant value."""
@@ -800,7 +800,7 @@ class Interpreter(object):
             self.no_deepcopy.remove(node.name)
 
 
-class Procedure(object):
+class Procedure:
     """Procedure: user-defined function for asteval.
 
     This stores the parsed ast nodes as from the 'functiondef' ast node
