@@ -39,7 +39,7 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 import ast
 import time
 import inspect
-from sys import exc_info, stdout, stderr, version_info
+from sys import exc_info, stdout, stderr
 
 from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
                        op2func, ExceptionHolder, ReturnedNone,
@@ -52,6 +52,7 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
              'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
+
 
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -195,7 +196,6 @@ class Interpreter:
     def set_nodehandler(self, node, handler):
         """set node handler"""
         self.node_handlers[node] = handler
-
 
     def user_defined_symbols(self):
         """Return a set of symbols that have been added to symtable after
@@ -373,7 +373,7 @@ class Interpreter:
 
     def on_expression(self, node):
         "basic expression"
-        return self.on_module(node) # ():('body',)
+        return self.on_module(node)  # ():('body',)
 
     def on_pass(self, node):
         """Pass statement."""
@@ -742,7 +742,6 @@ class Interpreter:
                                      exc=SyntaxError)
             else:
                 keywords[key.arg] = self.run(key.value)
-
 
         kwargs = getattr(node, 'kwargs', None)
 

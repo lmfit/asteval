@@ -167,6 +167,7 @@ def _open(filename, mode='r', buffering=-1):
         raise RuntimeError(f"Invalid buffering value, max buffer size is {MAX_OPEN_BUFFER}")
     return open(filename, mode, buffering)
 
+
 def _type(obj, *varargs, **varkws):
     """type that prevents varargs and varkws"""
     return type(obj).__name__
@@ -344,9 +345,11 @@ class NameFinder(ast.NodeVisitor):
                 self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)
 
+
 builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
+
 
 def get_ast_names(astnode):
     """Return symbol Names from an AST node."""
@@ -388,7 +391,6 @@ def make_symbol_table(use_numpy=True, **kws):
         for name, sym in NUMPY_RENAMES.items():
             if hasattr(numpy, sym):
                 symtable[name] = getattr(numpy, sym)
-
 
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
