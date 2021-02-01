@@ -4,15 +4,15 @@ utility functions for asteval
    Matthew Newville <newville@cars.uchicago.edu>,
    The University of Chicago
 """
-import io
-import re
 import ast
+import io
 import math
 import numbers
+import re
 from sys import exc_info
-from tokenize import (tokenize as generate_tokens,
-                      ENCODING as tk_ENCODING,
-                      NAME as tk_NAME)
+from tokenize import ENCODING as tk_ENCODING
+from tokenize import NAME as tk_NAME
+from tokenize import tokenize as generate_tokens
 
 HAS_NUMPY = False
 numpy = None
@@ -165,8 +165,9 @@ def _open(filename, mode='r', buffering=-1):
     if mode not in ('r', 'rb', 'rU'):
         raise RuntimeError("Invalid open file mode, must be 'r', 'rb', or 'rU'")
     if buffering > MAX_OPEN_BUFFER:
-        raise RuntimeError("Invalid buffering value, max buffer size is {}".format(MAX_OPEN_BUFFER))
+        raise RuntimeError(f"Invalid buffering value, max buffer size is {MAX_OPEN_BUFFER}")
     return open(filename, mode, buffering)
+
 
 def _type(obj, *varargs, **varkws):
     """type that prevents varargs and varkws"""
@@ -182,25 +183,25 @@ def safe_pow(base, exp):
     """safe version of pow"""
     if isinstance(exp, numbers.Number):
         if exp > MAX_EXPONENT:
-            raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
+            raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
     elif HAS_NUMPY:
         if isinstance(exp, numpy.ndarray):
             if numpy.nanmax(exp) > MAX_EXPONENT:
-                raise RuntimeError("Invalid exponent, max exponent is {}".format(MAX_EXPONENT))
+                raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
     return base ** exp
 
 
 def safe_mult(a, b):
     """safe version of multiply"""
     if isinstance(a, str) and isinstance(b, int) and len(a) * b > MAX_STR_LEN:
-        raise RuntimeError("String length exceeded, max string length is {}".format(MAX_STR_LEN))
+        raise RuntimeError(f"String length exceeded, max string length is {MAX_STR_LEN}")
     return a * b
 
 
 def safe_add(a, b):
     """safe version of add"""
     if isinstance(a, str) and isinstance(b, str) and len(a) + len(b) > MAX_STR_LEN:
-        raise RuntimeError("String length exceeded, max string length is {}".format(MAX_STR_LEN))
+        raise RuntimeError(f"String length exceeded, max string length is {MAX_STR_LEN}")
     return a + b
 
 
@@ -208,11 +209,11 @@ def safe_lshift(a, b):
     """safe version of lshift"""
     if isinstance(b, numbers.Number):
         if b > MAX_SHIFT:
-            raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
+            raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     elif HAS_NUMPY:
         if isinstance(b, numpy.ndarray):
             if numpy.nanmax(b) > MAX_SHIFT:
-                raise RuntimeError("Invalid left shift, max left shift is {}".format(MAX_SHIFT))
+                raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     return a << b
 
 
@@ -292,7 +293,7 @@ class Empty:
 ReturnedNone = Empty()
 
 
-class ExceptionHolder(object):
+class ExceptionHolder:
     """Basic exception handler."""
 
     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
@@ -345,9 +346,11 @@ class NameFinder(ast.NodeVisitor):
                 self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)
 
+
 builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
+
 
 def get_ast_names(astnode):
     """Return symbol Names from an AST node."""
@@ -396,7 +399,6 @@ def make_symbol_table(use_numpy=True, **kws):
         for name, sym in NUMPY_RENAMES.items():
             if hasattr(numpy, sym):
                 symtable[name] = getattr(numpy, sym)
-
 
     symtable.update(LOCALFUNCS)
     symtable.update(kws)

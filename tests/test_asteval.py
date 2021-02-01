@@ -3,19 +3,19 @@
 Base TestCase for asteval
 """
 import ast
+from functools import partial
+from io import StringIO
 import math
 import os
+from sys import version_info
+from tempfile import NamedTemporaryFile
 import textwrap
 import time
 import unittest
+
 import pytest
-from io import StringIO
 
-from functools import partial
-from sys import version_info
-from tempfile import NamedTemporaryFile
-
-from asteval import NameFinder, Interpreter, make_symbol_table
+from asteval import Interpreter, NameFinder, make_symbol_table
 
 HAS_NUMPY = False
 try:
@@ -27,6 +27,7 @@ except ImportError:
 
 
 version_info = (version_info.major, version_info.minor)
+
 
 class TestCase(unittest.TestCase):
     """testing of asteval"""
@@ -95,7 +96,6 @@ class TestCase(unittest.TestCase):
         if HAS_NUMPY:
             assert_allclose(tval, val, rtol=1.e-4, atol=1.e-4)
 
-
     # noinspection PyUnresolvedReferences
     def istrue(self, expr):
         """assert that an expression evaluates to True"""
@@ -155,8 +155,6 @@ class TestEval(TestCase):
         self.interp("b_dict[keyname] = (1, -1, 'x')")
         self.istrue("b_dict[keyname] ==  (1, -1, 'x')")
 
-
-
     def test_list_index(self):
         """list indexing"""
         self.interp("a_list = ['a', 'b', 'c', 'd', 'o']")
@@ -182,8 +180,8 @@ class TestEval(TestCase):
         """nd array indexing"""
         if HAS_NUMPY:
             self.interp("a_ndarray = 5*arange(20)")
-            assert(self.interp("a_ndarray[2]")  == 10)
-            assert(self.interp("a_ndarray[4]")  == 20)
+            assert(self.interp("a_ndarray[2]") == 10)
+            assert(self.interp("a_ndarray[4]") == 20)
 
     def test_ndarrayslice(self):
         """array slicing"""
@@ -828,7 +826,7 @@ class TestEval(TestCase):
         self.interp(textwrap.dedent("""
             def inner(foo=None, bar=None):
                 return (foo, bar)
-                
+
             def outer(**kwargs):
                 return inner(**kwargs)
             """))
@@ -836,13 +834,12 @@ class TestEval(TestCase):
         ret = self.interp("inner(foo='a', bar=2)")
         assert(ret == ('a', 2))
         ret = self.interp("outer(foo='a', bar=7)")
-        assert(ret == ('a', 7))        
-        ret = self.interp("outer(**dict(foo='b', bar=3))") 
-        assert(ret == ('b', 3))        
-
+        assert(ret == ('a', 7))
+        ret = self.interp("outer(**dict(foo='b', bar=3))")
+        assert(ret == ('b', 3))
 
     def test_nested_functions(self):
-        setup="""
+        setup = """
         def a(x=10):
             if x > 5:
                 return 1
@@ -861,7 +858,6 @@ class TestEval(TestCase):
         self.interp("o2 = c(x=0)")
         self.isvalue('o1', 3.5)
         self.isvalue('o2', 1.5)
-
 
     def test_astdump(self):
         """test ast parsing and dumping"""
@@ -891,7 +887,6 @@ class TestEval(TestCase):
         self.check_error(None)
         self.interp("1<<1001")
         self.check_error('RuntimeError')
-
 
     def test_safe_open(self):
         self.interp('open("foo1", "wb")')
@@ -985,9 +980,9 @@ class TestEval(TestCase):
             x2 = aeval.symtable['x2']
             x3 = aeval.symtable['x3']
 
-            assert_allclose(x1, 0.50,     rtol=0.001)
+            assert_allclose(x1, 0.50, rtol=0.001)
             assert_allclose(x2, 0.866025, rtol=0.001)
-            assert_allclose(x3, 1.00,     rtol=0.001)
+            assert_allclose(x3, 1.00, rtol=0.001)
 
     def test_readonly_symbols(self):
 
@@ -1025,7 +1020,6 @@ class TestEval(TestCase):
         assert(aeval("x") == 21)
         assert(aeval("y") == 17)
 
-
         assert(aeval("abs(8)") == 8)
         assert(aeval("abs(-8)") == 8)
         aeval("def abs(x): return x*2")
@@ -1039,7 +1033,6 @@ class TestEval(TestCase):
         aeval2("def abs(x): return x*2")
         assert(aeval2("abs(8)") == 8)
         assert(aeval2("abs(-8)") == 8)
-
 
     def test_chained_compparisons(self):
         self.interp('a = 7')
@@ -1104,6 +1097,7 @@ class TestEval(TestCase):
         """))
         assert 4 == self.interp("func_w()")
 
+
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
         """ test using stringio for output/errors """
@@ -1112,6 +1106,7 @@ class TestCase2(unittest.TestCase):
         intrep = Interpreter(writer=out, err_writer=err)
         intrep("print('out')")
         self.assertEqual(out.getvalue(), 'out\n')
+
 
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])

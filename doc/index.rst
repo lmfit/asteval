@@ -36,7 +36,7 @@ These differences and absences include:
  2. creating classes is not allowed.
  3. importing modules is not allowed.
  4. f-strings, function decorators, generators, yield, type hint, and
-    `lambda` are not supported. 
+    `lambda` are not supported.
  5. Many builtin functions (:py:func:`eval`, :py:func:`execfile`,
     :py:func:`getattr`, :py:func:`hasattr`, :py:func:`setattr`, and
     :py:func:`delattr`) are not allowed.

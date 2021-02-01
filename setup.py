@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
+
 import versioneer
 
 long_description = """ASTEVAL provides a numpy-aware, safe(ish) 'eval' function
@@ -18,7 +19,7 @@ setup(name='asteval',
       author='Matthew Newville',
       author_email='newville@cars.uchicago.edu',
       url='http://github.com/newville/asteval',
-      license = 'OSI Approved :: MIT License',
+      license='OSI Approved :: MIT License',
       python_requires='>=3.6',
       description="Safe, minimalistic evaluator of python expression using ast module",
       long_description=long_description,
@@ -29,5 +30,5 @@ setup(name='asteval',
                    'Intended Audience :: Science/Research',
                    'Operating System :: OS Independent',
                    'Programming Language :: Python',
-      ],
+                   ],
       )

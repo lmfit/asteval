@@ -17,7 +17,7 @@ compiled into ast node and then evaluated later, using the current values
 in the symbol table.
 
 The result is a restricted, simplified version of Python meant for
-numerical caclulations that is somewhat safer than 'eval' because many
+numerical calculations that is somewhat safer than 'eval' because many
 unsafe operations (such as 'import' and 'eval') are simply not allowed.
 
 Many parts of Python syntax are supported, including:
@@ -37,13 +37,12 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example)
 """
 import ast
-import time
 import inspect
-from sys import exc_info, stdout, stderr, version_info
+from sys import exc_info, stderr, stdout
+import time
 
-from .astutils import (UNSAFE_ATTRS, HAS_NUMPY, make_symbol_table, numpy,
-                       op2func, ExceptionHolder, ReturnedNone,
-                       valid_symbol_name)
+from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
+                       make_symbol_table, numpy, op2func, valid_symbol_name)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'call', 'compare', 'continue', 'delete',
@@ -53,7 +52,8 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
 
-class Interpreter(object):
+
+class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
     of mathematical expressions using Python syntax.
 
@@ -86,7 +86,7 @@ class Interpreter(object):
     no_listcomp : bool
         whether to support list comprehension.
     no_augassign : bool
-        whether to support augemented assigments (`a += 1`, etc).
+        whether to support augemented assignments (`a += 1`, etc).
     no_assert : bool
         whether to support `assert`.
     no_delete : bool
@@ -195,7 +195,6 @@ class Interpreter(object):
     def set_nodehandler(self, node, handler):
         """set node handler"""
         self.node_handlers[node] = handler
-
 
     def user_defined_symbols(self):
         """Return a set of symbols that have been added to symtable after
@@ -354,7 +353,7 @@ class Interpreter(object):
         return self.run(node.value)  # ('value',)
 
     def on_return(self, node):  # ('value',)
-        """Return statement: look for None, return special sentinal."""
+        """Return statement: look for None, return special sentinel."""
         self.retval = self.run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
@@ -373,7 +372,7 @@ class Interpreter(object):
 
     def on_expression(self, node):
         "basic expression"
-        return self.on_module(node) # ():('body',)
+        return self.on_module(node)  # ():('body',)
 
     def on_pass(self, node):
         """Pass statement."""
@@ -414,8 +413,8 @@ class Interpreter(object):
 
     def on_dict(self, node):    # ('keys', 'values')
         """Dictionary."""
-        return dict([(self.run(k), self.run(v)) for k, v in
-                     zip(node.keys, node.values)])
+        return {self.run(k): self.run(v) for k, v in
+                zip(node.keys, node.values)}
 
     def on_constant(self, node):   # ('value', 'kind')
         """Return constant value."""
@@ -428,10 +427,6 @@ class Interpreter(object):
     def on_str(self, node):   # ('s',)
         """Return string."""
         return node.s
-
-    def on_nameconstant(self, node):   # ('value',)
-        """named constant"""
-        return node.value
 
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
@@ -446,7 +441,7 @@ class Interpreter(object):
                 self.raise_exception(node, exc=NameError, msg=msg)
 
     def on_nameconstant(self, node):
-        """ True, False, None in python >= 3.4 """
+        """True, False, or None"""
         return node.value
 
     def node_assign(self, node, val):
@@ -493,7 +488,7 @@ class Interpreter(object):
             return delattr(sym, node.attr)
 
         # ctx is ast.Load
-        fmt = "cannnot access attribute '%s' for %s"
+        fmt = "cannot access attribute '%s' for %s"
         if node.attr not in UNSAFE_ATTRS:
             fmt = "no attribute '%s' for %s"
             try:
@@ -743,7 +738,6 @@ class Interpreter(object):
             else:
                 keywords[key.arg] = self.run(key.value)
 
-
         kwargs = getattr(node, 'kwargs', None)
 
         if kwargs is not None:
@@ -800,7 +794,7 @@ class Interpreter(object):
             self.no_deepcopy.remove(node.name)
 
 
-class Procedure(object):
+class Procedure:
     """Procedure: user-defined function for asteval.
 
     This stores the parsed ast nodes as from the 'functiondef' ast node
