@@ -20,6 +20,7 @@ try:
     import numpy
     ndarr = numpy.ndarray
     HAS_NUMPY = True
+    numpy_version = numpy.version.version.split('.', 2)
 except ImportError:
     pass
 
@@ -382,7 +383,14 @@ def make_symbol_table(use_numpy=True, **kws):
             symtable[sym] = getattr(math, sym)
 
     if HAS_NUMPY and use_numpy:
+        # aliases deprecated in NumPy v1.20.0
+        deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
+                      'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
+                      'irr', 'ipmt']
         for sym in FROM_NUMPY:
+            if (int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20 and
+                    sym in deprecated):
+                continue
             if hasattr(numpy, sym):
                 symtable[sym] = getattr(numpy, sym)
         for name, sym in NUMPY_RENAMES.items():
