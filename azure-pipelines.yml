@@ -27,11 +27,13 @@ steps:
 
 - script: |
     python -m pip install --upgrade pip
-    pip install numpy codecov pytest pytest-azurepipelines
+    pip install numpy codecov coverage pytest pytest-azurepipelines
   displayName: 'Install dependencies'
 
 - script: |
     python setup.py install
     cd tests
-    pytest
-  displayName: 'Install and Test'
+    coverage run --source=lmfit -m pytest
+    coverage report -m
+    bash <(curl -s https://codecov.io/bash)
+  displayName: 'Install asteval, run test suite and measure coverage'
