@@ -3,15 +3,15 @@
 Base TestCase for asteval
 """
 import ast
-from functools import partial
-from io import StringIO
 import math
 import os
-from sys import version_info
-from tempfile import NamedTemporaryFile
 import textwrap
 import time
 import unittest
+from functools import partial
+from io import StringIO
+from sys import version_info
+from tempfile import NamedTemporaryFile
 
 import pytest
 

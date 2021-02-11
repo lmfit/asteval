@@ -38,8 +38,8 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 """
 import ast
 import inspect
-from sys import exc_info, stderr, stdout
 import time
+from sys import exc_info, stderr, stdout
 
 from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
                        make_symbol_table, numpy, op2func, valid_symbol_name)
@@ -296,7 +296,7 @@ class Interpreter:
         except:
             if with_raise:
                 if len(self.error) == 0:
-                    # Unhandled exception that didn't go through raise_exception
+                    # Unhandled exception that didn't use raise_exception
                     self.raise_exception(node, expr=expr)
                 raise
 
@@ -452,7 +452,8 @@ class Interpreter:
 
         """
         if node.__class__ == ast.Name:
-            if not valid_symbol_name(node.id) or node.id in self.readonly_symbols:
+            if (not valid_symbol_name(node.id) or
+                    node.id in self.readonly_symbols):
                 errmsg = "invalid symbol name (reserved word?) %s" % node.id
                 self.raise_exception(node, exc=NameError, msg=errmsg)
             self.symtable[node.id] = val
@@ -545,8 +546,8 @@ class Interpreter:
             while tnode.__class__ == ast.Attribute:
                 children.append(tnode.attr)
                 tnode = tnode.value
-
-            if tnode.__class__ == ast.Name and tnode.id not in self.readonly_symbols:
+            if (tnode.__class__ == ast.Name and
+                    tnode.id not in self.readonly_symbols):
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
@@ -582,7 +583,8 @@ class Interpreter:
             rval = self.run(rnode)
             ret = op2func(op)(lval, rval)
             results.append(ret)
-            if (self.use_numpy and not isinstance(ret, numpy.ndarray)) and not ret:
+            if ((self.use_numpy and not isinstance(ret, numpy.ndarray)) and
+                    not ret):
                 break
             lval = rval
         if len(results) == 1:
@@ -762,7 +764,8 @@ class Interpreter:
             raise Warning("decorated procedures not supported!")
         kwargs = []
 
-        if not valid_symbol_name(node.name) or node.name in self.readonly_symbols:
+        if (not valid_symbol_name(node.name) or
+                node.name in self.readonly_symbols):
             errmsg = "invalid function name (reserved word?) %s" % node.name
             self.raise_exception(node, exc=NameError, msg=errmsg)
 
