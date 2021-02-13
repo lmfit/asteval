@@ -40,12 +40,13 @@ RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
 UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
+                '__reduce__', '__reduce_ex__',  '__mro__',
                 '__closure__', '__func__', '__self__', '__module__',
                 '__dict__', '__class__', '__call__', '__get__',
                 '__getattribute__', '__subclasshook__', '__new__',
                 '__init__', 'func_globals', 'func_code', 'func_closure',
                 'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
-                '__asteval__', 'f_locals', '__mro__')
+                'f_locals', '__asteval__')
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',

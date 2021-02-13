@@ -489,17 +489,16 @@ class Interpreter:
             return delattr(sym, node.attr)
 
         # ctx is ast.Load
-        fmt = "cannot access attribute '%s' for %s"
-        if node.attr not in UNSAFE_ATTRS:
-            fmt = "no attribute '%s' for %s"
+        if not (node.attr in UNSAFE_ATTRS or
+                (node.attr.startswith('__') and
+                 node.attr.endswith('__'))):
             try:
                 return getattr(sym, node.attr)
             except AttributeError:
                 pass
 
         # AttributeError or accessed unsafe attribute
-        obj = self.run(node.value)
-        msg = fmt % (node.attr, obj)
+        msg = "no attribute '%s' for %s" % (node.attr, self.run(node.value))
         self.raise_exception(node, exc=AttributeError, msg=msg)
 
     def on_assign(self, node):    # ('targets', 'value')
