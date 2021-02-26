@@ -16,7 +16,7 @@ available.  The test suite requires the `pytest` module.
 The latest stable version of asteval is |release|.
 
 
-Versions 0.9.21 and 0.9.22 support and are tested with Python 3.6 through
+Versions 0.9.21 and later support and are tested with Python 3.6 through
 3.9.  Python 3.6 will be supported until at least its official end of life
 (December 2021).  No released version supports Python 3.10 yet.
 

@@ -6,13 +6,12 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Motivation for asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
     <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
-    <script src="_static/language_data.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Using asteval" href="basics.html" />
@@ -106,23 +105,26 @@ builtin <a class="reference external" href="https://docs.python.org/3/library/fu
 <li><p>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p></li>
+<li><p>accessing object attributes that begin and end with <cite>__</cite>, the so-called
+<code class="docutils literal notranslate"><span class="pre">dunder</span></code> attributes.  This will include (but is not limited to
+<cite>__globals__</cite>, <cite>__code__</cite>, <cite>__func__</cite>, <cite>__self__</cite>, <cite>__module__</cite>,
+<cite>__dict__</cite>, <cite>__class__</cite>, <cite>__call__</cite>, and <cite>__getattribute__</cite>.  None of
+these can be accessed for any object.</p></li>
 </ul>
 </div></blockquote>
 <p>In addition (and following the discussion in the link above), the following
 attributes are blacklisted for all objects, and cannot be accessed:</p>
 <blockquote>
-<div><p>__subclasses__, __bases__, __globals__, __code__, __closure__, __func__,
-__self__, __module__, __dict__, __class__, __call__, __get__,
-__getattribute__, __subclasshook__, __new__, __init__, func_globals,
-func_code, func_closure, im_class, im_func, im_self, gi_code, gi_frame
-f_locals, __mro__</p>
+<div><p><cite>func_globals</cite>, <cite>func_code</cite>, <cite>func_closure</cite>, <cite>im_class</cite>, <cite>im_func</cite>, <cite>im_self</cite>,
+<cite>gi_code</cite>, <cite>gi_frame</cite>, <cite>f_locals</cite></p>
 </div></blockquote>
-<p>This approach of making a blacklist cannot be guaranteed to be complete,
-but it does eliminate classes of attacks known to seg-fault the Python.  On
-the other hand, asteval will typically expose numpy ufuncs from the numpy
-module, and several of these can seg-fault Python without too much trouble.
-If you’re paranoid about safe user input that can never cause a
-segmentation fault, you’ll want to disable the use of numpy.</p>
+<p>While this approach of making a blacklist cannot be guaranteed to be complete,
+it does eliminate entire classes of attacks known to seg-fault the Python.</p>
+<p>It should be noted that asteval will typically expose numpy ufuncs from the
+numpy module, and several of these can seg-fault Python without too much
+trouble.  If you’re paranoid about safe user input that can never cause a
+segmentation fault, you may want to consider disabling the use of numpy
+entirely.</p>
 <p>There are important categories of safety that asteval does not even attempt
 to address. The most important of these is resource hogging, which might be
 used for a denial-of-service attack.  There is no guaranteed timeout on any
@@ -137,22 +139,24 @@ calculation, and so a reasonable looking calculation such as:</p>
 </div>
 <p>can take a noticeable amount of CPU time.  It is not hard to come up with
 short program that would run for hundreds of years, which probably exceeds
-anyones threshold for an acceptable run-time.  But there simply is not an
-obvious way to predict how long any code will take to run from the text of
-the code itself.  As a simple example, consider the expression <cite>x**y**z</cite>.
-For values <cite>x=y=z=5</cite>, runtime will be well under 0.001 seconds.  For
-<cite>x=y=z=8</cite>, runtime will still be under 1 sec.  For <cite>x=8, y=9, z=9</cite>, runtime
-will several seconds.  But for <cite>x=y=z=9</cite>, runtime may exceed 1 hour on some
-machines.  In short, runtime cannot be determined lexically.</p>
-<p>This example also demonstrates there is not a good way to check for a
-long-running calculation within a single Python process.  That calculation is
-not stuck within the Python interpreter – it is stuck deep inside C-code.
-called by the Python interpreter itself, and will not return or allow other
-threads to run until that calculation is done.  That is, from within a single
-process, there is not a foolproof way to tell <cite>asteval</cite> (or really, even
-Python) when a calculation has taken too long.  The most reliable way to limit
-run time is to have a second process watching the execution time of the
-asteval process and interrupt or kill it.</p>
+anyones threshold for an acceptable run-time.  There simply is not a good
+way to predict how long any code will take to run from the text of the code
+itself.  As a simple example, consider the expression <cite>x**y**z</cite>.  For
+values <cite>x=y=z=5</cite>, the run time will be well under 0.001 seconds.  For
+<cite>x=y=z=8</cite>, run time will still be under 1 sec.  Changing to <cite>x=8, y=9,
+z=9</cite>, will cause the statement to take several seconds.  With <cite>x=y=z=9</cite>,
+executing that statement may take more than 1 hour on some machines.  In
+short, runtime cannot be determined lexically.</p>
+<p>This double exponential example also demonstrates there is not a good way
+to check for a long-running calculation within a single Python process.
+That calculation is not stuck within the Python interpreter, in Python’s C
+C-code (no doubt calling the <cite>pow()</cite> function) called by the Python
+interpreter itself.  That call will not return to the Python interpreter or
+allow other threads to run until that call is done.  That means that from
+within a single process, there is not a foolproof way to tell <cite>asteval</cite> (or
+really, even Python) when a calculation has taken too long.  The most
+reliable way to limit run time is to have a second process watching the
+execution time of the asteval process and interrupt or kill it.</p>
 <p>For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the <em>recursion limit</em> when
 executing expressions, with a code like this:</p>
@@ -250,7 +254,7 @@ improve this situation would be greatly appreciated.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.2.1.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
     </div>
   </body>
 </html>
