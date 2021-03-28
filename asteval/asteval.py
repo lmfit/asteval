@@ -304,7 +304,7 @@ class Interpreter:
         """Call class instance as function."""
         return self.eval(expr, **kw)
 
-    def eval(self, expr, lineno=0, show_errors=True):
+    def eval(self, expr, lineno=0, show_errors=True, raise_errors=False):
         """Evaluate a single statement."""
         self.lineno = lineno
         self.error = []
@@ -315,13 +315,14 @@ class Interpreter:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
                 errmsg = "\n".join(self.error[0].get_error())
-            if not show_errors:
+            if raise_errors:
                 try:
                     exc = self.error[0].exc
                 except:
                     exc = RuntimeError
                 raise exc(errmsg)
-            print(errmsg, file=self.err_writer)
+            if show_errors:
+                print(errmsg, file=self.err_writer)
             return
         try:
             return self.run(node, expr=expr, lineno=lineno)
@@ -329,13 +330,14 @@ class Interpreter:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
                 errmsg = "\n".join(self.error[0].get_error())
-            if not show_errors:
+            if raise_errors:
                 try:
                     exc = self.error[0].exc
                 except:
                     exc = RuntimeError
                 raise exc(errmsg)
-            print(errmsg, file=self.err_writer)
+            if show_errors:
+                print(errmsg, file=self.err_writer)
             return
 
     @staticmethod

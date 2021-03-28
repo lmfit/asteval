@@ -464,7 +464,7 @@ class TestEval(TestCase):
             failed = False
             # noinspection PyBroadException
             try:
-                self.interp(expr, show_errors=False)
+                self.interp(expr, show_errors=False, raise_errors=True)
             except:
                 failed = True
 
@@ -477,7 +477,7 @@ class TestEval(TestCase):
             failed = False
             # noinspection PyBroadException
             try:
-                self.interp(expr, show_errors=False)
+                self.interp(expr, show_errors=False, raise_errors=True)
             except:
                 failed = True
             self.assertTrue(failed)
@@ -489,7 +489,7 @@ class TestEval(TestCase):
             failed = False
             # noinspection PyBroadException
             try:
-                self.interp(expr, show_errors=False)
+                self.interp(expr, show_errors=False, raise_errors=True)
             except:  # RuntimeError:
                 failed = True
             self.assertTrue(failed)
@@ -513,7 +513,7 @@ class TestEval(TestCase):
             failed, errtype, errmsg = False, None, None
             # noinspection PyBroadException
             try:
-                self.interp(expr, show_errors=False)
+                self.interp(expr, show_errors=False, raise_errors=True)
             except:
                 failed = True
             self.assertTrue(failed)
@@ -628,7 +628,7 @@ class TestEval(TestCase):
             self.interp.error = []
             # noinspection PyBroadException
             try:
-                self.interp("%s= 2" % w, show_errors=False)
+                self.interp("%s= 2" % w, show_errors=False, raise_errors=True)
             except:
                 pass
 
