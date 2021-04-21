@@ -20,10 +20,10 @@ ASTEVAL
 Links
 -----
 
-* Documentation: http://newville.github.com/asteval
-* PyPI installation: http://pypi.python.org/pypi/asteval
-* Development Code: http://github.com/newville/asteval
-* Issue Tracker: http://github.com/newville/asteval/issues
+* Documentation: https://newville.github.io/asteval/
+* PyPI installation: https://pypi.org/project/asteval/
+* Development Code: https://github.com/newville/asteval
+* Issue Tracker: https://github.com/newville/asteval/issues
 
 What is it?
 -----------
