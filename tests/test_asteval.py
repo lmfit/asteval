@@ -473,7 +473,7 @@ class TestEval(TestCase):
 
     def test_unsupportednodes(self):
         """unsupported nodes"""
-        for expr in ('f = lambda x: x*x', 'yield 10'):
+        for expr in ('yield 10',):
             failed = False
             # noinspection PyBroadException
             try:
@@ -900,12 +900,19 @@ class TestEval(TestCase):
         self.interp("""def foo(): return foo()\nfoo()""")
         self.check_error('RecursionError')
 
+    def test_lambda(self):
+        self.interp('q = (lambda x: x*2)(2)')
+        self.isvalue('q', 4)
+
+        self.interp('f = lambda x: lambda y: x+y\nq = f(4)(5)')
+        self.isvalue('q', 9)
+
     def test_kaboom(self):
         """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
         self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
     fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
 )()""")
-        self.check_error('NotImplementedError', 'Lambda')  # Safe, lambda is not supported
+        self.check_error('AttributeError', 'no attribute \'__class__\' for ()')  # Safe, __class__ is inaccessible
 
         self.interp(
             """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...

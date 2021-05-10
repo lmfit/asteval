@@ -37,6 +37,7 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example)
 """
 import ast
+import collections
 import inspect
 import time
 from sys import exc_info, stderr, stdout
@@ -48,8 +49,8 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'call', 'compare', 'continue', 'delete',
              'dict', 'ellipsis', 'excepthandler', 'expr', 'extslice',
              'for', 'functiondef', 'if', 'ifexp', 'index', 'interrupt',
-             'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
-             'pass', 'raise', 'repr', 'return', 'slice', 'str',
+             'list', 'listcomp', 'lambda', 'module', 'name', 'nameconstant',
+             'num', 'pass', 'raise', 'repr', 'return', 'slice', 'str',
              'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
 
 
@@ -763,22 +764,45 @@ class Interpreter:
         # ('name', 'args', 'body', 'decorator_list')
         if node.decorator_list:
             raise Warning("decorated procedures not supported!")
-        kwargs = []
 
         if (not valid_symbol_name(node.name) or
                 node.name in self.readonly_symbols):
             errmsg = "invalid function name (reserved word?) %s" % node.name
             self.raise_exception(node, exc=NameError, msg=errmsg)
 
+        self.symtable[node.name] = self.on_lambda(node, name=node.name)
+        if node.name in self.no_deepcopy:
+            self.no_deepcopy.remove(node.name)
+
+    def on_lambda(self, node, name='<anonymous>'):
+        # The plan here is to reuse most of the logic for function definitions and lambdas.
+        #
+        # In order for that to work, we have to recognize a few differences:
+        #
+        # 1. lambda functions implicitly return
+        # 2. lambda functions have no name
+        # 3. lambda functions have a node in the body position rather than a list
+        #
+        # So we must do some work here to bring lambdas into the happy path. The first
+        # thing we do is receive a default name value of "<anonymous>"; functions will
+        # call this method with their actual name instead.
+        #
+        # Second thing we have to do is normalize the bodies and add the Return
+        if isinstance(node.body, collections.abc.Iterable):
+            body = node.body
+        else:
+            body = [ast.Return(value=node.body)]
+
+        kwargs = []
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
             defval = self.run(defnode)
-            keyval = self.run(node.args.args[idef+offset])
+            keyval = self.run(node.args.args[idef + offset])
             kwargs.append((keyval, defval))
-
         args = [tnode.arg for tnode in node.args.args[:offset]]
         doc = None
-        nb0 = node.body[0]
+
+        nb0 = body[0]
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
             doc = nb0.value.s
 
@@ -789,13 +813,11 @@ class Interpreter:
         if isinstance(varkws, ast.arg):
             varkws = varkws.arg
 
-        self.symtable[node.name] = Procedure(node.name, self, doc=doc,
-                                             lineno=self.lineno,
-                                             body=node.body,
-                                             args=args, kwargs=kwargs,
-                                             vararg=vararg, varkws=varkws)
-        if node.name in self.no_deepcopy:
-            self.no_deepcopy.remove(node.name)
+        return Procedure(name, self, doc=doc,
+                         lineno=self.lineno,
+                         body=body,
+                         args=args, kwargs=kwargs,
+                         vararg=vararg, varkws=varkws)
 
 
 class Procedure:
