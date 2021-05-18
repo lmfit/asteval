@@ -1,7 +1,7 @@
 ASTEVAL
 =======
 
-.. image:: https://dev.azure.com/mattnewville/asteval/_apis/build/status/mattnewville.asteval?branchName=master
+.. image:: https://dev.azure.com/mattnewville/asteval/_apis/build/status/newville.asteval?branchName=master
   :target: https://dev.azure.com/mattnewville/asteval/_build/latest?definitionId=1&branchName=master
 
 .. image:: https://travis-ci.org/newville/asteval.png
