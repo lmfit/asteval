@@ -1,6 +1,9 @@
 ASTEVAL
 =======
 
+.. image:: https://dev.azure.com/newville/asteval/_apis/build/status/newville.asteval?branchName=master
+  :target: https://dev.azure.com/newville/asteval/_build/latest?definitionId=1&branchName=master
+
 .. image:: https://travis-ci.org/newville/asteval.png
    :target: https://travis-ci.org/newville/asteval
 
@@ -12,6 +15,10 @@ ASTEVAL
 
 .. image:: https://img.shields.io/pypi/dm/asteval.svg
    :target: https://pypi.org/project/asteval
+
+.. image:: https://img.shields.io/badge/docs-read-brightgreen
+   :target: https://newville.github.io/asteval/
+
 
 .. image:: https://zenodo.org/badge/4185/newville/asteval.svg
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
