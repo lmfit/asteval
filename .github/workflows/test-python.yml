@@ -24,10 +24,16 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
+    - name: Add conda to system path
+      run: |
+        # $CONDA is an environment variable pointing to the root of the miniconda directory
+        echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
+        conda install numpy pip setuptools codecov pytest pytest-cov coverage
+        conda update -n base -c defaults conda
         python -m pip install --upgrade pip
-        python -m pip install numpy codecov coverage pytest
+        python -m pip install numpy>=1.11xf codecov coverage pytest
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
       run: |
