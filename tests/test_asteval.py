@@ -26,9 +26,6 @@ except ImportError:
     HAS_NUMPY = False
 
 
-version_info = (version_info.major, version_info.minor)
-
-
 class TestCase(unittest.TestCase):
     """testing of asteval"""
     def setUp(self):
@@ -134,6 +131,9 @@ class TestCase(unittest.TestCase):
 
 class TestEval(TestCase):
     """testing of asteval"""
+
+    def test_py3(self):
+        assert version_info.major > 2
 
     def test_dict_index(self):
         """dictionary indexing"""
@@ -915,7 +915,7 @@ class TestEval(TestCase):
         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
         self.interp(
             "x = ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
-        if version_info == (3, 9):
+        if version_info.minor > 8:
             self.isvalue('x', 1)
             self.check_error(None)
         else:
