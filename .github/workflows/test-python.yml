@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: [3.6, 3.7, 3.8, 3.9, '3.10.0-beta.1']
+        python-version: [3.6, 3.7, 3.8, 3.9]
 
     steps:
     - uses: actions/checkout@v2
@@ -26,10 +26,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        # conda install python=${{ matrix.python-version }} 
-        # conda update -n base -c defaults conda
         python -m pip install --upgrade pip
-        python -m pip install numpy==1.18 pip setuptools codecov pytest pytest-cov coverage
+        python -m pip install numpy pip setuptools codecov pytest pytest-cov coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
       run: |
