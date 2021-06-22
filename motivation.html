@@ -4,11 +4,12 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Motivation for asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
@@ -42,7 +43,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="motivation-for-asteval">
+  <section id="motivation-for-asteval">
 <h1>Motivation for asteval<a class="headerlink" href="#motivation-for-asteval" title="Permalink to this headline">¶</a></h1>
 <p>The asteval module allows you to evaluate a large subset of the Python
 language from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is,
@@ -84,7 +85,7 @@ function calls, which is going to be slower than Python - often 4x slower
 than Python.  That said, for certain use cases (see
 <a class="reference external" href="https://stackoverflow.com/questions/34106484">https://stackoverflow.com/questions/34106484</a>), use of asteval and numpy can
 approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
-<div class="section" id="how-safe-is-asteval">
+<section id="how-safe-is-asteval">
 <h2>How Safe is asteval?<a class="headerlink" href="#how-safe-is-asteval" title="Permalink to this headline">¶</a></h2>
 <p>Asteval avoids all of the exploits we know about that make <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>
 dangerous. For reference, see, <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and the
@@ -188,8 +189,8 @@ information on disk that should be kept private.</p>
 using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, there are many ways that asteval could be considered
 part of an un-safe programming environment.  Recommendations for how to
 improve this situation would be greatly appreciated.</p>
-</div>
-</div>
+</section>
+</section>
 
 
             <div class="clearer"></div>
@@ -254,7 +255,7 @@ improve this situation would be greatly appreciated.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2021, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 3.4.3.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.1.
     </div>
   </body>
 </html>
