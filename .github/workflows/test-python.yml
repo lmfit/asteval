@@ -29,7 +29,7 @@ jobs:
         # conda install python=${{ matrix.python-version }} 
         # conda update -n base -c defaults conda
         python -m pip install --upgrade pip
-        python -m pip install numpy pip setuptools codecov pytest pytest-cov coverage
+        python -m pip install numpy==1.18 pip setuptools codecov pytest pytest-cov coverage
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Test with pytest
       run: |
