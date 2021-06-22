@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from setuptools import setup
 
-import versioneer
-
 long_description = """ASTEVAL provides a numpy-aware, safe(ish) 'eval' function
 
 Emphasis is on mathematical expressions, and so numpy ufuncs
@@ -14,8 +12,8 @@ Expressions can be compiled into ast node for later evaluation,
 using the values in the symbol table current at evaluation time.
 """
 setup(name='asteval',
-      version=versioneer.get_version(),
-      cmdclass=versioneer.get_cmdclass(),
+      use_scm_version=True,
+      setup_requires=['setuptools_scm'],
       author='Matthew Newville',
       author_email='newville@cars.uchicago.edu',
       url='http://github.com/newville/asteval',

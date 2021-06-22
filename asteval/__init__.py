@@ -17,7 +17,6 @@
             The University of Chicago
 """
 
-from ._version import get_versions
 from .asteval import Interpreter
 from .astutils import (NameFinder, get_ast_names, make_symbol_table,
                        valid_symbol_name)
@@ -25,5 +24,4 @@ from .astutils import (NameFinder, get_ast_names, make_symbol_table,
 __all__ = ['Interpreter', 'NameFinder', 'valid_symbol_name',
            'make_symbol_table', 'get_ast_names']
 
-__version__ = get_versions()['version']
-del get_versions
+from ._version import __version__
