@@ -71,7 +71,7 @@ not be considered as part of the usable API.  The methods described be low,
 and the examples elsewhere in this documentation should be used as the
 stable API.
 
-.. method:: eval(expression[, lineno=0[, show_errors=True]])
+.. method:: eval(expression[, lineno=0[, show_errors=True[, raise_errors=False]]])
 
    evaluate the expression, returning the result.
 
@@ -83,8 +83,11 @@ stable API.
    :param show_errors: whether to print error messages or leave them
                        in the :attr:`errors` list.
    :type show_errors:  bool
+   :param raise_errors: whether to reraise exceptions or leave them
+                       in the :attr:`errors` list.
+   :type raise_errors:  bool
 
-.. method:: __call__(expression[, lineno=0[, show_errors=True]])
+.. method:: __call__(expression[, lineno=0[, show_errors=True[, raise_errors=False]]])
 
    same as :meth:`eval`.  That is::
 
