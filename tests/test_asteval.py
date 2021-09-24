@@ -460,7 +460,8 @@ class TestEval(TestCase):
     def test_syntaxerrors_1(self):
         """assignment syntax errors test"""
         for expr in ('class = 1', 'for = 1', 'if = 1', 'raise = 1',
-                     '1x = 1', '1.x = 1', '1_x = 1'):
+                     '1x = 1', '1.x = 1', '1_x = 1',
+                     'return 3', 'return False'):
             failed = False
             # noinspection PyBroadException
             try:
