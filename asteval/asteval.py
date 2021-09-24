@@ -128,6 +128,7 @@ class Interpreter:
         self.error_msg = None
         self.expr = None
         self.retval = None
+        self._calldepth = 0
         self.lineno = 0
         self.start_time = time.time()
         self.use_numpy = HAS_NUMPY and use_numpy
@@ -356,6 +357,8 @@ class Interpreter:
 
     def on_return(self, node):  # ('value',)
         """Return statement: look for None, return special sentinel."""
+        if self._calldepth == 0:
+            raise SyntaxError('cannot return at top level')
         self.retval = self.run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
@@ -746,13 +749,20 @@ class Interpreter:
         if kwargs is not None:
             keywords.update(self.run(kwargs))
 
+        if isinstance(func, Procedure):
+            self._calldepth += 1
         try:
-            return func(*args, **keywords)
+            out = func(*args, **keywords)
         except Exception as ex:
+            out = None
             func_name = getattr(func, '__name__', str(func))
             self.raise_exception(
                 node, msg="Error running function call '%s' with args %s and "
                 "kwargs %s: %s" % (func_name, args, keywords, ex))
+        finally:
+            if isinstance(func, Procedure):
+                self._calldepth -= 1
+        return out
 
     def on_arg(self, node):    # ('test', 'msg')
         """Arg for function definitions."""
