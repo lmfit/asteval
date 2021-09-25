@@ -939,6 +939,7 @@ class Procedure:
         save_symtable = self.__asteval__.symtable.copy()
         self.__asteval__.symtable.update(symlocals)
         self.__asteval__.retval = None
+        self.__asteval__._calldepth += 1
         retval = None
 
         # evaluate script of function
@@ -954,5 +955,6 @@ class Procedure:
                 break
 
         self.__asteval__.symtable = save_symtable
+        self.__asteval__._calldepth -= 1
         symlocals = None
         return retval
