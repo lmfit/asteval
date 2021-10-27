@@ -68,7 +68,7 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
                        'continue', 'delete', 'dict', 'dictcomp', 'ellipsis',
                        'excepthandler', 'expr', 'extslice', 'for',
                        'functiondef', 'if', 'ifexp', 'index', 'interrupt',
-                       'list', 'listcomp', 'module', 'name', 'nameconstant',
+                       'list', 'listcomp', 'module', 'name', 'nameconstant', 'constant',
                        'num', 'pass', 'raise', 'repr', 'return',  # 'print'
                        'set', 'slice', 'starred', 'str', 'subscript', 'try', 'tuple',
                        'unaryop', 'while',
@@ -452,6 +452,10 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
     # noinspection PyMethodMayBeStatic
     def on_nameconstant(self, node):  # pylint: disable=no-self-use
         """ True, False, None in python >= 3.4 """
+        return node.value
+
+    def on_constant(self, node):  # pylint: disable=no-self-use
+        # starting with 3.8 ast.Constant used for all constants, ast.NameConstant no longer used
         return node.value
 
     def __get_node_path(self, node):
