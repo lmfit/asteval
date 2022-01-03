@@ -69,6 +69,8 @@ class Interpreter:
         callable file-like object where standard error will be sent.
     use_numpy : bool
         whether to use functions from numpy.
+    max_statement_length : int
+        maximum length of expression allowed [50,000 characters]
     minimal : bool
         create a minimal interpreter: disable all options (see Note 1).
     no_if : bool
@@ -107,8 +109,9 @@ class Interpreter:
     """
 
     def __init__(self, symtable=None, usersyms=None, writer=None,
-                 err_writer=None, use_numpy=True, minimal=False,
-                 no_if=False, no_for=False, no_while=False, no_try=False,
+                 err_writer=None, use_numpy=True,
+                 max_statement_length=50000, minimal=False, no_if=False,
+                 no_for=False, no_while=False, no_try=False,
                  no_functiondef=False, no_ifexp=False, no_listcomp=False,
                  no_augassign=False, no_assert=False, no_delete=False,
                  no_raise=False, no_print=False, max_time=None,
@@ -116,6 +119,7 @@ class Interpreter:
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
+        self.max_statement_length = max(1, min(1.e8, max_statement_length))
 
         if symtable is None:
             if usersyms is None:
@@ -250,6 +254,10 @@ class Interpreter:
     #  eval:   string statement -> result = run(parse(statement))
     def parse(self, text):
         """Parse statement/expression to Ast representation."""
+        if len(text) > self.max_statement_length:
+            msg = f'length of text exceeds {self.max_statement_length:d} characters'
+            self.raise_exception(None, msg='Runtime Error', expr=msg)
+
         self.expr = text
         try:
             out = ast.parse(text)
@@ -307,6 +315,10 @@ class Interpreter:
 
     def eval(self, expr, lineno=0, show_errors=True, raise_errors=False):
         """Evaluate a single statement."""
+        if len(expr) > self.max_statement_length:
+            msg = f'length of text exceeds {self.max_statement_length:d} characters'
+            raise ValueError(msg)
+
         self.lineno = lineno
         self.error = []
         self.start_time = time.time()
