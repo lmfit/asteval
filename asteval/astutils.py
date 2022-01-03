@@ -16,6 +16,7 @@ from tokenize import tokenize as generate_tokens
 
 HAS_NUMPY = False
 numpy = None
+ndarr = None
 try:
     import numpy
     ndarr = numpy.ndarray
@@ -185,10 +186,14 @@ def safe_pow(base, exp):
     if isinstance(exp, numbers.Number):
         if exp > MAX_EXPONENT:
             raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
-    elif HAS_NUMPY:
-        if isinstance(exp, numpy.ndarray):
-            if numpy.nanmax(exp) > MAX_EXPONENT:
-                raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
+    elif HAS_NUMPY and isinstance(exp, ndarr):
+        if numpy.nanmax(exp) > MAX_EXPONENT:
+            raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
+    if isinstance(base, int):
+        ret = (1.0*base)**exp
+        if isinstance(exp, int):
+            return int(ret)
+        return ret
     return base ** exp
 
 
@@ -211,8 +216,7 @@ def safe_lshift(a, b):
     if isinstance(b, numbers.Number):
         if b > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
-    elif HAS_NUMPY:
-        if isinstance(b, numpy.ndarray):
+    elif HAS_NUMPY and isinstance(b, ndarr):
             if numpy.nanmax(b) > MAX_SHIFT:
                 raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     return a << b
