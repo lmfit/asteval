@@ -315,28 +315,32 @@ class Interpreter:
 
     def eval(self, expr, lineno=0, show_errors=True, raise_errors=False):
         """Evaluate a single statement."""
-        if len(expr) > self.max_statement_length:
-            msg = f'length of text exceeds {self.max_statement_length:d} characters'
-            raise ValueError(msg)
-
         self.lineno = lineno
         self.error = []
         self.start_time = time.time()
-        try:
-            node = self.parse(expr)
-        except:
-            errmsg = exc_info()[1]
-            if len(self.error) > 0:
-                errmsg = "\n".join(self.error[0].get_error())
-            if raise_errors:
-                try:
-                    exc = self.error[0].exc
-                except:
-                    exc = RuntimeError
-                raise exc(errmsg)
-            if show_errors:
-                print(errmsg, file=self.err_writer)
-            return
+        if isinstance(expr, str):
+            if len(expr) > self.max_statement_length:
+                msg = f'length of text exceeds {self.max_statement_length:d} characters'
+                raise ValueError(msg)
+
+            try:
+                node = self.parse(expr)
+            except:
+                errmsg = exc_info()[1]
+                if len(self.error) > 0:
+                    errmsg = "\n".join(self.error[0].get_error())
+                if raise_errors:
+                    try:
+                        exc = self.error[0].exc
+                    except:
+                        exc = RuntimeError
+                    raise exc(errmsg)
+                if show_errors:
+                    print(errmsg, file=self.err_writer)
+                return
+        else:
+            node = expr
+
         try:
             return self.run(node, expr=expr, lineno=lineno)
         except:
