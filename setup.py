@@ -14,6 +14,7 @@ using the values in the symbol table current at evaluation time.
 setup(name='asteval',
       use_scm_version=True,
       setup_requires=['setuptools_scm'],
+      install_requires=['importlib_metadata'],
       author='Matthew Newville',
       author_email='newville@cars.uchicago.edu',
       url='http://github.com/newville/asteval',
