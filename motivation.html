@@ -46,21 +46,21 @@
   <section id="motivation-for-asteval">
 <h1>Motivation for asteval<a class="headerlink" href="#motivation-for-asteval" title="Permalink to this headline">¶</a></h1>
 <p>The asteval module allows you to evaluate a large subset of the Python
-language from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is,
-in effect, a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>,
+language from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is,
+in effect, a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>,
 forbidding several actions, and using a simple dictionary as a flat namespace.
 A completely fair question is: Why is this desirable?  That is, why not simply
-use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
+use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
 <p>The short answer is that sometimes you want to allow evaluation of user
 input, or expose a simple or even scientific calculator inside a larger
-application.  For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes
+application.  For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes
 <em>all</em> of Python, which makes user input difficult to trust.  Since asteval
 does not support the <strong>import</strong> statement or many other constructs, user
-code cannot access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any
+code cannot access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any
 functions or classes outside those provided in the symbol table.</p>
 <p>Many of the other missing features (modules, classes, lambda, yield,
 generators) are similarly motivated by a desire for a safer version of
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
 mathematically-oriented language that can be embedded into larger
 applications.</p>
 <p>In fact, the asteval module grew out the the need for a simple expression
@@ -68,12 +68,12 @@ evaluator for scientific applications such as the <a class="reference external" 
 modules.  An early attempt using the pyparsing module worked but was
 error-prone and difficult to maintain.  While the simplest of calculators
 or expressiona-evaluators is not hard with pyparsing, it turned out that
-using the Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes it much easier to implement a
+using the Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes it much easier to implement a
 feature-rich scientific calculator, including slicing, complex numbers,
 keyword arguments to functions, etc. In fact, this approach meant that
 adding more complex programming constructs like conditionals, loops,
 exception handling, and even user-defined functions was fairly simple.  An
-important benefit of using the <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.9)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module is that whole
+important benefit of using the <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module is that whole
 categories of implementation errors involving parsing, lexing, and defining a
 grammar disappear.  Any valid python expression will be parsed correctly
 and converted into an Abstract Syntax Tree.  Furthermore, the resulting AST
@@ -87,25 +87,25 @@ than Python.  That said, for certain use cases (see
 approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
 <section id="how-safe-is-asteval">
 <h2>How Safe is asteval?<a class="headerlink" href="#how-safe-is-asteval" title="Permalink to this headline">¶</a></h2>
-<p>Asteval avoids all of the exploits we know about that make <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>
+<p>Asteval avoids all of the exploits we know about that make <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>
 dangerous. For reference, see, <a class="reference external" href="http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really dangerous</a> and the
 comments and links therein.  From this discussion it is apparent that not only
-is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a difficult prospect to make any
+is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a difficult prospect to make any
 program that takes user input perfectly safe.  In particular, if a user can
 cause Python to crash with a segmentation fault, safety cannot be guaranteed.
 Asteval explicitly forbids the exploits described in the above link, and works
 hard to prevent malicious code from crashing Python or accessing the
 underlying operating system.  That said, we cannot guarantee that asteval is
 completely safe from malicious code.  We claim only that it is safer than the
-builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it useful.</p>
+builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it useful.</p>
 <p>Some of the things not allowed in the asteval interpreter for safety reasons include:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>importing modules.  Neither ‘import’ nor ‘__import__’ are supported.</p></li>
 <li><p>create classes or modules.</p></li>
-<li><p>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p></li>
+<li><p>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p></li>
 <li><p>accessing object attributes that begin and end with <cite>__</cite>, the so-called
 <code class="docutils literal notranslate"><span class="pre">dunder</span></code> attributes.  This will include (but is not limited to
 <cite>__globals__</cite>, <cite>__code__</cite>, <cite>__func__</cite>, <cite>__self__</cite>, <cite>__module__</cite>,
@@ -186,7 +186,7 @@ desirable, and you may want to remove some of these functions from the
 symbol table, re-implement them, or ensure that your program cannot access
 information on disk that should be kept private.</p>
 <p>In summary, while asteval attempts to be safe and is definitely safer than
-using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.9)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, there are many ways that asteval could be considered
+using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, there are many ways that asteval could be considered
 part of an un-safe programming environment.  Recommendations for how to
 improve this situation would be greatly appreciated.</p>
 </section>
@@ -224,7 +224,7 @@ improve this situation would be greatly appreciated.</p>
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <input type="submit" value="Go" />
     </form>
     </div>
@@ -254,8 +254,8 @@ improve this situation would be greatly appreciated.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2021, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.1.
+        &#169; Copyright 2022, Matthew Newville, The University of Chicago.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.3.1.
     </div>
   </body>
 </html>
