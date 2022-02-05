@@ -2,6 +2,7 @@
 *~
 *#
 .coverage
+asteval/version.py
 NonGit/
 doc/_build
 doc/*.pdf
