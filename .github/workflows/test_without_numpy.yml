@@ -30,6 +30,6 @@ jobs:
         python -m pip install setuptools codecov pytest pytest-cov coverage
     - name: Test with pytest
       run: |
-        python setup.py install
+        python -m pip install .
         cd tests
         pytest
