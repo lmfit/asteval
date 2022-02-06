@@ -1,8 +1,17 @@
 ASTEVAL
 =======
 
-.. image::  https://github.com/newville/asteval/actions/workflows/test-python.yml/badge.svg
-   :target: https://github.com/newville/asteval/actions/workflows/test-python.yml
+.. image:: https://github.com/newville/asteval/actions/workflows/ubuntu_numpy.yml/badge.svg
+   :target: https://github.com/newville/asteval/actions/workflows/ubuntu_numpy.yml
+
+.. image:: https://github.com/newville/asteval/actions/workflows/ubuntu_nonumpy.yml/badge.svg
+   :target: https://github.com/newville/asteval/actions/workflows/ubuntu_nonumpy.yml
+
+.. image:: https://github.com/newville/asteval/actions/workflows/macos_numpy.yml/badge.svg
+   :target: https://github.com/newville/asteval/actions/workflows/macos_numpy.yml
+
+.. image:: https://github.com/newville/asteval/actions/workflows/windows_numpy.yml/badge.svg
+   :target: https://github.com/newville/asteval/actions/workflows/windows_numpy.yml
 
 .. image:: https://codecov.io/gh/newville/asteval/branch/master/graph/badge.svg
    :target: https://codecov.io/gh/newville/asteval
@@ -18,6 +27,7 @@ ASTEVAL
 
 .. image:: https://zenodo.org/badge/4185/newville/asteval.svg
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
+
 
 
 Links
