@@ -29,6 +29,4 @@ jobs:
     - name: Test with pytest
       run: |
         cd tests
-        coverage run --source=asteval -m pytest
-        coverage report -m
-        bash <(curl -s https://codecov.io/bash)
+        pytest
