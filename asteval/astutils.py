@@ -395,9 +395,10 @@ def make_symbol_table(use_numpy=True, **kws):
         deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
                       'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
                       'irr', 'ipmt']
+        numpy_check = int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20
+
         for sym in FROM_NUMPY:
-            if (int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20 and
-                    sym in deprecated):
+            if (numpy_check and sym in deprecated):
                 continue
             if hasattr(numpy, sym):
                 symtable[sym] = getattr(numpy, sym)

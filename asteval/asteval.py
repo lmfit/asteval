@@ -184,8 +184,8 @@ class Interpreter:
 
         self.no_deepcopy = [key for key, val in symtable.items()
                             if (callable(val)
-                                or 'numpy.lib.index_tricks' in repr(val)
-                                or inspect.ismodule(val))]
+                                or inspect.ismodule(val)
+                                or 'numpy.lib.index_tricks' in repr(val))]
 
     def remove_nodehandler(self, node):
         """remove support for a node
