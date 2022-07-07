@@ -71,6 +71,8 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'reversed', 'round', 'set', 'slice', 'sorted', 'str', 'sum',
            'tuple', 'zip')
 
+FROM_PY =tuple(sym for sym in FROM_PY if sym in builtins)
+
 # inherit these from python's math
 FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
              'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'e', 'exp',
@@ -78,6 +80,8 @@ FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
              'hypot', 'isinf', 'isnan', 'ldexp', 'log', 'log10', 'log1p',
              'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
              'tanh', 'trunc')
+
+FROM_MATH = tuple(sym for sym in FROM_MATH if hasattr(math, sym))
 
 FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'angle', 'any', 'append', 'arange', 'arccos', 'arccosh',
@@ -156,10 +160,22 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'vstack', 'where', 'who', 'zeros', 'zeros_like',
               'fft', 'linalg', 'polynomial', 'random')
 
-
 NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
+
+if HAS_NUMPY:
+    numpy_check = int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20
+
+    if numpy_check:
+        # aliases deprecated in NumPy v1.20.0
+        numpy_deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
+                      'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
+                      'irr', 'ipmt']
+        FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
+
+    FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
+    NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, sym)} 
 
 
 def _open(filename, mode='r', buffering=-1):
@@ -383,25 +399,14 @@ def make_symbol_table(use_numpy=True, **kws):
     symtable = {}
 
     for sym in FROM_PY:
-        if sym in builtins:
-            symtable[sym] = builtins[sym]
+        symtable[sym] = builtins[sym]
 
     for sym in FROM_MATH:
-        if hasattr(math, sym):
-            symtable[sym] = getattr(math, sym)
+        symtable[sym] = getattr(math, sym)
 
     if HAS_NUMPY and use_numpy:
-        # aliases deprecated in NumPy v1.20.0
-        deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
-                      'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
-                      'irr', 'ipmt']
-        numpy_check = int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20
-
         for sym in FROM_NUMPY:
-            if (numpy_check and sym in deprecated):
-                continue
-            if hasattr(numpy, sym):
-                symtable[sym] = getattr(numpy, sym)
+            symtable[sym] = getattr(numpy, sym)
         for name, sym in NUMPY_RENAMES.items():
             if hasattr(numpy, sym):
                 symtable[name] = getattr(numpy, sym)
