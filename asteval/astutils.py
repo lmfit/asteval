@@ -71,7 +71,7 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'reversed', 'round', 'set', 'slice', 'sorted', 'str', 'sum',
            'tuple', 'zip')
 
-FROM_PY =tuple(sym for sym in FROM_PY if sym in builtins)
+FROM_PY = tuple(sym for sym in FROM_PY if sym in builtins)
 
 # inherit these from python's math
 FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
@@ -170,12 +170,12 @@ if HAS_NUMPY:
     if numpy_check:
         # aliases deprecated in NumPy v1.20.0
         numpy_deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
-                      'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
-                      'irr', 'ipmt']
+                            'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
+                            'irr', 'ipmt']
         FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
 
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
-    NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, sym)} 
+    NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, sym)}
 
 
 def _open(filename, mode='r', buffering=-1):
@@ -233,8 +233,8 @@ def safe_lshift(a, b):
         if b > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     elif HAS_NUMPY and isinstance(b, ndarr):
-            if numpy.nanmax(b) > MAX_SHIFT:
-                raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
+        if numpy.nanmax(b) > MAX_SHIFT:
+            raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     return a << b
 
 
