@@ -14,6 +14,10 @@ from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
 
+builtins = __builtins__
+if not isinstance(builtins, dict):
+    builtins = builtins.__dict__
+
 HAS_NUMPY = False
 numpy = None
 ndarr = None
@@ -71,7 +75,7 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'reversed', 'round', 'set', 'slice', 'sorted', 'str', 'sum',
            'tuple', 'zip')
 
-FROM_PY = tuple(sym for sym in FROM_PY if sym in builtins)
+BUILTINS_TABLE = {sym: builtins[sym] for sym in FROM_PY if sym in builtins}
 
 # inherit these from python's math
 FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
@@ -81,7 +85,8 @@ FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
              'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
              'tanh', 'trunc')
 
-FROM_MATH = tuple(sym for sym in FROM_MATH if hasattr(math, sym))
+MATH_TABLE = {sym: getattr(math, sym) for sym in FROM_MATH if hasattr(math, sym)}
+
 
 FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'angle', 'any', 'append', 'arange', 'arccos', 'arccosh',
@@ -176,6 +181,14 @@ if HAS_NUMPY:
 
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
     NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, sym)}
+
+    NUMPY_TABLE = {}
+    for sym in FROM_NUMPY:
+        NUMPY_TABLE[sym] = getattr(numpy, sym)
+    for name, sym in NUMPY_RENAMES.items():
+        NUMPY_TABLE[name] = getattr(numpy, sym)
+else:
+    NUMPY_TABLE = {}
 
 
 def _open(filename, mode='r', buffering=-1):
@@ -368,11 +381,6 @@ class NameFinder(ast.NodeVisitor):
         ast.NodeVisitor.generic_visit(self, node)
 
 
-builtins = __builtins__
-if not isinstance(builtins, dict):
-    builtins = builtins.__dict__
-
-
 def get_ast_names(astnode):
     """Return symbol Names from an AST node."""
     finder = NameFinder()
@@ -398,19 +406,10 @@ def make_symbol_table(use_numpy=True, **kws):
     """
     symtable = {}
 
-    for sym in FROM_PY:
-        symtable[sym] = builtins[sym]
-
-    for sym in FROM_MATH:
-        symtable[sym] = getattr(math, sym)
-
-    if HAS_NUMPY and use_numpy:
-        for sym in FROM_NUMPY:
-            symtable[sym] = getattr(numpy, sym)
-        for name, sym in NUMPY_RENAMES.items():
-            if hasattr(numpy, sym):
-                symtable[name] = getattr(numpy, sym)
-
+    symtable.update(BUILTINS_TABLE)
+    symtable.update(MATH_TABLE)
+    if use_numpy:
+        symtable.update(NUMPY_TABLE)
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
 
