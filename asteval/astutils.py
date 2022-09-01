@@ -14,6 +14,10 @@ from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
 
+builtins = __builtins__
+if not isinstance(builtins, dict):
+    builtins = builtins.__dict__
+
 HAS_NUMPY = False
 numpy = None
 ndarr = None
@@ -71,6 +75,8 @@ FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
            'reversed', 'round', 'set', 'slice', 'sorted', 'str', 'sum',
            'tuple', 'zip')
 
+BUILTINS_TABLE = {sym: builtins[sym] for sym in FROM_PY if sym in builtins}
+
 # inherit these from python's math
 FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
              'ceil', 'copysign', 'cos', 'cosh', 'degrees', 'e', 'exp',
@@ -78,6 +84,9 @@ FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
              'hypot', 'isinf', 'isnan', 'ldexp', 'log', 'log10', 'log1p',
              'modf', 'pi', 'pow', 'radians', 'sin', 'sinh', 'sqrt', 'tan',
              'tanh', 'trunc')
+
+MATH_TABLE = {sym: getattr(math, sym) for sym in FROM_MATH if hasattr(math, sym)}
+
 
 FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'angle', 'any', 'append', 'arange', 'arccos', 'arccosh',
@@ -156,10 +165,30 @@ FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
               'vstack', 'where', 'who', 'zeros', 'zeros_like',
               'fft', 'linalg', 'polynomial', 'random')
 
-
 NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
+
+if HAS_NUMPY:
+    numpy_check = int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20
+
+    if numpy_check:
+        # aliases deprecated in NumPy v1.20.0
+        numpy_deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
+                            'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
+                            'irr', 'ipmt']
+        FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
+
+    FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
+    NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, sym)}
+
+    NUMPY_TABLE = {}
+    for sym in FROM_NUMPY:
+        NUMPY_TABLE[sym] = getattr(numpy, sym)
+    for name, sym in NUMPY_RENAMES.items():
+        NUMPY_TABLE[name] = getattr(numpy, sym)
+else:
+    NUMPY_TABLE = {}
 
 
 def _open(filename, mode='r', buffering=-1):
@@ -217,8 +246,8 @@ def safe_lshift(a, b):
         if b > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     elif HAS_NUMPY and isinstance(b, ndarr):
-            if numpy.nanmax(b) > MAX_SHIFT:
-                raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
+        if numpy.nanmax(b) > MAX_SHIFT:
+            raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     return a << b
 
 
@@ -352,11 +381,6 @@ class NameFinder(ast.NodeVisitor):
         ast.NodeVisitor.generic_visit(self, node)
 
 
-builtins = __builtins__
-if not isinstance(builtins, dict):
-    builtins = builtins.__dict__
-
-
 def get_ast_names(astnode):
     """Return symbol Names from an AST node."""
     finder = NameFinder()
@@ -382,30 +406,10 @@ def make_symbol_table(use_numpy=True, **kws):
     """
     symtable = {}
 
-    for sym in FROM_PY:
-        if sym in builtins:
-            symtable[sym] = builtins[sym]
-
-    for sym in FROM_MATH:
-        if hasattr(math, sym):
-            symtable[sym] = getattr(math, sym)
-
-    if HAS_NUMPY and use_numpy:
-        # aliases deprecated in NumPy v1.20.0
-        deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
-                      'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
-                      'irr', 'ipmt']
-        numpy_check = int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20
-
-        for sym in FROM_NUMPY:
-            if (numpy_check and sym in deprecated):
-                continue
-            if hasattr(numpy, sym):
-                symtable[sym] = getattr(numpy, sym)
-        for name, sym in NUMPY_RENAMES.items():
-            if hasattr(numpy, sym):
-                symtable[name] = getattr(numpy, sym)
-
+    symtable.update(BUILTINS_TABLE)
+    symtable.update(MATH_TABLE)
+    if use_numpy:
+        symtable.update(NUMPY_TABLE)
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
 
