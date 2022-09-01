@@ -597,6 +597,9 @@ class TestEval(TestCase):
         self.isvalue('x', [0, 1, 4, 9])
         self.interp('x = [i*i for i in range(6) if i > 1]')
         self.isvalue('x', [4, 9, 16, 25])
+        self.interp('x = [(i, j*2) for i in range(6) for j in range(2)]')
+        self.isvalue('x', [(0, 0), (0, 2), (1, 0), (1, 2), (2, 0), (2, 2), (3, 0), (3, 2), (4, 0), (4, 2), (5, 0), (5, 2)])
+
 
     def test_ifexp(self):
         """test if expressions"""
