@@ -239,7 +239,7 @@ class Interpreter:
         self._interrupt = ast.Raise()
         self.error.append(err)
         if self.error_msg is None:
-            self.error_msg = "at expr='%s'" % (self.expr)
+            self.error_msg = (' '.join(msg, "at expr='%s'" % (self.expr))).strip()
         elif len(msg) > 0:
             self.error_msg = msg
         if exc is None:
