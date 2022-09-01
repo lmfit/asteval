@@ -37,6 +37,7 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example)
 """
 import ast
+import copy
 import inspect
 import time
 from sys import exc_info, stderr, stdout
@@ -675,18 +676,109 @@ class Interpreter:
         self._interrupt = None
 
     def on_listcomp(self, node):    # ('elt', 'generators')
-        """List comprehension."""
+        """List comprehension -- only up to 4 generators!"""
         out = []
+        locals = {}
+        saved_syms = {}
+
         for tnode in node.generators:
             if tnode.__class__ == ast.comprehension:
+                if tnode.target.__class__ == ast.Name:
+                    if (not valid_symbol_name(tnode.target.id) or
+                        tnode.target.id in self.readonly_symbols):
+                        errmsg = "invalid symbol name (reserved word?) %s" % tnode.target.id
+                        self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
+                    locals[tnode.target.id] = []
+                    if tnode.target.id in self.symtable:
+                        saved_syms[tnode.target.id] = copy.deepcopy(self.symtable[tnode.target.id])
+
+                elif tnode.target.__class__ == ast.Tuple:
+                    target = []
+                    for tval in tnode.target.elts:
+                        locals[tval.id] = []
+                        if tval.id in self.symtable:
+                            saved_syms[tval.id] = copy.deepcopy(self.symtable[tval.id])
+
+        for tnode in node.generators:
+            if tnode.__class__ == ast.comprehension:
+                tlist = []
+                ttype = 'name'
+                if tnode.target.__class__ == ast.Name:
+                    if (not valid_symbol_name(tnode.target.id) or
+                        tnode.target.id in self.readonly_symbols):
+                        errmsg = "invalid symbol name (reserved word?) %s" % tnode.target.id
+                        self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
+                    ttype, target = 'name', tnode.target.id
+                elif tnode.target.__class__ == ast.Tuple:
+                    ttype = 'tuple'
+                    target =tuple([tval.id for tval in tnode.target.elts])
+
                 for val in self.run(tnode.iter):
-                    self.node_assign(tnode.target, val)
+                    if ttype == 'name':
+                        self.symtable[target] = val
+                    else:
+                        for telem, tval in zip(target, val):
+                            self.symtable[target] = val
+
                     add = True
                     for cond in tnode.ifs:
                         add = add and self.run(cond)
                     if add:
+                        if ttype == 'name':
+                            locals[target].append(val)
+                        else:
+                            for telem, tval in zip(target, val):
+                                locals[telem].append(tval)
+
+        names = list(locals.keys())
+        data = list(locals.values())
+        if len(names) == 1:
+            name = names[0]
+            for val in data[0]:
+                self.symtable[name] = val
+                out.append(self.run(node.elt))
+        elif len(names) == 2:
+            name0 = names[0]
+            name1 = names[1]
+            for val0 in data[0]:
+                self.symtable[name0] = val0
+                for val1 in data[1]:
+                    self.symtable[name1] = val1
+                    out.append(self.run(node.elt))
+        elif len(names) == 3:
+            name0 = names[0]
+            name1 = names[1]
+            name2 = names[2]
+            for val0 in data[0]:
+                self.symtable[name0] = val0
+                for val1 in data[1]:
+                    self.symtable[name1] = val1
+                    for val2 in data[2]:
+                        self.symtable[name2] = val2
                         out.append(self.run(node.elt))
+        elif len(names) == 4:
+            name0 = names[0]
+            name1 = names[1]
+            name2 = names[2]
+            name3 = names[3]
+            for val0 in data[0]:
+                self.symtable[name0] = val0
+                for val1 in data[1]:
+                    self.symtable[name1] = val1
+                    for val2 in data[2]:
+                        self.symtable[name2] = val2
+                        for val3 in data[3]:
+                            self.symtable[name3] = val3
+                            out.append(self.run(node.elt))
+        else:
+            msg = "list comprehension supports up to 4 generators"
+            self.raise_exception(node, msg=msg)
+
+        for name, val in saved_syms.items():
+            self.symtable[name] = val
+
         return out
+
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """Exception handler..."""
