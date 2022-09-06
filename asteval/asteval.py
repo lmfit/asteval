@@ -730,49 +730,19 @@ class Interpreter:
                             for telem, tval in zip(target, val):
                                 locals[telem].append(tval)
 
+        def listcomp_recurse(i, names, data):
+            if i == len(names):
+                out.append(self.run(node.elt))
+                return
+
+            for val in data[i]:
+                self.symtable[names[i]] = val
+                listcomp_recurse(i+1, names, data)
+
         names = list(locals.keys())
         data = list(locals.values())
-        if len(names) == 1:
-            name = names[0]
-            for val in data[0]:
-                self.symtable[name] = val
-                out.append(self.run(node.elt))
-        elif len(names) == 2:
-            name0 = names[0]
-            name1 = names[1]
-            for val0 in data[0]:
-                self.symtable[name0] = val0
-                for val1 in data[1]:
-                    self.symtable[name1] = val1
-                    out.append(self.run(node.elt))
-        elif len(names) == 3:
-            name0 = names[0]
-            name1 = names[1]
-            name2 = names[2]
-            for val0 in data[0]:
-                self.symtable[name0] = val0
-                for val1 in data[1]:
-                    self.symtable[name1] = val1
-                    for val2 in data[2]:
-                        self.symtable[name2] = val2
-                        out.append(self.run(node.elt))
-        elif len(names) == 4:
-            name0 = names[0]
-            name1 = names[1]
-            name2 = names[2]
-            name3 = names[3]
-            for val0 in data[0]:
-                self.symtable[name0] = val0
-                for val1 in data[1]:
-                    self.symtable[name1] = val1
-                    for val2 in data[2]:
-                        self.symtable[name2] = val2
-                        for val3 in data[3]:
-                            self.symtable[name3] = val3
-                            out.append(self.run(node.elt))
-        else:
-            msg = "list comprehension supports up to 4 generators"
-            self.raise_exception(node, msg=msg)
+
+        listcomp_recurse(0, names, data)
 
         for name, val in saved_syms.items():
             self.symtable[name] = val
