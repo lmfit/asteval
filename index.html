@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>ASTEVAL: Minimal Python AST Evaluator &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -12,7 +12,9 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Downloading and Installation" href="installation.html" /> 
@@ -40,14 +42,14 @@
           <div class="body" role="main">
             
   <section id="asteval-minimal-python-ast-evaluator">
-<h1>ASTEVAL: Minimal Python AST Evaluator<a class="headerlink" href="#asteval-minimal-python-ast-evaluator" title="Permalink to this headline">¶</a></h1>
+<h1>ASTEVAL: Minimal Python AST Evaluator<a class="headerlink" href="#asteval-minimal-python-ast-evaluator" title="Permalink to this heading">¶</a></h1>
 <p>The asteval package evaluates Python expressions and statements, providing
-a safer alternative to Python’s builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> and a richer,
-easier to use alternative to <a class="reference external" href="https://docs.python.org/3/library/ast.html#ast.literal_eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code></a>.  It does this by
+a safer alternative to Python’s builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> and a richer,
+easier to use alternative to <a class="reference external" href="https://docs.python.org/3/library/ast.html#ast.literal_eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code></a>.  It does this by
 building an embedded interpreter for a subset of the Python language using
-Python’s <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  The emphasis and main area of application
+Python’s <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  The emphasis and main area of application
 is the evaluation of mathematical expressions. Because of this emphasis,
-mathematical functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module are built-in to
+mathematical functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module are built-in to
 asteval, and a large number of functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> will be available if
 <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> is installed on your system.</p>
 <p>While the primary goal is evaluation of mathematical expressions, many
@@ -59,9 +61,9 @@ interpreter are truly Python objects, and all of the basic built-in data
 structures (strings, dictionaries, tuple, lists, sets, numpy arrays) are
 supported, including the built-in methods for these objects.</p>
 <p>However, asteval is by no means an attempt to reproduce Python with its own
-<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.10)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  There are important differences and missing features
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  There are important differences and missing features
 compared to Python.  Many of these absences are intentional, and part of
-the effort to try to make a safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some
+the effort to try to make a safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some
 are simply due to the reduced requirements for an embedded mini-language.
 These differences and absences include:</p>
 <blockquote>
@@ -72,9 +74,9 @@ table - a single dictionary - giving a flat namespace.</p></li>
 <li><p>importing modules is not allowed.</p></li>
 <li><p>f-strings, function decorators, generators, yield, type hint, and
 <cite>lambda</cite> are not supported.</p></li>
-<li><p>Many builtin functions (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
+<li><p>Many builtin functions (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
 <li><p>Accessing several private object attributes that can provide access to
 the python interpreter are not allowed.</p></li>
 </ol>
@@ -88,7 +90,7 @@ against malicious or incompetent user input is an important concern.
 Asteval tries as hard as possible to prevent user-supplied input from
 crashing the Python interpreter or from returning exploitable parts of the
 Python interpreter.  In this sense asteval is certainly safer than using
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.10)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  However, asteval is an open source project written by
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  However, asteval is an open source project written by
 volunteers, and we cannot guarantee that it is completely safe against
 malicious attacks.</p>
 <div class="toctree-wrapper compound">
@@ -131,7 +133,7 @@ malicious attacks.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
-<p>Current version: <b>0.9.27</b></p>
+<p>Current version: <b>0.9.28</b></p>
 <p>Downloads:
 <a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
 
@@ -150,7 +152,7 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -173,7 +175,7 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>
 </html>

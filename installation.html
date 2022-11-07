@@ -1,10 +1,10 @@
 
 <!DOCTYPE html>
 
-<html>
+<html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
 
     <title>Downloading and Installation &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -12,7 +12,9 @@
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
+    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Motivation for asteval" href="motivation.html" />
@@ -44,23 +46,27 @@
           <div class="body" role="main">
             
   <section id="downloading-and-installation">
-<h1>Downloading and Installation<a class="headerlink" href="#downloading-and-installation" title="Permalink to this headline">¶</a></h1>
+<h1>Downloading and Installation<a class="headerlink" href="#downloading-and-installation" title="Permalink to this heading">¶</a></h1>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
-<p>Asteval is a pure python module with no required dependencies outside of the
-standard library.  Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module if
-available.  The test suite requires the <cite>pytest</cite> module.</p>
-<p>The latest stable version of asteval is 0.9.27.</p>
-<p>Versions 0.9.21 and later support and are tested with Python 3.6 through
-3.9.  Python 3.6 will be supported until at least its official end of life
-(December 2021).  No released version supports Python 3.10 yet.</p>
-<p>Versions 0.9.18, 0.9.19, and 0.9.20 supported and were tested with Python
-3.5 through 3.8.</p>
-<p>Version 0.9.17 was the last version to support Python 2.7.</p>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
+<p>Asteval is a pure Python module with very few dependencies.  For Python 3.8 and
+higher, there are no required dependencies outside of the standard
+library. Python 3.7 does require the <cite>importlib_metadata</cite> package.  If
+available, Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module.  The test suite
+requires the <cite>pytest</cite> and <cite>coverage modules, and building the documentation
+requires the `sphinx</cite> package.</p>
+<p>The latest stable version of asteval is 0.9.28.</p>
+<p>Versions 0.9.28 and later support and are tested with Python 3.7 through
+3.11. There are no immediate plans to drop support Python 3.7.  Python versions
+have generally been supported until they are past the end-of-maintenance period
+for security fixes.  Supporting new versions of the Python 3 series is
+generally not too much work, but may not be guaranteed until after release of
+that version.</p>
+<p>The last version of asteval to support Python 2.7 was version 0.9.17.</p>
 </section>
 <section id="download-and-installation">
-<h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this headline">¶</a></h2>
-<p>The latest stable version of asteval is 0.9.27 and is available at
+<h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this heading">¶</a></h2>
+<p>The latest stable version of asteval is 0.9.28 and is available at
 <a class="reference external" href="http://pypi.python.org/pypi/asteval/">PyPI</a> or as a conda package.  You should be able to install asteval
 with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
@@ -72,21 +78,21 @@ extensions, using <cite>pip</cite> should be the preferred method on all platfor
 environments.</p>
 </section>
 <section id="development-version">
-<h2>Development Version<a class="headerlink" href="#development-version" title="Permalink to this headline">¶</a></h2>
+<h2>Development Version<a class="headerlink" href="#development-version" title="Permalink to this heading">¶</a></h2>
 <p>The latest development version can be found at the <a class="reference external" href="http://github.com/newville/asteval">github</a> repository, and cloned with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">newville</span><span class="o">/</span><span class="n">asteval</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
 </section>
 <section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this heading">¶</a></h2>
 <p>Installation from source on any platform is:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
 </section>
 <section id="license">
-<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<h2>License<a class="headerlink" href="#license" title="Permalink to this heading">¶</a></h2>
 <p>The ASTEVAL code is distribution under the following license:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">MIT</span> <span class="n">License</span>
 
@@ -161,7 +167,7 @@ environments.</p>
     </form>
     </div>
 </div>
-<script>$('#searchbox').show(0);</script>
+<script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
       <div class="clearer"></div>
@@ -187,7 +193,7 @@ environments.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2022, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.4.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>
 </html>
