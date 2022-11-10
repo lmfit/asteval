@@ -989,6 +989,14 @@ class TestEval(TestCase):
             assert_allclose(x1, 0.50, rtol=0.001)
             assert_allclose(x2, 0.866025, rtol=0.001)
             assert_allclose(x3, 1.00, rtol=0.001)
+            
+    
+    def test_numpy_renames_in_custom_symtable(self):
+        """test that numpy renamed functions are in symtable"""
+        if HAS_NUMPY:
+            sym_table = make_symbol_table()
+            
+            assert "ln" in sym_table
 
     def test_readonly_symbols(self):
 
