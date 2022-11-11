@@ -180,7 +180,7 @@ if HAS_NUMPY:
         FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
 
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
-    NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, sym)}
+    NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, value)}
 
     NUMPY_TABLE = {}
     for sym in FROM_NUMPY:
