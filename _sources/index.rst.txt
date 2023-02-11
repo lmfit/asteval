@@ -32,15 +32,14 @@ are simply due to the reduced requirements for an embedded mini-language.
 These differences and absences include:
 
  1. Variable and function symbol names are held in a simple symbol
-    table - a single dictionary - giving a flat namespace.
+    table, giving a flat namespace.
  2. creating classes is not allowed.
  3. importing modules is not allowed.
- 4. f-strings, function decorators, generators, yield, type hint, and
-    `lambda` are not supported.
- 5. Many builtin functions (:py:func:`eval`, :py:func:`execfile`,
-    :py:func:`getattr`, :py:func:`hasattr`, :py:func:`setattr`, and
-    :py:func:`delattr`) are not allowed.
- 6. Accessing several private object attributes that can provide access to
+ 4. f-strings, decorators, generators, type hints, `yield`, `with` blocks,
+    and `lambda` are not supported.
+ 5. Many builtin functions (:py:func:`eval`, :py:func:`getattr`,
+    :py:func:`hasattr`, :py:func:`setattr`, and :py:func:`delattr`) are not allowed.
+ 6. Accessing many object attributes that can provide access to
     the python interpreter are not allowed.
 
 The resulting "asteval language" acts very much like miniature version of

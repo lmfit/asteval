@@ -53,20 +53,24 @@
 higher, there are no required dependencies outside of the standard
 library. Python 3.7 does require the <cite>importlib_metadata</cite> package.  If
 available, Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module.  The test suite
-requires the <cite>pytest</cite> and <cite>coverage modules, and building the documentation
-requires the `sphinx</cite> package.</p>
-<p>The latest stable version of asteval is 0.9.28.</p>
-<p>Versions 0.9.28 and later support and are tested with Python 3.7 through
-3.11. There are no immediate plans to drop support Python 3.7.  Python versions
-have generally been supported until they are past the end-of-maintenance period
-for security fixes.  Supporting new versions of the Python 3 series is
-generally not too much work, but may not be guaranteed until after release of
-that version.</p>
-<p>The last version of asteval to support Python 2.7 was version 0.9.17.</p>
+requires the <cite>pytest</cite> and <cite>coverage</cite> modules, and building the documentation
+requires the <cite>sphinx</cite>.</p>
+<p>The latest stable version of asteval is 0.9.29.</p>
+<p>Versions 0.9.28 and later support and are automatically tested with Python 3.7
+through 3.11.  Python versions have generally been supported by <cite>asteval</cite> until
+they are well past the end of security fixes - there are no immediate plans to
+drop support for Python 3.7.  Support for new versions of the Python 3 series
+is not gauranteed until some time after the official release of that version,
+as we may not start testing until late in the “beta” period of development.
+Historically, the delay has not been too long, though <cite>asteval</cite> may not support
+newly introduced language features.</p>
+<p>The last version of asteval to support Python 2.7 was version 0.9.17.  It
+should not be used and cannot be supported, but the code may be of historical
+interest.</p>
 </section>
 <section id="download-and-installation">
 <h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this heading">¶</a></h2>
-<p>The latest stable version of asteval is 0.9.28 and is available at
+<p>The latest stable version of asteval is 0.9.29 and is available at
 <a class="reference external" href="http://pypi.python.org/pypi/asteval/">PyPI</a> or as a conda package.  You should be able to install asteval
 with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
@@ -192,7 +196,7 @@ environments.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2022, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2023, Matthew Newville, The University of Chicago.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>

@@ -70,9 +70,8 @@ Some of the things not allowed in the asteval interpreter for safety reasons inc
 
   * importing modules.  Neither 'import' nor '__import__' are supported.
   * create classes or modules.
-  * access to Python's :py:func:`eval`, :py:func:`execfile`,
-    :py:func:`getattr`, :py:func:`hasattr`, :py:func:`setattr`, and
-    :py:func:`delattr`.
+  * access to Python's :py:func:`eval`, :py:func:`getattr`, :py:func:`hasattr`,
+      :py:func:`setattr`, and    :py:func:`delattr`.
   * accessing object attributes that begin and end with `__`, the so-called
     ``dunder`` attributes.  This will include (but is not limited to
     `__globals__`, `__code__`, `__func__`, `__self__`, `__module__`,
@@ -86,11 +85,11 @@ attributes are blacklisted for all objects, and cannot be accessed:
    `gi_code`, `gi_frame`, `f_locals`
 
 While this approach of making a blacklist cannot be guaranteed to be complete,
-it does eliminate entire classes of attacks known to seg-fault the Python.
+it does eliminate entire classes of attacks known to be able to seg-fault the Python.
 
 It should be noted that asteval will typically expose numpy ufuncs from the
 numpy module, and several of these can seg-fault Python without too much
-trouble.  If you're paranoid about safe user input that can never cause a
+trouble.  If you are paranoid about safe user input that can never cause a
 segmentation fault, you may want to consider disabling the use of numpy
 entirely.
 
@@ -117,16 +116,16 @@ z=9`, will cause the statement to take several seconds.  With `x=y=z=9`,
 executing that statement may take more than 1 hour on some machines.  In
 short, runtime cannot be determined lexically.
 
-This double exponential example also demonstrates there is not a good way
-to check for a long-running calculation within a single Python process.
-That calculation is not stuck within the Python interpreter, in Python's C
-C-code (no doubt calling the `pow()` function) called by the Python
-interpreter itself.  That call will not return to the Python interpreter or
-allow other threads to run until that call is done.  That means that from
-within a single process, there is not a foolproof way to tell `asteval` (or
-really, even Python) when a calculation has taken too long.  The most
-reliable way to limit run time is to have a second process watching the
-execution time of the asteval process and interrupt or kill it.
+This double exponential example also demonstrates there is not a good way to
+check for a long-running calculation within a single Python process.  That
+calculation is not stuck within the Python interpreter, but in Python's C
+C-code (no doubt calling the `pow()` function) called by the Python interpreter
+itself.  That call will not return to the Python interpreter or allow other
+threads to run until that call is done.  That means that from within a single
+process, there is not a reliable way to tell `asteval` (or really, even Python)
+when a calculation has taken too long.  The only reliable way to limit run time
+is to have a second process watching the execution time of the asteval process
+and either try to interrupt it or kill it.
 
 For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the *recursion limit* when

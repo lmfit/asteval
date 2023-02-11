@@ -69,15 +69,14 @@ These differences and absences include:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>Variable and function symbol names are held in a simple symbol
-table - a single dictionary - giving a flat namespace.</p></li>
+table, giving a flat namespace.</p></li>
 <li><p>creating classes is not allowed.</p></li>
 <li><p>importing modules is not allowed.</p></li>
-<li><p>f-strings, function decorators, generators, yield, type hint, and
-<cite>lambda</cite> are not supported.</p></li>
-<li><p>Many builtin functions (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
-<li><p>Accessing several private object attributes that can provide access to
+<li><p>f-strings, decorators, generators, type hints, <cite>yield</cite>, <cite>with</cite> blocks,
+and <cite>lambda</cite> are not supported.</p></li>
+<li><p>Many builtin functions (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>,
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
+<li><p>Accessing many object attributes that can provide access to
 the python interpreter are not allowed.</p></li>
 </ol>
 </div></blockquote>
@@ -133,7 +132,7 @@ malicious attacks.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
-<p>Current version: <b>0.9.28</b></p>
+<p>Current version: <b>0.9.29</b></p>
 <p>Downloads:
 <a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
 
@@ -174,7 +173,7 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2022, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2023, Matthew Newville, The University of Chicago.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>

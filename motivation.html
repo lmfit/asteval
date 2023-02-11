@@ -105,9 +105,11 @@ builtin <a class="reference external" href="https://docs.python.org/3/library/fu
 <div><ul class="simple">
 <li><p>importing modules.  Neither ‘import’ nor ‘__import__’ are supported.</p></li>
 <li><p>create classes or modules.</p></li>
-<li><p>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <code class="xref py py-func docutils literal notranslate"><span class="pre">execfile()</span></code>,
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p></li>
+<li><dl class="simple">
+<dt>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>,</dt><dd><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and    <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p>
+</dd>
+</dl>
+</li>
 <li><p>accessing object attributes that begin and end with <cite>__</cite>, the so-called
 <code class="docutils literal notranslate"><span class="pre">dunder</span></code> attributes.  This will include (but is not limited to
 <cite>__globals__</cite>, <cite>__code__</cite>, <cite>__func__</cite>, <cite>__self__</cite>, <cite>__module__</cite>,
@@ -122,10 +124,10 @@ attributes are blacklisted for all objects, and cannot be accessed:</p>
 <cite>gi_code</cite>, <cite>gi_frame</cite>, <cite>f_locals</cite></p>
 </div></blockquote>
 <p>While this approach of making a blacklist cannot be guaranteed to be complete,
-it does eliminate entire classes of attacks known to seg-fault the Python.</p>
+it does eliminate entire classes of attacks known to be able to seg-fault the Python.</p>
 <p>It should be noted that asteval will typically expose numpy ufuncs from the
 numpy module, and several of these can seg-fault Python without too much
-trouble.  If you’re paranoid about safe user input that can never cause a
+trouble.  If you are paranoid about safe user input that can never cause a
 segmentation fault, you may want to consider disabling the use of numpy
 entirely.</p>
 <p>There are important categories of safety that asteval does not even attempt
@@ -150,16 +152,16 @@ values <cite>x=y=z=5</cite>, the run time will be well under 0.001 seconds.  For
 z=9</cite>, will cause the statement to take several seconds.  With <cite>x=y=z=9</cite>,
 executing that statement may take more than 1 hour on some machines.  In
 short, runtime cannot be determined lexically.</p>
-<p>This double exponential example also demonstrates there is not a good way
-to check for a long-running calculation within a single Python process.
-That calculation is not stuck within the Python interpreter, in Python’s C
-C-code (no doubt calling the <cite>pow()</cite> function) called by the Python
-interpreter itself.  That call will not return to the Python interpreter or
-allow other threads to run until that call is done.  That means that from
-within a single process, there is not a foolproof way to tell <cite>asteval</cite> (or
-really, even Python) when a calculation has taken too long.  The most
-reliable way to limit run time is to have a second process watching the
-execution time of the asteval process and interrupt or kill it.</p>
+<p>This double exponential example also demonstrates there is not a good way to
+check for a long-running calculation within a single Python process.  That
+calculation is not stuck within the Python interpreter, but in Python’s C
+C-code (no doubt calling the <cite>pow()</cite> function) called by the Python interpreter
+itself.  That call will not return to the Python interpreter or allow other
+threads to run until that call is done.  That means that from within a single
+process, there is not a reliable way to tell <cite>asteval</cite> (or really, even Python)
+when a calculation has taken too long.  The only reliable way to limit run time
+is to have a second process watching the execution time of the asteval process
+and either try to interrupt it or kill it.</p>
 <p>For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the <em>recursion limit</em> when
 executing expressions, with a code like this:</p>
@@ -262,7 +264,7 @@ improve this situation would be greatly appreciated.</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2022, Matthew Newville, The University of Chicago.
+        &#169; Copyright 2023, Matthew Newville, The University of Chicago.
       Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
     </div>
   </body>
