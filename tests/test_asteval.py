@@ -1111,6 +1111,8 @@ class TestEval(TestCase):
         """))
         assert 4 == self.interp("func_w()")
 
+    def test_pow(self):
+        assert 2**-2 == self.interp("2**-2")
 
 class TestCase2(unittest.TestCase):
     def test_stringio(self):
