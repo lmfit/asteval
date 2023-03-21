@@ -221,11 +221,6 @@ def safe_pow(base, exp):
     elif HAS_NUMPY and isinstance(exp, ndarr):
         if numpy.nanmax(exp) > MAX_EXPONENT:
             raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
-    if isinstance(base, int):
-        ret = (1.0*base)**exp
-        if isinstance(exp, int):
-            return int(ret)
-        return ret
     return base ** exp
 
 
