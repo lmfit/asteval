@@ -46,12 +46,14 @@ from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
                        make_symbol_table, numpy, op2func, valid_symbol_name)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
-             'boolop', 'break', 'call', 'compare', 'continue', 'delete',
-             'dict', 'ellipsis', 'excepthandler', 'expr', 'extslice',
-             'for', 'functiondef', 'if', 'ifexp', 'index', 'interrupt',
-             'list', 'listcomp', 'module', 'name', 'nameconstant', 'num',
-             'pass', 'raise', 'repr', 'return', 'slice', 'str',
-             'subscript', 'try', 'tuple', 'unaryop', 'while', 'constant']
+             'boolop', 'break', 'bytes', 'call', 'compare', 'constant',
+             'continue', 'delete', 'dict', 'dictcomp', 'ellipsis',
+             'excepthandler', 'expr', 'extslice', 'for', 'functiondef', 'if',
+             'ifexp', 'import', 'importfrom', 'index', 'interrupt', 'list',
+             'listcomp', 'module', 'name', 'nameconstant', 'num', 'pass',
+             'raise', 'repr', 'return', 'set', 'setcomp', 'slice', 'starred',
+             'str', 'subscript', 'try', 'tuple', 'unaryop', 'while', 'with',
+             'formattedvalue', 'joinedstr']
 
 
 class Interpreter:
@@ -168,9 +170,13 @@ class Interpreter:
 
         self.node_handlers = {}
         for node in nodes:
-            self.node_handlers[node] = getattr(self, "on_%s" % node)
+            try:
+                self.node_handlers[node] = getattr(self, "on_%s" % node)
+            except AttributeError:
+                print("no handler for ", node)
 
-        # to rationalize try/except try/finally for Python2.6 through Python3.3
+
+        # to rationalize try/except try/finally
         if 'try' in self.node_handlers:
             self.node_handlers['tryexcept'] = self.node_handlers['try']
             self.node_handlers['tryfinally'] = self.node_handlers['try']
@@ -450,6 +456,10 @@ class Interpreter:
         """Return string."""
         return node.s
 
+    def on_bytes(self, node):
+        'return bytes'
+        return node.s  # ('s',)
+
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
         ctx = node.ctx.__class__
@@ -675,8 +685,29 @@ class Interpreter:
                 self.run(tnode)
         self._interrupt = None
 
+    def on_with(self, node):    # ('items', 'body', 'type_comment')
+        """with blocks."""
+        contexts = []
+        for item in node.items:
+            ctx = self.run(item.context_expr)
+            contexts.append(ctx)
+            if hasattr(ctx, '__enter__'):
+               result = ctx.__enter__()
+               if item.optional_vars is not None:
+                   self.node_assign(item.optional_vars, result)
+            else:
+                raise TypeError(f"'{type(context)}' object does not support the context manager protocol")
+        for bnode in node.body:
+            self.run(bnode)
+            if self._interrupt is not None:
+                break
+
+        for ctx in contexts:
+            if hasattr(ctx, '__exit__'):
+                ctx.__exit__()
+
     def on_listcomp(self, node):    # ('elt', 'generators')
-        """List comprehension -- only up to 4 generators!"""
+        """List comprehension"""
         out = []
         locals = {}
         saved_syms = {}
