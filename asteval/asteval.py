@@ -261,15 +261,14 @@ class Interpreter:
         """Parse statement/expression to Ast representation."""
         if len(text) > self.max_statement_length:
             msg = f'length of text exceeds {self.max_statement_length:d} characters'
-            self.raise_exception(None, msg='Runtime Error', expr=msg)
-
+            self.raise_exception(None, exc=RuntimeError, expr=msg)
         self.expr = text
         try:
             out = ast.parse(text)
         except SyntaxError:
-            self.raise_exception(None, msg='Syntax Error', expr=text)
+            self.raise_exception(None, exc=SyntaxError, expr=text)
         except:
-            self.raise_exception(None, msg='Runtime Error', expr=text)
+            self.raise_exception(None, exc=RuntimeError, expr=text)
 
         return out
 
@@ -325,9 +324,10 @@ class Interpreter:
         self.error = []
         self.start_time = time.time()
         if isinstance(expr, str):
-            if len(expr) > self.max_statement_length:
-                msg = f'length of text exceeds {self.max_statement_length:d} characters'
-                raise ValueError(msg)
+            # if len(expr) > self.max_statement_length:
+            #     msg = f'length of text exceeds {self.max_statement_length:d} characters'
+            #     self.raise_exception(None, msg='ValueError', expr=msg)
+            #     return None
             try:
                 node = self.parse(expr)
             except Exception:
@@ -403,7 +403,7 @@ class Interpreter:
         return None  # ()
 
     def on_ellipsis(self, node):
-        """Ellipses."""
+        """Ellipses.  deprecated in 3.8"""
         return Ellipsis
 
     # for break and continue: set the instance variable _interrupt
@@ -449,16 +449,31 @@ class Interpreter:
         return node.value
 
     def on_num(self, node):   # ('n',)
-        """Return number."""
+        """Return number.  deprecated in 3.8"""
         return node.n
 
     def on_str(self, node):   # ('s',)
-        """Return string."""
+        """Return string.  deprecated in 3.8"""
         return node.s
 
     def on_bytes(self, node):
-        'return bytes'
+        """return bytes.  deprecated in 3.8"""
         return node.s  # ('s',)
+
+    def on_joinedstr(self, node):  # ('values',)
+        "join strings, used in f-strings"
+        return ''.join([self.run(k) for k in node.values])
+
+    def on_formattedvalue(self, node): # ('value', 'conversion', 'format_spec')
+        "formatting used in f-strings"
+        val = self.run(node.value)
+        fstring_converters = {115: str, 114: repr, 97: ascii}
+        if node.conversion in fstring_converters:
+            val = fstring_converters[node.conversion](val)
+        fmt = '{0}'
+        if node.format_spec is not None:
+            fmt = f'{{0:{self.run(node.format_spec)}}}'
+        return fmt.format(val)
 
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
@@ -471,7 +486,7 @@ class Interpreter:
         self.raise_exception(node, exc=NameError, msg=msg)
 
     def on_nameconstant(self, node):
-        """True, False, or None"""
+        """True, False, or None  deprecated in 3.8"""
         return node.value
 
     def node_assign(self, node, val):
@@ -561,7 +576,6 @@ class Interpreter:
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
             return val[nslice]
-
         msg = "subscript with unknown context"
         self.raise_exception(node, msg=msg)
 
