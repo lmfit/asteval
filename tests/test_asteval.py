@@ -271,6 +271,24 @@ class TestEval(TestCase):
             """))
         self.isvalue('n', 7)
 
+    def test_with(self):
+        tmpfile = NamedTemporaryFile('w', delete=False, prefix='asteval_test')
+        tmpfile.write('hello world\nline 2\nline 3\n\n')
+        tmpfile.close()
+        time.sleep(0.1)
+        fname = tmpfile.name
+        self.interp(textwrap.dedent("""
+            with open('{0}', 'r') as fh:
+                 lines = fh.readlines()
+            """.format(fname)))
+        lines = self.interp.symtable['lines']
+        fh = self.interp.symtable['fh']
+        assert fh.closed
+        assert len(lines) > 2
+        assert lines[1].startswith('line')
+
+
+
     # noinspection PyTypeChecker
     def test_assert(self):
         """test assert statements"""
@@ -989,13 +1007,13 @@ class TestEval(TestCase):
             assert_allclose(x1, 0.50, rtol=0.001)
             assert_allclose(x2, 0.866025, rtol=0.001)
             assert_allclose(x3, 1.00, rtol=0.001)
-            
-    
+
+
     def test_numpy_renames_in_custom_symtable(self):
         """test that numpy renamed functions are in symtable"""
         if HAS_NUMPY:
             sym_table = make_symbol_table()
-            
+
             assert "ln" in sym_table
 
     def test_readonly_symbols(self):
