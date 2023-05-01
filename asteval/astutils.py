@@ -409,3 +409,155 @@ def make_symbol_table(use_numpy=True, **kws):
     symtable.update(kws)
 
     return symtable
+
+
+
+class Procedure:
+    """Procedure: user-defined function for asteval.
+
+    This stores the parsed ast nodes as from the 'functiondef' ast node
+    for later evaluation.
+
+    """
+
+    def __init__(self, name, interp, doc=None, lineno=0,
+                 body=None, args=None, kwargs=None,
+                 vararg=None, varkws=None):
+        """TODO: docstring in public method."""
+        self.__ininit__ = True
+        self.name = name
+        self.__name__ = self.name
+        self.__asteval__ = interp
+        self.raise_exc = self.__asteval__.raise_exception
+        self.__doc__ = doc
+        self.body = body
+        self.argnames = args
+        self.kwargs = kwargs
+        self.vararg = vararg
+        self.varkws = varkws
+        self.lineno = lineno
+        self.__ininit__ = False
+
+    def __setattr__(self, attr, val):
+        if not getattr(self, '__ininit__', True):
+            self.raise_exc(None, exc=TypeError,
+                           msg="procedure is read-only")
+        self.__dict__[attr] = val
+
+    def __dir__(self):
+        return ['name']
+
+    def __repr__(self):
+        """TODO: docstring in magic method."""
+        sig = ""
+        if len(self.argnames) > 0:
+            sig = sig + ', '.join(self.argnames)
+        if self.vararg is not None:
+            sig = sig + f"*{self.vararg}"
+        if len(self.kwargs) > 0:
+            if len(sig) > 0:
+                sig = f"{sig}, "
+            _kw = [f"{k}={v}" for k, v in self.kwargs]
+            sig = f"{sig}{', '.join(_kw)}"
+
+        if self.varkws is not None:
+            sig = f"%sig, **{self.varkws}"
+        sig = f"<Procedure {self.name}({sig})>"
+        if self.__doc__ is not None:
+            sig = f"{sig}\n {self.__doc__}"
+        return sig
+
+    def __call__(self, *args, **kwargs):
+        """TODO: docstring in public method."""
+        symlocals = {}
+        args = list(args)
+        nargs = len(args)
+        nkws = len(kwargs)
+        nargs_expected = len(self.argnames)
+        # check for too few arguments, but the correct keyword given
+        if (nargs < nargs_expected) and nkws > 0:
+            for name in self.argnames[nargs:]:
+                if name in kwargs:
+                    args.append(kwargs.pop(name))
+            nargs = len(args)
+            nargs_expected = len(self.argnames)
+            nkws = len(kwargs)
+        if nargs < nargs_expected:
+            msg = f"{self.name}() takes at least"
+            msg = f"{msg} {nargs_expected} arguments, got {nargs}"
+            self.raise_exc(None, exc=TypeError, msg=msg)
+        # check for multiple values for named argument
+        if len(self.argnames) > 0 and kwargs is not None:
+            msg = "multiple values for keyword argument"
+            for targ in self.argnames:
+                if targ in kwargs:
+                    msg = f"{msg} '{targ}' in Procedure {self.name}"
+                    self.raise_exc(None, exc=TypeError, msg=msg, lineno=self.lineno)
+
+        # check more args given than expected, varargs not given
+        if nargs != nargs_expected:
+            msg = None
+            if nargs < nargs_expected:
+                msg = f"not enough arguments for Procedure {self.name}()"
+                msg = f"{msg} (expected {nargs_expected}, got {nargs}"
+                self.raise_exc(None, exc=TypeError, msg=msg)
+
+        if nargs > nargs_expected and self.vararg is None:
+            if nargs - nargs_expected > len(self.kwargs):
+                msg = f"too many arguments for {self.name}() expected at most"
+                msg = f"{msg} {len(self.kwargs)+nargs_expected}, got {nargs}"
+                self.raise_exc(None, exc=TypeError, msg=msg)
+
+            for i, xarg in enumerate(args[nargs_expected:]):
+                kw_name = self.kwargs[i][0]
+                if kw_name not in kwargs:
+                    kwargs[kw_name] = xarg
+
+        for argname in self.argnames:
+            symlocals[argname] = args.pop(0)
+
+        try:
+            if self.vararg is not None:
+                symlocals[self.vararg] = tuple(args)
+
+            for key, val in self.kwargs:
+                if key in kwargs:
+                    val = kwargs.pop(key)
+                symlocals[key] = val
+
+            if self.varkws is not None:
+                symlocals[self.varkws] = kwargs
+
+            elif len(kwargs) > 0:
+                msg = f"extra keyword arguments for Procedure {self.name}: "
+                msg = msg + ','.join(list(kwargs.keys()))
+                self.raise_exc(None, msg=msg, exc=TypeError,
+                               lineno=self.lineno)
+
+        except (ValueError, LookupError, TypeError,
+                NameError, AttributeError):
+            msg = f"incorrect arguments for Procedure {self.name}"
+            self.raise_exc(None, msg=msg, lineno=self.lineno)
+
+        save_symtable = self.__asteval__.symtable.copy()
+        self.__asteval__.symtable.update(symlocals)
+        self.__asteval__.retval = None
+        self.__asteval__._calldepth += 1
+        retval = None
+
+        # evaluate script of function
+        for node in self.body:
+            self.__asteval__.run(node, expr='<>', lineno=self.lineno)
+            if len(self.__asteval__.error) > 0:
+                break
+            if self.__asteval__.retval is not None:
+                retval = self.__asteval__.retval
+                self.__asteval__.retval = None
+                if retval is ReturnedNone:
+                    retval = None
+                break
+
+        self.__asteval__.symtable = save_symtable
+        self.__asteval__._calldepth -= 1
+        symlocals = None
+        return retval
