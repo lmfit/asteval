@@ -201,8 +201,6 @@ class TestEval(TestCase):
         self.istrue("c_major7 & e_minor7 == {'b', 'g', 'e'}")
         self.istrue("c_major7 | d_minor7 == c_diatonic")
 
-
-
     def test_basic(self):
         """build, use set"""
         v = self.interp("4")
@@ -217,14 +215,33 @@ class TestEval(TestCase):
         assert v == '4'
         v = self.interp("...")
         assert v == ...
+        v = self.interp("False")
+        assert v == False
         self.interp("x = 8")
         self.interp("x.foo = 3")
         self.check_error('AttributeError')
-
         self.interp("del x")
 
+    def test_fstring(self):
+        "fstrings"
+        self.interp("x = 2523.33/723")
+        self.interp("s = f'{x:+.3f}'")
+        self.istrue("s == '+3.490'")
 
+        self.interp("chie = '\u03c7(E)'")
+        self.interp("v_s = f'{chie!s}'")
+        self.interp("v_r = f'{chie!r}'")
+        self.interp("v_a = f'{chie!a}'")
 
+        self.istrue("v_s == '\u03c7(E)'")
+        self.istrue('''v_r == "'\u03c7(E)'"''')
+        self.istrue('''v_a == "'\\\\u03c7(E)'"''')
+
+    def test_verylong_strings(self):
+        "test that long string raises an error"
+        longstr = "statement_of_somesize" * 5000
+        self.interp(longstr)
+        self.check_error('RuntimeError')
 
     def test_ndarray_index(self):
         """nd array indexing"""
@@ -337,7 +354,6 @@ class TestEval(TestCase):
         assert fh1.closed
         assert len(lines) > 2
         assert lines[1].startswith('line')
-
 
 
     # noinspection PyTypeChecker
