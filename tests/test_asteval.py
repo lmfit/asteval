@@ -280,7 +280,7 @@ class TestEval(TestCase):
         tmpfile = NamedTemporaryFile('w', delete=False, prefix='asteval_test')
         tmpfile.write('hello world\nline 2\nline 3\n\n')
         tmpfile.close()
-        time.sleep(0.1)
+        time.sleep(0.25)
         fname = tmpfile.name
         self.interp(textwrap.dedent("""
             with open('{0}', 'r') as fh:
