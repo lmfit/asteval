@@ -43,7 +43,8 @@ import time
 from sys import exc_info, stderr, stdout
 
 from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
-                       make_symbol_table, numpy, op2func, valid_symbol_name, Procedure)
+                       make_symbol_table, numpy, op2func, valid_symbol_name,
+                       Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'bytes', 'call', 'compare', 'constant',
@@ -370,6 +371,19 @@ class Interpreter:
     def on_expr(self, node):
         """Expression."""
         return self.run(node.value)  # ('value',)
+
+    # imports
+    def on_import(self, node):
+        "simple import statements"
+        msg = f"import not supported"
+        self.raise_exception(node, exc=NotImplementedError, msg=msg)
+
+
+    def on_importfrom(self, node):
+        "import from statements"
+        msg = f"import-from not supported"
+        self.raise_exception(node, exc=NotImplementedError, msg=msg)
+
 
     def on_index(self, node):
         """Index."""
