@@ -1027,7 +1027,7 @@ class TestEval(TestCase):
             self.isvalue('x', 1)
             self.check_error(None)
         else:
-            self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
+            self.check_error('RuntimeError')  # Hmmm, this is caught, but its still concerning...
         self.interp("compile('xxx')")
         self.check_error('NameError')  # Safe, compile() is not supported
 
