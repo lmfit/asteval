@@ -29,16 +29,19 @@ except ImportError:
 class TestCase(unittest.TestCase):
     """testing of asteval"""
     def setUp(self):
+        "setup"
         self.interp = Interpreter()
         self.symtable = self.interp.symtable
         self.set_stdout()
         self.set_stderr()
 
     def set_stdout(self):
+        "stdout"
         self.stdout = NamedTemporaryFile('w', delete=False, prefix='astevaltest')
         self.interp.writer = self.stdout
 
     def read_stdout(self):
+        "read stdout"
         self.stdout.close()
         time.sleep(0.1)
         fname = self.stdout.name
@@ -49,6 +52,7 @@ class TestCase(unittest.TestCase):
         return out
 
     def set_stderr(self):
+        "sterr"
         self.stderr = NamedTemporaryFile('w', delete=False,
                                          prefix='astevaltest_stderr')
         self.interp.err_writer = self.stderr
@@ -86,7 +90,7 @@ class TestCase(unittest.TestCase):
         if HAS_NUMPY and isinstance(val, np.ndarray):
             assert_allclose(tval, val, rtol=0.01)
         else:
-            assert(tval == val)
+            assert tval == val
 
     def isnear(self, expr, val):
         tval = self.interp(expr)
@@ -176,12 +180,75 @@ class TestEval(TestCase):
         self.istrue("a_string[-1] == 'd'")
         self.istrue("a_string[-2] == 'l'")
 
+    def test_sets(self):
+        """build, use set"""
+        self.interp("a_set = {'a', 'b', 'c', 'd', 'c'}")
+        self.istrue("len(a_set) == 4")
+        self.istrue("'b' in a_set")
+
+        self.interp("c_major7 = {'c', 'e', 'g', 'b'}")
+        self.interp("d_minor7 = {'d', 'f', 'a', 'c'}")
+        self.interp("e_minor7 = {'e', 'g', 'b', 'd'}")
+        self.interp("f_major7 = {'f', 'a', 'c', 'e'}")
+        self.interp("g_dom7 = {'g', 'b', 'd', 'f'}")
+        self.interp("a_minor7 = {'a', 'c', 'e', 'g'}")
+        self.interp("b_halfdim = {'b', 'd', 'f', 'a'}")
+        self.interp("c_diatonic = {'a', 'b', 'c', 'd', 'e', 'f', 'g'}")
+
+        self.interp("phrase = d_minor7 + g_dom7 + c_major7")
+        self.check_error('TypeError')
+        self.istrue("c_major7 & d_minor7 == {'c'}")
+        self.istrue("c_major7 & e_minor7 == {'b', 'g', 'e'}")
+        self.istrue("c_major7 | d_minor7 == c_diatonic")
+
+    def test_basic(self):
+        """build, use set"""
+        v = self.interp("4")
+        assert v == 4
+        v = self.interp("'x'")
+        assert v == 'x'
+        v = self.interp("b'x'")
+        assert v == b'x'
+        v = self.interp("str(4)")
+        assert v == '4'
+        v = self.interp("repr(4)")
+        assert v == '4'
+        v = self.interp("...")
+        assert v == ...
+        v = self.interp("False")
+        assert v == False
+        self.interp("x = 8")
+        self.interp("x.foo = 3")
+        self.check_error('AttributeError')
+        self.interp("del x")
+
+    def test_fstring(self):
+        "fstrings"
+        self.interp("x = 2523.33/723")
+        self.interp("s = f'{x:+.3f}'")
+        self.istrue("s == '+3.490'")
+
+        self.interp("chie = '\u03c7(E)'")
+        self.interp("v_s = f'{chie!s}'")
+        self.interp("v_r = f'{chie!r}'")
+        self.interp("v_a = f'{chie!a}'")
+
+        self.istrue("v_s == '\u03c7(E)'")
+        self.istrue('''v_r == "'\u03c7(E)'"''')
+        self.istrue('''v_a == "'\\\\u03c7(E)'"''')
+
+    def test_verylong_strings(self):
+        "test that long string raises an error"
+        longstr = "statement_of_somesize" * 5000
+        self.interp(longstr)
+        self.check_error('RuntimeError')
+
     def test_ndarray_index(self):
         """nd array indexing"""
         if HAS_NUMPY:
             self.interp("a_ndarray = 5*arange(20)")
-            assert(self.interp("a_ndarray[2]") == 10)
-            assert(self.interp("a_ndarray[4]") == 20)
+            assert self.interp("a_ndarray[2]") == 10
+            assert self.interp("a_ndarray[4]") == 20
 
     def test_ndarrayslice(self):
         """array slicing"""
@@ -270,6 +337,24 @@ class TestEval(TestCase):
             print( 'finish: n = ', n)
             """))
         self.isvalue('n', 7)
+
+    def test_with(self):
+        "test with"
+        tmpfile = NamedTemporaryFile('w', delete=False, prefix='asteval_test')
+        tmpfile.write('hello world\nline 2\nline 3\n\n')
+        tmpfile.close()
+        time.sleep(0.25)
+        fname = tmpfile.name.replace('\\', '/')
+        self.interp(textwrap.dedent("""
+            with open('{0}', 'r') as fh:
+                 lines = fh.readlines()
+            """.format(fname)))
+        lines = self.interp.symtable['lines']
+        fh1 = self.interp.symtable['fh']
+        assert fh1.closed
+        assert len(lines) > 2
+        assert lines[1].startswith('line')
+
 
     # noinspection PyTypeChecker
     def test_assert(self):
@@ -598,8 +683,24 @@ class TestEval(TestCase):
         self.interp('x = [i*i for i in range(6) if i > 1]')
         self.isvalue('x', [4, 9, 16, 25])
         self.interp('x = [(i, j*2) for i in range(6) for j in range(2)]')
-        self.isvalue('x', [(0, 0), (0, 2), (1, 0), (1, 2), (2, 0), (2, 2), (3, 0), (3, 2), (4, 0), (4, 2), (5, 0), (5, 2)])
+        self.isvalue('x', [(0, 0), (0, 2), (1, 0), (1, 2), (2, 0), (2, 2),
+                           (3, 0), (3, 2), (4, 0), (4, 2), (5, 0), (5, 2)])
 
+    def test_set_comprehension(self):
+        """test set comprehension"""
+        set_in = "x = {(a,2*b) for a in range(5) for b in range(4)}"
+        set_out = {(4, 0), (3, 4), (4, 6), (0, 2), (2, 2), (1, 0), (1, 6),
+                   (4, 2), (3, 0), (3, 6), (2, 4), (1, 2), (0, 4), (3, 2),
+                   (4, 4), (0, 0), (2, 0), (1, 4), (0, 6), (2, 6)}
+        self.interp(set_in)
+        self.isvalue("x", set_out)
+
+    def test_dict_comprehension(self):
+        """test set comprehension"""
+        dict_in = "x = {a:2*b for a in range(5) for b in range(4)}"
+        dict_out = {0: 6, 1: 6, 2: 6, 3: 6, 4: 6}
+        self.interp(dict_in)
+        self.isvalue('x', dict_out)
 
     def test_ifexp(self):
         """test if expressions"""
@@ -836,11 +937,11 @@ class TestEval(TestCase):
             """))
 
         ret = self.interp("inner(foo='a', bar=2)")
-        assert(ret == ('a', 2))
+        assert ret == ('a', 2)
         ret = self.interp("outer(foo='a', bar=7)")
-        assert(ret == ('a', 7))
+        assert ret == ('a', 7)
         ret = self.interp("outer(**dict(foo='b', bar=3))")
-        assert(ret == ('b', 3))
+        assert ret == ('b', 3)
 
     def test_nested_functions(self):
         setup = """
@@ -907,7 +1008,8 @@ class TestEval(TestCase):
         self.check_error('RecursionError')
 
     def test_kaboom(self):
-        """ test Ned Batchelder's 'Eval really is dangerous' - Kaboom test (and related tests)"""
+        """ test Ned Batchelder's 'Eval really is dangerous'
+        - Kaboom test (and related tests)"""
         self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
     fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
 )()""")
@@ -919,13 +1021,13 @@ class TestEval(TestCase):
         self.check_error('AttributeError', '__class__')  # Safe, unsafe dunders are not supported
         self.interp("9**9**9**9**9**9**9**9")
         self.check_error('RuntimeError')  # Safe, safe_pow() catches this
-        self.interp(
-            "x = ((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((((1))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))))")
+        s = 'x = ' + '('*100 + '1' + ')'*100
+        self.interp(s)
         if version_info.minor > 8:
             self.isvalue('x', 1)
             self.check_error(None)
         else:
-            self.check_error('MemoryError')  # Hmmm, this is caught, but its still concerning...
+            self.check_error('RuntimeError')  # Hmmm, this is caught, but its still concerning...
         self.interp("compile('xxx')")
         self.check_error('NameError')  # Safe, compile() is not supported
 
@@ -954,10 +1056,10 @@ class TestEval(TestCase):
     def test_get_user_symbols(self):
         self.interp("x = 1.1\ny = 2.5\nz = 788\n")
         usersyms = self.interp.user_defined_symbols()
-        assert('x' in usersyms)
-        assert('y' in usersyms)
-        assert('z' in usersyms)
-        assert('foo' not in usersyms)
+        assert 'x' in usersyms
+        assert 'y' in usersyms
+        assert 'z' in usersyms
+        assert 'foo' not in usersyms
 
     def test_custom_symtable(self):
         "test making and using a custom symbol table"
@@ -989,13 +1091,13 @@ class TestEval(TestCase):
             assert_allclose(x1, 0.50, rtol=0.001)
             assert_allclose(x2, 0.866025, rtol=0.001)
             assert_allclose(x3, 1.00, rtol=0.001)
-            
-    
+
+
     def test_numpy_renames_in_custom_symtable(self):
         """test that numpy renamed functions are in symtable"""
         if HAS_NUMPY:
             sym_table = make_symbol_table()
-            
+
             assert "ln" in sym_table
 
     def test_readonly_symbols(self):
@@ -1025,28 +1127,28 @@ class TestEval(TestCase):
         aeval("x = 21")
         aeval("y += a")
 
-        assert(aeval("a") == 10)
-        assert(aeval("b") == 11)
-        assert(aeval("c") == 12)
-        assert(aeval("d") == 13)
-        assert(aeval("foo()") == 31)
-        assert(aeval("bar()") == 31)
-        assert(aeval("x") == 21)
-        assert(aeval("y") == 17)
+        assert aeval("a") == 10
+        assert aeval("b") == 11
+        assert aeval("c") == 12
+        assert aeval("d") == 13
+        assert aeval("foo()") == 31
+        assert aeval("bar()") == 31
+        assert aeval("x") == 21
+        assert aeval("y") == 17
 
-        assert(aeval("abs(8)") == 8)
-        assert(aeval("abs(-8)") == 8)
+        assert aeval("abs(8)") == 8
+        assert aeval("abs(-8)") == 8
         aeval("def abs(x): return x*2")
-        assert(aeval("abs(8)") == 16)
-        assert(aeval("abs(-8)") == -16)
+        assert aeval("abs(8)") == 16
+        assert aeval("abs(-8)") == -16
 
         aeval2 = Interpreter(builtins_readonly=True)
 
-        assert(aeval2("abs(8)") == 8)
-        assert(aeval2("abs(-8)") == 8)
+        assert aeval2("abs(8)") == 8
+        assert aeval2("abs(-8)") == 8
         aeval2("def abs(x): return x*2")
-        assert(aeval2("abs(8)") == 8)
-        assert(aeval2("abs(-8)") == 8)
+        assert aeval2("abs(8)") == 8
+        assert aeval2("abs(-8)") == 8
 
     def test_chained_compparisons(self):
         self.interp('a = 7')
@@ -1061,10 +1163,10 @@ class TestEval(TestCase):
         if HAS_NUMPY:
             self.interp("sarr = arange(8)")
             sarr = np.arange(8)
-            o1 = self.interp("sarr < 4.3")
-            assert(np.all(o1 == (sarr < 4.3)))
-            o1 = self.interp("sarr == 4")
-            assert(np.all(o1 == (sarr == 4)))
+            ox1 = self.interp("sarr < 4.3")
+            assert np.all(ox1 == (sarr < 4.3))
+            ox1 = self.interp("sarr == 4")
+            assert np.all(ox1 == (sarr == 4))
 
     def test_minimal(self):
         aeval = Interpreter(builtins_readonly=True, minimal=True)

@@ -19,15 +19,12 @@ if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
 HAS_NUMPY = False
-numpy = None
-ndarr = None
 try:
     import numpy
-    ndarr = numpy.ndarray
-    HAS_NUMPY = True
     numpy_version = numpy.version.version.split('.', 2)
+    HAS_NUMPY = True
 except ImportError:
-    pass
+    numpy = None
 
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
@@ -170,17 +167,17 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
 if HAS_NUMPY:
-    numpy_check = int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20
-
-    if numpy_check:
+    numpy_deprecated = []
+    if int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 20:
         # aliases deprecated in NumPy v1.20.0
         numpy_deprecated = ['str', 'bool', 'int', 'float', 'complex', 'pv', 'rate',
                             'pmt', 'ppmt', 'npv', 'nper', 'long', 'mirr', 'fv',
                             'irr', 'ipmt']
+    if int(numpy_version[0]) == 1 and int(numpy_version[1]) >= 24:
         # aliases deprecated in NumPy v1.24.0
         numpy_deprecated += ['int0', 'uint0', 'bool8']
 
-        FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
+    FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
 
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
     NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, value)}
@@ -188,22 +185,22 @@ if HAS_NUMPY:
     NUMPY_TABLE = {}
     for sym in FROM_NUMPY:
         NUMPY_TABLE[sym] = getattr(numpy, sym)
-    for name, sym in NUMPY_RENAMES.items():
-        NUMPY_TABLE[name] = getattr(numpy, sym)
+    for sname, sym in NUMPY_RENAMES.items():
+        NUMPY_TABLE[sname] = getattr(numpy, sym)
 else:
     NUMPY_TABLE = {}
 
 
-def _open(filename, mode='r', buffering=-1):
+def _open(filename, mode='r', buffering=-1, encoding=None):
     """read only version of open()"""
     if mode not in ('r', 'rb', 'rU'):
         raise RuntimeError("Invalid open file mode, must be 'r', 'rb', or 'rU'")
     if buffering > MAX_OPEN_BUFFER:
         raise RuntimeError(f"Invalid buffering value, max buffer size is {MAX_OPEN_BUFFER}")
-    return open(filename, mode, buffering)
+    return open(filename, mode, buffering, encoding=encoding)
 
 
-def _type(obj, *varargs, **varkws):
+def _type(obj):
     """type that prevents varargs and varkws"""
     return type(obj).__name__
 
@@ -218,35 +215,35 @@ def safe_pow(base, exp):
     if isinstance(exp, numbers.Number):
         if exp > MAX_EXPONENT:
             raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
-    elif HAS_NUMPY and isinstance(exp, ndarr):
+    elif HAS_NUMPY and isinstance(exp, numpy.ndarray):
         if numpy.nanmax(exp) > MAX_EXPONENT:
             raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
     return base ** exp
 
 
-def safe_mult(a, b):
+def safe_mult(arg1, arg2):
     """safe version of multiply"""
-    if isinstance(a, str) and isinstance(b, int) and len(a) * b > MAX_STR_LEN:
+    if isinstance(arg1, str) and isinstance(arg2, int) and len(arg1) * arg2 > MAX_STR_LEN:
         raise RuntimeError(f"String length exceeded, max string length is {MAX_STR_LEN}")
-    return a * b
+    return arg1 * arg2
 
 
-def safe_add(a, b):
+def safe_add(arg1, arg2):
     """safe version of add"""
-    if isinstance(a, str) and isinstance(b, str) and len(a) + len(b) > MAX_STR_LEN:
+    if isinstance(arg1, str) and isinstance(arg2, str) and len(arg1) + len(arg2) > MAX_STR_LEN:
         raise RuntimeError(f"String length exceeded, max string length is {MAX_STR_LEN}")
-    return a + b
+    return arg1 + arg2
 
 
-def safe_lshift(a, b):
+def safe_lshift(arg1, arg2):
     """safe version of lshift"""
-    if isinstance(b, numbers.Number):
-        if b > MAX_SHIFT:
+    if isinstance(arg2, numbers.Number):
+        if arg2 > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
-    elif HAS_NUMPY and isinstance(b, ndarr):
-        if numpy.nanmax(b) > MAX_SHIFT:
+    elif HAS_NUMPY and isinstance(arg2, numpy.ndarray):
+        if numpy.nanmax(arg2) > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
-    return a << b
+    return arg1 << arg2
 
 
 OPERATORS = {ast.Is: lambda a, b: a is b,
@@ -263,6 +260,7 @@ OPERATORS = {ast.Is: lambda a, b: a is b,
              ast.RShift: lambda a, b: a >> b,
              ast.Mult: safe_mult,
              ast.Pow: safe_pow,
+             ast.MatMult: lambda a, b: a @ b,
              ast.Sub: lambda a, b: a - b,
              ast.Mod: lambda a, b: a % b,
              ast.And: lambda a, b: a and b,
@@ -305,20 +303,19 @@ def valid_symbol_name(name):
     return typ == tk_NAME and start == (1, 0) and end == (1, len(name))
 
 
-def op2func(op):
+def op2func(oper):
     """Return function for operator nodes."""
-    return OPERATORS[op.__class__]
+    return OPERATORS[oper.__class__]
 
 
 class Empty:
     """Empty class."""
-
     def __init__(self):
         """TODO: docstring in public method."""
         pass
 
     def __nonzero__(self):
-        """TODO: docstring in magic method."""
+        """Empty is TODO: docstring in magic method."""
         return False
 
 
@@ -356,9 +353,9 @@ class ExceptionHolder:
         if exc_name in (None, 'None'):
             exc_name = 'UnknownError'
 
-        out = ["   %s" % self.expr]
+        out = [f"   {self.expr}"]
         if col_offset > 0:
-            out.append("    %s^^^" % ((col_offset)*' '))
+            out.append(f"    {col_offset*' '}^^^")
         out.append(str(self.msg))
         return (exc_name, '\n'.join(out))
 
@@ -412,3 +409,155 @@ def make_symbol_table(use_numpy=True, **kws):
     symtable.update(kws)
 
     return symtable
+
+
+
+class Procedure:
+    """Procedure: user-defined function for asteval.
+
+    This stores the parsed ast nodes as from the 'functiondef' ast node
+    for later evaluation.
+
+    """
+
+    def __init__(self, name, interp, doc=None, lineno=0,
+                 body=None, args=None, kwargs=None,
+                 vararg=None, varkws=None):
+        """TODO: docstring in public method."""
+        self.__ininit__ = True
+        self.name = name
+        self.__name__ = self.name
+        self.__asteval__ = interp
+        self.raise_exc = self.__asteval__.raise_exception
+        self.__doc__ = doc
+        self.body = body
+        self.argnames = args
+        self.kwargs = kwargs
+        self.vararg = vararg
+        self.varkws = varkws
+        self.lineno = lineno
+        self.__ininit__ = False
+
+    def __setattr__(self, attr, val):
+        if not getattr(self, '__ininit__', True):
+            self.raise_exc(None, exc=TypeError,
+                           msg="procedure is read-only")
+        self.__dict__[attr] = val
+
+    def __dir__(self):
+        return ['name']
+
+    def __repr__(self):
+        """TODO: docstring in magic method."""
+        sig = ""
+        if len(self.argnames) > 0:
+            sig = sig + ', '.join(self.argnames)
+        if self.vararg is not None:
+            sig = sig + f"*{self.vararg}"
+        if len(self.kwargs) > 0:
+            if len(sig) > 0:
+                sig = f"{sig}, "
+            _kw = [f"{k}={v}" for k, v in self.kwargs]
+            sig = f"{sig}{', '.join(_kw)}"
+
+        if self.varkws is not None:
+            sig = f"%sig, **{self.varkws}"
+        sig = f"<Procedure {self.name}({sig})>"
+        if self.__doc__ is not None:
+            sig = f"{sig}\n {self.__doc__}"
+        return sig
+
+    def __call__(self, *args, **kwargs):
+        """TODO: docstring in public method."""
+        symlocals = {}
+        args = list(args)
+        nargs = len(args)
+        nkws = len(kwargs)
+        nargs_expected = len(self.argnames)
+        # check for too few arguments, but the correct keyword given
+        if (nargs < nargs_expected) and nkws > 0:
+            for name in self.argnames[nargs:]:
+                if name in kwargs:
+                    args.append(kwargs.pop(name))
+            nargs = len(args)
+            nargs_expected = len(self.argnames)
+            nkws = len(kwargs)
+        if nargs < nargs_expected:
+            msg = f"{self.name}() takes at least"
+            msg = f"{msg} {nargs_expected} arguments, got {nargs}"
+            self.raise_exc(None, exc=TypeError, msg=msg)
+        # check for multiple values for named argument
+        if len(self.argnames) > 0 and kwargs is not None:
+            msg = "multiple values for keyword argument"
+            for targ in self.argnames:
+                if targ in kwargs:
+                    msg = f"{msg} '{targ}' in Procedure {self.name}"
+                    self.raise_exc(None, exc=TypeError, msg=msg, lineno=self.lineno)
+
+        # check more args given than expected, varargs not given
+        if nargs != nargs_expected:
+            msg = None
+            if nargs < nargs_expected:
+                msg = f"not enough arguments for Procedure {self.name}()"
+                msg = f"{msg} (expected {nargs_expected}, got {nargs}"
+                self.raise_exc(None, exc=TypeError, msg=msg)
+
+        if nargs > nargs_expected and self.vararg is None:
+            if nargs - nargs_expected > len(self.kwargs):
+                msg = f"too many arguments for {self.name}() expected at most"
+                msg = f"{msg} {len(self.kwargs)+nargs_expected}, got {nargs}"
+                self.raise_exc(None, exc=TypeError, msg=msg)
+
+            for i, xarg in enumerate(args[nargs_expected:]):
+                kw_name = self.kwargs[i][0]
+                if kw_name not in kwargs:
+                    kwargs[kw_name] = xarg
+
+        for argname in self.argnames:
+            symlocals[argname] = args.pop(0)
+
+        try:
+            if self.vararg is not None:
+                symlocals[self.vararg] = tuple(args)
+
+            for key, val in self.kwargs:
+                if key in kwargs:
+                    val = kwargs.pop(key)
+                symlocals[key] = val
+
+            if self.varkws is not None:
+                symlocals[self.varkws] = kwargs
+
+            elif len(kwargs) > 0:
+                msg = f"extra keyword arguments for Procedure {self.name}: "
+                msg = msg + ','.join(list(kwargs.keys()))
+                self.raise_exc(None, msg=msg, exc=TypeError,
+                               lineno=self.lineno)
+
+        except (ValueError, LookupError, TypeError,
+                NameError, AttributeError):
+            msg = f"incorrect arguments for Procedure {self.name}"
+            self.raise_exc(None, msg=msg, lineno=self.lineno)
+
+        save_symtable = self.__asteval__.symtable.copy()
+        self.__asteval__.symtable.update(symlocals)
+        self.__asteval__.retval = None
+        self.__asteval__._calldepth += 1
+        retval = None
+
+        # evaluate script of function
+        for node in self.body:
+            self.__asteval__.run(node, expr='<>', lineno=self.lineno)
+            if len(self.__asteval__.error) > 0:
+                break
+            if self.__asteval__.retval is not None:
+                retval = self.__asteval__.retval
+                self.__asteval__.retval = None
+                if retval is ReturnedNone:
+                    retval = None
+                break
+
+        self.__asteval__.symtable = save_symtable
+        self.__asteval__._calldepth -= 1
+        symlocals = None
+        return retval
