@@ -180,6 +180,52 @@ class TestEval(TestCase):
         self.istrue("a_string[-1] == 'd'")
         self.istrue("a_string[-2] == 'l'")
 
+    def test_sets(self):
+        """build, use set"""
+        self.interp("a_set = {'a', 'b', 'c', 'd', 'c'}")
+        self.istrue("len(a_set) == 4")
+        self.istrue("'b' in a_set")
+
+        self.interp("c_major7 = {'c', 'e', 'g', 'b'}")
+        self.interp("d_minor7 = {'d', 'f', 'a', 'c'}")
+        self.interp("e_minor7 = {'e', 'g', 'b', 'd'}")
+        self.interp("f_major7 = {'f', 'a', 'c', 'e'}")
+        self.interp("g_dom7 = {'g', 'b', 'd', 'f'}")
+        self.interp("a_minor7 = {'a', 'c', 'e', 'g'}")
+        self.interp("b_halfdim = {'b', 'd', 'f', 'a'}")
+        self.interp("c_diatonic = {'a', 'b', 'c', 'd', 'e', 'f', 'g'}")
+
+        self.interp("phrase = d_minor7 + g_dom7 + c_major7")
+        self.check_error('TypeError')
+        self.istrue("c_major7 & d_minor7 == {'c'}")
+        self.istrue("c_major7 & e_minor7 == {'b', 'g', 'e'}")
+        self.istrue("c_major7 | d_minor7 == c_diatonic")
+
+
+
+    def test_basic(self):
+        """build, use set"""
+        v = self.interp("4")
+        assert v == 4
+        v = self.interp("'x'")
+        assert v == 'x'
+        v = self.interp("b'x'")
+        assert v == b'x'
+        v = self.interp("str(4)")
+        assert v == '4'
+        v = self.interp("repr(4)")
+        assert v == '4'
+        v = self.interp("...")
+        assert v == ...
+        self.interp("x = 8")
+        self.interp("x.foo = 3")
+        self.check_error('AttributeError')
+
+        self.interp("del x")
+
+
+
+
     def test_ndarray_index(self):
         """nd array indexing"""
         if HAS_NUMPY:
