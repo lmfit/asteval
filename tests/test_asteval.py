@@ -618,6 +618,20 @@ class TestEval(TestCase):
         self.interp('x = [(i, j*2) for i in range(6) for j in range(2)]')
         self.isvalue('x', [(0, 0), (0, 2), (1, 0), (1, 2), (2, 0), (2, 2), (3, 0), (3, 2), (4, 0), (4, 2), (5, 0), (5, 2)])
 
+    def test_set_comprehension(self):
+        """test set comprehension"""
+        set_in = "x = {(a,2*b) for a in range(5) for b in range(4)}"
+        set_out = {(4, 0), (3, 4), (4, 6), (0, 2), (2, 2), (1, 0), (1, 6), (4, 2), (3, 0), (3, 6),
+                   (2, 4), (1, 2), (0, 4), (3, 2), (4, 4), (0, 0), (2, 0), (1, 4), (0, 6), (2, 6)}
+        self.interp(set_in)
+        self.isvalue("x", set_out)
+
+    def test_dict_comprehension(self):
+        """test set comprehension"""
+        dict_in = "x = {a:2*b for a in range(5) for b in range(4)}"
+        dict_out = {0: 6, 1: 6, 2: 6, 3: 6, 4: 6}
+        self.interp(dict_in)
+        self.isvalue('x', dict_out)
 
     def test_ifexp(self):
         """test if expressions"""
