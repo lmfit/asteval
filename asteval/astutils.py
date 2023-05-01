@@ -24,7 +24,7 @@ try:
     numpy_version = numpy.version.version.split('.', 2)
     HAS_NUMPY = True
 except ImportError:
-    pass
+    numpy = None
 
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
