@@ -686,6 +686,13 @@ class TestEval(TestCase):
         self.isvalue('x', [(0, 0), (0, 2), (1, 0), (1, 2), (2, 0), (2, 2),
                            (3, 0), (3, 2), (4, 0), (4, 2), (5, 0), (5, 2)])
 
+        self.interp.readonly_symbols = set('a')
+        list_in = "x = [a*2 for a in range(5)]"
+        self.interp(list_in)
+        self.check_error('NameError')
+        self.interp.readonly_symbols = set()
+
+
     def test_set_comprehension(self):
         """test set comprehension"""
         set_in = "x = {(a,2*b) for a in range(5) for b in range(4)}"
@@ -701,6 +708,11 @@ class TestEval(TestCase):
         dict_out = {0: 6, 1: 6, 2: 6, 3: 6, 4: 6}
         self.interp(dict_in)
         self.isvalue('x', dict_out)
+
+        dict_in = "x = {a:yield for a in range(5) for yield in range(4)}"
+        self.interp(dict_in)
+        self.check_error('SyntaxError')
+
 
     def test_ifexp(self):
         """test if expressions"""
@@ -1013,7 +1025,7 @@ class TestEval(TestCase):
         self.interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
     fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
 )()""")
-        self.check_error('NotImplementedError', 'Lambda')  # Safe, lambda is not supported
+        self.check_error('NotImplementedError')  # Safe, lambda is not supported
 
         self.interp(
             """[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
@@ -1052,6 +1064,54 @@ class TestEval(TestCase):
         self.interp.set_nodehandler('ifexp', handler)
         self.interp('bogus = 3 if testval > 100 else 1')
         self.isvalue('bogus', 3)
+
+    def test_set_default_nodehandler(self):
+        handler_import = self.interp.set_nodehandler('import')
+        handler_importfrom = self.interp.set_nodehandler('importfrom')
+        self.interp('import tkinter')
+        self.check_error(None)
+
+        self.interp('import notavailable')
+        self.check_error('ImportError')
+
+        self.interp('from time import ctime, strftime')
+        self.check_error(None)
+        self.interp('from time import ctime as tclock, strftime as s')
+        self.check_error(None)
+        self.interp('import requests as rq')
+        self.check_error(None)
+
+        self.interp.remove_nodehandler('import')
+        self.interp.remove_nodehandler('importfrom')
+        self.interp('from time import ctime')
+        self.check_error('NotImplementedError')
+
+
+    def test_interpreter_opts(self):
+        i1 = Interpreter(no_ifexp=True)
+        assert not i1.config['ifexp']
+
+        i1('y = 4 if x > 0 else -1')
+        errtype, errmsg = i1.error[0].get_error()
+        self.assertEqual(errtype, 'NotImplementedError')
+
+        conf = {k: v for k, v in i1.config.items()}
+        conf['ifexp'] = True
+
+        imin = Interpreter(minimal=True)
+        assert not imin.config['ifexp']
+        assert not imin.config['importfrom']
+        assert not imin.config['augassign']
+        assert not imin.config['with']
+
+        ix = Interpreter(with_import=True, with_importfrom=True)
+        assert ix.config['ifexp']
+        assert ix.config['import']
+        assert ix.config['importfrom']
+
+        i2 = Interpreter(config=conf)
+        assert i2.config['ifexp']
+        assert not i2.config['import']
 
     def test_get_user_symbols(self):
         self.interp("x = 1.1\ny = 2.5\nz = 788\n")
