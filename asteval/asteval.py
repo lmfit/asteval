@@ -114,15 +114,12 @@ class Interpreter:
             for key, val in kws.items():
                 if key.startswith('no_'):
                     node = key[3:]
-                    print(" no  ", node, val, node in self.config)
                     if node in self.config:
                         self.config[node] = not val
                 elif key.startswith('with_'):
                     node = key[5:]
                     if node in self.config:
                         self.config[node] = val
-
-        print("CONF ", self.config['import'], self.config['ifexp'])
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
