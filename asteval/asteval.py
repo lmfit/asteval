@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-"""Safe(ish) evaluation of mathematical expression using Python's ast
-module.
+"""
+Safe(ish) evaluation of minimal Python code using Python's ast module.
 
 This module provides an Interpreter class that compiles a restricted set of
 Python expressions and statements to Python's AST representation, and then
 executes that representation using values held in a symbol table.
 
-The symbol table is a simple dictionary, giving a simple, flat namespace.
-This comes pre-loaded with many functions from Python's builtin and math
-module.  If numpy is installed, many numpy functions are also included.
-Additional symbols can be added when an Interpreter is created, but the
-user of that interpreter will not be able to import additional modules.
+The symbol table is a simple dictionary, giving a flat namespace.  This comes
+pre-loaded with many functions from Python's builtin and math module.  If numpy
+is installed, many numpy functions are also included.  Additional symbols can
+be added when an Interpreter is created, but the user of that interpreter will
+not be able to import additional modules.
 
 Expressions, including loops, conditionals, and function definitions can be
 compiled into ast node and then evaluated later, using the current values
@@ -21,12 +21,12 @@ numerical calculations that is somewhat safer than 'eval' because many
 unsafe operations (such as 'import' and 'eval') are simply not allowed.
 
 Many parts of Python syntax are supported, including:
-     for loops, while loops, if-then-elif-else conditionals
-     try-except (including 'finally')
+     for loops, while loops, if-then-elif-else conditionals, with,
+     try-except-finally
      function definitions with def
      advanced slicing:    a[::-1], array[-3:, :, ::2]
      if-expressions:      out = one_thing if TEST else other
-     list comprehension   out = [sqrt(i) for i in values]
+     list, dict, and set comprehension
 
 The following Python syntax elements are not supported:
      Import, Exec, Lambda, Class, Global, Generators,
@@ -37,6 +37,7 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example)
 """
 import ast
+import sys
 import copy
 import inspect
 import time
@@ -52,10 +53,14 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'excepthandler', 'expr', 'extslice', 'for', 'functiondef', 'if',
              'ifexp', 'import', 'importfrom', 'index', 'interrupt', 'list',
              'listcomp', 'module', 'name', 'nameconstant', 'num', 'pass',
-             'raise', 'repr', 'return', 'set', 'setcomp', 'slice', 'str',
-             'subscript', 'try', 'tuple', 'unaryop', 'while', 'with',
+             'print', 'raise', 'repr', 'return', 'set', 'setcomp', 'slice',
+             'str', 'subscript', 'try', 'tuple', 'unaryop', 'while', 'with',
              'formattedvalue', 'joinedstr']
 
+DEF_DISABLED = ('import', 'importfrom')
+MIN_DISABLED = ('import', 'importfrom', 'if', 'for', 'while', 'try', 'with',
+                'functiondef', 'ifexp', 'listcomp', 'dictcomp', 'setcomp',
+                'augassign', 'assert', 'delete', 'raise', 'print')
 
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -75,50 +80,49 @@ class Interpreter:
         whether to use functions from numpy.
     max_statement_length : int
         maximum length of expression allowed [50,000 characters]
-    minimal : bool
-        create a minimal interpreter: disable all options (see Note 1).
-    no_if : bool
-        whether to support `if` blocks
-    no_for : bool
-        whether to support `for` blocks.
-    no_while : bool
-        whether to support `while` blocks.
-    no_try : bool
-        whether to support `try` blocks.
-    no_functiondef : bool
-        whether to support user-defined functions.
-    no_ifexp : bool
-        whether to support if expressions.
-    no_listcomp : bool
-        whether to support list comprehension.
-    no_augassign : bool
-        whether to support augemented assignments (`a += 1`, etc).
-    no_assert : bool
-        whether to support `assert`.
-    no_delete : bool
-        whether to support `del`.
-    no_raise : bool
-        whether to support `raise`.
-    no_print : bool
-        whether to support `print`.
     readonly_symbols : iterable or `None`
         symbols that the user can not assign to
     builtins_readonly : bool
         whether to blacklist all symbols that are in the initial symtable
+    minimal : bool
+        create a minimal interpreter: disable many nodes (see Note 1).
+    config : dict
+        dictionay listing which nodes to support (see note 2))
 
     Notes
     -----
-    1. setting `minimal=True` is equivalent to setting all
-       `no_***` options to `True`.
+    1. setting `minimal=True` is equivalent to setting a config with the following
+       nodes disabled: ('import', 'importfrom', 'if', 'for', 'while', 'try', 'with',
+       'functiondef', 'ifexp', 'listcomp', 'dictcomp', 'setcomp', 'augassign',
+       'assert', 'delete', 'raise', 'print')
+    2. by default 'import' and 'importfrom' are disabled, though they can be enabled.
     """
-
     def __init__(self, symtable=None, usersyms=None, writer=None,
                  err_writer=None, use_numpy=True, max_statement_length=50000,
-                 minimal=False, no_if=False, no_for=False, no_while=False,
-                 no_try=False, no_functiondef=False, no_ifexp=False,
-                 no_listcomp=False, no_augassign=False, no_assert=False,
-                 no_delete=False, no_raise=False, no_print=False,
-                 readonly_symbols=None, builtins_readonly=False):
+                 minimal=False, readonly_symbols=None, builtins_readonly=False,
+                 config=None, **kws):
+
+        self.config = {}
+        disabled = MIN_DISABLED if minimal else DEF_DISABLED
+        for node in ALL_NODES:
+            self.config[node] = node not in disabled
+
+        if config is not None:
+            self.config.update(config)
+
+        if len(kws) > 0:
+            for key, val in kws.items():
+                if key.startswith('no_'):
+                    node = key[3:]
+                    print(" no  ", node, val, node in self.config)
+                    if node in self.config:
+                        self.config[node] = not val
+                elif key.startswith('with_'):
+                    node = key[5:]
+                    if node in self.config:
+                        self.config[node] = val
+
+        print("CONF ", self.config['import'], self.config['ifexp'])
 
         self.writer = writer or stdout
         self.err_writer = err_writer or stderr
@@ -129,6 +133,7 @@ class Interpreter:
                 usersyms = {}
             symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
 
+        symtable['print'] = self._printer
         self.symtable = symtable
         self._interrupt = None
         self.error = []
@@ -140,41 +145,12 @@ class Interpreter:
         self.start_time = time.time()
         self.use_numpy = HAS_NUMPY and use_numpy
 
-        symtable['print'] = self._printer
-        self.no_print = no_print or minimal
-
-        nodes = ALL_NODES[:]
-
-        if minimal or no_if:
-            nodes.remove('if')
-        if minimal or no_for:
-            nodes.remove('for')
-        if minimal or no_while:
-            nodes.remove('while')
-        if minimal or no_try:
-            nodes.remove('try')
-        if minimal or no_functiondef:
-            nodes.remove('functiondef')
-        if minimal or no_ifexp:
-            nodes.remove('ifexp')
-        if minimal or no_assert:
-            nodes.remove('assert')
-        if minimal or no_delete:
-            nodes.remove('delete')
-        if minimal or no_raise:
-            nodes.remove('raise')
-        if minimal or no_listcomp:
-            nodes.remove('listcomp')
-        if minimal or no_augassign:
-            nodes.remove('augassign')
-
         self.node_handlers = {}
-        for node in nodes:
-            try:
-                self.node_handlers[node] = getattr(self, f"on_{node}")
-            except AttributeError:
-                print(f"no handler for {node}")
-
+        for node, use in self.config.items():
+            handler = getattr(self, f"on_{node}", self.unimplemented)
+            if not use:
+                handler = self.unimplemented
+            self.node_handlers[node] = handler
 
         # to rationalize try/except try/finally
         if 'try' in self.node_handlers:
@@ -204,9 +180,12 @@ class Interpreter:
             out = self.node_handlers.pop(node)
         return out
 
-    def set_nodehandler(self, node, handler):
-        """set node handler"""
+    def set_nodehandler(self, node, handler=None):
+        """set node handler or use current built-in default"""
+        if handler is None:
+            handler = getattr(self, f"on_{node}", self.unimplemented)
         self.node_handlers[node] = handler
+        return handler
 
     def user_defined_symbols(self):
         """Return a set of symbols that have been added to symtable after
@@ -298,7 +277,7 @@ class Interpreter:
         try:
             handler = self.node_handlers[node.__class__.__name__.lower()]
         except KeyError:
-            return self.unimplemented(node)
+            self.raise_exception(None, exc=NotImplementedError, expr=expr)
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
@@ -325,10 +304,6 @@ class Interpreter:
         self.error = []
         self.start_time = time.time()
         if isinstance(expr, str):
-            # if len(expr) > self.max_statement_length:
-            #     msg = f'length of text exceeds {self.max_statement_length:d} characters'
-            #     self.raise_exception(None, msg='ValueError', expr=msg)
-            #     return None
             try:
                 node = self.parse(expr)
             except Exception:
@@ -373,17 +348,58 @@ class Interpreter:
         return self.run(node.value)  # ('value',)
 
     # imports
-    def on_import(self, node):
-        "simple import statements"
-        msg = f"import not supported"
-        self.raise_exception(node, exc=NotImplementedError, msg=msg)
+    def on_import(self, node):    # ('names',)
+        "simple import"
+        for tnode in node.names:
+            self.import_module(tnode.name, tnode.asname)
 
+    def on_importfrom(self, node):    # ('module', 'names', 'level')
+        "import/from"
+        fromlist, asname = [], []
+        for tnode in node.names:
+            fromlist.append(tnode.name)
+            asname.append(tnode.asname)
+        self.import_module(node.module, asname, fromlist=fromlist)
 
-    def on_importfrom(self, node):
-        "import from statements"
-        msg = f"import-from not supported"
-        self.raise_exception(node, exc=NotImplementedError, msg=msg)
+    def import_module(self, name, asname, fromlist=None):
+        """import a python module, installing it into the symbol table.
+        options:
+          name       name of module to import 'foo' in 'import foo'
+          asname     alias for imported name(s)
+                          'bar' in 'import foo as bar'
+                       or
+                          ['s','t'] in 'from foo import x as s, y as t'
+          fromlist   list of symbols to import with 'from-import'
+                         ['x','y'] in 'from foo import x, y'
+        """
+        # find module in sys.modules or import to it
+        if name in sys.modules:
+            thismod = sys.modules[name]
+        else:
+            try:
+                __import__(name)
+                thismod = sys.modules[name]
+            except:
+                self.raise_exception(None, exc=ImportError, msg='Import Error')
 
+        if fromlist is None:
+            if asname is not None:
+                self.symtable[asname] = sys.modules[name]
+            else:
+                mparts = []
+                parts = name.split('.')
+                while len(parts) > 0:
+                    mparts.append(parts.pop(0))
+                    modname = '.'.join(mparts)
+                    inname = name if (len(parts) == 0) else modname
+                    self.symtable[inname] = sys.modules[modname]
+        else: #  import-from construct
+            if asname is None:
+                asname = [None]*len(fromlist)
+            for sym, alias in zip(fromlist, asname):
+                if alias is None:
+                    alias = sym
+                self.symtable[alias] = getattr(thismod, sym)
 
     def on_index(self, node):
         """Index."""
@@ -652,16 +668,14 @@ class Interpreter:
 
     def _printer(self, *out, **kws):
         """Generic print function."""
-        if self.no_print:
-            return
-        flush = kws.pop('flush', True)
-        fileh = kws.pop('file', self.writer)
-        sep = kws.pop('sep', ' ')
-        end = kws.pop('sep', '\n')
-
-        print(*out, file=fileh, sep=sep, end=end)
-        if flush:
-            fileh.flush()
+        if self.config['print']:
+            flush = kws.pop('flush', True)
+            fileh = kws.pop('file', self.writer)
+            sep = kws.pop('sep', ' ')
+            end = kws.pop('sep', '\n')
+            print(*out, file=fileh, sep=sep, end=end)
+            if flush:
+                fileh.flush()
 
     def on_if(self, node):    # ('test', 'body', 'orelse')
         """Regular if-then-else statement."""
