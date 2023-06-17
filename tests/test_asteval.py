@@ -1089,7 +1089,7 @@ class TestEval(TestCase):
 
     def test_interpreter_opts(self):
         i1 = Interpreter(no_ifexp=True)
-        assert not i1.config['ifexp']
+        assert i1.node_handlers['ifexp'] == i1.unimplemented
 
         i1('y = 4 if x > 0 else -1')
         errtype, errmsg = i1.error[0].get_error()
@@ -1105,13 +1105,14 @@ class TestEval(TestCase):
         assert not imin.config['with']
 
         ix = Interpreter(with_import=True, with_importfrom=True)
-        assert ix.config['ifexp']
-        assert ix.config['import']
-        assert ix.config['importfrom']
+        assert ix.node_handlers['ifexp'] != ix.unimplemented
+        assert ix.node_handlers['import'] != ix.unimplemented
+        assert ix.node_handlers['importfrom'] != ix.unimplemented
 
         i2 = Interpreter(config=conf)
-        assert i2.config['ifexp']
-        assert not i2.config['import']
+        assert i2.node_handlers['ifexp'] != i2.unimplemented
+        assert i2.node_handlers['import'] == i2.unimplemented
+
 
     def test_get_user_symbols(self):
         self.interp("x = 1.1\ny = 2.5\nz = 788\n")
