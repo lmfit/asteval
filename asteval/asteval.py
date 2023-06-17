@@ -53,14 +53,19 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'excepthandler', 'expr', 'extslice', 'for', 'functiondef', 'if',
              'ifexp', 'import', 'importfrom', 'index', 'interrupt', 'list',
              'listcomp', 'module', 'name', 'nameconstant', 'num', 'pass',
-             'print', 'raise', 'repr', 'return', 'set', 'setcomp', 'slice',
-             'str', 'subscript', 'try', 'tuple', 'unaryop', 'while', 'with',
+             'raise', 'repr', 'return', 'set', 'setcomp', 'slice', 'str',
+             'subscript', 'try', 'tuple', 'unaryop', 'while', 'with',
              'formattedvalue', 'joinedstr']
 
-DEF_DISABLED = ('import', 'importfrom')
-MIN_DISABLED = ('import', 'importfrom', 'if', 'for', 'while', 'try', 'with',
-                'functiondef', 'ifexp', 'listcomp', 'dictcomp', 'setcomp',
-                'augassign', 'assert', 'delete', 'raise', 'print')
+
+MINIMAL_CONFIG = {'import': False, 'importfrom': False}
+DEFAULT_CONFIG = {'import': False, 'importfrom': False}
+
+for node in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
+             'formattedvalue', 'functiondef', 'print', 'raise', 'listcomp',
+             'dictcomp', 'setcomp', 'try', 'while', 'with'):
+    MINIMAL_CONFIG[node] = False
+    DEFAULT_CONFIG[node] = True
 
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -102,11 +107,7 @@ class Interpreter:
                  minimal=False, readonly_symbols=None, builtins_readonly=False,
                  config=None, **kws):
 
-        self.config = {}
-        disabled = MIN_DISABLED if minimal else DEF_DISABLED
-        for node in ALL_NODES:
-            self.config[node] = node not in disabled
-
+        self.config = copy.copy(MINIMAL_CONFIG if minimal else DEFAULT_CONFIG)
         if config is not None:
             self.config.update(config)
 
@@ -114,11 +115,11 @@ class Interpreter:
             for key, val in kws.items():
                 if key.startswith('no_'):
                     node = key[3:]
-                    if node in self.config:
+                    if node in ALL_NODES:
                         self.config[node] = not val
                 elif key.startswith('with_'):
                     node = key[5:]
-                    if node in self.config:
+                    if node in ALL_NODES:
                         self.config[node] = val
 
         self.writer = writer or stdout
@@ -143,10 +144,10 @@ class Interpreter:
         self.use_numpy = HAS_NUMPY and use_numpy
 
         self.node_handlers = {}
-        for node, use in self.config.items():
-            handler = getattr(self, f"on_{node}", self.unimplemented)
-            if not use:
-                handler = self.unimplemented
+        for node in ALL_NODES:
+            handler = self.unimplemented
+            if self.config.get(node, True):
+                handler = getattr(self, f"on_{node}", self.unimplemented)
             self.node_handlers[node] = handler
 
         # to rationalize try/except try/finally
@@ -665,7 +666,7 @@ class Interpreter:
 
     def _printer(self, *out, **kws):
         """Generic print function."""
-        if self.config['print']:
+        if self.config.get('print', True):
             flush = kws.pop('flush', True)
             fileh = kws.pop('file', self.writer)
             sep = kws.pop('sep', ' ')
