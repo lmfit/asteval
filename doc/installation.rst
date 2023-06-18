@@ -9,27 +9,24 @@ Downloading and Installation
 Requirements
 ~~~~~~~~~~~~~~~
 
-Asteval is a pure Python module with very few dependencies.  For Python 3.8 and
-higher, there are no required dependencies outside of the standard
-library. Python 3.7 does require the `importlib_metadata` package.  If
-available, Asteval will make use of the `numpy`_ module.  The test suite
-requires the `pytest` and `coverage` modules, and building the documentation
-requires the `sphinx`.
+Asteval is a pure Python module.  For Python 3.8 and higher, there are no
+required dependencies outside of the standard library.  If `numpy`_ is
+available, Asteval will make use of it.  The test suite requires the `pytest`
+and `coverage` modules, and building the documentation requires `sphinx`.
 
 The latest stable version of asteval is |release|.
 
-Versions 0.9.28 and later support and are automatically tested with Python 3.7
+Versions 0.9.30 and later support and are automatically tested with Python 3.8
 through 3.11.  Python versions have generally been supported by `asteval` until
 they are well past the end of security fixes - there are no immediate plans to
-drop support for Python 3.7.  Support for new versions of the Python 3 series
-is not gauranteed until some time after the official release of that version,
-as we may not start testing until late in the "beta" period of development.
-Historically, the delay has not been too long, though `asteval` may not support
-newly introduced language features.
+drop support for Python 3.7, though we are no longer testing with it.  Support
+for new versions of the Python 3 series is not guaranteed until some time after
+the official release of that version, as we may not start testing until late in
+the "beta" period of development.  Historically, the delay has not been too
+long, though `asteval` may not support newly introduced language features.
 
-The last version of asteval to support Python 2.7 was version 0.9.17.  It
-should not be used and cannot be supported, but the code may be of historical
-interest.
+At this writing (Asteval 0.9.30, June, 2023), minimal testing has been done
+with Python 3.12-beta2, but all tests pass.
 
 Download and Installation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
