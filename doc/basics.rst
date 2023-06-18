@@ -81,7 +81,7 @@ several basic Python functions:
     dict, dir, divmod, enumerate, filter, float, format,
     frozenset, hash, hex, id, int, isinstance, len, list, map,
     max, min, oct, ord, pow, range, repr, reversed, round,
-    set, slice, sorted, str, sum, tuple, type, zip
+    set, slice, sorted, str, sum, tuple, zip
 
 and a large number of named exceptions:
 
@@ -114,9 +114,9 @@ imported from `numpy`_.
 conditionals and loops
 ==========================
 
-If-then-else blocks, for-loops (including the optional *else* block) and
-while loops (also including optional *else* block) are supported, and work
-exactly as they do in python.  Thus:
+If-then-else blocks, for-loops (including the optional *else* block), while
+loops (also including optional *else* block), and with blocks are supported,
+and work exactly as they do in python.  Thus:
 
     >>> code = """
     sum = 0
@@ -128,6 +128,12 @@ exactly as they do in python.  Thus:
     """
     >>> aeval(code)
     sum =  114.049534067
+
+comprehensions
+================
+
+list, dict, and set comprehension are supported, acting just as they do in
+Python.  Generators, yield, and async programmming are not currently supported.
 
 
 printing

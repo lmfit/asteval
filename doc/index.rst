@@ -34,18 +34,20 @@ These differences and absences include:
  1. Variable and function symbol names are held in a simple symbol
     table, giving a flat namespace.
  2. creating classes is not allowed.
- 3. importing modules is not allowed.
- 4. f-strings, decorators, generators, type hints, `yield`, `with` blocks,
-    and `lambda` are not supported.
- 5. Many builtin functions (:py:func:`eval`, :py:func:`getattr`,
+ 3. importing modules is not allowed, unless specifically enabled.
+ 4. decorators, generators, type hints, and `lambda` are not supported.
+ 5. `yield`, `await`,  and async programming are not supported.
+ 6. Many builtin functions (:py:func:`eval`, :py:func:`getattr`,
     :py:func:`hasattr`, :py:func:`setattr`, and :py:func:`delattr`) are not allowed.
- 6. Accessing many object attributes that can provide access to
+ 7. Accessing many object attributes that can provide access to
     the python interpreter are not allowed.
 
 The resulting "asteval language" acts very much like miniature version of
-Python, focused on mathematical calculations, and with noticeable
-limitations.  It is the kind of toy programming language you might use to
-introduce simple scientific programming concepts.
+Python, focused on mathematical calculations, and with noticeable limitations.
+It is the kind of toy programming language you might use to introduce simple
+scientific programming concepts, but also includes much of the standard Python
+features to be a reasonably complete language and not too restricted from what
+someone familiar with Python would expect.
 
 Because asteval is designed for evaluating user-supplied input, safety
 against malicious or incompetent user input is an important concern.
