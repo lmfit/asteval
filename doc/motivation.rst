@@ -116,21 +116,24 @@ the run time will be well under 0.001 seconds.  For `x=y=z=8`, run time will
 still be under 1 sec.  Changing to `x=8, y=9, z=9`, will cause the statement to
 take several seconds.  With `x=y=z=9`, executing that statement may take more
 than 1 hour on some machines.  In short, runtime cannot be determined
-lexically.  To be clear for the example of exponentiation like this, Asteval
-will raise a runtime error, telling you that an exponent > 10,000 is not
-allowed.  But, there may very well be other "clever ways" to have very long
-runtimes that cannot be readily predicted.
+lexically.  To be clear, for this exponentiation example, Asteval will raise a
+runtime error, telling you that an exponent > 10,000 is not allowed.  But that
+happens at runtime, after the value of the exponent has been evaluated, it does
+not happen by looking at the text of the code. That is, there may very well be
+other "clever ways" to have very long run times that cannot be readily predicted
+from the text.
 
-This double exponential example also demonstrates there is not a good way to
-check for a long-running calculation within a single Python process.  That
-calculation is not stuck within the Python interpreter, but in Python's C
-C-code (no doubt calling the `pow()` function) called by the Python interpreter
-itself.  That call will not return to the Python interpreter or allow other
-threads to run until that call is done.  That means that from within a single
-process, there would not be a reliable way to tell `asteval` (or really, even Python)
-when a calculation has taken too long.  The only reliable way to limit run time
-is to have a second process watching the execution time of the asteval process
-and either try to interrupt it or kill it.
+The exponential example also demonstrates there is not a good way to check for
+a long-running calculation within a single Python process.  That calculation is
+not stuck within the Python interpreter, but in C code (no doubt the `pow()`
+function) called by the Python interpreter itself.  That call will not return
+to the Python interpreter or allow other threads to run until that call is
+done.  That means that from within a single process, there would not be a
+reliable way to tell `asteval` (or really, even Python) when a calculation has
+taken too long: Denial of Service is hard to detect before it happens, and even
+challenging to detect while it is happening.  The only reliable way to limit
+run time is to have a second process watching the execution time of the asteval
+process and either try to interrupt it or kill it.
 
 For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the *recursion limit* when

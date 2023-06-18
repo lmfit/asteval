@@ -49,8 +49,9 @@ constructs, named according to the AST node in the Python language definition.
 
 .. _node_table:
 
-**Table of optional Python AST nodes used asteval. The minimal configuration gives a
-bare-bones mathemetical language.**
+**Table of optional Python AST nodes used asteval.** The minimal configuration
+excludes all of the nodes listed, to give a bare-bones mathemetical language
+but will full support for Python data types and array slicing.
 
   +----------------+----------------------+-------------------+-------------------+
   | node name      | description          | in default config | in minimal config |
