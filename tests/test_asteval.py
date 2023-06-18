@@ -1078,7 +1078,7 @@ class TestEval(TestCase):
         self.check_error(None)
         self.interp('from time import ctime as tclock, strftime as s')
         self.check_error(None)
-        self.interp('import requests as rq')
+        self.interp('import socket as rq')
         self.check_error(None)
 
         self.interp.remove_nodehandler('import')
