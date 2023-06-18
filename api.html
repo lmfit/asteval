@@ -1,18 +1,14 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>asteval reference &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -55,7 +51,7 @@ tables that may be pre-loaded with custom symbols and functions.</p>
 <h2>The <a class="reference internal" href="#asteval.Interpreter" title="asteval.Interpreter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code></a> class<a class="headerlink" href="#the-interpreter-class" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="asteval.Interpreter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">Interpreter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symtable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usersyms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_statement_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_if</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_for</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_while</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_try</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_functiondef</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_ifexp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_listcomp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_augassign</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_assert</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_delete</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_raise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">no_print</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly_symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builtins_readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">Interpreter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symtable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usersyms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_statement_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly_symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builtins_readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an asteval Interpreter: a restricted, simplified interpreter
 of mathematical expressions using Python syntax.</p>
 <dl class="field-list simple">
@@ -67,28 +63,20 @@ of mathematical expressions using Python syntax.</p>
 <li><p><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</p></li>
 <li><p><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to use functions from numpy.</p></li>
 <li><p><strong>max_statement_length</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – maximum length of expression allowed [50,000 characters]</p></li>
-<li><p><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – create a minimal interpreter: disable all options (see Note 1).</p></li>
-<li><p><strong>no_if</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>if</cite> blocks</p></li>
-<li><p><strong>no_for</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>for</cite> blocks.</p></li>
-<li><p><strong>no_while</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>while</cite> blocks.</p></li>
-<li><p><strong>no_try</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>try</cite> blocks.</p></li>
-<li><p><strong>no_functiondef</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support user-defined functions.</p></li>
-<li><p><strong>no_ifexp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support if expressions.</p></li>
-<li><p><strong>no_listcomp</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support list comprehension.</p></li>
-<li><p><strong>no_augassign</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support augemented assignments (<cite>a += 1</cite>, etc).</p></li>
-<li><p><strong>no_assert</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>assert</cite>.</p></li>
-<li><p><strong>no_delete</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>del</cite>.</p></li>
-<li><p><strong>no_raise</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>raise</cite>.</p></li>
-<li><p><strong>no_print</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to support <cite>print</cite>.</p></li>
 <li><p><strong>readonly_symbols</strong> (iterable or <cite>None</cite>) – symbols that the user can not assign to</p></li>
 <li><p><strong>builtins_readonly</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to blacklist all symbols that are in the initial symtable</p></li>
+<li><p><strong>minimal</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – create a minimal interpreter: disable many nodes (see Note 1).</p></li>
+<li><p><strong>config</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)"><em>dict</em></a>) – dictionay listing which nodes to support (see note 2))</p></li>
 </ul>
 </dd>
 </dl>
 <p class="rubric">Notes</p>
 <ol class="arabic simple">
-<li><p>setting <cite>minimal=True</cite> is equivalent to setting all
-<cite>no_***</cite> options to <cite>True</cite>.</p></li>
+<li><p>setting <cite>minimal=True</cite> is equivalent to setting a config with the following
+nodes disabled: (‘import’, ‘importfrom’, ‘if’, ‘for’, ‘while’, ‘try’, ‘with’,
+‘functiondef’, ‘ifexp’, ‘listcomp’, ‘dictcomp’, ‘setcomp’, ‘augassign’,
+‘assert’, ‘delete’, ‘raise’, ‘print’)</p></li>
+<li><p>by default ‘import’ and ‘importfrom’ are disabled, though they can be enabled.</p></li>
 </ol>
 </dd></dl>
 
@@ -103,31 +91,173 @@ will be used for output that will otherwise be sent to
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">use_numpy</span></code> argument can be used to control whether functions from
 <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> are loaded into the symbol table.</p>
-<p>By default, the interpreter will support many Python language constructs,
-including</p>
+<p>Whether the user-code is able to overwrite the entries in the symbol table can
+be controlled with the <code class="docutils literal notranslate"><span class="pre">readonly_symbols</span></code> and <code class="docutils literal notranslate"><span class="pre">builtins_readonly</span></code> keywords.</p>
+<section id="configuring-what-features-the-interpreter-support">
+<h3>Configuring what features the Interpreter support<a class="headerlink" href="#configuring-what-features-the-interpreter-support" title="Permalink to this heading">¶</a></h3>
+<p>The interpreter can be configured to enable or disable many language
+constructs, named according to the AST node in the Python language definition.</p>
+<p id="node-table"><strong>Table of optional Python AST nodes used asteval.</strong> The minimal configuration
+excludes all of the nodes listed, to give a bare-bones mathemetical language
+but will full support for Python data types and array slicing.</p>
+<blockquote>
+<div><table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>node name</p></th>
+<th class="head"><p>description</p></th>
+<th class="head"><p>in default config</p></th>
+<th class="head"><p>in minimal config</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>import</p></td>
+<td><p>import statements</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>importfrom</p></td>
+<td><p>from x import y</p></td>
+<td><p>False</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>assert</p></td>
+<td><p>assert statements</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>augassign</p></td>
+<td><p>x += 1</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>delete</p></td>
+<td><p>delete statements</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>if</p></td>
+<td><p>if/then blocks</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>ifexp</p></td>
+<td><p>a = b if c else d</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>for</p></td>
+<td><p>for loops</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>formattedvalue</p></td>
+<td><p>f-strings</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>functiondef</p></td>
+<td><p>define functions</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>print</p></td>
+<td><p>print function</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>raise</p></td>
+<td><p>raise statements</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>listcomp</p></td>
+<td><p>list comprehension</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>dictcomp</p></td>
+<td><p>dict comprehension</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>setcomp</p></td>
+<td><p>set comprehension</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>try</p></td>
+<td><p>try/except blocks</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-even"><td><p>while</p></td>
+<td><p>while blocks</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>with</p></td>
+<td><p>with blocks</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>To be clear, the <code class="docutils literal notranslate"><span class="pre">minimal</span></code> configuration for the Interpreter will support
+many basic Python language constructs including all basic data types,
+operators, slicing.  The <code class="docutils literal notranslate"><span class="pre">default</span></code> configuration adds many language
+constructs, including</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>advanced slicing:    <code class="docutils literal notranslate"><span class="pre">a[::-1],</span> <span class="pre">array[-3:,</span> <span class="pre">:,</span> <span class="pre">::2]</span></code></p></li>
 <li><p>if-elif-else conditionals</p></li>
 <li><p>for loops, with <code class="docutils literal notranslate"><span class="pre">else</span></code></p></li>
 <li><p>while loops, with <code class="docutils literal notranslate"><span class="pre">else</span></code></p></li>
 <li><p>try-except-finally blocks</p></li>
-<li><p>function definitions</p></li>
+<li><p>with blocks</p></li>
 <li><p>augmented assignments:  <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">1</span></code></p></li>
 <li><p>if-expressions:      <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">if</span> <span class="pre">TEST</span> <span class="pre">else</span> <span class="pre">b</span></code></p></li>
 <li><p>list comprehension:  <code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">[sqrt(i)</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">values]</span></code></p></li>
+<li><p>set and dict comphrension, too.</p></li>
+<li><p>print formatting with <cite>%</cite>, <cite>str.format()</cite>, or f-strings.</p></li>
+<li><p>function definitions</p></li>
 </ul>
 </div></blockquote>
-<p>with the exception of slicing, each of these features can be turned off
-with the appropriate <code class="docutils literal notranslate"><span class="pre">no_XXX</span></code> option.  To turn off all these optional
-constructs, and create a simple expression calculator, use
-<code class="docutils literal notranslate"><span class="pre">minimal=True</span></code>.</p>
-<p>Many Python syntax elements are not supported at all, including:</p>
-<blockquote>
-<div><p>Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators</p>
-</div></blockquote>
-<p>In addition, many actions that are known to be unsafe (such as inspecting
-objects to get at their base classes) are also not allowed.</p>
+<p>The nodes listed in Table <a class="reference internal" href="#node-table"><span class="std std-ref">Table of optional Python AST nodes used asteval</span></a>
+can be enabled and disabled individually with the appropriate
+<code class="docutils literal notranslate"><span class="pre">no_NODE</span></code> or <code class="docutils literal notranslate"><span class="pre">with_NODE</span></code> argument when creating the interpreter, or
+specifying a <code class="docutils literal notranslate"><span class="pre">config</span></code> dictionary.</p>
+<p>That is, you might construct an Interpreter as:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_all</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">with_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_importfrom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_nowhile</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">no_while</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;while&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;if&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span> <span class="s1">&#39;try&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+<span class="go">             &#39;for&#39;: False, &#39;with&#39;: False}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aveal_noblocks</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Passing, <code class="docutils literal notranslate"><span class="pre">minimal=True</span></code> will turn off all the nodes listed in Table
+<a class="reference internal" href="#node-table"><span class="std std-ref">Table of optional Python AST nodes used asteval</span></a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_min</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">minimal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_min</span><span class="o">.</span><span class="n">config</span>
+<span class="go">{&#39;import&#39;: False, &#39;importfrom&#39;: False, &#39;assert&#39;: False, &#39;augassign&#39;: False,</span>
+<span class="go">&#39;delete&#39;: False, &#39;if&#39;: False, &#39;ifexp&#39;: False, &#39;for&#39;: False,</span>
+<span class="go">&#39;formattedvalue&#39;: False, &#39;functiondef&#39;: False, &#39;print&#39;: False,</span>
+<span class="go">&#39;raise&#39;: False, &#39;listcomp&#39;: False, &#39;dictcomp&#39;: False, &#39;setcomp&#39;: False,</span>
+<span class="go">&#39;try&#39;: False, &#39;while&#39;: False, &#39;with&#39;: False}</span>
+</pre></div>
+</div>
+<p>As shown above, importing Python modules with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module</span></code> or <code class="docutils literal notranslate"><span class="pre">from</span>
+<span class="pre">module</span> <span class="pre">import</span> <span class="pre">method</span></code> can be supported, but is not supported by default, but
+can be enabled with <code class="docutils literal notranslate"><span class="pre">with_import=True</span></code> and <code class="docutils literal notranslate"><span class="pre">with_importfrom=True</span></code>, or by
+setting the config dictionary as described above.</p>
+</section>
+<section id="interpreter-methods">
+<h3>Interpreter methods<a class="headerlink" href="#interpreter-methods" title="Permalink to this heading">¶</a></h3>
 <p>An Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should
 not be considered as part of the usable API.  The methods described be low,
@@ -192,6 +322,7 @@ of Exceptions raised.</p>
 <dd><p>the most recent error message.</p>
 </dd></dl>
 
+</section>
 </section>
 <section id="utility-functions">
 <h2>Utility Functions<a class="headerlink" href="#utility-functions" title="Permalink to this heading">¶</a></h2>
@@ -272,11 +403,15 @@ the regular expression <code class="docutils literal notranslate"><span class="p
 <li><a class="reference internal" href="#">asteval reference</a><ul>
 <li><a class="reference internal" href="#the-interpreter-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a><ul>
 <li><a class="reference internal" href="#asteval.Interpreter"><code class="docutils literal notranslate"><span class="pre">Interpreter</span></code></a></li>
+<li><a class="reference internal" href="#configuring-what-features-the-interpreter-support">Configuring what features the Interpreter support</a></li>
+<li><a class="reference internal" href="#interpreter-methods">Interpreter methods</a><ul>
 <li><a class="reference internal" href="#asteval.eval"><code class="docutils literal notranslate"><span class="pre">eval()</span></code></a></li>
 <li><a class="reference internal" href="#asteval.__call__"><code class="docutils literal notranslate"><span class="pre">__call__()</span></code></a></li>
 <li><a class="reference internal" href="#asteval.symtable"><code class="docutils literal notranslate"><span class="pre">symtable</span></code></a></li>
 <li><a class="reference internal" href="#asteval.error"><code class="docutils literal notranslate"><span class="pre">error</span></code></a></li>
 <li><a class="reference internal" href="#asteval.error_msg"><code class="docutils literal notranslate"><span class="pre">error_msg</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li><a class="reference internal" href="#utility-functions">Utility Functions</a><ul>
@@ -333,7 +468,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2023, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     </div>
   </body>
 </html>

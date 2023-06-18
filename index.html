@@ -1,18 +1,14 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>ASTEVAL: Minimal Python AST Evaluator &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -71,9 +67,9 @@ These differences and absences include:</p>
 <li><p>Variable and function symbol names are held in a simple symbol
 table, giving a flat namespace.</p></li>
 <li><p>creating classes is not allowed.</p></li>
-<li><p>importing modules is not allowed.</p></li>
-<li><p>f-strings, decorators, generators, type hints, <cite>yield</cite>, <cite>with</cite> blocks,
-and <cite>lambda</cite> are not supported.</p></li>
+<li><p>importing modules is not allowed, unless specifically enabled.</p></li>
+<li><p>decorators, generators, type hints, and <cite>lambda</cite> are not supported.</p></li>
+<li><p><cite>yield</cite>, <cite>await</cite>,  and async programming are not supported.</p></li>
 <li><p>Many builtin functions (<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>,
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>) are not allowed.</p></li>
 <li><p>Accessing many object attributes that can provide access to
@@ -81,9 +77,11 @@ the python interpreter are not allowed.</p></li>
 </ol>
 </div></blockquote>
 <p>The resulting “asteval language” acts very much like miniature version of
-Python, focused on mathematical calculations, and with noticeable
-limitations.  It is the kind of toy programming language you might use to
-introduce simple scientific programming concepts.</p>
+Python, focused on mathematical calculations, and with noticeable limitations.
+It is the kind of toy programming language you might use to introduce simple
+scientific programming concepts, but also includes much of the standard Python
+features to be a reasonably complete language and not too restricted from what
+someone familiar with Python would expect.</p>
 <p>Because asteval is designed for evaluating user-supplied input, safety
 against malicious or incompetent user input is an important concern.
 Asteval tries as hard as possible to prevent user-supplied input from
@@ -111,6 +109,7 @@ malicious attacks.</p>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#accessing-the-symbol-table">accessing the symbol table</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#built-in-functions">built-in functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#conditionals-and-loops">conditionals and loops</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basics.html#comprehensions">comprehensions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#printing">printing</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#writing-functions">writing functions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#exceptions">exceptions</a></li>
@@ -132,7 +131,7 @@ malicious attacks.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
         <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
-<p>Current version: <b>0.9.29</b></p>
+<p>Current version: <b>0.9.30</b></p>
 <p>Downloads:
 <a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
 
@@ -174,7 +173,7 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/newville/ast
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2023, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     </div>
   </body>
 </html>

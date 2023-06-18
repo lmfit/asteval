@@ -38,32 +38,119 @@ will be used for output that will otherwise be sent to
 The ``use_numpy`` argument can be used to control whether functions from
 `numpy`_ are loaded into the symbol table.
 
-By default, the interpreter will support many Python language constructs,
-including
+Whether the user-code is able to overwrite the entries in the symbol table can
+be controlled with the ``readonly_symbols`` and ``builtins_readonly`` keywords.
 
-  *  advanced slicing:    ``a[::-1], array[-3:, :, ::2]``
+Configuring what features the Interpreter support
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The interpreter can be configured to enable or disable many language
+constructs, named according to the AST node in the Python language definition.
+
+.. _node_table:
+
+**Table of optional Python AST nodes used asteval.** The minimal configuration
+excludes all of the nodes listed, to give a bare-bones mathemetical language
+but will full support for Python data types and array slicing.
+
+  +----------------+----------------------+-------------------+-------------------+
+  | node name      | description          | in default config | in minimal config |
+  +================+======================+===================+===================+
+  | import         | import statements    |  False            | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | importfrom     | from x import y      |  False            | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | assert         | assert statements    |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | augassign      | x += 1               |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | delete         | delete statements    |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | if             | if/then blocks       |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | ifexp          | a = b if c else d    |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | for            | for loops            |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | formattedvalue | f-strings            |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | functiondef    | define functions     |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | print          | print function       |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | raise          | raise statements     |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | listcomp       | list comprehension   |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | dictcomp       | dict comprehension   |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | setcomp        | set comprehension    |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | try            | try/except blocks    |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | while          | while blocks         |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+  | with           | with blocks          |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
+
+
+To be clear, the ``minimal`` configuration for the Interpreter will support
+many basic Python language constructs including all basic data types,
+operators, slicing.  The ``default`` configuration adds many language
+constructs, including
+
   *  if-elif-else conditionals
   *  for loops, with ``else``
   *  while loops, with ``else``
   *  try-except-finally blocks
-  *  function definitions
+  *  with blocks
   *  augmented assignments:  ``x += 1``
   *  if-expressions:      ``x = a if TEST else b``
   *  list comprehension:  ``out = [sqrt(i) for i in values]``
+  *  set and dict comphrension, too.
+  *  print formatting with `%`, `str.format()`, or f-strings.
+  *  function definitions
 
-with the exception of slicing, each of these features can be turned off
-with the appropriate ``no_XXX`` option.  To turn off all these optional
-constructs, and create a simple expression calculator, use
-``minimal=True``.
+The nodes listed in Table :ref:`Table of optional Python AST nodes used asteval
+<node_table>`
+can be enabled and disabled individually with the appropriate
+``no_NODE`` or ``with_NODE`` argument when creating the interpreter, or
+specifying a ``config`` dictionary.
+
+That is, you might construct an Interpreter as::
+
+    >>> from asteval import Interpreter
+    >>>
+    >>> aeval_all = Interpreter(with_import=True, with_importfrom=True)
+    >>>
+    >>> aeval_nowhile = Interpreter(no_while=True)
+    >>>
+    >>> config = {'while': False, 'if': False, 'try': False,
+                 'for': False, 'with': False}
+    >>> aveal_noblocks = Interpreter(config=config)
 
 
-Many Python syntax elements are not supported at all, including:
+Passing, ``minimal=True`` will turn off all the nodes listed in Table
+:ref:`Table of optional Python AST nodes used asteval <node_table>`::
 
-   Import, Exec, Lambda, Class, Global, Generators, Yield, Decorators
+    >>> from asteval import Interpreter
+    >>>
+    >>> aeval_min = Interpreter(minimal=True)
+    >>> aeval_min.config
+    {'import': False, 'importfrom': False, 'assert': False, 'augassign': False,
+    'delete': False, 'if': False, 'ifexp': False, 'for': False,
+    'formattedvalue': False, 'functiondef': False, 'print': False,
+    'raise': False, 'listcomp': False, 'dictcomp': False, 'setcomp': False,
+    'try': False, 'while': False, 'with': False}
 
-In addition, many actions that are known to be unsafe (such as inspecting
-objects to get at their base classes) are also not allowed.
+As shown above, importing Python modules with ``import module`` or ``from
+module import method`` can be supported, but is not supported by default, but
+can be enabled with ``with_import=True`` and ``with_importfrom=True``, or by
+setting the config dictionary as described above.
 
+
+Interpreter methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 An Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should

@@ -1,18 +1,14 @@
-
 <!DOCTYPE html>
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Downloading and Installation &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
     <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/jquery.js"></script>
-    <script src="_static/underscore.js"></script>
-    <script src="_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/sphinx_highlight.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -49,28 +45,25 @@
 <h1>Downloading and Installation<a class="headerlink" href="#downloading-and-installation" title="Permalink to this heading">¶</a></h1>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this heading">¶</a></h2>
-<p>Asteval is a pure Python module with very few dependencies.  For Python 3.8 and
-higher, there are no required dependencies outside of the standard
-library. Python 3.7 does require the <cite>importlib_metadata</cite> package.  If
-available, Asteval will make use of the <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> module.  The test suite
-requires the <cite>pytest</cite> and <cite>coverage</cite> modules, and building the documentation
-requires the <cite>sphinx</cite>.</p>
-<p>The latest stable version of asteval is 0.9.29.</p>
-<p>Versions 0.9.28 and later support and are automatically tested with Python 3.7
+<p>Asteval is a pure Python module.  For Python 3.8 and higher, there are no
+required dependencies outside of the standard library.  If <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> is
+available, Asteval will make use of it.  The test suite requires the <cite>pytest</cite>
+and <cite>coverage</cite> modules, and building the documentation requires <cite>sphinx</cite>.</p>
+<p>The latest stable version of asteval is 0.9.30.</p>
+<p>Versions 0.9.30 and later support and are automatically tested with Python 3.8
 through 3.11.  Python versions have generally been supported by <cite>asteval</cite> until
 they are well past the end of security fixes - there are no immediate plans to
-drop support for Python 3.7.  Support for new versions of the Python 3 series
-is not gauranteed until some time after the official release of that version,
-as we may not start testing until late in the “beta” period of development.
-Historically, the delay has not been too long, though <cite>asteval</cite> may not support
-newly introduced language features.</p>
-<p>The last version of asteval to support Python 2.7 was version 0.9.17.  It
-should not be used and cannot be supported, but the code may be of historical
-interest.</p>
+drop support for Python 3.7, though we are no longer testing with it.  Support
+for new versions of the Python 3 series is not guaranteed until some time after
+the official release of that version, as we may not start testing until late in
+the “beta” period of development.  Historically, the delay has not been too
+long, though <cite>asteval</cite> may not support newly introduced language features.</p>
+<p>At this writing (Asteval 0.9.30, June, 2023), minimal testing has been done
+with Python 3.12-beta2, but all tests pass.</p>
 </section>
 <section id="download-and-installation">
 <h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Permalink to this heading">¶</a></h2>
-<p>The latest stable version of asteval is 0.9.29 and is available at
+<p>The latest stable version of asteval is 0.9.30 and is available at
 <a class="reference external" href="http://pypi.python.org/pypi/asteval/">PyPI</a> or as a conda package.  You should be able to install asteval
 with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
@@ -100,7 +93,7 @@ environments.</p>
 <p>The ASTEVAL code is distribution under the following license:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">MIT</span> <span class="n">License</span>
 
-<span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2021</span> <span class="n">Matthew</span> <span class="n">Newville</span><span class="p">,</span> <span class="n">The</span> <span class="n">University</span> <span class="n">of</span> <span class="n">Chicago</span>
+<span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2023</span> <span class="n">Matthew</span> <span class="n">Newville</span><span class="p">,</span> <span class="n">The</span> <span class="n">University</span> <span class="n">of</span> <span class="n">Chicago</span>
 
 <span class="n">Permission</span> <span class="ow">is</span> <span class="n">hereby</span> <span class="n">granted</span><span class="p">,</span> <span class="n">free</span> <span class="n">of</span> <span class="n">charge</span><span class="p">,</span> <span class="n">to</span> <span class="nb">any</span> <span class="n">person</span> <span class="n">obtaining</span> <span class="n">a</span> <span class="n">copy</span> <span class="n">of</span>
 <span class="n">this</span> <span class="n">software</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">documentation</span> <span class="n">files</span> <span class="p">(</span><span class="n">the</span> <span class="s2">&quot;Software&quot;</span><span class="p">),</span> <span class="n">to</span> <span class="n">deal</span> <span class="ow">in</span>
@@ -197,7 +190,7 @@ environments.</p>
     </div>
     <div class="footer" role="contentinfo">
         &#169; Copyright 2023, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 5.3.0.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     </div>
   </body>
 </html>
