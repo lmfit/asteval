@@ -451,6 +451,8 @@ class Interpreter:
     def on_assert(self, node):    # ('test', 'msg')
         """Assert statement."""
         if not self.run(node.test):
+            #depraction warning: will become:
+            #  msg = node.msg.value if node.msg else ""
             msg = node.msg.s if node.msg else ""
             self.raise_exception(node, exc=AssertionError, msg=msg)
         return True
@@ -961,7 +963,11 @@ class Interpreter:
         args = [tnode.arg for tnode in node.args.args[:offset]]
         doc = None
         nb0 = node.body[0]
+        # deprecation warning: will become
+        # if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Constant):
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
+            # deprecation warning: will become
+            # doc = nb0.value
             doc = nb0.value.s
 
         varkws = node.args.kwarg
