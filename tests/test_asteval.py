@@ -1068,7 +1068,7 @@ class TestEval(TestCase):
     def test_set_default_nodehandler(self):
         handler_import = self.interp.set_nodehandler('import')
         handler_importfrom = self.interp.set_nodehandler('importfrom')
-        self.interp('import tkinter')
+        self.interp('import ast')
         self.check_error(None)
 
         self.interp('import notavailable')
@@ -1078,7 +1078,7 @@ class TestEval(TestCase):
         self.check_error(None)
         self.interp('from time import ctime as tclock, strftime as s')
         self.check_error(None)
-        self.interp('import socket as rq')
+        self.interp('import ast as pyast')
         self.check_error(None)
 
         self.interp.remove_nodehandler('import')
