@@ -26,6 +26,15 @@ try:
 except ImportError:
     numpy = None
 
+HAS_NUMPY_FINANCIAL = False
+try:
+    import numpy_financial
+    HAS_NUMPY_FINANCIAL = True
+except ImportError:
+    pass
+
+
+
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
@@ -85,82 +94,78 @@ FROM_MATH = ('acos', 'acosh', 'asin', 'asinh', 'atan', 'atan2', 'atanh',
 MATH_TABLE = {sym: getattr(math, sym) for sym in FROM_MATH if hasattr(math, sym)}
 
 
-FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'alen', 'all', 'amax', 'amin',
-              'angle', 'any', 'append', 'arange', 'arccos', 'arccosh',
-              'arcsin', 'arcsinh', 'arctan', 'arctan2', 'arctanh',
-              'argmax', 'argmin', 'argsort', 'argwhere', 'around', 'array',
-              'array2string', 'asanyarray', 'asarray', 'asarray_chkfinite',
-              'ascontiguousarray', 'asfarray', 'asfortranarray',
-              'asmatrix', 'asscalar', 'atleast_1d', 'atleast_2d',
-              'atleast_3d', 'average', 'bartlett', 'base_repr',
-              'bitwise_and', 'bitwise_not', 'bitwise_or', 'bitwise_xor',
-              'blackman', 'bool', 'broadcast', 'broadcast_arrays', 'byte',
-              'c_', 'cdouble', 'ceil', 'cfloat', 'chararray', 'choose',
+FROM_NUMPY = ('Inf', 'NAN', 'abs', 'add', 'all', 'amax', 'amin', 'angle',
+              'any', 'append', 'arange', 'arccos', 'arccosh', 'arcsin',
+              'arcsinh', 'arctan', 'arctan2', 'arctanh', 'argmax', 'argmin',
+              'argsort', 'argwhere', 'around', 'array', 'array2string',
+              'asanyarray', 'asarray', 'asarray_chkfinite',
+              'ascontiguousarray', 'asfarray', 'asfortranarray', 'asmatrix',
+              'atleast_1d', 'atleast_2d', 'atleast_3d', 'average', 'bartlett',
+              'base_repr', 'bitwise_and', 'bitwise_not', 'bitwise_or',
+              'bitwise_xor', 'blackman', 'broadcast', 'broadcast_arrays',
+              'byte', 'c_', 'cdouble', 'ceil', 'cfloat', 'chararray', 'choose',
               'clip', 'clongdouble', 'clongfloat', 'column_stack',
-              'common_type', 'complex', 'complex128', 'complex64',
-              'complex_', 'complexfloating', 'compress', 'concatenate',
-              'conjugate', 'convolve', 'copy', 'copysign', 'corrcoef',
-              'correlate', 'cos', 'cosh', 'cov', 'cross', 'csingle',
-              'cumprod', 'cumsum', 'datetime_data', 'deg2rad', 'degrees',
-              'delete', 'diag', 'diag_indices', 'diag_indices_from',
-              'diagflat', 'diagonal', 'diff', 'digitize', 'divide', 'dot',
-              'double', 'dsplit', 'dstack', 'dtype', 'e', 'ediff1d',
-              'empty', 'empty_like', 'equal', 'exp', 'exp2', 'expand_dims',
-              'expm1', 'extract', 'eye', 'fabs', 'fill_diagonal', 'finfo',
-              'fix', 'flatiter', 'flatnonzero', 'fliplr', 'flipud',
-              'float', 'float32', 'float64', 'float_', 'floating', 'floor',
-              'floor_divide', 'fmax', 'fmin', 'fmod', 'format_parser',
-              'frexp', 'frombuffer', 'fromfile', 'fromfunction',
-              'fromiter', 'frompyfunc', 'fromregex', 'fromstring', 'fv',
-              'genfromtxt', 'getbufsize', 'geterr', 'gradient', 'greater',
-              'greater_equal', 'hamming', 'hanning', 'histogram',
-              'histogram2d', 'histogramdd', 'hsplit', 'hstack', 'hypot',
-              'i0', 'identity', 'iinfo', 'imag', 'in1d', 'index_exp',
-              'indices', 'inexact', 'inf', 'info', 'infty', 'inner',
-              'insert', 'int', 'int0', 'int16', 'int32', 'int64', 'int8',
-              'int_', 'int_asbuffer', 'intc', 'integer', 'interp',
-              'intersect1d', 'intp', 'invert', 'ipmt', 'irr', 'iscomplex',
-              'iscomplexobj', 'isfinite', 'isfortran', 'isinf', 'isnan',
-              'isneginf', 'isposinf', 'isreal', 'isrealobj', 'isscalar',
-              'issctype', 'iterable', 'ix_', 'kaiser', 'kron', 'ldexp',
-              'left_shift', 'less', 'less_equal', 'linspace',
-              'little_endian', 'load', 'loads', 'loadtxt', 'log', 'log10',
-              'log1p', 'log2', 'logaddexp', 'logaddexp2', 'logical_and',
-              'logical_not', 'logical_or', 'logical_xor', 'logspace',
-              'long', 'longcomplex', 'longdouble', 'longfloat', 'longlong',
-              'mafromtxt', 'mask_indices', 'mat', 'matrix',
+              'common_type', 'complex128', 'complex64', 'complex_',
+              'complexfloating', 'compress', 'concatenate', 'conjugate',
+              'convolve', 'copy', 'copysign', 'corrcoef', 'correlate', 'cos',
+              'cosh', 'cov', 'cross', 'csingle', 'cumprod', 'cumsum',
+              'datetime_data', 'deg2rad', 'degrees', 'delete', 'diag',
+              'diag_indices', 'diag_indices_from', 'diagflat', 'diagonal',
+              'diff', 'digitize', 'divide', 'dot', 'double', 'dsplit',
+              'dstack', 'dtype', 'e', 'ediff1d', 'empty', 'empty_like',
+              'equal', 'exp', 'exp2', 'expand_dims', 'expm1', 'extract', 'eye',
+              'fabs', 'fft', 'fill_diagonal', 'finfo', 'fix', 'flatiter',
+              'flatnonzero', 'fliplr', 'flipud', 'float32', 'float64',
+              'float_', 'floating', 'floor', 'floor_divide', 'fmax', 'fmin',
+              'fmod', 'format_parser', 'frexp', 'frombuffer', 'fromfile',
+              'fromfunction', 'fromiter', 'frompyfunc', 'fromregex',
+              'fromstring', 'genfromtxt', 'getbufsize', 'geterr', 'gradient',
+              'greater', 'greater_equal', 'hamming', 'hanning', 'histogram',
+              'histogram2d', 'histogramdd', 'hsplit', 'hstack', 'hypot', 'i0',
+              'identity', 'iinfo', 'imag', 'in1d', 'index_exp', 'indices',
+              'inexact', 'inf', 'info', 'infty', 'inner', 'insert', 'int16',
+              'int32', 'int64', 'int8', 'int_', 'intc', 'integer', 'interp',
+              'intersect1d', 'intp', 'invert', 'iscomplex', 'iscomplexobj',
+              'isfinite', 'isfortran', 'isinf', 'isnan', 'isneginf',
+              'isposinf', 'isreal', 'isrealobj', 'isscalar', 'issctype',
+              'iterable', 'ix_', 'kaiser', 'kron', 'ldexp', 'left_shift',
+              'less', 'less_equal', 'linalg', 'linspace', 'little_endian',
+              'load', 'loadtxt', 'log', 'log10', 'log1p', 'log2', 'logaddexp',
+              'logaddexp2', 'logical_and', 'logical_not', 'logical_or',
+              'logical_xor', 'logspace', 'longcomplex', 'longdouble',
+              'longfloat', 'longlong', 'mask_indices', 'mat', 'matrix',
               'maximum', 'maximum_sctype', 'may_share_memory', 'mean',
               'median', 'memmap', 'meshgrid', 'mgrid', 'minimum',
-              'mintypecode', 'mirr', 'mod', 'modf', 'msort', 'multiply',
-              'nan', 'nan_to_num', 'nanargmax', 'nanargmin', 'nanmax',
-              'nanmin', 'nansum', 'ndarray', 'ndenumerate', 'ndfromtxt',
-              'ndim', 'ndindex', 'negative', 'newaxis', 'nextafter',
-              'nonzero', 'not_equal', 'nper', 'npv', 'number',
-              'obj2sctype', 'ogrid', 'ones', 'ones_like', 'outer',
-              'packbits', 'percentile', 'pi', 'piecewise', 'place', 'pmt',
-              'poly', 'poly1d', 'polyadd', 'polyder', 'polydiv', 'polyfit',
-              'polyint', 'polymul', 'polysub', 'polyval', 'power', 'ppmt',
-              'prod', 'product', 'ptp', 'put', 'putmask', 'pv', 'r_',
-              'rad2deg', 'radians', 'rank', 'rate', 'ravel', 'real',
-              'real_if_close', 'reciprocal', 'record', 'remainder',
-              'repeat', 'reshape', 'resize', 'restoredot', 'right_shift',
-              'rint', 'roll', 'rollaxis', 'roots', 'rot90', 'round',
-              'round_', 'row_stack', 's_', 'sctype2char', 'searchsorted',
-              'select', 'setbufsize', 'setdiff1d', 'seterr', 'setxor1d',
-              'shape', 'short', 'sign', 'signbit', 'signedinteger', 'sin',
-              'sinc', 'single', 'singlecomplex', 'sinh', 'size',
-              'sometrue', 'sort', 'sort_complex', 'spacing', 'split',
-              'sqrt', 'square', 'squeeze', 'std', 'str', 'str_',
-              'subtract', 'sum', 'swapaxes', 'take', 'tan', 'tanh',
-              'tensordot', 'tile', 'trace', 'transpose', 'trapz', 'tri',
-              'tril', 'tril_indices', 'tril_indices_from', 'trim_zeros',
-              'triu', 'triu_indices', 'triu_indices_from', 'true_divide',
-              'trunc', 'ubyte', 'uint', 'uint0', 'uint16', 'uint32',
-              'uint64', 'uint8', 'uintc', 'uintp', 'ulonglong', 'union1d',
-              'unique', 'unravel_index', 'unsignedinteger', 'unwrap',
-              'ushort', 'vander', 'var', 'vdot', 'vectorize', 'vsplit',
-              'vstack', 'where', 'who', 'zeros', 'zeros_like',
-              'fft', 'linalg', 'polynomial', 'random')
+              'mintypecode', 'mod', 'modf', 'msort', 'multiply', 'nan',
+              'nan_to_num', 'nanargmax', 'nanargmin', 'nanmax', 'nanmin',
+              'nansum', 'ndarray', 'ndenumerate', 'ndim', 'ndindex',
+              'negative', 'newaxis', 'nextafter', 'nonzero', 'not_equal',
+              'number', 'obj2sctype', 'ogrid', 'ones', 'ones_like', 'outer',
+              'packbits', 'percentile', 'pi', 'piecewise', 'place', 'poly',
+              'poly1d', 'polyadd', 'polyder', 'polydiv', 'polyfit', 'polyint',
+              'polymul', 'polynomial', 'polysub', 'polyval', 'power', 'prod',
+              'product', 'ptp', 'put', 'putmask', 'r_', 'rad2deg', 'radians',
+              'random', 'ravel', 'real', 'real_if_close', 'reciprocal',
+              'record', 'remainder', 'repeat', 'reshape', 'resize',
+              'right_shift', 'rint', 'roll', 'rollaxis', 'roots', 'rot90',
+              'round', 'round_', 'row_stack', 's_', 'sctype2char',
+              'searchsorted', 'select', 'setbufsize', 'setdiff1d', 'seterr',
+              'setxor1d', 'shape', 'short', 'sign', 'signbit', 'signedinteger',
+              'sin', 'sinc', 'single', 'singlecomplex', 'sinh', 'size',
+              'sometrue', 'sort', 'sort_complex', 'spacing', 'split', 'sqrt',
+              'square', 'squeeze', 'std', 'str_', 'subtract', 'sum',
+              'swapaxes', 'take', 'tan', 'tanh', 'tensordot', 'tile', 'trace',
+              'transpose', 'trapz', 'tri', 'tril', 'tril_indices',
+              'tril_indices_from', 'trim_zeros', 'triu', 'triu_indices',
+              'triu_indices_from', 'true_divide', 'trunc', 'ubyte', 'uint',
+              'uint16', 'uint32', 'uint64', 'uint8', 'uintc', 'uintp',
+              'ulonglong', 'union1d', 'unique', 'unravel_index',
+              'unsignedinteger', 'unwrap', 'ushort', 'vander', 'var', 'vdot',
+              'vectorize', 'vsplit', 'vstack', 'where', 'who', 'zeros',
+              'zeros_like')
+
+FROM_NUMPY_FINANCIAL = ('fv', 'ipmt', 'irr', 'mirr', 'nper', 'npv',
+                        'pmt', 'ppmt', 'pv', 'rate')
 
 NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'atan': 'arctan', 'atan2': 'arctan2', 'atanh':
@@ -187,6 +192,11 @@ if HAS_NUMPY:
         NUMPY_TABLE[sym] = getattr(numpy, sym)
     for sname, sym in NUMPY_RENAMES.items():
         NUMPY_TABLE[sname] = getattr(numpy, sym)
+
+    if HAS_NUMPY_FINANCIAL:
+        for sym in FROM_NUMPY_FINANCIAL:
+            NUMPY_TABLE[sym] = getattr(numpy_financial, sym)
+
 else:
     NUMPY_TABLE = {}
 
