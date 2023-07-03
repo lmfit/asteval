@@ -4,7 +4,7 @@
 asteval reference
 ========================
 
-.. _numpy: http://docs.scipy.org/doc/numpy
+.. _numpy: https://numpy.org
 
 .. module:: asteval
 

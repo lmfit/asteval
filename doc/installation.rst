@@ -2,9 +2,9 @@
 Downloading and Installation
 ====================================
 
-.. _numpy: http://docs.scipy.org/doc/numpy
-.. _github:  http://github.com/newville/asteval
-.. _PyPI:  http://pypi.python.org/pypi/asteval/
+.. _numpy: https://numpy.org/
+.. _github:  https://github.com/newville/asteval
+.. _PyPI:  https://pypi.org/project/asteval/
 
 Requirements
 ~~~~~~~~~~~~~~~
@@ -47,7 +47,7 @@ Development Version
 
 The latest development version can be found at the `github`_ repository, and cloned with::
 
-    git clone http://github.com/newville/asteval.git
+    git clone https://github.com/newville/asteval.git
 
 
 Installation

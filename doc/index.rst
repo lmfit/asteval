@@ -3,17 +3,21 @@
 ASTEVAL: Minimal Python AST Evaluator
 ================================================
 
-.. _numpy: http://docs.scipy.org/doc/numpy
+.. _numpy: https://numpy.org/
+.. _numpy_financial: https://numpy.org/numpy-financial/
 
-The asteval package evaluates Python expressions and statements, providing
-a safer alternative to Python's builtin :py:func:`eval` and a richer,
-easier to use alternative to :py:func:`ast.literal_eval`.  It does this by
-building an embedded interpreter for a subset of the Python language using
-Python's :py:mod:`ast` module.  The emphasis and main area of application
-is the evaluation of mathematical expressions. Because of this emphasis,
-mathematical functions from Python's :py:mod:`math` module are built-in to
-asteval, and a large number of functions from `numpy`_ will be available if
-`numpy`_ is installed on your system.
+The asteval package evaluates Python expressions and statements, providing a
+safer alternative to Python's builtin :py:func:`eval` and a richer, easier to
+use alternative to :py:func:`ast.literal_eval`.  It does this by building an
+embedded interpreter for a subset of the Python language using Python's
+:py:mod:`ast` module.  The emphasis and main area of application is the
+evaluation of mathematical expressions. Because of this emphasis, mathematical
+functions from Python's :py:mod:`math` module are built-in to asteval, and a
+large number of functions from `numpy`_ will be available if `numpy`_ is
+installed on your system.  For backward compatibility, a few functions that
+were moved from `numpy`_ to `numpy_financial`_ will be imported, if that
+package is installed.
+
 
 While the primary goal is evaluation of mathematical expressions, many
 features and constructs of the Python language are supported by default.

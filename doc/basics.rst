@@ -106,7 +106,7 @@ The symbols imported from Python's *math* module include:
     frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
     modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc
 
-.. _numpy: http://docs.scipy.org/doc/numpy
+.. _numpy: https://numpy.org/
 
 If available, a very large number (~400) additional symbols are
 imported from `numpy`_.

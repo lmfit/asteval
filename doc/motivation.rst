@@ -1,5 +1,5 @@
-.. _lmfit: http://github.com/lmfit/lmfit-py
-.. _xraylarch: http://github.com/xraypy/xraylarch
+.. _lmfit: https://github.com/lmfit/lmfit-py
+.. _xraylarch: https://github.com/xraypy/xraylarch
 
 ########################
 Motivation for asteval
@@ -54,7 +54,7 @@ How Safe is asteval?
 
 Asteval avoids all of the exploits we know about that make :py:func:`eval`
 dangerous. For reference, see, `Eval is really dangerous
-<http://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html>`_ and the
+<https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html>`_ and the
 comments and links therein.  From this discussion it is apparent that not only
 is :py:func:`eval` unsafe, but that it is a difficult prospect to make any
 program that takes user input perfectly safe.  In particular, if a user can
