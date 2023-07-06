@@ -10,6 +10,7 @@ import math
 import numbers
 import re
 from sys import exc_info
+from copy import copy, deepcopy
 from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
@@ -40,13 +41,12 @@ MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
 
-RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
-                  'def', 'del', 'elif', 'else', 'except', 'exec',
-                  'finally', 'for', 'from', 'global', 'if', 'import',
-                  'in', 'is', 'lambda', 'not', 'or', 'pass', 'print',
-                  'raise', 'return', 'try', 'while', 'with', 'True',
-                  'False', 'None', 'eval', 'execfile', '__import__',
-                  '__package__')
+RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue', 'def',
+                  'del', 'elif', 'else', 'except', 'exec', 'finally', 'for',
+                  'from', 'global', 'if', 'import', 'in', 'is', 'lambda',
+                  'not', 'or', 'pass', 'raise', 'return', 'try', 'while',
+                  'with', 'True', 'False', 'None', 'eval', 'execfile',
+                  '__import__', '__package__')
 
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
@@ -393,6 +393,52 @@ def get_ast_names(astnode):
     return finder.names
 
 
+def valid_varname(name):
+    return name.isidentifier() and name not in RESERVED_WORDS
+
+class SymbolTable(dict):
+    """
+    SymbolTable: a container that can be accessed as an object or dictionary
+    key value / attribute names must follow Python naming conventions
+    """
+    def __init__(self, name=None, **kws):
+        if name is None:
+            name = hex(id(self))
+        self.__name__ = name
+        dict.__init__(self, **kws)
+
+    def __setattr__(self, name, value):
+        if not valid_varname(name):
+            raise SyntaxError(f"invalid attribute name '{name}'")
+        self[name] = value
+
+    def __getattr__(self, name, default=None):
+        if name in self:
+            return self[name]
+        elif default is not None:
+            return default
+        else:
+            raise KeyError(f"no attribute named '{name}'")
+
+    def __setitem__(self, name, value):
+        if not valid_varname(name):
+            raise SyntaxError(f"invalid attribute name '{name}'")
+        dict.__setitem__(self, name, value)
+
+    def __repr__(self):
+        keys = [a for a in self.keys() if a != '__name__']
+        return f"SymbolTable('{self.__name__}', attrs={keys})"
+
+    def _repr_html_(self):
+        """HTML representation for Jupyter notebook"""
+        html = [f"<table><caption>SymbolTable('{self.__name__}')</caption>",
+                "<tr><th>Attribute</th><th>DataType</th><th><b>Value</b></th></tr>"]
+        for key, val in self.items():
+            html.append(f"<tr><td>{key}</td><td><i>{type(val).__name__}</i></td><td>{repr(val):.75s}</td></tr>")
+        html.append("</table>")
+        return '\n'.join(html)
+
+
 def make_symbol_table(use_numpy=True, **kws):
     """Create a default symboltable, taking dict of user-defined symbols.
 
@@ -409,7 +455,7 @@ def make_symbol_table(use_numpy=True, **kws):
        a symbol table that can be used in `asteval.Interpereter`
 
     """
-    symtable = {}
+    symtable = SymbolTable()
 
     symtable.update(BUILTINS_TABLE)
     symtable.update(MATH_TABLE)
@@ -479,7 +525,7 @@ class Procedure:
 
     def __call__(self, *args, **kwargs):
         """TODO: docstring in public method."""
-        symlocals = {}
+        symlocals = SymbolTable()
         args = list(args)
         nargs = len(args)
         nkws = len(kwargs)
