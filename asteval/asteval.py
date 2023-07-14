@@ -43,7 +43,7 @@ import inspect
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
+from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone, Empty,
                        make_symbol_table, numpy, op2func, valid_symbol_name,
                        Procedure)
 
@@ -74,7 +74,9 @@ class Interpreter:
     Parameters
     ----------
     symtable : dict or `None`
-        dictionary to use as symbol table (if `None`, one will be created).
+        dictionary or SymbolTable to use as symbol table (if `None`, one will be created).
+    nested_symtable : bool, optional
+        whether to use a new-style nested symbol table instead of a plain dict [False]
     usersyms : dict or `None`
         dictionary of user-defined symbols to add to symbol table.
     writer : file-like or `None`
@@ -102,15 +104,16 @@ class Interpreter:
        'assert', 'delete', 'raise', 'print')
     2. by default 'import' and 'importfrom' are disabled, though they can be enabled.
     """
-    def __init__(self, symtable=None, usersyms=None, writer=None,
-                 err_writer=None, use_numpy=True, max_statement_length=50000,
-                 minimal=False, readonly_symbols=None, builtins_readonly=False,
-                 config=None, **kws):
+    def __init__(self, symtable=None, nested_symtable=False,
+                 usersyms=None, writer=None, err_writer=None,
+                 use_numpy=True, max_statement_length=50000,
+                 minimal=False, readonly_symbols=None,
+                 builtins_readonly=False, config=None, **kws):
 
         self.config = copy.copy(MINIMAL_CONFIG if minimal else DEFAULT_CONFIG)
         if config is not None:
             self.config.update(config)
-
+        self.config['nested_symtable'] = nested_symtable
         if len(kws) > 0:
             for key, val in kws.items():
                 if key.startswith('no_'):
@@ -129,7 +132,8 @@ class Interpreter:
         if symtable is None:
             if usersyms is None:
                 usersyms = {}
-            symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
+            symtable = make_symbol_table(nested=nested_symtable,
+                                         use_numpy=use_numpy, **usersyms)
 
         symtable['print'] = self._printer
         self.symtable = symtable
@@ -505,15 +509,20 @@ class Interpreter:
             fmt = f'{{0:{self.run(node.format_spec)}}}'
         return fmt.format(val)
 
+    def _getsym(self, node):
+        val = self.symtable.get(node.id, ReturnedNone)
+        if isinstance(val, Empty):
+            msg = f"name '{node.id}' is not defined"
+            self.raise_exception(node, exc=NameError, msg=msg)
+        else:
+            return val
+       
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
         ctx = node.ctx.__class__
         if ctx in (ast.Param, ast.Del):
             return str(node.id)
-        if node.id in self.symtable:
-            return self.symtable[node.id]
-        msg = f"name '{node.id}' is not defined"
-        self.raise_exception(node, exc=NameError, msg=msg)
+        return self._getsym(node)
 
     def on_nameconstant(self, node):
         """True, False, or None  deprecated in 3.8"""
@@ -760,14 +769,14 @@ class Interpreter:
                         self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
                     mylocals[tnode.target.id] = []
                     if tnode.target.id in self.symtable:
-                        saved_syms[tnode.target.id] = copy.deepcopy(self.symtable[tnode.target.id])
+                        saved_syms[tnode.target.id] = copy.deepcopy(self._getsym(tnode.target))
 
                 elif tnode.target.__class__ == ast.Tuple:
                     target = []
                     for tval in tnode.target.elts:
                         mylocals[tval.id] = []
                         if tval.id in self.symtable:
-                            saved_syms[tval.id] = copy.deepcopy(self.symtable[tval.id])
+                            saved_syms[tval.id] = copy.deepcopy(self._getsym(tval))
 
         for tnode in node.generators:
             if tnode.__class__ == ast.comprehension:
