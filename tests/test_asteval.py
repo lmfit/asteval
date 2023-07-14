@@ -26,11 +26,13 @@ except ImportError:
     HAS_NUMPY = False
 
 
+nested = False
+
 class TestCase(unittest.TestCase):
     """testing of asteval"""
     def setUp(self):
         "setup"
-        self.interp = Interpreter()
+        self.interp = Interpreter(nested_symtable=nested)
         self.symtable = self.interp.symtable
         self.set_stdout()
         self.set_stderr()
@@ -57,7 +59,7 @@ class TestCase(unittest.TestCase):
                                          prefix='astevaltest_stderr')
         self.interp.err_writer = self.stderr
 
-    def read_stderr(self):
+    def read_stderro(self):
         self.stderr.close()
         time.sleep(0.1)
         fname = self.stderr.name
@@ -1157,9 +1159,12 @@ class TestEval(TestCase):
     def test_numpy_renames_in_custom_symtable(self):
         """test that numpy renamed functions are in symtable"""
         if HAS_NUMPY:
-            sym_table = make_symbol_table()
-
+            sym_table = make_symbol_table(nested=False)
             assert "ln" in sym_table
+
+            sym_table = make_symbol_table(nested=True)
+            lnfunc = sym_table.get('ln', None)
+            assert lnfunc is not None
 
     def test_readonly_symbols(self):
 
@@ -1177,7 +1182,8 @@ class TestEval(TestCase):
             "y": 7
         }
 
-        aeval = Interpreter(usersyms=usersyms, readonly_symbols={"a", "b", "c", "d", "foo", "bar"})
+        aeval = Interpreter(usersyms=usersyms, nested_symtable=nested,
+                            readonly_symbols={"a", "b", "c", "d", "foo", "bar"})
 
         aeval("a = 20")
         aeval("def b(): return 100")
@@ -1277,14 +1283,13 @@ class TestEval(TestCase):
     def test_pow(self):
         assert 2**-2 == self.interp("2**-2")
 
-class TestCase2(unittest.TestCase):
-    def test_stringio(self):
-        """ test using stringio for output/errors """
-        out = StringIO()
-        err = StringIO()
-        intrep = Interpreter(writer=out, err_writer=err)
-        intrep("print('out')")
-        self.assertEqual(out.getvalue(), 'out\n')
+def test_stringio():
+    """ test using stringio for output/errors """
+    out = StringIO()
+    err = StringIO()
+    intrep = Interpreter(writer=out, err_writer=err)
+    intrep("print('out')")
+    assert out.getvalue() == 'out\n'
 
 
 if __name__ == '__main__':
