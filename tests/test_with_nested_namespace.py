@@ -16,6 +16,7 @@ from tempfile import NamedTemporaryFile
 import pytest
 
 from asteval import Interpreter, NameFinder, make_symbol_table
+from asteval.astutils import get_ast_names
 
 HAS_NUMPY = False
 try:
@@ -1076,6 +1077,18 @@ def test_astdump(nested):
     assert astnode.body[0].value.n == 1
     dumped = interp.dump(astnode.body[0])
     assert dumped.startswith('Assign')
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_get_ast_names(nested):
+    """test ast_names"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp('x = 12')
+    interp('y = 9.9')
+    astnode = interp.parse('z = x + y/3')
+    names = get_ast_names(astnode)
+    assert 'x' in names
+    assert 'y' in names
+    assert 'z' in names
 
 
 @pytest.mark.parametrize("nested", [False, True])
