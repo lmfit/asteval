@@ -1112,6 +1112,17 @@ def test_safe_funcs(nested):
     check_error(interp, 'RuntimeError')
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_safe__numpyfuncs(nested):
+    if HAS_NUMPY:
+        interp = make_interpreter(nested_symtable=nested)
+        interp("arg = linspace(0, 20000, 21)")
+        interp("a = 3**arg")
+        check_error(interp, 'RuntimeError')
+        interp("a = 100 << arg")
+        check_error(interp, 'RuntimeError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_safe_open(nested):
     interp = make_interpreter(nested_symtable=nested)
     interp('open("foo1", "wb")')
@@ -1257,7 +1268,7 @@ def test_custom_symtable(nested):
             return np.tan(np.radians(x))
 
         sym_table = make_symbol_table(cosd=cosd, sind=sind, tand=tand,
-                                      nested=nested)
+                                      nested=nested, name='mysymtable')
         aeval = Interpreter(symtable=sym_table)
         aeval("x1 = sind(30)")
         aeval("x2 = cosd(30)")
@@ -1270,6 +1281,15 @@ def test_custom_symtable(nested):
         assert_allclose(x1, 0.50, rtol=0.001)
         assert_allclose(x2, 0.866025, rtol=0.001)
         assert_allclose(x3, 1.00, rtol=0.001)
+
+        repr1 = repr(sym_table)
+        if nested:
+            repr2 = sym_table._repr_html_()
+            assert 'Group' in repr1
+            assert '<caption>Group' in repr2
+        else:
+            assert isinstance(repr1, str)
+
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_numpy_renames_in_custom_symtable(nested):
