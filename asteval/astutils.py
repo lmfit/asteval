@@ -411,7 +411,7 @@ class Group(dict):
         self.__name__ = name
         dict.__init__(self, **kws)
         self._searchgroups = searchgroups
-            
+
     def __setattr__(self, name, value):
         if not valid_varname(name):
             raise SyntaxError(f"invalid attribute name '{name}'")
@@ -443,7 +443,7 @@ class Group(dict):
                     if not isinstance(v, Empty):
                         return v
         return default
-    
+
 
     def __repr__(self):
         keys = [a for a in self.keys() if a != '__name__']
@@ -466,9 +466,9 @@ def make_symbol_table(use_numpy=True, nested=True, top=True,  **kws):
     ---------
     numpy : bool, optional
        whether to include symbols from numpy [True]
-    nested : bool optional 
+    nested : bool, optional
        whether to make a "new-style" nested table instead of a plain dict [True]
-    top : bool optional 
+    top : bool, optional
        whether this is the top-level table in a nested-table [True]
     kws :  optional
        additional symbol name, value pairs to include in symbol table
@@ -479,10 +479,12 @@ def make_symbol_table(use_numpy=True, nested=True, top=True,  **kws):
        a symbol table that can be used in `asteval.Interpereter`
 
     """
-    if nested: 
-        if top and 'name' not in kws:
-            kws['name'] = '_main'
-        symtable = Group(**kws)
+    if nested:
+        if top:
+            name = '_main'
+            if 'name' in kws:
+                name = kws.pop('name')
+        symtable = Group(name=name)
     else:
         symtable = {}
 
@@ -495,8 +497,10 @@ def make_symbol_table(use_numpy=True, nested=True, top=True,  **kws):
     if nested:
         symtable['math'] = Group(name='math', **NUMPY_TABLE)
         symtable._searchgroups = ('math',)
+
     else:
         symtable.update(mathtable)
+    symtable.update(**kws)
     return symtable
 
 
@@ -564,13 +568,13 @@ class Procedure:
             if sgroups is not None:
                 for sname in sgroups:
                     sargs[sname] = topsym.get(sname)
-                    
-            
+
+
             symlocals = Group(name=f'symtable_{self.name}_', **sargs)
             symlocals._searchgroups = list(sargs.keys())
         else:
             symlocals = {}
-        
+
         args = list(args)
         nargs = len(args)
         nkws = len(kwargs)
