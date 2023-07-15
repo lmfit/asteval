@@ -226,6 +226,8 @@ def test_ndarray_index(nested):
 def test_ndarrayslice(nested):
     """array slicing"""
     interp = make_interpreter(nested_symtable=nested)
+    interp("xlist = lisr(range(12))")
+    istrue(interp, "x[::3] == [0, 3, 6, 9]")
     if HAS_NUMPY:
         interp("a_ndarray = arange(200).reshape(10, 20)")
         istrue(interp, "a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
@@ -235,6 +237,8 @@ def test_ndarrayslice(nested):
         istrue(interp, "y[1,:] == array([5, 6, 7, 8, 9])")
         interp("y[...,1] = array([2, 2, 2, 2])")
         istrue(interp, "y[1,:] == array([5, 2, 7, 8, 9])")
+        interp("xarr = arange(12)")
+        istrue(interp, "x[::3] == array([0, 3, 6, 9])")
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_while(nested):
@@ -1178,6 +1182,19 @@ def test_exit_value(nested):
     assert z == 42
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_interpreter_run(nested):
+    interp = make_interpreter(nested_symtable=nested)
+    interp('a = 12')
+    interp.run('b = a + 2')
+    isvalue(interp, 'b', 14)
+
+    node = interp.parse('c = b - 7')
+    interp.eval(node)
+    isvalue(interp, 'c', 7)
+
+
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_removenodehandler(nested):
     interp = make_interpreter(nested_symtable=nested)
     handler = interp.remove_nodehandler('ifexp')
@@ -1205,6 +1222,8 @@ def test_set_default_nodehandler(nested):
     interp('from time import ctime as tclock, strftime as s')
     check_error(interp, None)
     interp('import ast as pyast')
+    check_error(interp, None)
+    interp('x = pyast.parse("a = 1.0  + 3.4")')
     check_error(interp, None)
 
     interp.remove_nodehandler('import')
