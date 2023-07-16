@@ -41,8 +41,8 @@ The ``use_numpy`` argument can be used to control whether functions from
 Whether the user-code is able to overwrite the entries in the symbol table can
 be controlled with the ``readonly_symbols`` and ``builtins_readonly`` keywords.
 
-Configuring what features the Interpreter support
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Configuring which features the Interpreter recognizes
+========================================================
 
 The interpreter can be configured to enable or disable many language
 constructs, named according to the AST node in the Python language definition.
@@ -94,10 +94,9 @@ but will full support for Python data types and array slicing.
   +----------------+----------------------+-------------------+-------------------+
 
 
-To be clear, the ``minimal`` configuration for the Interpreter will support
-many basic Python language constructs including all basic data types,
-operators, slicing.  The ``default`` configuration adds many language
-constructs, including
+The ``minimal`` configuration for the Interpreter will support many basic
+Python language constructs including all basic data types, operators, slicing.
+The ``default`` configuration adds many language constructs, including
 
   *  if-elif-else conditionals
   *  for loops, with ``else``
@@ -112,16 +111,13 @@ constructs, including
   *  function definitions
 
 The nodes listed in Table :ref:`Table of optional Python AST nodes used asteval
-<node_table>`
-can be enabled and disabled individually with the appropriate
+<node_table>` can be enabled and disabled individually with the appropriate
 ``no_NODE`` or ``with_NODE`` argument when creating the interpreter, or
 specifying a ``config`` dictionary.
 
 That is, you might construct an Interpreter as::
 
     >>> from asteval import Interpreter
-    >>>
-    >>> aeval_all = Interpreter(with_import=True, with_importfrom=True)
     >>>
     >>> aeval_nowhile = Interpreter(no_while=True)
     >>>
@@ -144,13 +140,16 @@ Passing, ``minimal=True`` will turn off all the nodes listed in Table
     'try': False, 'while': False, 'with': False}
 
 As shown above, importing Python modules with ``import module`` or ``from
-module import method`` can be supported, but is not supported by default, but
-can be enabled with ``with_import=True`` and ``with_importfrom=True``, or by
-setting the config dictionary as described above.
+module import method`` can be enabled, but is disabled by default.  To enable
+these, use ``with_import=True`` and ``with_importfrom=True``, as ::
 
+    >>> from asteval import Interpreter
+    >>> aeval_max = Interpreter(with_import=True, with_importfrom=True)
 
-Interpreter methods
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+or by setting the config dictionary as described above:
+
+Interpreter methods and attributes
+====================================
 
 An Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should
@@ -188,13 +187,17 @@ stable API.
 
 .. attribute:: symtable
 
-   the symbol table. A dictionary with symbol names as keys, and object
-   values (data and functions).
+   the symbol table where all data and functions for the Interpreter are stored
+   and looked up. By default, this is a simple dictionary with symbol names as
+   keys, and values of data and functions. If the `nested_symtable`
+   option is used, the symbol tables will be a subclass of a dictionary with
+   more features, as discussed in :ref:`symtable_section`.
 
-   For full control of the symbol table, you can simply access the
-   :attr:`symtable` object, inserting, replacing, or removing symbols to
-   alter what symbols are known to your interpreter.  You can also access
-   the :attr:`symtable` to retrieve results.
+   In either case, the symbol table can be accessed from the calling program
+   using the  :attr:`symtable` attribute of the Interpreter.  This allows the
+   calling program to read, insert, replace, or remove symbols to
+   alter what symbols are known to your interpreter.
+
 
 .. attribute:: error
 
@@ -207,6 +210,83 @@ stable API.
 
    the most recent error message.
 
+.. _symtable_section:
+
+Symbol Tables used in asteval
+====================================
+
+The symbol table used by the Interpreter holds all of the data used by it.
+Historically, and by default, this is a simple dictionary with variable names
+as the keys, and their values as the corresponding values.  This is slightly
+simpler than in Python or roughly equivalent to everything being "global".
+Symbol names are limited to being valid Python object names.  The symbol table
+is held in the :attr:`symtable` attribute of the Interpreter, and can be
+accessed and manipulated from the containing Python environment.  This allows
+the calling program to read, insert, replace, or remove symbols to alter what
+symbols are known to your interpreter.  That is, it is perfectly valid to do
+something like this::
+
+      >>> from asteval import Interpreter
+      >>> aeval = Interpreter()
+      >>> aeval.symtable['x'] = 10
+      >>> aeval('sqrt(x)')
+      3.1622776601683795
+
+
+By default, the symbol table will be pre-loaded with many Python builtins,
+functions from the `math` module, and functions from `numpy` if available.  You
+can control some of these settings or add symbols into the symbol table with
+the `use_numpy` and `user_symbols` arguments when creating an Interpreter.  You
+can also build your own symbol table and pass that it, and use the
+`readonly_symbols` and `builtins_readonly` options to prevent some symbols to
+be writeable from within the Interpreter.  You can also create your own symbol
+table, either as a plain dict, or with the :func:`make_symbol_table` function,
+and alter that to use as the `symtable` option when creating an Interpreter.
+That is, the calling program can fully control the symbol table, either
+pre-loading custom variables and functions or removing default functions.
+
+.. versionadded:: 0.9.40
+
+
+New Style Symbol Table
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Beginning with version 0.9.40, there is an option to use a more complex and
+nested symbol table. This symbol table uses a "`Group`" object which is a
+subclass of `dict` that can also be used with `object.attribute` syntax::
+
+      >>> from asteval import Interpreter
+      >>> aeval = Interpreter(nested_symtable=True)
+      >>> aeval('x = 3')
+      >>> aeval.symtable['x']  # as with default dictionary
+      3
+      >>> aeval.symtable.x     # new
+      3
+      >>> aeval.symtable.y = 7  # new
+      >>> aeval('print(x+y)')
+      10
+
+As with the plain-dictionary symbol table, all symbols must be valid Python
+identifiers, and cannot be reserved words.
+
+In addition, this symbol table can be nested, not flat, and may have a special
+member called `_searchgroups` that give the name of sub-Groups to search for
+symbols.  By default, when using this new-style symbol table, the mathematical
+functions imported from the `math` and `numpy` modules) are placed in a
+subgroup named `math` (with more that 350 named functions and variables), and
+the `_searchgroups` variable is set to the tuple `('math',)`.   When looking
+for the a symbol in an expression such as::
+
+      >>> aeval('x = 2 * cos( pi /3) ')
+
+The Interpreter will have to find and use the symbols names `cos` and `pi`.
+With the old-style symbol table, these functions
+must be in the flat dictionary, which makes it difficult to browse
+through the symbol table.  With the new, nested symbol table, the names like
+`cos` and `pi` are first looked for in the top-level Group. If not found there,
+they are looked for in the subgroups named in `_searchgroups`, in order and
+returned as soon as one is found.  If using `asteval` as a domain-specific
+language, this nesting can be quite useful.
 
 
 Utility Functions
