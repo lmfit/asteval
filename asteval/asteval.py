@@ -16,9 +16,10 @@ Expressions, including loops, conditionals, and function definitions can be
 compiled into ast node and then evaluated later, using the current values
 in the symbol table.
 
-The result is a restricted, simplified version of Python meant for
-numerical calculations that is somewhat safer than 'eval' because many
-unsafe operations (such as 'import' and 'eval') are simply not allowed.
+The result is a restricted, simplified version of Python meant for numerical
+calculations that is somewhat safer than 'eval' because many unsafe operations
+(such as 'eval') are simply not allowed, and others (such as 'import') are
+disabled by default, but can be explicitly enabled.
 
 Many parts of Python syntax are supported, including:
      for loops, while loops, if-then-elif-else conditionals, with,
@@ -34,7 +35,7 @@ The following Python syntax elements are not supported:
 
 In addition, while many builtin functions are supported, several builtin
 functions that are considered unsafe are missing ('eval', 'exec', and
-'getattr' for example)
+'getattr' for example) are missing.
 """
 import ast
 import sys
@@ -61,11 +62,11 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
 MINIMAL_CONFIG = {'import': False, 'importfrom': False}
 DEFAULT_CONFIG = {'import': False, 'importfrom': False}
 
-for node in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
+for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
              'formattedvalue', 'functiondef', 'print', 'raise', 'listcomp',
              'dictcomp', 'setcomp', 'try', 'while', 'with'):
-    MINIMAL_CONFIG[node] = False
-    DEFAULT_CONFIG[node] = True
+    MINIMAL_CONFIG[_tnode] = False
+    DEFAULT_CONFIG[_tnode] = True
 
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -341,7 +342,7 @@ class Interpreter:
                 raise exc(errmsg)
             if show_errors:
                 print(errmsg, file=self.err_writer)
-
+        return None
 
     @staticmethod
     def dump(node, **kw):
@@ -518,8 +519,7 @@ class Interpreter:
         if isinstance(val, Empty):
             msg = f"name '{node.id}' is not defined"
             self.raise_exception(node, exc=NameError, msg=msg)
-        else:
-            return val
+        return val
 
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
@@ -588,6 +588,7 @@ class Interpreter:
         # AttributeError or accessed unsafe attribute
         msg = f"no attribute '{node.attr}' for {self.run(node.value)}"
         self.raise_exception(node, exc=AttributeError, msg=msg)
+        return None
 
     def on_assign(self, node):    # ('targets', 'value')
         """Simple assignment."""
@@ -621,6 +622,7 @@ class Interpreter:
             return val[nslice]
         msg = "subscript with unknown context"
         self.raise_exception(node, msg=msg)
+        return None
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
@@ -901,17 +903,15 @@ class Interpreter:
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
-            msg = "%s: %s" % (msg, msg2)
+            msg = f"{msg:s}: {msg2:s}"
         self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
 
     def on_call(self, node):
         """Function execution."""
-        #  ('func', 'args', 'keywords'. Py<3.5 has 'starargs' and 'kwargs' too)
         func = self.run(node.func)
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = f"'{func}' is not callable!!"
             self.raise_exception(node, exc=TypeError, msg=msg)
-
         args = [self.run(targ) for targ in node.args]
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
@@ -982,14 +982,12 @@ class Interpreter:
             # deprecation warning: will become
             # doc = nb0.value
             doc = nb0.value.s
-
         varkws = node.args.kwarg
         vararg = node.args.vararg
         if isinstance(vararg, ast.arg):
             vararg = vararg.arg
         if isinstance(varkws, ast.arg):
             varkws = varkws.arg
-
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
                                              lineno=self.lineno,
                                              body=node.body,

@@ -10,7 +10,6 @@ import math
 import numbers
 import re
 from sys import exc_info
-from copy import copy, deepcopy
 from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
@@ -323,19 +322,20 @@ class Empty:
     """Empty class."""
     def __init__(self):
         """TODO: docstring in public method."""
-        pass
+        return
 
     def __nonzero__(self):
         """Empty is TODO: docstring in magic method."""
         return False
 
+    def __repr__(self):
+        """Empty is TODO: docstring in magic method."""
+        return "Empty"
 
 ReturnedNone = Empty()
 
-
 class ExceptionHolder:
     """Basic exception handler."""
-
     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
         """TODO: docstring in public method."""
         self.node = node
@@ -395,6 +395,7 @@ def get_ast_names(astnode):
 
 
 def valid_varname(name):
+    "is this a valid variable name"
     return name.isidentifier() and name not in RESERVED_WORDS
 
 
@@ -420,10 +421,9 @@ class Group(dict):
     def __getattr__(self, name, default=None):
         if name in self:
             return self[name]
-        elif default is not None:
+        if default is not None:
             return default
-        else:
-            raise KeyError(f"no attribute named '{name}'")
+        raise KeyError(f"no attribute named '{name}'")
 
     def __setitem__(self, name, value):
         if not valid_varname(name):
@@ -431,17 +431,17 @@ class Group(dict):
         dict.__setitem__(self, name, value)
 
     def get(self, key, default=None):
-        v = self.__getattr__(key, ReturnedNone)
-        if not isinstance(v, Empty):
-            return v
+        val = self.__getattr__(key, ReturnedNone)
+        if not isinstance(val, Empty):
+            return val
         searchgroups = self._searchgroups
         if searchgroups is not None:
             for sgroup in searchgroups:
-                g = self.__getattr__(sgroup, None)
-                if isinstance(g, (Group, dict)):
-                    v = g.__getattr__(key, ReturnedNone)
-                    if not isinstance(v, Empty):
-                        return v
+                grp = self.__getattr__(sgroup, None)
+                if isinstance(grp, (Group, dict)):
+                    val = grp.__getattr__(key, ReturnedNone)
+                    if not isinstance(val, Empty):
+                        return val
         return default
 
 
@@ -452,9 +452,12 @@ class Group(dict):
     def _repr_html_(self):
         """HTML representation for Jupyter notebook"""
         html = [f"<table><caption>Group('{self.__name__}')</caption>",
-                "<tr><th>Attribute</th><th>DataType</th><th><b>Value</b></th></tr>"]
+  "<tr><th>Attribute</th><th>DataType</th><th><b>Value</b></th></tr>"]
         for key, val in self.items():
-            html.append(f"<tr><td>{key}</td><td><i>{type(val).__name__}</i></td><td>{repr(val):.75s}</td></tr>")
+            html.append(f"""
+<tr><td>{key}</td><td><i>{type(val).__name__}</i></td>
+    <td>{repr(val):.75s}</td>
+</tr>""")
         html.append("</table>")
         return '\n'.join(html)
 
@@ -491,7 +494,7 @@ def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
     symtable.update(BUILTINS_TABLE)
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
-    math_functions = {k: v for k,v in MATH_TABLE.items()}
+    math_functions = dict(MATH_TABLE.items())
     if use_numpy:
         math_functions.update(NUMPY_TABLE)
 
@@ -566,8 +569,8 @@ class Procedure:
             sargs = {'_main': topsym}
             sgroups = topsym.get('_searchgroups', None)
             if sgroups is not None:
-                for sname in sgroups:
-                    sargs[sname] = topsym.get(sname)
+                for sxname in sgroups:
+                    sargs[sxname] = topsym.get(sxname)
 
 
             symlocals = Group(name=f'symtable_{self.name}_', **sargs)
