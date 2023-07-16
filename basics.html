@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -76,10 +76,10 @@ that is very much like python:</p>
 </section>
 <section id="accessing-the-symbol-table">
 <h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Permalink to this heading">¶</a></h2>
-<p>The symbol table (that is, the mapping between variable and function names
-and the underlying objects) is a simple dictionary held in the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code> attribute of the interpreter, and can be read or written
-to:</p>
+<p>The symbol table (that is, the mapping between variable and function names and
+the underlying objects) is a simple dictionary (by default, see
+<a class="reference internal" href="api.html#symtable-section"><span class="std std-ref">Symbol Tables used in asteval</span></a> for details of an optional alternative) held in the
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code> attribute of the interpreter, and can be read or written to:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>
 <span class="go">1.73205080757</span>
@@ -97,17 +97,17 @@ expression pattern:</p>
 <p>In addition, certain names are reserved in Python, and cannot be used
 within the asteval interpreter.  These reserved words are:</p>
 <blockquote>
-<div><p>and, as, assert, break, class, continue, def, del, elif, else,
-except, exec, finally, for, from, global, if, import, in, is,
-lambda, not, or, pass, print, raise, return, try, while, with,
-True, False, None, eval, execfile, __import__, __package__</p>
+<div><p>and, as, assert, async, await, break, class, continue, def, del, elif,
+else, eval, except, exec, execfile, finally, for, from, global, if, import,
+in, is, lambda, nonlocal, not, or, pass, print, raise, return, try, while,
+with, True, False, None, __import__, __package__</p>
 </div></blockquote>
 </section>
 <section id="built-in-functions">
 <h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this heading">¶</a></h2>
-<p>At startup, many symbols are loaded into the symbol table from
-Python’s builtins and the <strong>math</strong> module.   The builtins include
-several basic Python functions:</p>
+<p>At startup, many symbols are loaded into the symbol table from Python’s
+builtins and the <code class="docutils literal notranslate"><span class="pre">math</span></code> module.  The builtins include several basic Python
+functions:</p>
 <blockquote>
 <div><p>abs, all, any, bin, bool, bytearray, bytes, chr, complex,
 dict, dir, divmod, enumerate, filter, float, format,
@@ -130,20 +130,20 @@ TypeError, UnboundLocalError, UnicodeDecodeError,
 UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
 UnicodeWarning, ValueError, Warning, ZeroDivisionError</p>
 </div></blockquote>
-<p>The symbols imported from Python’s <em>math</em> module include:</p>
+<p>The symbols imported from Python’s <code class="docutils literal notranslate"><span class="pre">math</span></code> module include:</p>
 <blockquote>
 <div><p>acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
 cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
 frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
 modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</p>
 </div></blockquote>
-<p>If available, a very large number (~400) additional symbols are
-imported from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</p>
+<p>If available, a very large number (~350) additional symbols are imported from
+<a class="reference external" href="https://numpy.org/">numpy</a>.</p>
 </section>
 <section id="conditionals-and-loops">
 <h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Permalink to this heading">¶</a></h2>
-<p>If-then-else blocks, for-loops (including the optional <em>else</em> block), while
-loops (also including optional <em>else</em> block), and with blocks are supported,
+<p>If-then-else blocks, for-loops (including the optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), while
+loops (also including optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), and with blocks are supported,
 and work exactly as they do in python.  Thus:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="go">sum = 0</span>
@@ -173,7 +173,7 @@ option.  By default, outputs are sent to <a class="reference external" href="htt
 <section id="writing-functions">
 <h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this heading">¶</a></h2>
 <p>User-defined functions can be written and executed, as in python with a
-<em>def</em> block, for example:</p>
+<code class="docutils literal notranslate"><span class="pre">def</span></code> block, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>

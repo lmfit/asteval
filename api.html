@@ -3,7 +3,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
     <title>asteval reference &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
@@ -44,21 +44,22 @@
 code.  There are a few options available to control what language features
 to support, how to deal with writing to standard output and standard error,
 and specifying the symbol table.  There are also a few convenience
-functions: <a class="reference internal" href="#asteval.valid_symbol_name" title="asteval.valid_symbol_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">valid_symbol_name()</span></code></a> is useful for tesing the validity of
+functions: <a class="reference internal" href="#asteval.valid_symbol_name" title="asteval.valid_symbol_name"><code class="xref py py-func docutils literal notranslate"><span class="pre">valid_symbol_name()</span></code></a> is useful for testing the validity of
 symbol names, and <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_symbol_table()</span></code></a> is useful for creating symbol
 tables that may be pre-loaded with custom symbols and functions.</p>
 <section id="the-interpreter-class">
 <h2>The <a class="reference internal" href="#asteval.Interpreter" title="asteval.Interpreter"><code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code></a> class<a class="headerlink" href="#the-interpreter-class" title="Permalink to this heading">¶</a></h2>
 <dl class="py class">
 <dt class="sig sig-object py" id="asteval.Interpreter">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">Interpreter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symtable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">usersyms</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_statement_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly_symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builtins_readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">Interpreter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symtable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested_symtable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user_symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">err_writer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_statement_length</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minimal</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">readonly_symbols</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">builtins_readonly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.Interpreter" title="Permalink to this definition">¶</a></dt>
 <dd><p>create an asteval Interpreter: a restricted, simplified interpreter
 of mathematical expressions using Python syntax.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>symtable</strong> (dict or <cite>None</cite>) – dictionary to use as symbol table (if <cite>None</cite>, one will be created).</p></li>
-<li><p><strong>usersyms</strong> (dict or <cite>None</cite>) – dictionary of user-defined symbols to add to symbol table.</p></li>
+<li><p><strong>symtable</strong> (dict or <cite>None</cite>) – dictionary or SymbolTable to use as symbol table (if <cite>None</cite>, one will be created).</p></li>
+<li><p><strong>nested_symtable</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to use a new-style nested symbol table instead of a plain dict [False]</p></li>
+<li><p><strong>user_symbols</strong> (dict or <cite>None</cite>) – dictionary of user-defined symbols to add to symbol table.</p></li>
 <li><p><strong>writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard output will be sent.</p></li>
 <li><p><strong>err_writer</strong> (file-like or <cite>None</cite>) – callable file-like object where standard error will be sent.</p></li>
 <li><p><strong>use_numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to use functions from numpy.</p></li>
@@ -83,22 +84,23 @@ nodes disabled: (‘import’, ‘importfrom’, ‘if’, ‘for’, ‘while�
 <p>By default, the symbol table will be created with <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_symbol_table()</span></code></a>
 that will include several standard python builtin functions, several
 functions from the <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.11)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module and (if available and not turned off)
-several functions from <a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a>.</p>
+several functions from <a class="reference external" href="https://numpy.org">numpy</a>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument can be used to provide a place to send all output
 that would normally go to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.  The default is, of
 course, to send output to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.  Similarly, <code class="docutils literal notranslate"><span class="pre">err_writer</span></code>
 will be used for output that will otherwise be sent to
 <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">use_numpy</span></code> argument can be used to control whether functions from
-<a class="reference external" href="http://docs.scipy.org/doc/numpy">numpy</a> are loaded into the symbol table.</p>
+<a class="reference external" href="https://numpy.org">numpy</a> are loaded into the symbol table.</p>
 <p>Whether the user-code is able to overwrite the entries in the symbol table can
 be controlled with the <code class="docutils literal notranslate"><span class="pre">readonly_symbols</span></code> and <code class="docutils literal notranslate"><span class="pre">builtins_readonly</span></code> keywords.</p>
-<section id="configuring-what-features-the-interpreter-support">
-<h3>Configuring what features the Interpreter support<a class="headerlink" href="#configuring-what-features-the-interpreter-support" title="Permalink to this heading">¶</a></h3>
+</section>
+<section id="configuring-which-features-the-interpreter-recognizes">
+<h2>Configuring which features the Interpreter recognizes<a class="headerlink" href="#configuring-which-features-the-interpreter-recognizes" title="Permalink to this heading">¶</a></h2>
 <p>The interpreter can be configured to enable or disable many language
 constructs, named according to the AST node in the Python language definition.</p>
 <p id="node-table"><strong>Table of optional Python AST nodes used asteval.</strong> The minimal configuration
-excludes all of the nodes listed, to give a bare-bones mathemetical language
+excludes all of the nodes listed, to give a bare-bones mathematical language
 but will full support for Python data types and array slicing.</p>
 <blockquote>
 <div><table class="docutils align-default">
@@ -203,10 +205,9 @@ but will full support for Python data types and array slicing.</p>
 </tbody>
 </table>
 </div></blockquote>
-<p>To be clear, the <code class="docutils literal notranslate"><span class="pre">minimal</span></code> configuration for the Interpreter will support
-many basic Python language constructs including all basic data types,
-operators, slicing.  The <code class="docutils literal notranslate"><span class="pre">default</span></code> configuration adds many language
-constructs, including</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">minimal</span></code> configuration for the Interpreter will support many basic
+Python language constructs including all basic data types, operators, slicing.
+The <code class="docutils literal notranslate"><span class="pre">default</span></code> configuration adds many language constructs, including</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>if-elif-else conditionals</p></li>
@@ -217,19 +218,16 @@ constructs, including</p>
 <li><p>augmented assignments:  <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">1</span></code></p></li>
 <li><p>if-expressions:      <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">if</span> <span class="pre">TEST</span> <span class="pre">else</span> <span class="pre">b</span></code></p></li>
 <li><p>list comprehension:  <code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">[sqrt(i)</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">values]</span></code></p></li>
-<li><p>set and dict comphrension, too.</p></li>
-<li><p>print formatting with <cite>%</cite>, <cite>str.format()</cite>, or f-strings.</p></li>
+<li><p>set and dict comprehension, too.</p></li>
+<li><p>print formatting with <code class="docutils literal notranslate"><span class="pre">%</span></code>, <code class="docutils literal notranslate"><span class="pre">str.format()</span></code>, or f-strings.</p></li>
 <li><p>function definitions</p></li>
 </ul>
 </div></blockquote>
-<p>The nodes listed in Table <a class="reference internal" href="#node-table"><span class="std std-ref">Table of optional Python AST nodes used asteval</span></a>
-can be enabled and disabled individually with the appropriate
+<p>The nodes listed in Table <a class="reference internal" href="#node-table"><span class="std std-ref">Table of optional Python AST nodes used asteval</span></a> can be enabled and disabled individually with the appropriate
 <code class="docutils literal notranslate"><span class="pre">no_NODE</span></code> or <code class="docutils literal notranslate"><span class="pre">with_NODE</span></code> argument when creating the interpreter, or
 specifying a <code class="docutils literal notranslate"><span class="pre">config</span></code> dictionary.</p>
 <p>That is, you might construct an Interpreter as:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
-<span class="gp">&gt;&gt;&gt;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_all</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">with_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_importfrom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_nowhile</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">no_while</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt;</span>
@@ -252,12 +250,16 @@ specifying a <code class="docutils literal notranslate"><span class="pre">config
 </pre></div>
 </div>
 <p>As shown above, importing Python modules with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module</span></code> or <code class="docutils literal notranslate"><span class="pre">from</span>
-<span class="pre">module</span> <span class="pre">import</span> <span class="pre">method</span></code> can be supported, but is not supported by default, but
-can be enabled with <code class="docutils literal notranslate"><span class="pre">with_import=True</span></code> and <code class="docutils literal notranslate"><span class="pre">with_importfrom=True</span></code>, or by
-setting the config dictionary as described above.</p>
+<span class="pre">module</span> <span class="pre">import</span> <span class="pre">method</span></code> can be enabled, but is disabled by default.  To enable
+these, use <code class="docutils literal notranslate"><span class="pre">with_import=True</span></code> and <code class="docutils literal notranslate"><span class="pre">with_importfrom=True</span></code>, as</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_max</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">with_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_importfrom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>or by setting the config dictionary as described above:</p>
 </section>
-<section id="interpreter-methods">
-<h3>Interpreter methods<a class="headerlink" href="#interpreter-methods" title="Permalink to this heading">¶</a></h3>
+<section id="interpreter-methods-and-attributes">
+<h2>Interpreter methods and attributes<a class="headerlink" href="#interpreter-methods-and-attributes" title="Permalink to this heading">¶</a></h2>
 <p>An Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should
 not be considered as part of the usable API.  The methods described be low,
@@ -274,7 +276,7 @@ stable API.</p>
 <li><p><strong>lineno</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.11)"><em>int</em></a>) – line number (for error messages).</p></li>
 <li><p><strong>show_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to print error messages or leave them
 in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code> list.</p></li>
-<li><p><strong>raise_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to reraise exceptions or leave them
+<li><p><strong>raise_errors</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a>) – whether to re-raise exceptions or leave them
 in the <code class="xref py py-attr docutils literal notranslate"><span class="pre">errors</span></code> list.</p></li>
 </ul>
 </dd>
@@ -299,12 +301,15 @@ in the <code class="xref py py-attr docutils literal notranslate"><span class="p
 <dl class="py attribute">
 <dt class="sig sig-object py" id="asteval.symtable">
 <span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">symtable</span></span><a class="headerlink" href="#asteval.symtable" title="Permalink to this definition">¶</a></dt>
-<dd><p>the symbol table. A dictionary with symbol names as keys, and object
-values (data and functions).</p>
-<p>For full control of the symbol table, you can simply access the
-<a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code></a> object, inserting, replacing, or removing symbols to
-alter what symbols are known to your interpreter.  You can also access
-the <a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code></a> to retrieve results.</p>
+<dd><p>the symbol table where all data and functions for the Interpreter are stored
+and looked up. By default, this is a simple dictionary with symbol names as
+keys, and values of data and functions. If the <code class="docutils literal notranslate"><span class="pre">nested_symtable</span></code>
+option is used, the symbol tables will be a subclass of a dictionary with
+more features, as discussed in <a class="reference internal" href="#symtable-section"><span class="std std-ref">Symbol Tables used in asteval</span></a>.</p>
+<p>In either case, the symbol table can be accessed from the calling program
+using the  <a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code></a> attribute of the Interpreter.  This allows the
+calling program to read, insert, replace, or remove symbols to
+alter what symbols are known to your interpreter.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -322,6 +327,93 @@ of Exceptions raised.</p>
 <dd><p>the most recent error message.</p>
 </dd></dl>
 
+</section>
+<section id="symbol-tables-used-in-asteval">
+<span id="symtable-section"></span><h2>Symbol Tables used in asteval<a class="headerlink" href="#symbol-tables-used-in-asteval" title="Permalink to this heading">¶</a></h2>
+<p>The symbol table holds all of the data used by the Interpreter.  That is, when
+you execute <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">*</span> <span class="pre">cos(pi/3)</span></code>, the Interpreter sees that it needs to lookup
+values for <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>, and <code class="docutils literal notranslate"><span class="pre">pi</span></code> (it already knows <code class="docutils literal notranslate"><span class="pre">=</span></code>, <code class="docutils literal notranslate"><span class="pre">*</span></code>, <code class="docutils literal notranslate"><span class="pre">/</span></code>,
+<code class="docutils literal notranslate"><span class="pre">(</span></code>, and <code class="docutils literal notranslate"><span class="pre">)</span></code> mean), and then set the value for <code class="docutils literal notranslate"><span class="pre">a</span></code>.  The place where it
+looks up and then sets those values for these assigned variables is the symbol
+table.</p>
+<p>Historically, and by default, the symbol table in Asteval is a simple
+dictionary with variable names as the keys, and their values as the
+corresponding values.  This is slightly simpler than in Python or roughly
+equivalent to everything being “global”.  This isn’t exactly true, and what
+happens inside an Asteval Procedure (basically, a function) is a little
+different as a special local symbol table (or Frame) is created for that
+function, but it is mostly true.</p>
+<p>Symbol names are limited to being valid Python object names, and must match
+<code class="docutils literal notranslate"><span class="pre">[a-zA-Z_][a-zA-Z0-9_]*</span></code> and not be a reserved word.  The symbol table is held
+in the <a class="reference internal" href="#asteval.symtable" title="asteval.symtable"><code class="xref py py-attr docutils literal notranslate"><span class="pre">symtable</span></code></a> attribute of the Interpreter, and can be accessed and
+manipulated from the containing Python program.  This allows the calling
+program to read, insert, replace, or remove symbols to alter what symbols are
+known to your interpreter.  That is, it is perfectly valid to do something like
+this:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;sqrt(x)&#39;</span><span class="p">)</span>
+<span class="go">3.1622776601683795</span>
+</pre></div>
+</div>
+<p>By default, the symbol table will be pre-loaded with many Python builtins,
+functions from the <code class="docutils literal notranslate"><span class="pre">math</span></code> module, and functions from <code class="docutils literal notranslate"><span class="pre">numpy</span></code> if available.
+You can control some of these settings or add symbols into the symbol table
+with the <code class="docutils literal notranslate"><span class="pre">use_numpy</span></code> and <code class="docutils literal notranslate"><span class="pre">user_symbols</span></code> arguments when creating an Interpreter.
+You can also build your own symbol table and pass that it, and use the
+<code class="docutils literal notranslate"><span class="pre">readonly_symbols</span></code> and <code class="docutils literal notranslate"><span class="pre">builtins_readonly</span></code> options to prevent some symbols to
+be writeable from within the Interpreter.  You can also create your own symbol
+table, either as a plain dict, or with the <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_symbol_table()</span></code></a> function,
+and alter that to use as the <code class="docutils literal notranslate"><span class="pre">symtable</span></code> option when creating an Interpreter.
+That is, the calling program can fully control the symbol table, either
+pre-loading custom variables and functions or removing default functions.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.9.31.</span></p>
+</div>
+<section id="new-style-symbol-table">
+<h3>New Style Symbol Table<a class="headerlink" href="#new-style-symbol-table" title="Permalink to this heading">¶</a></h3>
+<p>Beginning with version 0.9.31, there is an option to use a more complex and
+nested symbol table. This symbol table uses a <code class="docutils literal notranslate"><span class="pre">&quot;Group&quot;</span></code> object which is a
+subclass of a Python dict that can also be used with <code class="docutils literal notranslate"><span class="pre">object.attribute</span></code> syntax:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">nested_symtable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = 3&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">]</span>  <span class="c1"># as with default dictionary</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="o">.</span><span class="n">x</span>     <span class="c1"># new</span>
+<span class="go">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="o">.</span><span class="n">symtable</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="mi">7</span>  <span class="c1"># new</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print(x+y)&#39;</span><span class="p">)</span>
+<span class="go">10</span>
+</pre></div>
+</div>
+<p>As with the plain-dictionary symbol table, all symbols must be valid Python
+identifiers, and cannot be reserved words.</p>
+<p>In addition, this symbol table can be nested – not flat – and may have a
+special attribute called <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code> that give the name of sub-Groups to
+search for symbols.  By default, when using this new-style symbol table, the
+mathematical functions imported from the <code class="docutils literal notranslate"><span class="pre">math</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy</span></code> modules) are
+placed in a subgroup named <code class="docutils literal notranslate"><span class="pre">math</span></code> (with more that 350 named functions and
+variables), and the <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code> variable is set to the tuple
+<code class="docutils literal notranslate"><span class="pre">('math',)</span></code>.  When looking for the a symbol in an expression like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">*</span>
+<span class="pre">cos(</span> <span class="pre">pi</span> <span class="pre">/3)</span></code>, the Interpreter will have to find and use the symbols names for
+<code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code> and <code class="docutils literal notranslate"><span class="pre">pi</span></code>.  With the old-style symbol table, all of these
+must be in the flat dictionary, which makes it difficult to browse through the
+symbol table.  With the new, nested symbol table, the names <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>
+and <code class="docutils literal notranslate"><span class="pre">pi</span></code> are first looked for in the top-level Group. If not found there,
+they are looked for in the subgroups named in <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code>, in order and
+returned as soon as one is found.  That is the expectation is that <cite>b</cite> would be
+found in the “top-level user Group”, while <code class="docutils literal notranslate"><span class="pre">cos</span></code> and <code class="docutils literal notranslate"><span class="pre">pi</span></code> would be found in the
+<code class="docutils literal notranslate"><span class="pre">math</span></code> Group, and that:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;a = b * cos( pi /3)&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;a = b * math.cos(math.pi /3)&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>would be equivalent, as if you had imported a module that would automatically
+be searched: something between <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">math</span></code> and <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">math</span> <span class="pre">import</span> <span class="pre">*</span></code>.  Though
+different from how Python works, if using Asteval as a domain-specific
+language, this nesting and automated searching can be quite useful.</p>
 </section>
 </section>
 <section id="utility-functions">
@@ -347,12 +439,14 @@ the regular expression <code class="docutils literal notranslate"><span class="p
 
 <dl class="py function">
 <dt class="sig sig-object py" id="asteval.make_symbol_table">
-<span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">make_symbol_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.make_symbol_table" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">asteval.</span></span><span class="sig-name descname"><span class="pre">make_symbol_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">use_numpy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nested</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kws</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#asteval.make_symbol_table" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a default symboltable, taking dict of user-defined symbols.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy</p></li>
+<li><p><strong>numpy</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to include symbols from numpy [True]</p></li>
+<li><p><strong>nested</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether to make a “new-style” nested table instead of a plain dict [False]</p></li>
+<li><p><strong>top</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.11)"><em>bool</em></a><em>, </em><em>optional</em>) – whether this is the top-level table in a nested-table [True]</p></li>
 <li><p><strong>kws</strong> (<em>optional</em>) – additional symbol name, value pairs to include in symbol table</p></li>
 </ul>
 </dd>
@@ -360,7 +454,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
 <dd class="field-even"><p><strong>symbol_table</strong> – a symbol table that can be used in <cite>asteval.Interpereter</cite></p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.11)">dict</a> or nested Group</p>
 </dd>
 </dl>
 </dd></dl>
@@ -403,8 +497,10 @@ the regular expression <code class="docutils literal notranslate"><span class="p
 <li><a class="reference internal" href="#">asteval reference</a><ul>
 <li><a class="reference internal" href="#the-interpreter-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a><ul>
 <li><a class="reference internal" href="#asteval.Interpreter"><code class="docutils literal notranslate"><span class="pre">Interpreter</span></code></a></li>
-<li><a class="reference internal" href="#configuring-what-features-the-interpreter-support">Configuring what features the Interpreter support</a></li>
-<li><a class="reference internal" href="#interpreter-methods">Interpreter methods</a><ul>
+</ul>
+</li>
+<li><a class="reference internal" href="#configuring-which-features-the-interpreter-recognizes">Configuring which features the Interpreter recognizes</a></li>
+<li><a class="reference internal" href="#interpreter-methods-and-attributes">Interpreter methods and attributes</a><ul>
 <li><a class="reference internal" href="#asteval.eval"><code class="docutils literal notranslate"><span class="pre">eval()</span></code></a></li>
 <li><a class="reference internal" href="#asteval.__call__"><code class="docutils literal notranslate"><span class="pre">__call__()</span></code></a></li>
 <li><a class="reference internal" href="#asteval.symtable"><code class="docutils literal notranslate"><span class="pre">symtable</span></code></a></li>
@@ -412,6 +508,8 @@ the regular expression <code class="docutils literal notranslate"><span class="p
 <li><a class="reference internal" href="#asteval.error_msg"><code class="docutils literal notranslate"><span class="pre">error_msg</span></code></a></li>
 </ul>
 </li>
+<li><a class="reference internal" href="#symbol-tables-used-in-asteval">Symbol Tables used in asteval</a><ul>
+<li><a class="reference internal" href="#new-style-symbol-table">New Style Symbol Table</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#utility-functions">Utility Functions</a><ul>
