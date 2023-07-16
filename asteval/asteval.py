@@ -77,7 +77,7 @@ class Interpreter:
         dictionary or SymbolTable to use as symbol table (if `None`, one will be created).
     nested_symtable : bool, optional
         whether to use a new-style nested symbol table instead of a plain dict [False]
-    usersyms : dict or `None`
+    user_symbols : dict or `None`
         dictionary of user-defined symbols to add to symbol table.
     writer : file-like or `None`
         callable file-like object where standard output will be sent.
@@ -105,7 +105,7 @@ class Interpreter:
     2. by default 'import' and 'importfrom' are disabled, though they can be enabled.
     """
     def __init__(self, symtable=None, nested_symtable=False,
-                 usersyms=None, writer=None, err_writer=None,
+                 user_symbols=None, writer=None, err_writer=None,
                  use_numpy=True, max_statement_length=50000,
                  minimal=False, readonly_symbols=None,
                  builtins_readonly=False, config=None, **kws):
@@ -114,6 +114,12 @@ class Interpreter:
         if config is not None:
             self.config.update(config)
         self.config['nested_symtable'] = nested_symtable
+
+        if user_symbols is None:
+            user_symbols = {}
+            if 'usersyms' in kws:
+                user_symbols = kws.pop('usersyms') # back compat, changed July, 2023, v 0.9.4
+
         if len(kws) > 0:
             for key, val in kws.items():
                 if key.startswith('no_'):
@@ -129,11 +135,10 @@ class Interpreter:
         self.err_writer = err_writer or stderr
         self.max_statement_length = max(1, min(1.e8, max_statement_length))
 
+        self.use_numpy = HAS_NUMPY and use_numpy
         if symtable is None:
-            if usersyms is None:
-                usersyms = {}
             symtable = make_symbol_table(nested=nested_symtable,
-                                         use_numpy=use_numpy, **usersyms)
+                                         use_numpy=self.use_numpy, **user_symbols)
 
         symtable['print'] = self._printer
         self.symtable = symtable
@@ -145,7 +150,6 @@ class Interpreter:
         self._calldepth = 0
         self.lineno = 0
         self.start_time = time.time()
-        self.use_numpy = HAS_NUMPY and use_numpy
 
         self.node_handlers = {}
         for node in ALL_NODES:
@@ -516,7 +520,7 @@ class Interpreter:
             self.raise_exception(node, exc=NameError, msg=msg)
         else:
             return val
-       
+
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
         ctx = node.ctx.__class__
