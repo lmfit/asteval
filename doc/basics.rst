@@ -73,9 +73,9 @@ within the asteval interpreter.  These reserved words are:
 built-in functions
 =======================
 
-At startup, many symbols are loaded into the symbol table from
-Python's builtins and the **math** module.   The builtins include
-several basic Python functions:
+At startup, many symbols are loaded into the symbol table from Python's
+builtins and the ``math`` module.  The builtins include several basic Python
+functions:
 
     abs, all, any, bin, bool, bytearray, bytes, chr, complex,
     dict, dir, divmod, enumerate, filter, float, format,
@@ -99,7 +99,7 @@ and a large number of named exceptions:
     UnicodeWarning, ValueError, Warning, ZeroDivisionError
 
 
-The symbols imported from Python's *math* module include:
+The symbols imported from Python's ``math`` module include:
 
     acos, acosh, asin, asinh, atan, atan2, atanh, ceil, copysign,
     cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
@@ -108,14 +108,14 @@ The symbols imported from Python's *math* module include:
 
 .. _numpy: https://numpy.org/
 
-If available, a very large number (~400) additional symbols are
-imported from `numpy`_.
+If available, a very large number (~350) additional symbols are imported from
+`numpy`_.
 
 conditionals and loops
 ==========================
 
-If-then-else blocks, for-loops (including the optional *else* block), while
-loops (also including optional *else* block), and with blocks are supported,
+If-then-else blocks, for-loops (including the optional ``else`` block), while
+loops (also including optional ``else`` block), and with blocks are supported,
 and work exactly as they do in python.  Thus:
 
     >>> code = """
@@ -149,7 +149,7 @@ writing functions
 ===================
 
 User-defined functions can be written and executed, as in python with a
-*def* block, for example::
+``def`` block, for example::
 
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()

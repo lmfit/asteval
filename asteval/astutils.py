@@ -478,7 +478,7 @@ def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
 
     Returns
     --------
-    symbol_table : dict
+    symbol_table : dict or nested Group
        a symbol table that can be used in `asteval.Interpereter`
 
     """
