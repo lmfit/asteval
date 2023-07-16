@@ -9,8 +9,8 @@
    Expressions can be compiled into ast node for later evaluation,
    using the values in the symbol table current at evaluation time.
 
-   version: 0.9.27
-   last update: 2022-Feb-05
+   version: 0.9.31
+   last update: 2023-July-16
    License:  MIT
    Author:  Matthew Newville <newville@cars.uchicago.edu>
             Center for Advanced Radiation Sources,
