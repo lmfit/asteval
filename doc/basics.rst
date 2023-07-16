@@ -41,10 +41,10 @@ that is very much like python::
 accessing the symbol table
 =============================
 
-The symbol table (that is, the mapping between variable and function names
-and the underlying objects) is a simple dictionary held in the
-:attr:`symtable` attribute of the interpreter, and can be read or written
-to::
+The symbol table (that is, the mapping between variable and function names and
+the underlying objects) is a simple dictionary (by default, see
+:ref:`symtable_section` for details of an optional alternative) held in the
+:attr:`symtable` attribute of the interpreter, and can be read or written to::
 
     >>> aeval('x = sqrt(3)')
     >>> aeval.symtable['x']
@@ -63,10 +63,10 @@ expression pattern::
 In addition, certain names are reserved in Python, and cannot be used
 within the asteval interpreter.  These reserved words are:
 
-    and, as, assert, break, class, continue, def, del, elif, else,
-    except, exec, finally, for, from, global, if, import, in, is,
-    lambda, not, or, pass, print, raise, return, try, while, with,
-    True, False, None, eval, execfile, __import__, __package__
+    and, as, assert, async, await, break, class, continue, def, del, elif,
+    else, eval, except, exec, execfile, finally, for, from, global, if, import,
+    in, is, lambda, nonlocal, not, or, pass, print, raise, return, try, while,
+    with, True, False, None, __import__, __package__
 
 
 

@@ -37,7 +37,7 @@ These differences and absences include:
  1. All variable and function symbol names are held in a single symbol table
     that can be accessed from the calling program.  By default, this is a
     simple dictionary, giving a flat namespace. A more elaborate, still
-    experimental, symbol table that allows both dictionary and attribrute
+    experimental, symbol table that allows both dictionary and attribute
     access can also be used.
  2. creating classes is not allowed.
  3. importing modules is not allowed, unless specifically enabled.

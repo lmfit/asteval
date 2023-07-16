@@ -27,7 +27,7 @@ mathematically-oriented language that can be embedded into larger applications.
 
 In fact, the asteval module grew out the the need for a simple expression
 evaluator for scientific applications such as the `lmfit`_ and `xraylarch`_
-modules.  An early attempt using the pyparsing module worked but was
+modules.  An early attempt using the `pyparsing` module worked but was
 error-prone and difficult to maintain.  While the simplest of calculators or
 expressiona-evaluators is not hard with pyparsing, it turned out that using the
 Python :py:mod:`ast` module makes it much easier to implement a feature-rich
@@ -89,7 +89,7 @@ While this approach of making a blacklist cannot be guaranteed to be complete,
 it does eliminate entire classes of attacks known to be able to seg-fault the
 Python interpreter.
 
-An important caveat is that asteval will typically expose numpy ufuncs from the
+An important caveat is that asteval will typically expose numpy `ufuncs` from the
 numpy module. Several of these can seg-fault Python without too much trouble.
 If you are paranoid about safe user input that can never cause a segmentation
 fault, you may want to consider disabling the use of numpy, or take extra care

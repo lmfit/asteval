@@ -13,7 +13,7 @@ The asteval module has a pretty simple interface, providing an
 code.  There are a few options available to control what language features
 to support, how to deal with writing to standard output and standard error,
 and specifying the symbol table.  There are also a few convenience
-functions: :func:`valid_symbol_name` is useful for tesing the validity of
+functions: :func:`valid_symbol_name` is useful for testing the validity of
 symbol names, and :func:`make_symbol_table` is useful for creating symbol
 tables that may be pre-loaded with custom symbols and functions.
 
@@ -50,7 +50,7 @@ constructs, named according to the AST node in the Python language definition.
 .. _node_table:
 
 **Table of optional Python AST nodes used asteval.** The minimal configuration
-excludes all of the nodes listed, to give a bare-bones mathemetical language
+excludes all of the nodes listed, to give a bare-bones mathematical language
 but will full support for Python data types and array slicing.
 
   +----------------+----------------------+-------------------+-------------------+
@@ -106,7 +106,7 @@ The ``default`` configuration adds many language constructs, including
   *  augmented assignments:  ``x += 1``
   *  if-expressions:      ``x = a if TEST else b``
   *  list comprehension:  ``out = [sqrt(i) for i in values]``
-  *  set and dict comphrension, too.
+  *  set and dict comprehension, too.
   *  print formatting with `%`, `str.format()`, or f-strings.
   *  function definitions
 
@@ -169,7 +169,7 @@ stable API.
    :param show_errors: whether to print error messages or leave them
                        in the :attr:`errors` list.
    :type show_errors:  bool
-   :param raise_errors: whether to reraise exceptions or leave them
+   :param raise_errors: whether to re-raise exceptions or leave them
                        in the :attr:`errors` list.
    :type raise_errors:  bool
 
@@ -215,16 +215,27 @@ stable API.
 Symbol Tables used in asteval
 ====================================
 
-The symbol table used by the Interpreter holds all of the data used by it.
-Historically, and by default, this is a simple dictionary with variable names
-as the keys, and their values as the corresponding values.  This is slightly
-simpler than in Python or roughly equivalent to everything being "global".
-Symbol names are limited to being valid Python object names.  The symbol table
-is held in the :attr:`symtable` attribute of the Interpreter, and can be
-accessed and manipulated from the containing Python environment.  This allows
-the calling program to read, insert, replace, or remove symbols to alter what
-symbols are known to your interpreter.  That is, it is perfectly valid to do
-something like this::
+The symbol table holds all of the data used by the Interpreter.  That is, when
+you execute `a = b * cos(pi/3)`, the Interpreter sees that it needs to lookup
+values for `b`, `cos`, and `pi` (it already knows '=', `*`, `/`, `(`, and `)`
+mean), and then set the value for `a`.  The place where it looks up and then
+sets those values for "assigned variables" is the symbol table.
+
+Historically, and by default, the symbol table in Asteval is a simple
+dictionary with variable names as the keys, and their values as the
+corresponding values.  This is slightly simpler than in Python or roughly
+equivalent to everything being "global".  This isn't exactly true, and what
+happens inside an Asteval Procedure (basically, a function) is a little
+different as a special local symbol table (or Frame) is created for that
+function, but it is mostly true.
+
+Symbol names are limited to being valid Python object names, and must match
+`[a-zA-Z_][a-zA-Z0-9_]*` and not be a reserved word.  The symbol table is held
+in the :attr:`symtable` attribute of the Interpreter, and can be accessed and
+manipulated from the containing Python program.  This allows the calling
+program to read, insert, replace, or remove symbols to alter what symbols are
+known to your interpreter.  That is, it is perfectly valid to do something like
+this::
 
       >>> from asteval import Interpreter
       >>> aeval = Interpreter()
@@ -245,13 +256,13 @@ and alter that to use as the `symtable` option when creating an Interpreter.
 That is, the calling program can fully control the symbol table, either
 pre-loading custom variables and functions or removing default functions.
 
-.. versionadded:: 0.9.40
+.. versionadded:: 0.9.31
 
 
 New Style Symbol Table
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Beginning with version 0.9.40, there is an option to use a more complex and
+Beginning with version 0.9.31, there is an option to use a more complex and
 nested symbol table. This symbol table uses a "`Group`" object which is a
 subclass of `dict` that can also be used with `object.attribute` syntax::
 
@@ -269,24 +280,29 @@ subclass of `dict` that can also be used with `object.attribute` syntax::
 As with the plain-dictionary symbol table, all symbols must be valid Python
 identifiers, and cannot be reserved words.
 
-In addition, this symbol table can be nested, not flat, and may have a special
-member called `_searchgroups` that give the name of sub-Groups to search for
-symbols.  By default, when using this new-style symbol table, the mathematical
-functions imported from the `math` and `numpy` modules) are placed in a
-subgroup named `math` (with more that 350 named functions and variables), and
-the `_searchgroups` variable is set to the tuple `('math',)`.   When looking
-for the a symbol in an expression such as::
+In addition, this symbol table can be nested -- not flat -- and may have a
+special attribute called `_searchgroups` that give the name of sub-Groups to
+search for symbols.  By default, when using this new-style symbol table, the
+mathematical functions imported from the `math` and `numpy` modules) are placed
+in a subgroup named `math` (with more that 350 named functions and variables),
+and the `_searchgroups` variable is set to the tuple `('math',)`.  When looking
+for the a symbol in an expression like `a = b * cos( pi /3) `, the Interpreter
+will have to find and use the symbols names for `b`, `cos` and `pi`.  With the
+old-style symbol table, all of these must be in the flat dictionary, which
+makes it difficult to browse through the symbol table.  With the new, nested
+symbol table, the names `b`, `cos` and `pi` are first looked for in the
+top-level Group. If not found there, they are looked for in the subgroups named
+in `_searchgroups`, in order and returned as soon as one is found.  That is the
+expectation is that `b` would be found in the "top-level user Group", while
+`cos` and `pi` would be found in the `math` Group, and that::
 
-      >>> aeval('x = 2 * cos( pi /3) ')
+      >>> aeval('a = b * cos( pi /3)')
+      >>> aeval('a = b * math.cos(math.pi /3)')
 
-The Interpreter will have to find and use the symbols names `cos` and `pi`.
-With the old-style symbol table, these functions
-must be in the flat dictionary, which makes it difficult to browse
-through the symbol table.  With the new, nested symbol table, the names like
-`cos` and `pi` are first looked for in the top-level Group. If not found there,
-they are looked for in the subgroups named in `_searchgroups`, in order and
-returned as soon as one is found.  If using `asteval` as a domain-specific
-language, this nesting can be quite useful.
+would be equivalent, as if you had imported a module that would automatically
+be searched: something between "import math" and "from math import *".  Though
+different from how Python works, if using `asteval` as a domain-specific
+language, this nesting and automated searching can be quite useful.
 
 
 Utility Functions
