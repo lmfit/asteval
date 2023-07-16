@@ -40,13 +40,13 @@ MAX_STR_LEN = 2 << 17  # 256KiB
 MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
 
-RESERVED_WORDS = ('and', 'as', 'assert', 'break', 'class', 'continue',
-                  'def', 'del', 'elif', 'else', 'except', 'exec',
-                  'finally', 'for', 'from', 'global', 'if', 'import',
-                  'in', 'is', 'lambda', 'not', 'or', 'pass', 'print',
-                  'raise', 'return', 'try', 'while', 'with', 'True',
-                  'False', 'None', 'eval', 'execfile', '__import__',
-                  '__package__')
+RESERVED_WORDS = ('False', 'None', 'True', 'and', 'as', 'assert',
+                  'async', 'await', 'break', 'class', 'continue',
+                  'def', 'del', 'elif', 'else', 'except', 'finally',
+                  'for', 'from', 'global', 'if', 'import', 'in', 'is',
+                  'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise',
+                  'return', 'try', 'while', 'with', 'yield', 'exec',
+                  'eval', 'execfile', '__import__', '__package__')
 
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
@@ -322,19 +322,20 @@ class Empty:
     """Empty class."""
     def __init__(self):
         """TODO: docstring in public method."""
-        pass
+        return
 
     def __nonzero__(self):
         """Empty is TODO: docstring in magic method."""
         return False
 
+    def __repr__(self):
+        """Empty is TODO: docstring in magic method."""
+        return "Empty"
 
 ReturnedNone = Empty()
 
-
 class ExceptionHolder:
     """Basic exception handler."""
-
     def __init__(self, node, exc=None, msg='', expr=None, lineno=None):
         """TODO: docstring in public method."""
         self.node = node
@@ -381,7 +382,7 @@ class NameFinder(ast.NodeVisitor):
     def generic_visit(self, node):
         """TODO: docstring in public method."""
         if node.__class__.__name__ == 'Name':
-            if node.ctx.__class__ == ast.Load and node.id not in self.names:
+            if node.id not in self.names:
                 self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)
 
@@ -393,33 +394,117 @@ def get_ast_names(astnode):
     return finder.names
 
 
-def make_symbol_table(use_numpy=True, **kws):
+def valid_varname(name):
+    "is this a valid variable name"
+    return name.isidentifier() and name not in RESERVED_WORDS
+
+
+class Group(dict):
+    """
+    Group: a container of objects that can be accessed either as an object attributes
+    or dictionary  key/value.  Attribute names must follow Python naming conventions.
+
+
+    """
+    def __init__(self, name=None, searchgroups=None, **kws):
+        if name is None:
+            name = hex(id(self))
+        self.__name__ = name
+        dict.__init__(self, **kws)
+        self._searchgroups = searchgroups
+
+    def __setattr__(self, name, value):
+        if not valid_varname(name):
+            raise SyntaxError(f"invalid attribute name '{name}'")
+        self[name] = value
+
+    def __getattr__(self, name, default=None):
+        if name in self:
+            return self[name]
+        if default is not None:
+            return default
+        raise KeyError(f"no attribute named '{name}'")
+
+    def __setitem__(self, name, value):
+        if not valid_varname(name):
+            raise SyntaxError(f"invalid attribute name '{name}'")
+        dict.__setitem__(self, name, value)
+
+    def get(self, key, default=None):
+        val = self.__getattr__(key, ReturnedNone)
+        if not isinstance(val, Empty):
+            return val
+        searchgroups = self._searchgroups
+        if searchgroups is not None:
+            for sgroup in searchgroups:
+                grp = self.__getattr__(sgroup, None)
+                if isinstance(grp, (Group, dict)):
+                    val = grp.__getattr__(key, ReturnedNone)
+                    if not isinstance(val, Empty):
+                        return val
+        return default
+
+
+    def __repr__(self):
+        keys = [a for a in self.keys() if a != '__name__']
+        return f"Group('{self.__name__}', {len(keys)} symbols)"
+
+    def _repr_html_(self):
+        """HTML representation for Jupyter notebook"""
+        html = [f"<table><caption>Group('{self.__name__}')</caption>",
+  "<tr><th>Attribute</th><th>DataType</th><th><b>Value</b></th></tr>"]
+        for key, val in self.items():
+            html.append(f"""
+<tr><td>{key}</td><td><i>{type(val).__name__}</i></td>
+    <td>{repr(val):.75s}</td>
+</tr>""")
+        html.append("</table>")
+        return '\n'.join(html)
+
+
+def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
     """Create a default symboltable, taking dict of user-defined symbols.
 
     Arguments
     ---------
     numpy : bool, optional
-       whether to include symbols from numpy
+       whether to include symbols from numpy [True]
+    nested : bool, optional
+       whether to make a "new-style" nested table instead of a plain dict [False]
+    top : bool, optional
+       whether this is the top-level table in a nested-table [True]
     kws :  optional
        additional symbol name, value pairs to include in symbol table
 
     Returns
     --------
-    symbol_table : dict
+    symbol_table : dict or nested Group
        a symbol table that can be used in `asteval.Interpereter`
 
     """
-    symtable = {}
+    if nested:
+        if top:
+            name = '_main'
+            if 'name' in kws:
+                name = kws.pop('name')
+        symtable = Group(name=name)
+    else:
+        symtable = {}
 
     symtable.update(BUILTINS_TABLE)
-    symtable.update(MATH_TABLE)
-    if use_numpy:
-        symtable.update(NUMPY_TABLE)
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
+    math_functions = dict(MATH_TABLE.items())
+    if use_numpy:
+        math_functions.update(NUMPY_TABLE)
 
+    if nested:
+        symtable['math'] = Group(name='math', **math_functions)
+        symtable._searchgroups = ('math',)
+    else:
+        symtable.update(math_functions)
+    symtable.update(**kws)
     return symtable
-
 
 
 class Procedure:
@@ -479,11 +564,25 @@ class Procedure:
 
     def __call__(self, *args, **kwargs):
         """TODO: docstring in public method."""
-        symlocals = {}
+        topsym = self.__asteval__.symtable
+        if self.__asteval__.config.get('nested_symtable', False):
+            sargs = {'_main': topsym}
+            sgroups = topsym.get('_searchgroups', None)
+            if sgroups is not None:
+                for sxname in sgroups:
+                    sargs[sxname] = topsym.get(sxname)
+
+
+            symlocals = Group(name=f'symtable_{self.name}_', **sargs)
+            symlocals._searchgroups = list(sargs.keys())
+        else:
+            symlocals = {}
+
         args = list(args)
         nargs = len(args)
         nkws = len(kwargs)
         nargs_expected = len(self.argnames)
+
         # check for too few arguments, but the correct keyword given
         if (nargs < nargs_expected) and nkws > 0:
             for name in self.argnames[nargs:]:
@@ -549,8 +648,13 @@ class Procedure:
             msg = f"incorrect arguments for Procedure {self.name}"
             self.raise_exc(None, msg=msg, lineno=self.lineno)
 
-        save_symtable = self.__asteval__.symtable.copy()
-        self.__asteval__.symtable.update(symlocals)
+        if self.__asteval__.config.get('nested_symtable', False):
+            save_symtable = self.__asteval__.symtable
+            self.__asteval__.symtable = symlocals
+        else:
+            save_symtable = self.__asteval__.symtable.copy()
+            self.__asteval__.symtable.update(symlocals)
+
         self.__asteval__.retval = None
         self.__asteval__._calldepth += 1
         retval = None

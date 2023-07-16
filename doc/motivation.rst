@@ -8,9 +8,9 @@ Motivation for asteval
 The asteval module allows you to evaluate a large subset of the Python language
 from within a python program, without using :py:func:`eval`.  It is, in effect,
 a restricted version of Python's built-in :py:func:`eval`, forbidding several
-actions, and using a simple dictionary as a flat namespace.  A completely fair
-question is: Why is this desirable?  That is, why not simply use
-:py:func:`eval`, or just use Python itself?
+actions, and using (by default) a simple dictionary as a flat namespace.  A
+completely fair question is: Why is this desirable?  That is, why not simply
+use :py:func:`eval`, or just use Python itself?
 
 The short answer is that sometimes you want to allow evaluation of user input,
 or expose a simple or even scientific calculator inside a larger application.
@@ -27,7 +27,7 @@ mathematically-oriented language that can be embedded into larger applications.
 
 In fact, the asteval module grew out the the need for a simple expression
 evaluator for scientific applications such as the `lmfit`_ and `xraylarch`_
-modules.  An early attempt using the pyparsing module worked but was
+modules.  An early attempt using the `pyparsing` module worked but was
 error-prone and difficult to maintain.  While the simplest of calculators or
 expressiona-evaluators is not hard with pyparsing, it turned out that using the
 Python :py:mod:`ast` module makes it much easier to implement a feature-rich
@@ -67,29 +67,30 @@ builtin :py:func:`eval`, and that you might find it useful.
 
 Some of the things not allowed in the asteval interpreter for safety reasons include:
 
-  * importing modules.  Neither 'import' nor '__import__' are supported by
-    default.  If you do want to support 'import' and 'import from', you have to
+  * importing modules.  Neither ``import`` nor ``__import__`` are supported by
+    default.  If you do want to support ``import`` and ``import from``, you have to
     explicitly enable these.
   * create classes or modules.
   * access to Python's :py:func:`eval`, :py:func:`getattr`, :py:func:`hasattr`,
       :py:func:`setattr`, and    :py:func:`delattr`.
-  * accessing object attributes that begin and end with `__`, the so-called
+  * accessing object attributes that begin and end with ``__``, the so-called
     ``dunder`` attributes.  This will include (but is not limited to
-    `__globals__`, `__code__`, `__func__`, `__self__`, `__module__`,
-    `__dict__`, `__class__`, `__call__`, and `__getattribute__`.  None of
+    ``__globals__``, ``__code__``, ``__func__``, ``__self__``, ``__module__``,
+    ``__dict__``, ``__class__``, ``__call__``, and ``__getattribute__``.  None of
     these can be accessed for any object.
 
 In addition (and following the discussion in the link above), the following
 attributes are blacklisted for all objects, and cannot be accessed:
 
-   `func_globals`, `func_code`, `func_closure`, `im_class`, `im_func`, `im_self`,
-   `gi_code`, `gi_frame`, `f_locals`
+   ``func_globals``, ``func_code``, ``func_closure``,
+   ``im_class``, ``im_func``, ``im_self``,
+   ``gi_code``, ``gi_frame``, ``f_locals``
 
 While this approach of making a blacklist cannot be guaranteed to be complete,
 it does eliminate entire classes of attacks known to be able to seg-fault the
 Python interpreter.
 
-An important caveat is that asteval will typically expose numpy ufuncs from the
+An important caveat is that asteval will typically expose numpy ``ufuncs`` from the
 numpy module. Several of these can seg-fault Python without too much trouble.
 If you are paranoid about safe user input that can never cause a segmentation
 fault, you may want to consider disabling the use of numpy, or take extra care
@@ -107,33 +108,36 @@ calculation, and so a reasonable looking calculation such as::
    """
    aeval.eval(txt)
 
-can take a noticeable amount of CPU time.  It is not hard to come up with short
-program that would run for hundreds of years, which probably exceeds anyones
-threshold for an acceptable run-time.  There simply is not a good way to
-predict how long any code will take to run from the text of the code itself.
-As a simple example, consider the expression `x**y**z`.  For values `x=y=z=5`,
-the run time will be well under 0.001 seconds.  For `x=y=z=8`, run time will
-still be under 1 sec.  Changing to `x=8, y=9, z=9`, will cause the statement to
-take several seconds.  With `x=y=z=9`, executing that statement may take more
-than 1 hour on some machines.  In short, runtime cannot be determined
-lexically.  To be clear, for this exponentiation example, Asteval will raise a
-runtime error, telling you that an exponent > 10,000 is not allowed.  But that
-happens at runtime, after the value of the exponent has been evaluated, it does
-not happen by looking at the text of the code. That is, there may very well be
-other "clever ways" to have very long run times that cannot be readily predicted
-from the text.
+can take a noticeable amount of CPU time - if it does not, changing ``1e8`` to
+``9e13`` almost certainly will.  As another example, consider the expression
+``x**y**z``.  For values ``x=y=z=5``, the run time will be well under 0.001
+seconds.  For ``x=y=z=8``, run time will still be under 1 sec.  Changing to ``x=8,
+y=9, z=9``, will cause the statement to take several seconds.  With ``x=y=z=9``,
+executing that statement may take more than 1 hour on some machines.  It is not
+hard to come up with short program that would run for hundreds of years, which
+probably exceeds anyones threshold for an acceptable run-time.  There simply is
+not a good way to predict how long any code will take to run from the text of
+the code itself: run time cannot be determined lexically.  To be clear, for
+this exponentiation example, asteval will raise a runtime error, telling you
+that an exponent > 10,000 is not allowed.  But that happens at runtime, after
+the value of the exponent has been evaluated, it does not happen by looking at
+the text of the code.  And, there is no limit on the size of arrays that can be
+created because a check would have to done at runtime.  There are countless
+other "clever ways" to have very long run times that cannot be readily
+predicted from the text.
 
 The exponential example also demonstrates there is not a good way to check for
 a long-running calculation within a single Python process.  That calculation is
-not stuck within the Python interpreter, but in C code (no doubt the `pow()`
+not stuck within the Python interpreter, but in C code (no doubt the ``pow()``
 function) called by the Python interpreter itself.  That call will not return
-to the Python interpreter or allow other threads to run until that call is
-done.  That means that from within a single process, there would not be a
-reliable way to tell `asteval` (or really, even Python) when a calculation has
-taken too long: Denial of Service is hard to detect before it happens, and even
-challenging to detect while it is happening.  The only reliable way to limit
-run time is to have a second process watching the execution time of the asteval
-process and either try to interrupt it or kill it.
+from the C library to the Python interpreter or allow other threads to run
+until that call is done.  That means that from within a single process, there
+would not be a reliable way to tell asteval (or really, even Python) when a
+calculation has taken too long: Denial of Service is hard to detect before it
+happens, and even challenging to detect while it is happening.  The only
+reliable way to li`mit run time is at the level of the operating system, with a
+second process watching the execution time of the asteval process and either
+try to interrupt it or kill it.
 
 For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the *recursion limit* when
@@ -154,10 +158,10 @@ executing expressions, with a code like this::
         Interpreter().eval(...)
 
 A secondary security concern is that the default list of supported functions
-does include Python's `open()` which will allow disk access to the untrusted
-user.  If `numpy` is supported, its `load()` and `loadtxt()` functions will
+does include Python's ``open()`` which will allow disk access to the untrusted
+user.  If ``numpy`` is supported, its ``load()`` and ``loadtxt()`` functions will
 also normally be supported.  Including these functions does not elevate
-permissions, but it does allow the user of the `asteval` interpreter to read
+permissions, but it does allow the user of the asteval interpreter to read
 files with the privileges of the calling program.  In some cases, this may not
 be desirable, and you may want to remove some of these functions from the
 symbol table, re-implement them, or ensure that your program cannot access
@@ -165,5 +169,5 @@ information on disk that should be kept private.
 
 In summary, while asteval attempts to be safe and is definitely safer than
 using :py:func:`eval`, there may be ways that using asteval could lead to
-increased risk of malicious use.  Recommendations for how to improve this
+increased risk of malicious use. Recommendations for how to improve this
 situation would be greatly appreciated.

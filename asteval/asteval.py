@@ -16,9 +16,10 @@ Expressions, including loops, conditionals, and function definitions can be
 compiled into ast node and then evaluated later, using the current values
 in the symbol table.
 
-The result is a restricted, simplified version of Python meant for
-numerical calculations that is somewhat safer than 'eval' because many
-unsafe operations (such as 'import' and 'eval') are simply not allowed.
+The result is a restricted, simplified version of Python meant for numerical
+calculations that is somewhat safer than 'eval' because many unsafe operations
+(such as 'eval') are simply not allowed, and others (such as 'import') are
+disabled by default, but can be explicitly enabled.
 
 Many parts of Python syntax are supported, including:
      for loops, while loops, if-then-elif-else conditionals, with,
@@ -34,7 +35,7 @@ The following Python syntax elements are not supported:
 
 In addition, while many builtin functions are supported, several builtin
 functions that are considered unsafe are missing ('eval', 'exec', and
-'getattr' for example)
+'getattr' for example) are missing.
 """
 import ast
 import sys
@@ -43,7 +44,7 @@ import inspect
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone,
+from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone, Empty,
                        make_symbol_table, numpy, op2func, valid_symbol_name,
                        Procedure)
 
@@ -61,11 +62,11 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
 MINIMAL_CONFIG = {'import': False, 'importfrom': False}
 DEFAULT_CONFIG = {'import': False, 'importfrom': False}
 
-for node in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
+for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
              'formattedvalue', 'functiondef', 'print', 'raise', 'listcomp',
              'dictcomp', 'setcomp', 'try', 'while', 'with'):
-    MINIMAL_CONFIG[node] = False
-    DEFAULT_CONFIG[node] = True
+    MINIMAL_CONFIG[_tnode] = False
+    DEFAULT_CONFIG[_tnode] = True
 
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
@@ -74,8 +75,10 @@ class Interpreter:
     Parameters
     ----------
     symtable : dict or `None`
-        dictionary to use as symbol table (if `None`, one will be created).
-    usersyms : dict or `None`
+        dictionary or SymbolTable to use as symbol table (if `None`, one will be created).
+    nested_symtable : bool, optional
+        whether to use a new-style nested symbol table instead of a plain dict [False]
+    user_symbols : dict or `None`
         dictionary of user-defined symbols to add to symbol table.
     writer : file-like or `None`
         callable file-like object where standard output will be sent.
@@ -102,14 +105,21 @@ class Interpreter:
        'assert', 'delete', 'raise', 'print')
     2. by default 'import' and 'importfrom' are disabled, though they can be enabled.
     """
-    def __init__(self, symtable=None, usersyms=None, writer=None,
-                 err_writer=None, use_numpy=True, max_statement_length=50000,
-                 minimal=False, readonly_symbols=None, builtins_readonly=False,
-                 config=None, **kws):
+    def __init__(self, symtable=None, nested_symtable=False,
+                 user_symbols=None, writer=None, err_writer=None,
+                 use_numpy=True, max_statement_length=50000,
+                 minimal=False, readonly_symbols=None,
+                 builtins_readonly=False, config=None, **kws):
 
         self.config = copy.copy(MINIMAL_CONFIG if minimal else DEFAULT_CONFIG)
         if config is not None:
             self.config.update(config)
+        self.config['nested_symtable'] = nested_symtable
+
+        if user_symbols is None:
+            user_symbols = {}
+            if 'usersyms' in kws:
+                user_symbols = kws.pop('usersyms') # back compat, changed July, 2023, v 0.9.4
 
         if len(kws) > 0:
             for key, val in kws.items():
@@ -126,10 +136,10 @@ class Interpreter:
         self.err_writer = err_writer or stderr
         self.max_statement_length = max(1, min(1.e8, max_statement_length))
 
+        self.use_numpy = HAS_NUMPY and use_numpy
         if symtable is None:
-            if usersyms is None:
-                usersyms = {}
-            symtable = make_symbol_table(use_numpy=use_numpy, **usersyms)
+            symtable = make_symbol_table(nested=nested_symtable,
+                                         use_numpy=self.use_numpy, **user_symbols)
 
         symtable['print'] = self._printer
         self.symtable = symtable
@@ -141,7 +151,6 @@ class Interpreter:
         self._calldepth = 0
         self.lineno = 0
         self.start_time = time.time()
-        self.use_numpy = HAS_NUMPY and use_numpy
 
         self.node_handlers = {}
         for node in ALL_NODES:
@@ -333,7 +342,7 @@ class Interpreter:
                 raise exc(errmsg)
             if show_errors:
                 print(errmsg, file=self.err_writer)
-
+        return None
 
     @staticmethod
     def dump(node, **kw):
@@ -505,15 +514,19 @@ class Interpreter:
             fmt = f'{{0:{self.run(node.format_spec)}}}'
         return fmt.format(val)
 
+    def _getsym(self, node):
+        val = self.symtable.get(node.id, ReturnedNone)
+        if isinstance(val, Empty):
+            msg = f"name '{node.id}' is not defined"
+            self.raise_exception(node, exc=NameError, msg=msg)
+        return val
+
     def on_name(self, node):    # ('id', 'ctx')
         """Name node."""
         ctx = node.ctx.__class__
         if ctx in (ast.Param, ast.Del):
             return str(node.id)
-        if node.id in self.symtable:
-            return self.symtable[node.id]
-        msg = f"name '{node.id}' is not defined"
-        self.raise_exception(node, exc=NameError, msg=msg)
+        return self._getsym(node)
 
     def on_nameconstant(self, node):
         """True, False, or None  deprecated in 3.8"""
@@ -575,6 +588,7 @@ class Interpreter:
         # AttributeError or accessed unsafe attribute
         msg = f"no attribute '{node.attr}' for {self.run(node.value)}"
         self.raise_exception(node, exc=AttributeError, msg=msg)
+        return None
 
     def on_assign(self, node):    # ('targets', 'value')
         """Simple assignment."""
@@ -608,6 +622,7 @@ class Interpreter:
             return val[nslice]
         msg = "subscript with unknown context"
         self.raise_exception(node, msg=msg)
+        return None
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
@@ -760,14 +775,14 @@ class Interpreter:
                         self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
                     mylocals[tnode.target.id] = []
                     if tnode.target.id in self.symtable:
-                        saved_syms[tnode.target.id] = copy.deepcopy(self.symtable[tnode.target.id])
+                        saved_syms[tnode.target.id] = copy.deepcopy(self._getsym(tnode.target))
 
                 elif tnode.target.__class__ == ast.Tuple:
                     target = []
                     for tval in tnode.target.elts:
                         mylocals[tval.id] = []
                         if tval.id in self.symtable:
-                            saved_syms[tval.id] = copy.deepcopy(self.symtable[tval.id])
+                            saved_syms[tval.id] = copy.deepcopy(self._getsym(tval))
 
         for tnode in node.generators:
             if tnode.__class__ == ast.comprehension:
@@ -888,17 +903,15 @@ class Interpreter:
         msg = ' '.join(out.args)
         msg2 = self.run(msgnode)
         if msg2 not in (None, 'None'):
-            msg = "%s: %s" % (msg, msg2)
+            msg = f"{msg:s}: {msg2:s}"
         self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
 
     def on_call(self, node):
         """Function execution."""
-        #  ('func', 'args', 'keywords'. Py<3.5 has 'starargs' and 'kwargs' too)
         func = self.run(node.func)
         if not hasattr(func, '__call__') and not isinstance(func, type):
             msg = f"'{func}' is not callable!!"
             self.raise_exception(node, exc=TypeError, msg=msg)
-
         args = [self.run(targ) for targ in node.args]
         starargs = getattr(node, 'starargs', None)
         if starargs is not None:
@@ -969,14 +982,12 @@ class Interpreter:
             # deprecation warning: will become
             # doc = nb0.value
             doc = nb0.value.s
-
         varkws = node.args.kwarg
         vararg = node.args.vararg
         if isinstance(vararg, ast.arg):
             vararg = vararg.arg
         if isinstance(varkws, ast.arg):
             varkws = varkws.arg
-
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
                                              lineno=self.lineno,
                                              body=node.body,

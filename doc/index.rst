@@ -18,7 +18,6 @@ installed on your system.  For backward compatibility, a few functions that
 were moved from `numpy`_ to `numpy_financial`_ will be imported, if that
 package is installed.
 
-
 While the primary goal is evaluation of mathematical expressions, many
 features and constructs of the Python language are supported by default.
 These features include array slicing and subscripting, if-then-else
@@ -35,12 +34,15 @@ the effort to try to make a safer version of :py:func:`eval`, while some
 are simply due to the reduced requirements for an embedded mini-language.
 These differences and absences include:
 
- 1. Variable and function symbol names are held in a simple symbol
-    table, giving a flat namespace.
+ 1. All variable and function symbol names are held in a single symbol table
+    that can be accessed from the calling program.  By default, this is a
+    simple dictionary, giving a flat namespace. A more elaborate, still
+    experimental, symbol table that allows both dictionary and attribute
+    access can also be used.
  2. creating classes is not allowed.
  3. importing modules is not allowed, unless specifically enabled.
- 4. decorators, generators, type hints, and `lambda` are not supported.
- 5. `yield`, `await`,  and async programming are not supported.
+ 4. decorators, generators, type hints, and ``lambda`` are not supported.
+ 5. ``yield``, ``await``,  and async programming are not supported.
  6. Many builtin functions (:py:func:`eval`, :py:func:`getattr`,
     :py:func:`hasattr`, :py:func:`setattr`, and :py:func:`delattr`) are not allowed.
  7. Accessing many object attributes that can provide access to
