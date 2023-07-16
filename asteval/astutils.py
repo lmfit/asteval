@@ -459,7 +459,7 @@ class Group(dict):
         return '\n'.join(html)
 
 
-def make_symbol_table(use_numpy=True, nested=True, top=True,  **kws):
+def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
     """Create a default symboltable, taking dict of user-defined symbols.
 
     Arguments
@@ -467,7 +467,7 @@ def make_symbol_table(use_numpy=True, nested=True, top=True,  **kws):
     numpy : bool, optional
        whether to include symbols from numpy [True]
     nested : bool, optional
-       whether to make a "new-style" nested table instead of a plain dict [True]
+       whether to make a "new-style" nested table instead of a plain dict [False]
     top : bool, optional
        whether this is the top-level table in a nested-table [True]
     kws :  optional
@@ -491,15 +491,15 @@ def make_symbol_table(use_numpy=True, nested=True, top=True,  **kws):
     symtable.update(BUILTINS_TABLE)
     symtable.update(LOCALFUNCS)
     symtable.update(kws)
-    mathtable = MATH_TABLE
+    math_functions = {k: v for k,v in MATH_TABLE.items()}
     if use_numpy:
-        mathtable.update(NUMPY_TABLE)
-    if nested:
-        symtable['math'] = Group(name='math', **NUMPY_TABLE)
-        symtable._searchgroups = ('math',)
+        math_functions.update(NUMPY_TABLE)
 
+    if nested:
+        symtable['math'] = Group(name='math', **math_functions)
+        symtable._searchgroups = ('math',)
     else:
-        symtable.update(mathtable)
+        symtable.update(math_functions)
     symtable.update(**kws)
     return symtable
 
