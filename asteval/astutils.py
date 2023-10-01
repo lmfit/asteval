@@ -182,6 +182,10 @@ if HAS_NUMPY:
         # aliases deprecated in NumPy v1.24.0
         numpy_deprecated += ['int0', 'uint0', 'bool8']
 
+    if int(numpy_version[0]) >= 2 :
+        # aliases deprecated in NumPy v2.0
+        numpy_deprecated += ['bool', 'chararray', 'long', 'str']
+
     FROM_NUMPY = tuple(set(FROM_NUMPY) - set(numpy_deprecated))
 
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
