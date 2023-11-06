@@ -670,15 +670,18 @@ class Interpreter:
             rval = self.run(rnode)
             ret = op2func(oper)(lval, rval)
             results.append(ret)
-            if ((self.use_numpy and not isinstance(ret, numpy.ndarray)) and
-                    not ret):
-                break
+            try:
+                if not ret:
+                    break
+            except ValueError:
+                pass
             lval = rval
         if len(results) == 1:
-            return results[0]
-        out = True
-        for ret in results:
-            out = out and ret
+            out = results[0]
+        else:
+            out = True
+            for ret in results:
+                out = out and ret
         return out
 
     def _printer(self, *out, **kws):
