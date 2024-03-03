@@ -1,16 +1,16 @@
 <!DOCTYPE html>
 
-<html lang="en">
+<html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css" />
-    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
-    <script src="_static/doctools.js"></script>
-    <script src="_static/sphinx_highlight.js"></script>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=d59dc883" />
+    <script src="_static/documentation_options.js?v=412c1a71"></script>
+    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="asteval reference" href="api.html" />
@@ -42,12 +42,12 @@
           <div class="body" role="main">
             
   <section id="using-asteval">
-<h1>Using asteval<a class="headerlink" href="#using-asteval" title="Permalink to this heading">¶</a></h1>
+<h1>Using asteval<a class="headerlink" href="#using-asteval" title="Link to this heading">¶</a></h1>
 <p>This chapter gives a quick overview of asteval, showing basic usage and the
 most important features.  Further details can be found in the next chapter
 (<a class="reference internal" href="api.html#asteval-api"><span class="std std-ref">asteval reference</span></a>).</p>
 <section id="creating-and-using-an-asteval-interpreter">
-<h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Permalink to this heading">¶</a></h2>
+<h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Link to this heading">¶</a></h2>
 <p>The asteval module is very easy to use.  Import the module and create an Interpreter:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
@@ -75,7 +75,7 @@ that is very much like python:</p>
 </div>
 </section>
 <section id="accessing-the-symbol-table">
-<h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Permalink to this heading">¶</a></h2>
+<h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Link to this heading">¶</a></h2>
 <p>The symbol table (that is, the mapping between variable and function names and
 the underlying objects) is a simple dictionary (by default, see
 <a class="reference internal" href="api.html#symtable-section"><span class="std std-ref">Symbol Tables used in asteval</span></a> for details of an optional alternative) held in the
@@ -104,7 +104,7 @@ with, True, False, None, __import__, __package__</p>
 </div></blockquote>
 </section>
 <section id="built-in-functions">
-<h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Permalink to this heading">¶</a></h2>
+<h2>built-in functions<a class="headerlink" href="#built-in-functions" title="Link to this heading">¶</a></h2>
 <p>At startup, many symbols are loaded into the symbol table from Python’s
 builtins and the <code class="docutils literal notranslate"><span class="pre">math</span></code> module.  The builtins include several basic Python
 functions:</p>
@@ -141,7 +141,7 @@ modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</p>
 <a class="reference external" href="https://numpy.org/">numpy</a>.</p>
 </section>
 <section id="conditionals-and-loops">
-<h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Permalink to this heading">¶</a></h2>
+<h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Link to this heading">¶</a></h2>
 <p>If-then-else blocks, for-loops (including the optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), while
 loops (also including optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), and with blocks are supported,
 and work exactly as they do in python.  Thus:</p>
@@ -159,19 +159,19 @@ and work exactly as they do in python.  Thus:</p>
 </div>
 </section>
 <section id="comprehensions">
-<h2>comprehensions<a class="headerlink" href="#comprehensions" title="Permalink to this heading">¶</a></h2>
+<h2>comprehensions<a class="headerlink" href="#comprehensions" title="Link to this heading">¶</a></h2>
 <p>list, dict, and set comprehension are supported, acting just as they do in
 Python.  Generators, yield, and async programmming are not currently supported.</p>
 </section>
 <section id="printing">
-<h2>printing<a class="headerlink" href="#printing" title="Permalink to this heading">¶</a></h2>
-<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.11)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
+<h2>printing<a class="headerlink" href="#printing" title="Link to this heading">¶</a></h2>
+<p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
 can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when creating
 the interpreter, or supreess printing all together with the <code class="docutils literal notranslate"><span class="pre">no_print</span></code>
-option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.11)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
+option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
 </section>
 <section id="writing-functions">
-<h2>writing functions<a class="headerlink" href="#writing-functions" title="Permalink to this heading">¶</a></h2>
+<h2>writing functions<a class="headerlink" href="#writing-functions" title="Link to this heading">¶</a></h2>
 <p>User-defined functions can be written and executed, as in python with a
 <code class="docutils literal notranslate"><span class="pre">def</span></code> block, for example:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
@@ -186,7 +186,7 @@ option.  By default, outputs are sent to <a class="reference external" href="htt
 </div>
 </section>
 <section id="exceptions">
-<h2>exceptions<a class="headerlink" href="#exceptions" title="Permalink to this heading">¶</a></h2>
+<h2>exceptions<a class="headerlink" href="#exceptions" title="Link to this heading">¶</a></h2>
 <p>Asteval monitors and caches exceptions in the evaluated code.  Brief error
 messages are printed (with Python’s print function, and so using standard
 output by default), and the full set of exceptions is kept in the
@@ -288,8 +288,8 @@ REPL loop, you’d want to do something similar to</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-        &#169; Copyright 2023, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    &#169; Copyright 2024, Matthew Newville, The University of Chicago.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
     </div>
   </body>
 </html>
