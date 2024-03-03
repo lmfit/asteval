@@ -1,5 +1,5 @@
 ================
-Using asteval
+Using Asteval
 ================
 
 This chapter gives a quick overview of asteval, showing basic usage and the
@@ -133,7 +133,7 @@ comprehensions
 ================
 
 list, dict, and set comprehension are supported, acting just as they do in
-Python.  Generators, yield, and async programmming are not currently supported.
+Python.  Generators, yield, and async programming are not currently supported.
 
 
 printing
@@ -141,7 +141,7 @@ printing
 
 For printing, asteval emulates Python's native :func:`print` function.  You
 can change where output is sent with the ``writer`` argument when creating
-the interpreter, or supreess printing all together with the ``no_print``
+the interpreter, or suppress printing all together with the ``no_print``
 option.  By default, outputs are sent to :py:data:`sys.stdout`.
 
 
