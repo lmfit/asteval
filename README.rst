@@ -1,20 +1,20 @@
 ASTEVAL
 =======
 
-.. image:: https://github.com/newville/asteval/actions/workflows/ubuntu_numpy.yml/badge.svg
-   :target: https://github.com/newville/asteval/actions/workflows/ubuntu_numpy.yml
+.. image:: https://github.com/lmfit/asteval/actions/workflows/ubuntu_numpy.yml/badge.svg
+   :target: https://github.com/lmfit/asteval/actions/workflows/ubuntu_numpy.yml
 
-.. image:: https://github.com/newville/asteval/actions/workflows/ubuntu_nonumpy.yml/badge.svg
-   :target: https://github.com/newville/asteval/actions/workflows/ubuntu_nonumpy.yml
+.. image:: https://github.com/lmfit/asteval/actions/workflows/ubuntu_nonumpy.yml/badge.svg
+   :target: https://github.com/lmfit/asteval/actions/workflows/ubuntu_nonumpy.yml
 
-.. image:: https://github.com/newville/asteval/actions/workflows/macos_numpy.yml/badge.svg
-   :target: https://github.com/newville/asteval/actions/workflows/macos_numpy.yml
+.. image:: https://github.com/lmfit/asteval/actions/workflows/macos_numpy.yml/badge.svg
+   :target: https://github.com/lmfit/asteval/actions/workflows/macos_numpy.yml
 
-.. image:: https://github.com/newville/asteval/actions/workflows/windows_numpy.yml/badge.svg
-   :target: https://github.com/newville/asteval/actions/workflows/windows_numpy.yml
+.. image:: https://github.com/lmfit/asteval/actions/workflows/windows_numpy.yml/badge.svg
+   :target: https://github.com/lmfit/asteval/actions/workflows/windows_numpy.yml
 
-.. image:: https://codecov.io/gh/newville/asteval/branch/master/graph/badge.svg
-   :target: https://codecov.io/gh/newville/asteval
+.. image:: https://codecov.io/gh/lmfit/asteval/branch/master/graph/badge.svg
+   :target: https://codecov.io/gh/lmfit/asteval
 
 .. image:: https://img.shields.io/pypi/v/asteval.svg
    :target: https://pypi.org/project/asteval
@@ -23,7 +23,7 @@ ASTEVAL
    :target: https://pypi.org/project/asteval
 
 .. image:: https://img.shields.io/badge/docs-read-brightgreen
-   :target: https://newville.github.io/asteval/
+   :target: https://lmfit.github.io/asteval/
 
 .. image:: https://zenodo.org/badge/4185/newville/asteval.svg
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
@@ -33,10 +33,10 @@ ASTEVAL
 Links
 -----
 
-* Documentation: https://newville.github.io/asteval/
+* Documentation: https://lmfit.github.io/asteval/
 * PyPI installation: https://pypi.org/project/asteval/
-* Development Code: https://github.com/newville/asteval
-* Issue Tracker: https://github.com/newville/asteval/issues
+* Development Code: https://github.com/lmfit/asteval
+* Issue Tracker: https://github.com/lmfit/asteval/issues
 
 What is it?
 -----------
