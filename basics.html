@@ -1,20 +1,28 @@
-<!DOCTYPE html>
+
+
+<!doctype html>
 
 <html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Using asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
+    <title>Using Asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=d59dc883" />
-    <script src="_static/documentation_options.js?v=412c1a71"></script>
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    
+    <script src="_static/documentation_options.js?v=76d4901b"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="asteval reference" href="api.html" />
-    <link rel="prev" title="Motivation for asteval" href="motivation.html" /> 
+    <link rel="next" title="Asteval Reference" href="api.html" />
+    <link rel="prev" title="Installing Asteval" href="installation.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -26,13 +34,13 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="asteval reference"
+          <a href="api.html" title="Asteval Reference"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="motivation.html" title="Motivation for asteval"
+          <a href="installation.html" title="Installing Asteval"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Using asteval</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Using Asteval</a></li> 
       </ul>
     </div>  
 
@@ -42,10 +50,10 @@
           <div class="body" role="main">
             
   <section id="using-asteval">
-<h1>Using asteval<a class="headerlink" href="#using-asteval" title="Link to this heading">¶</a></h1>
+<h1>Using Asteval<a class="headerlink" href="#using-asteval" title="Link to this heading">¶</a></h1>
 <p>This chapter gives a quick overview of asteval, showing basic usage and the
 most important features.  Further details can be found in the next chapter
-(<a class="reference internal" href="api.html#asteval-api"><span class="std std-ref">asteval reference</span></a>).</p>
+(<a class="reference internal" href="api.html#asteval-api"><span class="std std-ref">Asteval Reference</span></a>).</p>
 <section id="creating-and-using-an-asteval-interpreter">
 <h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Link to this heading">¶</a></h2>
 <p>The asteval module is very easy to use.  Import the module and create an Interpreter:</p>
@@ -161,13 +169,13 @@ and work exactly as they do in python.  Thus:</p>
 <section id="comprehensions">
 <h2>comprehensions<a class="headerlink" href="#comprehensions" title="Link to this heading">¶</a></h2>
 <p>list, dict, and set comprehension are supported, acting just as they do in
-Python.  Generators, yield, and async programmming are not currently supported.</p>
+Python.  Generators, yield, and async programming are not currently supported.</p>
 </section>
 <section id="printing">
 <h2>printing<a class="headerlink" href="#printing" title="Link to this heading">¶</a></h2>
 <p>For printing, asteval emulates Python’s native <a class="reference external" href="https://docs.python.org/3/library/functions.html#print" title="(in Python v3.12)"><code class="xref py py-func docutils literal notranslate"><span class="pre">print()</span></code></a> function.  You
 can change where output is sent with the <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument when creating
-the interpreter, or supreess printing all together with the <code class="docutils literal notranslate"><span class="pre">no_print</span></code>
+the interpreter, or suppress printing all together with the <code class="docutils literal notranslate"><span class="pre">no_print</span></code>
 option.  By default, outputs are sent to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.</p>
 </section>
 <section id="writing-functions">
@@ -223,7 +231,7 @@ REPL loop, you’d want to do something similar to</p>
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
-<li><a class="reference internal" href="#">Using asteval</a><ul>
+<li><a class="reference internal" href="#">Using Asteval</a><ul>
 <li><a class="reference internal" href="#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
 <li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
 <li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
@@ -239,13 +247,13 @@ REPL loop, you’d want to do something similar to</p>
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="motivation.html"
-                          title="previous chapter">Motivation for asteval</a></p>
+    <p class="topless"><a href="installation.html"
+                          title="previous chapter">Installing Asteval</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
     <p class="topless"><a href="api.html"
-                          title="next chapter">asteval reference</a></p>
+                          title="next chapter">Asteval Reference</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -278,13 +286,13 @@ REPL loop, you’d want to do something similar to</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="api.html" title="asteval reference"
+          <a href="api.html" title="Asteval Reference"
              >next</a> |</li>
         <li class="right" >
-          <a href="motivation.html" title="Motivation for asteval"
+          <a href="installation.html" title="Installing Asteval"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Using asteval</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Using Asteval</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

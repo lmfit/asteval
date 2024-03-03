@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+
+
+<!doctype html>
 
 <html lang="en" data-content_root="./">
   <head>
@@ -7,13 +9,19 @@
 
     <title>ASTEVAL: Minimal Python AST Evaluator &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=d59dc883" />
-    <script src="_static/documentation_options.js?v=412c1a71"></script>
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    
+    <script src="_static/documentation_options.js?v=76d4901b"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Downloading and Installation" href="installation.html" /> 
+    <link rel="next" title="Installing Asteval" href="installation.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -25,7 +33,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="Downloading and Installation"
+          <a href="installation.html" title="Installing Asteval"
              accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ASTEVAL: Minimal Python AST Evaluator</a></li> 
@@ -97,19 +105,14 @@ volunteers, and we cannot guarantee that it is completely safe against
 malicious attacks.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Downloading and Installation</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing Asteval</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#download-and-installation">Download and Installation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#installing-with-pip">Installing with <cite>pip</cite></a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#development-version">Development Version</a></li>
-<li class="toctree-l2"><a class="reference internal" href="installation.html#installation">Installation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="installation.html#license">License</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for asteval</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="motivation.html#how-safe-is-asteval">How Safe is asteval?</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="basics.html">Using asteval</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="basics.html">Using Asteval</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#accessing-the-symbol-table">accessing the symbol table</a></li>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#built-in-functions">built-in functions</a></li>
@@ -120,12 +123,16 @@ malicious attacks.</p>
 <li class="toctree-l2"><a class="reference internal" href="basics.html#exceptions">exceptions</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="api.html">asteval reference</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">Asteval Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="api.html#the-interpreter-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Interpreter</span></code> class</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#configuring-which-features-the-interpreter-recognizes">Configuring which features the Interpreter recognizes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#interpreter-methods-and-attributes">Interpreter methods and attributes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#symbol-tables-used-in-asteval">Symbol Tables used in asteval</a></li>
 <li class="toctree-l2"><a class="reference internal" href="api.html#utility-functions">Utility Functions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="motivation.html">Motivation for Asteval</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="motivation.html#how-safe-is-asteval">How Safe is asteval?</a></li>
 </ul>
 </li>
 </ul>
@@ -138,15 +145,21 @@ malicious attacks.</p>
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper"><h3>Downloads</h3>
-<p>Current version: <b>0.9.31</b></p>
-<p>Downloads:
-<a href="http://pypi.python.org/pypi/asteval/">PyPI (Python.org)</a>
+        <div class="sphinxsidebarwrapper"><h3>Contents</h3>
 
-<p> try <tt>pip install asteval</tt>
+<ul>
+   <li>&nbsp; &nbsp;<a href="installation.html"> Installing Asteval</a></li>
+   <li>&nbsp; &nbsp;<a href="basics.html">     Using Asteval</a></li>
+   <li>&nbsp; &nbsp;<a href="api.html">    Astevel Reference</a></li>
+   <li>&nbsp; &nbsp;<a href="motivation.html"> Motivation for Asteval</a></li>
+</ul>
 
-<p>
-Development version: <br> &nbsp; &nbsp; <a href="https://github.com/lmfit/asteval/">github.com</a>
+<h3>Get Asteval</h3>
+<p>Current version: <b>0.9.32</b></p>
+<p>Install:         <tt>pip install asteval</tt></p>
+<p>Develop:
+  &nbsp; <a href="https://github.com/lmfit/asteval/">github.com</a>
+  <p>
 
 <hr>
 <div id="searchbox" style="display: none" role="search">
@@ -173,7 +186,7 @@ Development version: <br> &nbsp; &nbsp; <a href="https://github.com/lmfit/asteva
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="installation.html" title="Downloading and Installation"
+          <a href="installation.html" title="Installing Asteval"
              >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">ASTEVAL: Minimal Python AST Evaluator</a></li> 

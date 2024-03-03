@@ -68,6 +68,6 @@ malicious attacks.
    :maxdepth: 2
 
    installation
-   motivation
    basics
    api
+   motivation

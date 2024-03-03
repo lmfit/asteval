@@ -1,20 +1,28 @@
-<!DOCTYPE html>
+
+
+<!doctype html>
 
 <html lang="en" data-content_root="./">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>Downloading and Installation &#8212; ASTEVAL: Minimal Python AST evaluator</title>
+    <title>Installing Asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/sphinxdoc.css?v=d59dc883" />
-    <script src="_static/documentation_options.js?v=412c1a71"></script>
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    
+    <script src="_static/documentation_options.js?v=76d4901b"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Motivation for asteval" href="motivation.html" />
-    <link rel="prev" title="ASTEVAL: Minimal Python AST Evaluator" href="index.html" /> 
+    <link rel="next" title="Using Asteval" href="basics.html" />
+    <link rel="prev" title="ASTEVAL: Minimal Python AST Evaluator" href="index.html" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <!--[if lt IE 9]>
+    <script src="_static/css3-mediaqueries.js"></script>
+    <![endif]-->
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
       <h3>Navigation</h3>
@@ -26,13 +34,13 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="motivation.html" title="Motivation for asteval"
+          <a href="basics.html" title="Using Asteval"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="ASTEVAL: Minimal Python AST Evaluator"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Downloading and Installation</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Installing Asteval</a></li> 
       </ul>
     </div>  
 
@@ -41,33 +49,33 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="downloading-and-installation">
-<h1>Downloading and Installation<a class="headerlink" href="#downloading-and-installation" title="Link to this heading">¶</a></h1>
+  <section id="installing-asteval">
+<h1>Installing Asteval<a class="headerlink" href="#installing-asteval" title="Link to this heading">¶</a></h1>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
-<p>Asteval is a pure Python module.  For Python 3.8 and higher, there are no
-required dependencies outside of the standard library.  If <a class="reference external" href="https://numpy.org/">numpy</a> and
-<cite>numpy_financial</cite> are available, Asteval will make use of these libraries.  The
-test suite requires the <cite>pytest</cite> and <cite>coverage</cite> modules, and building the
-documentation requires <cite>sphinx</cite>.</p>
-<p>The latest stable version of asteval is 0.9.31.</p>
-<p>Versions 0.9.30 and later support Python 3.8 through 3.11 and are and are
-automatically tested with these on Windows, MacOS, and Linux, with and without
-<a class="reference external" href="https://numpy.org/">numpy</a> installed.  Python versions have generally been supported by <cite>asteval</cite>
-until they are well past the end of security fixes - there are no immediate
-plans to drop support for Python 3.7, though we are no longer test with it.
-Support for new versions of the Python 3 series is not guaranteed until some
+<p>Asteval is a pure Python module. The latest stable version is 0.9.32, which
+supports Python 3.8 through 3.12.</p>
+<p>Installing <cite>asteval</cite> requires <cite>setuptools</cite> and <cite>setuptools_scm</cite>. No other
+libraries outside of the standard library are required.  If <a class="reference external" href="https://numpy.org/">numpy</a> and
+<a class="reference external" href="https://numpy.org/numpy-financial/">numpy_financial</a> are available, <cite>asteval</cite> will make use of these libraries.
+Running the test suite requires the <cite>pytest</cite>, <cite>coverage</cite>, and <cite>pytest-cov</cite>
+modules, deployment uses <cite>build</cite> and <cite>twine</cite>, and building the documentation
+requires <cite>sphinx</cite>.</p>
+<p>Python 3.8 through 3.12 are tested on Windows, MacOS, and Linux, with and
+without <a class="reference external" href="https://numpy.org/">numpy</a> installed.  Older Python versions have generally been
+supported by <cite>asteval</cite> until they are well past the end of security fixes. That
+is, while <cite>asteval</cite> is no longer tested with Python 3.7, the latest release may
+continue to work with that version.</p>
+<p>Support for new versions of the Python 3 series is not guaranteed until some
 time after the official release of that version, as we may not start testing
 until late in the “beta” period of development.  Historically, the delay has
 not been too long, though <cite>asteval</cite> may not support newly introduced language
 features.</p>
-<p>At this writing (Asteval 0.9.32, March, 2024), testing is done with Python 3.8
-through 3.12, with and without numpy installed.</p>
 </section>
-<section id="download-and-installation">
-<h2>Download and Installation<a class="headerlink" href="#download-and-installation" title="Link to this heading">¶</a></h2>
-<p>The latest stable version of asteval is 0.9.31 and is available at
-<a class="reference external" href="https://pypi.org/project/asteval/">PyPI</a> or as a conda package.  You should be able to install asteval
+<section id="installing-with-pip">
+<h2>Installing with <cite>pip</cite><a class="headerlink" href="#installing-with-pip" title="Link to this heading">¶</a></h2>
+<p>The latest stable version of <cite>asteval</cite> is 0.9.32 and is available at
+<a class="reference external" href="https://pypi.org/project/asteval/">PyPI</a> or as a conda package.  You should be able to install <cite>asteval</cite>
 with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
 </pre></div>
@@ -83,20 +91,18 @@ environments.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">lmfit</span><span class="o">/</span><span class="n">asteval</span><span class="o">.</span><span class="n">git</span>
 </pre></div>
 </div>
-</section>
-<section id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
-<p>Installation from source on any platform is:</p>
+<p>Installation from the source tree on any platform is can then be done with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">.</span>
 </pre></div>
 </div>
 </section>
 <section id="license">
 <h2>License<a class="headerlink" href="#license" title="Link to this heading">¶</a></h2>
-<p>The ASTEVAL code is distribution under the following license:</p>
+<p>The <cite>asteval</cite> code and documentation is distribution under the following
+license:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">MIT</span> <span class="n">License</span>
 
-<span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2023</span> <span class="n">Matthew</span> <span class="n">Newville</span><span class="p">,</span> <span class="n">The</span> <span class="n">University</span> <span class="n">of</span> <span class="n">Chicago</span>
+<span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2024</span> <span class="n">Matthew</span> <span class="n">Newville</span><span class="p">,</span> <span class="n">The</span> <span class="n">University</span> <span class="n">of</span> <span class="n">Chicago</span>
 
 <span class="n">Permission</span> <span class="ow">is</span> <span class="n">hereby</span> <span class="n">granted</span><span class="p">,</span> <span class="n">free</span> <span class="n">of</span> <span class="n">charge</span><span class="p">,</span> <span class="n">to</span> <span class="nb">any</span> <span class="n">person</span> <span class="n">obtaining</span> <span class="n">a</span> <span class="n">copy</span> <span class="n">of</span>
 <span class="n">this</span> <span class="n">software</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">documentation</span> <span class="n">files</span> <span class="p">(</span><span class="n">the</span> <span class="s2">&quot;Software&quot;</span><span class="p">),</span> <span class="n">to</span> <span class="n">deal</span> <span class="ow">in</span>
@@ -130,11 +136,10 @@ environments.</p>
   <div>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
-<li><a class="reference internal" href="#">Downloading and Installation</a><ul>
+<li><a class="reference internal" href="#">Installing Asteval</a><ul>
 <li><a class="reference internal" href="#requirements">Requirements</a></li>
-<li><a class="reference internal" href="#download-and-installation">Download and Installation</a></li>
+<li><a class="reference internal" href="#installing-with-pip">Installing with <cite>pip</cite></a></li>
 <li><a class="reference internal" href="#development-version">Development Version</a></li>
-<li><a class="reference internal" href="#installation">Installation</a></li>
 <li><a class="reference internal" href="#license">License</a></li>
 </ul>
 </li>
@@ -148,8 +153,8 @@ environments.</p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="motivation.html"
-                          title="next chapter">Motivation for asteval</a></p>
+    <p class="topless"><a href="basics.html"
+                          title="next chapter">Using Asteval</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -182,13 +187,13 @@ environments.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="motivation.html" title="Motivation for asteval"
+          <a href="basics.html" title="Using Asteval"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="ASTEVAL: Minimal Python AST Evaluator"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Downloading and Installation</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Installing Asteval</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
