@@ -643,21 +643,15 @@ class Interpreter:  # pylint: disable=too-many-instance-attributes, too-many-pub
         return tuple([self.run(tnode) for tnode in node.dims])
 
     def on_subscript(self, node):  # ('value', 'slice', 'ctx')
-        """subscript handling -- one of the tricky parts"""
+        """Subscript handling -- one of the tricky parts."""
         val = self.run(node.value)
         nslice = self.run(node.slice)
         ctx = node.ctx.__class__
         if ctx in (ast.Load, ast.Store):
-            if isinstance(node.slice, (ast.Index, ast.Slice, ast.Ellipsis)):
-                try:
-                    return val.__getitem__(nslice)
-                except IndexError:
-                    self.raise_exception(node, exc=IndexError, msg='index out of range')
-            elif isinstance(node.slice, ast.ExtSlice):
-                return val[nslice]
-        else:
-            msg = "subscript with unknown context"
-            self.raise_exception(node, msg=msg)
+            return val[nslice]
+        msg = "subscript with unknown context"
+        self.raise_exception(node, msg=msg)
+        return None
 
     def on_delete(self, node):  # ('targets',)
         """delete statement"""
