@@ -702,6 +702,7 @@ def test_namefinder(nested):
     assert 'z' in nf.names
     assert 'cos' in nf.names
 
+
 @pytest.mark.parametrize("nested", [False, True])
 def test_list_comprehension(nested):
     """test list comprehension"""
@@ -718,6 +719,23 @@ def test_list_comprehension(nested):
     list_in = "x = [a*2 for a in range(5)]"
     interp(list_in)
     check_error(interp, 'NameError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_list_comprehension_more(nested):
+    """more tests of list comprehension"""
+    interp = make_interpreter(nested_symtable=nested)
+
+    for expr in  ['[2.5*x for x in range(4)]',
+                '[(i, 5*i+j) for i in range(6) for j in range(3)]',
+                '[(i, j*2) for i in range(6) for j in range(2) if i*j < 8]',
+                '[(x, y) for (x,y) in [(1,2), (3,4)]]',
+                '[(2*x, x+y) for (x,y) in [(1,3), (5,9)]]' ]:
+
+        interp(f"out = {expr}")
+        result = interp.symtable.get('out')
+        assert repr(result) == repr(eval(expr))
+
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_set_comprehension(nested):
