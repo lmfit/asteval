@@ -768,7 +768,7 @@ class Interpreter:
         "data for comprehensions"
         mylocals = {}
         saved_syms = {}
-
+        comps = []
         for tnode in node.generators:
             if tnode.__class__ == ast.comprehension:
                 if tnode.target.__class__ == ast.Name:
@@ -799,38 +799,47 @@ class Interpreter:
                 elif tnode.target.__class__ == ast.Tuple:
                     ttype = 'tuple'
                     target =tuple([tval.id for tval in tnode.target.elts])
-
+                vals = []
                 for val in self.run(tnode.iter):
                     if ttype == 'name':
                         self.symtable[target] = val
                     else:
                         for telem, tval in zip(target, val):
-                            self.symtable[target] = val
+                            self.symtable[telem] = tval
 
                     add = True
                     for cond in tnode.ifs:
                         add = add and self.run(cond)
                     if add:
+                        vals.append(val)
                         if ttype == 'name':
                             mylocals[target].append(val)
                         else:
                             for telem, tval in zip(target, val):
                                 mylocals[telem].append(tval)
-        return mylocals, saved_syms
+                comps.append([target, vals])
+        return comps, saved_syms
+
 
     def on_listcomp(self, node):
         """List comprehension"""
-        mylocals, saved_syms = self.comprehension_data(node)
+        tlocals, saved_syms = self.comprehension_data(node)
+        ncomp = len(tlocals)
+        names, data = [], []
+        for n, d in tlocals:
+            names.append(n)
+            data.append(d)
 
-        names = list(mylocals.keys())
-        data = list(mylocals.values())
         def listcomp_recurse(out, i, names, data):
-            if i == len(names):
+            if i == ncomp:
                 out.append(self.run(node.elt))
                 return
-
             for val in data[i]:
-                self.symtable[names[i]] = val
+                if isinstance(names[i], (tuple, list)):
+                    for _nn, _vv in zip(names[i], val):
+                        self.symtable[_nn] = _vv
+                else:
+                    self.symtable[names[i]] = val
                 listcomp_recurse(out, i+1, names, data)
 
         out = []
@@ -845,10 +854,12 @@ class Interpreter:
 
     def on_dictcomp(self, node):
         """Dictionary comprehension"""
-        mylocals, saved_syms = self.comprehension_data(node)
-
-        names = list(mylocals.keys())
-        data = list(mylocals.values())
+        tlocals, saved_syms = self.comprehension_data(node)
+        ncomp = len(tlocals)
+        names, data = [], []
+        for n, d in tlocals:
+            names.append(n)
+            data.append(d)
 
         def dictcomp_recurse(out, i, names, data):
             if i == len(names):
@@ -856,6 +867,12 @@ class Interpreter:
                 return
 
             for val in data[i]:
+                if isinstance(names[i], (tuple, list)):
+                    for _nn, _vv in zip(names[i], val):
+                        self.symtable[_nn] = _vv
+                else:
+                    self.symtable[names[i]] = val
+
                 self.symtable[names[i]] = val
                 dictcomp_recurse(out, i+1, names, data)
 
