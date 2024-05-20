@@ -193,13 +193,20 @@ if HAS_NUMPY:
 
     NUMPY_TABLE = {}
     for sym in FROM_NUMPY:
-        NUMPY_TABLE[sym] = getattr(numpy, sym)
+        obj = getattr(numpy, sym, None)
+        if obj is not None:
+            NUMPY_TABLE[sym] = obj
+
     for sname, sym in NUMPY_RENAMES.items():
-        NUMPY_TABLE[sname] = getattr(numpy, sym)
+        obj = getattr(numpy, sym, None)
+        if obj is not None:
+            NUMPY_TABLE[sname] = obj
 
     if HAS_NUMPY_FINANCIAL:
         for sym in FROM_NUMPY_FINANCIAL:
-            NUMPY_TABLE[sym] = getattr(numpy_financial, sym)
+            obj = getattr(numpy_financial, sym, None)
+            if obj is not None:
+                NUMPY_TABLE[sym] = obj
 
 else:
     NUMPY_TABLE = {}
