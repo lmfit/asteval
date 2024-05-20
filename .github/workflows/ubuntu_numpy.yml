@@ -14,8 +14,6 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
-        with_financial: [0, 1]
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up Python ${{ matrix.python-version }}
@@ -26,10 +24,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install setuptools codecov pytest pytest-cov coverage numpy
-    - name: Install financial
-    - if: ${{ matrix.with_financial }}
-      run: python -m pip install numpy_financial
+        python -m pip install setuptools codecov pytest pytest-cov coverage numpy numpy_financial
     - name: Install this package
         python -m pip install .
     - name: Test with pytest
