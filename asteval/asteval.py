@@ -439,10 +439,6 @@ class Interpreter:
         """Pass statement."""
         return None  # ()
 
-    def on_ellipsis(self, node):
-        """Ellipses.  deprecated in 3.8"""
-        return Ellipsis
-
     # for break and continue: set the instance variable _interrupt
     def on_interrupt(self, node):    # ()
         """Interrupt handler."""
@@ -460,9 +456,8 @@ class Interpreter:
     def on_assert(self, node):    # ('test', 'msg')
         """Assert statement."""
         if not self.run(node.test):
-            #depraction warning: will become:
-            #  msg = node.msg.value if node.msg else ""
-            msg = node.msg.s if node.msg else ""
+            msg = node.msg.value if node.msg else ""
+            # msg = node.msg.s if node.msg else ""
             self.raise_exception(node, exc=AssertionError, msg=msg)
         return True
 
@@ -486,18 +481,6 @@ class Interpreter:
     def on_constant(self, node):   # ('value', 'kind')
         """Return constant value."""
         return node.value
-
-    def on_num(self, node):   # ('n',)
-        """Return number.  deprecated in 3.8"""
-        return node.n
-
-    def on_str(self, node):   # ('s',)
-        """Return string.  deprecated in 3.8"""
-        return node.s
-
-    def on_bytes(self, node):
-        """return bytes.  deprecated in 3.8"""
-        return node.s  # ('s',)
 
     def on_joinedstr(self, node):  # ('values',)
         "join strings, used in f-strings"
@@ -527,10 +510,6 @@ class Interpreter:
         if ctx in (ast.Param, ast.Del):
             return str(node.id)
         return self._getsym(node)
-
-    def on_nameconstant(self, node):
-        """True, False, or None  deprecated in 3.8"""
-        return node.value
 
     def node_assign(self, node, val):
         """Assign a value (not the node.value object) to a node.
@@ -952,12 +931,8 @@ class Interpreter:
         args = [tnode.arg for tnode in node.args.args[:offset]]
         doc = None
         nb0 = node.body[0]
-        # deprecation warning: will become
-        # if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Constant):
-        if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Str):
-            # deprecation warning: will become
-            # doc = nb0.value
-            doc = nb0.value.s
+        if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Constant):
+            doc = nb0.value
         varkws = node.args.kwarg
         vararg = node.args.vararg
         if isinstance(vararg, ast.arg):

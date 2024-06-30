@@ -1105,9 +1105,9 @@ def test_astdump(nested):
     assert isinstance(astnode, ast.Module)
     assert isinstance(astnode.body[0], ast.Assign)
     assert isinstance(astnode.body[0].targets[0], ast.Name)
-    assert isinstance(astnode.body[0].value, ast.Num)
+    assert isinstance(astnode.body[0].value, ast.Constant)
     assert astnode.body[0].targets[0].id == 'x'
-    assert astnode.body[0].value.n == 1
+    assert astnode.body[0].value.value == 1
     dumped = interp.dump(astnode.body[0])
     assert dumped.startswith('Assign')
 
