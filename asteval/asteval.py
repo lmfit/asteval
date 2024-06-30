@@ -763,87 +763,68 @@ class Interpreter:
             if hasattr(ctx, '__exit__'):
                 ctx.__exit__()
 
-
-    def comprehension_data(self, node):      # ('elt', 'generators')
-        "data for comprehensions"
-        mylocals = {}
+    def _comp_save_syms(self, node):
+        """find and save symbols that will be used in a comprehension"""
         saved_syms = {}
-        comps = []
         for tnode in node.generators:
-            if tnode.__class__ == ast.comprehension:
-                if tnode.target.__class__ == ast.Name:
-                    if (not valid_symbol_name(tnode.target.id) or
-                        tnode.target.id in self.readonly_symbols):
-                        errmsg = f"invalid symbol name (reserved word?) {tnode.target.id}"
-                        self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
-                    mylocals[tnode.target.id] = []
-                    if tnode.target.id in self.symtable:
-                        saved_syms[tnode.target.id] = copy.deepcopy(self._getsym(tnode.target))
+            if tnode.target.__class__ == ast.Name:
+                if (not valid_symbol_name(tnode.target.id) or
+                    tnode.target.id in self.readonly_symbols):
+                    errmsg = f"invalid symbol name (reserved word?) {tnode.target.id}"
+                    self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
+                if tnode.target.id in self.symtable:
+                    saved_syms[tnode.target.id] = copy.deepcopy(self._getsym(tnode.target))
 
-                elif tnode.target.__class__ == ast.Tuple:
-                    target = []
-                    for tval in tnode.target.elts:
-                        mylocals[tval.id] = []
-                        if tval.id in self.symtable:
-                            saved_syms[tval.id] = copy.deepcopy(self._getsym(tval))
+            elif tnode.target.__class__ == ast.Tuple:
+                target = []
+                for tval in tnode.target.elts:
+                    if tval.id in self.symtable:
+                        saved_syms[tval.id] = copy.deepcopy(self._getsym(tval))
+        return saved_syms
 
-        for tnode in node.generators:
-            if tnode.__class__ == ast.comprehension:
-                ttype = 'name'
-                if tnode.target.__class__ == ast.Name:
-                    if (not valid_symbol_name(tnode.target.id) or
-                        tnode.target.id in self.readonly_symbols):
-                        errmsg = f"invalid symbol name (reserved word?) {tnode.target.id}"
-                        self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
-                    ttype, target = 'name', tnode.target.id
-                elif tnode.target.__class__ == ast.Tuple:
-                    ttype = 'tuple'
-                    target =tuple([tval.id for tval in tnode.target.elts])
-                vals = []
-                for val in self.run(tnode.iter):
-                    if ttype == 'name':
-                        self.symtable[target] = val
-                    else:
-                        for telem, tval in zip(target, val):
-                            self.symtable[telem] = tval
 
-                    add = True
-                    for cond in tnode.ifs:
-                        add = add and self.run(cond)
-                    if add:
-                        vals.append(val)
-                        if ttype == 'name':
-                            mylocals[target].append(val)
-                        else:
-                            for telem, tval in zip(target, val):
-                                mylocals[telem].append(tval)
-                comps.append([target, vals])
-        return comps, saved_syms
+    def do_generator(self, gnodes, node, out):
+        gnode = gnodes[0]
+        ttype = None
+        if gnode.target.__class__ == ast.Name:
+            if (not valid_symbol_name(gnode.target.id) or
+                gnode.target.id in self.readonly_symbols):
+                errmsg = f"invalid symbol name (reserved word?) {gnode.target.id}"
+                self.raise_exception(gnode.target, exc=NameError, msg=errmsg)
+            ttype = 'name'
+            target = gnode.target.id
+        elif gnode.target.__class__ == ast.Tuple:
+            ttype = 'tuple'
+            target = tuple([gval.id for gval in gnode.target.elts])
+        if ttype is None:
+             errmsg = f"invalid comprehension {gnode.target.id}"
+             self.raise_exception(gnode.target, exc=NameError, msg=errmsg)
 
+        for val in self.run(gnode.iter):
+            if ttype == 'name':
+                self.symtable[target] = val
+            else:
+                for telem, tval in zip(target, val):
+                    self.symtable[telem] = tval
+            add = True
+            for cond in gnode.ifs:
+                add = add and self.run(cond)
+                if not add:
+                    break
+            if add:
+                if len(gnodes[1:]) > 0:
+                    self.do_generator(gnodes[1:], node, out)
+                elif isinstance(out, (list, tuple)):
+                    out.append(self.run(node.elt))
+                elif isinstance(out, dict):
+                    out[self.run(node.key)] = self.run(node.value)
 
     def on_listcomp(self, node):
-        """List comprehension"""
-        tlocals, saved_syms = self.comprehension_data(node)
-        ncomp = len(tlocals)
-        names, data = [], []
-        for n, d in tlocals:
-            names.append(n)
-            data.append(d)
-
-        def listcomp_recurse(out, i, names, data):
-            if i == ncomp:
-                out.append(self.run(node.elt))
-                return
-            for val in data[i]:
-                if isinstance(names[i], (tuple, list)):
-                    for _nn, _vv in zip(names[i], val):
-                        self.symtable[_nn] = _vv
-                else:
-                    self.symtable[names[i]] = val
-                listcomp_recurse(out, i+1, names, data)
+        """List comprehension v2"""
+        saved_syms = self._comp_save_syms(node)
 
         out = []
-        listcomp_recurse(out, 0, names, data)
+        self.do_generator(node.generators, node, out)
         for name, val in saved_syms.items():
             self.symtable[name] = val
         return out
@@ -853,35 +834,14 @@ class Interpreter:
         return set(self.on_listcomp(node))
 
     def on_dictcomp(self, node):
-        """Dictionary comprehension"""
-        tlocals, saved_syms = self.comprehension_data(node)
-        ncomp = len(tlocals)
-        names, data = [], []
-        for n, d in tlocals:
-            names.append(n)
-            data.append(d)
-
-        def dictcomp_recurse(out, i, names, data):
-            if i == len(names):
-                out[self.run(node.key)] = self.run(node.value)
-                return
-
-            for val in data[i]:
-                if isinstance(names[i], (tuple, list)):
-                    for _nn, _vv in zip(names[i], val):
-                        self.symtable[_nn] = _vv
-                else:
-                    self.symtable[names[i]] = val
-
-                self.symtable[names[i]] = val
-                dictcomp_recurse(out, i+1, names, data)
+        """Dict comprehension v2"""
+        saved_syms = self._comp_save_syms(node)
 
         out = {}
-        dictcomp_recurse(out, 0, names, data)
+        self.do_generator(node.generators, node, out)
         for name, val in saved_syms.items():
             self.symtable[name] = val
         return out
-
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')
         """Exception handler..."""
