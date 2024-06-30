@@ -785,23 +785,19 @@ class Interpreter:
 
     def do_generator(self, gnodes, node, out):
         gnode = gnodes[0]
-        ttype = None
+        nametype = True
         if gnode.target.__class__ == ast.Name:
             if (not valid_symbol_name(gnode.target.id) or
                 gnode.target.id in self.readonly_symbols):
                 errmsg = f"invalid symbol name (reserved word?) {gnode.target.id}"
                 self.raise_exception(gnode.target, exc=NameError, msg=errmsg)
-            ttype = 'name'
             target = gnode.target.id
         elif gnode.target.__class__ == ast.Tuple:
-            ttype = 'tuple'
+            nametype = False
             target = tuple([gval.id for gval in gnode.target.elts])
-        if ttype is None:
-             errmsg = f"invalid comprehension {gnode.target.id}"
-             self.raise_exception(gnode.target, exc=NameError, msg=errmsg)
 
         for val in self.run(gnode.iter):
-            if ttype == 'name':
+            if nametype:
                 self.symtable[target] = val
             else:
                 for telem, tval in zip(target, val):
@@ -812,9 +808,9 @@ class Interpreter:
                 if not add:
                     break
             if add:
-                if len(gnodes[1:]) > 0:
+                if len(gnodes) > 1:
                     self.do_generator(gnodes[1:], node, out)
-                elif isinstance(out, (list, tuple)):
+                elif isinstance(out, list):
                     out.append(self.run(node.elt))
                 elif isinstance(out, dict):
                     out[self.run(node.key)] = self.run(node.value)
