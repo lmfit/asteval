@@ -725,12 +725,21 @@ def test_list_comprehension(nested):
 def test_list_comprehension_more(nested):
     """more tests of list comprehension"""
     interp = make_interpreter(nested_symtable=nested)
+    odd = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
+    even = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+
+    interp('odd = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]')
+    interp('even = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]')
 
     for expr in  ['[2.5*x for x in range(4)]',
                 '[(i, 5*i+j) for i in range(6) for j in range(3)]',
                 '[(i, j*2) for i in range(6) for j in range(2) if i*j < 8]',
                 '[(x, y) for (x,y) in [(1,2), (3,4)]]',
-                '[(2*x, x+y) for (x,y) in [(1,3), (5,9)]]' ]:
+                '[(2*x, x+y) for (x,y) in [(1,3), (5,9)]]',
+                '[p*2.5 for p in odd]',
+                '[n for p in zip(odd, even) for n in p]',
+                '[(i*i + 0.5) for i in range(4)]',
+                ]:
 
         interp(f"out = {expr}")
         result = interp.symtable.get('out')
