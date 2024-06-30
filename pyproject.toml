@@ -39,7 +39,7 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: PyPy",
     ]
 
-[project.url]
+[project.urls]
 Homepage = " https://github.com/lmfit/asteval"
 Documentation = "https://lmfit.github.io/asteval/"
 Tracker = "https://github.com/lmfit/asteval/issues"
