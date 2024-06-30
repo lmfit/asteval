@@ -29,7 +29,6 @@ ASTEVAL
    :target: https://zenodo.org/badge/latestdoi/4185/newville/asteval
 
 
-
 Links
 -----
 
@@ -38,8 +37,20 @@ Links
 * Development Code: https://github.com/lmfit/asteval
 * Issue Tracker: https://github.com/lmfit/asteval/issues
 
-What is it?
------------
+Installation
+----------
+
+To install the asteval module, use::
+   pip install asteval
+
+or download and unack the source package and use
+   pip install .
+
+Asteval require Python 3.8 or higher.  If installed, many functions and
+constants from numpy will be used by default.
+
+About ASTEVAL
+--------------
 
 ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
 using Python's ast module.  The idea is to provide a simple, safe, and
@@ -67,9 +78,13 @@ the most important differences and absences are:
  1. Variable and function symbol names are held in a simple symbol
     table (a single dictionary), giving a flat namespace.
  2. creating classes is not supported.
- 3. importing modules is not supported.
+ 3. importing modules is not supported by default - it can be enabled.
  4. function decorators, yield, lambda, exec, and eval are not supported.
  5. files can only be opened in read-only mode.
 
 In addition, accessing many internal methods and classes of objects is
 forbidden in order to strengthen asteval against malicious user code.
+
+
+Matt Newville <newville@cars.uchicago.edu>
+Last Update:  30-June-2024
