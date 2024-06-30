@@ -285,18 +285,18 @@ In addition, this symbol table can be nested -- not flat -- and may have a
 special attribute called ``_searchgroups`` that give the name of sub-Groups to
 search for symbols.  By default, when using this new-style symbol table, the
 mathematical functions imported from the ``math`` and ``numpy`` modules) are
-placed in a subgroup named ``math`` (with more that 350 named functions and
+placed in a subgroup named ``math`` (with about 300 named functions and
 variables), and the ``_searchgroups`` variable is set to the tuple
 ``('math',)``.  When looking for the a symbol in an expression like ``a = b *
 cos( pi /3)``, the Interpreter will have to find and use the symbols names for
-``b``, ``cos`` and ``pi``.  With the old-style symbol table, all of these
-must be in the flat dictionary, which makes it difficult to browse through the
-symbol table.  With the new, nested symbol table, the names ``b``, ``cos``
-and ``pi`` are first looked for in the top-level Group. If not found there,
-they are looked for in the subgroups named in ``_searchgroups``, in order and
+``b``, ``cos`` and ``pi``.  With the old-style symbol table, all of these must
+be in the flat dictionary, which makes it difficult to browse through the
+symbol table.  With the new, nested symbol table, the names ``b``, ``cos`` and
+``pi`` are first looked for in the top-level Group. If not found there, they
+are looked for in the subgroups named in ``_searchgroups``, in order and
 returned as soon as one is found.  That is the expectation is that `b` would be
-found in the "top-level user Group", while ``cos`` and ``pi`` would be found in the
-``math`` Group, and that::
+found in the "top-level user Group", while ``cos`` and ``pi`` would be found in
+the ``math`` Group, and that::
 
       >>> aeval('a = b * cos( pi /3)')
       >>> aeval('a = b * math.cos(math.pi /3)')
