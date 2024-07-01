@@ -1,6 +1,5 @@
 
-
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="en" data-content_root="./">
   <head>
@@ -9,10 +8,10 @@
 
     <title>Using Asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=658d757c" />
     
-    <script src="_static/documentation_options.js?v=d2ac1402"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -55,7 +54,7 @@
 most important features.  Further details can be found in the next chapter
 (<a class="reference internal" href="api.html#asteval-api"><span class="std std-ref">Asteval Reference</span></a>).</p>
 <section id="creating-and-using-an-asteval-interpreter">
-<h2>creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Link to this heading">¶</a></h2>
+<h2>Creating and using an asteval Interpreter<a class="headerlink" href="#creating-and-using-an-asteval-interpreter" title="Link to this heading">¶</a></h2>
 <p>The asteval module is very easy to use.  Import the module and create an Interpreter:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
@@ -66,8 +65,9 @@ that is very much like python:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;x = sqrt(3)&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;print(x)&#39;</span><span class="p">)</span>
 <span class="go">1.73205080757</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;for i in range(10):</span>
-<span class="go">print(i, sqrt(i), log(1+1))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
+<span class="go">for i in range(10):</span>
+<span class="go">    print(i, sqrt(i), log(1+1))</span>
 <span class="go">&#39;&#39;&#39;)</span>
 <span class="go">0 0.0 0.0</span>
 <span class="go">1 1.0 0.69314718056</span>
@@ -81,6 +81,9 @@ that is very much like python:</p>
 <span class="go">9 3.0 2.30258509299</span>
 </pre></div>
 </div>
+<p>There are lots of options when creating the Interpreter to controller what
+functionality is and isn’t allowed and to pre-load data and functions.  The
+default interpreter gives a limited but useful version of the Python language.</p>
 </section>
 <section id="accessing-the-symbol-table">
 <h2>accessing the symbol table<a class="headerlink" href="#accessing-the-symbol-table" title="Link to this heading">¶</a></h2>
@@ -145,14 +148,13 @@ cos, cosh, degrees, e, exp, fabs, factorial, floor, fmod,
 frexp, fsum, hypot, isinf, isnan, ldexp, log, log10, log1p,
 modf, pi, pow, radians, sin, sinh, sqrt, tan, tanh, trunc</p>
 </div></blockquote>
-<p>If available, a very large number (~350) additional symbols are imported from
-<a class="reference external" href="https://numpy.org/">numpy</a>.</p>
+<p>If available, about 300 additional symbols are imported from <a class="reference external" href="https://numpy.org/">numpy</a>.</p>
 </section>
 <section id="conditionals-and-loops">
 <h2>conditionals and loops<a class="headerlink" href="#conditionals-and-loops" title="Link to this heading">¶</a></h2>
-<p>If-then-else blocks, for-loops (including the optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), while
-loops (also including optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), and with blocks are supported,
-and work exactly as they do in python.  Thus:</p>
+<p>If-then-else blocks, for-loops (including the optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block),
+<code class="docutils literal notranslate"><span class="pre">while</span></code> loops (also including optional <code class="docutils literal notranslate"><span class="pre">else</span></code> block), and <code class="docutils literal notranslate"><span class="pre">with</span></code> blocks
+are supported, and work exactly as they do in python.  Thus:</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
 <span class="go">sum = 0</span>
 <span class="go">for i in range(10):</span>
@@ -185,7 +187,7 @@ option.  By default, outputs are sent to <a class="reference external" href="htt
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">asteval</span> <span class="kn">import</span> <span class="n">Interpreter</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">code</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;def func(a, b, norm=1.0):</span>
-<span class="gp">... </span><span class="s2">return (a + b)/norm</span>
+<span class="gp">... </span><span class="s2">    return (a + b)/norm</span>
 <span class="gp">... </span><span class="s2">&quot;&quot;&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s2">&quot;func(1, 3, norm=10.0)&quot;</span><span class="p">)</span>
@@ -232,7 +234,7 @@ REPL loop, you’d want to do something similar to</p>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Using Asteval</a><ul>
-<li><a class="reference internal" href="#creating-and-using-an-asteval-interpreter">creating and using an asteval Interpreter</a></li>
+<li><a class="reference internal" href="#creating-and-using-an-asteval-interpreter">Creating and using an asteval Interpreter</a></li>
 <li><a class="reference internal" href="#accessing-the-symbol-table">accessing the symbol table</a></li>
 <li><a class="reference internal" href="#built-in-functions">built-in functions</a></li>
 <li><a class="reference internal" href="#conditionals-and-loops">conditionals and loops</a></li>
@@ -262,7 +264,7 @@ REPL loop, you’d want to do something similar to</p>
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -270,7 +272,7 @@ REPL loop, you’d want to do something similar to</p>
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
@@ -297,7 +299,7 @@ REPL loop, you’d want to do something similar to</p>
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright 2024, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     </div>
   </body>
 </html>

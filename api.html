@@ -1,6 +1,5 @@
 
-
-<!doctype html>
+<!DOCTYPE html>
 
 <html lang="en" data-content_root="./">
   <head>
@@ -9,10 +8,10 @@
 
     <title>Asteval Reference &#8212; ASTEVAL: Minimal Python AST evaluator</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=532c1bf3" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=658d757c" />
     
-    <script src="_static/documentation_options.js?v=d2ac1402"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/documentation_options.js?v=8d563738"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -93,10 +92,10 @@ nodes disabled: (‘import’, ‘importfrom’, ‘if’, ‘for’, ‘while�
 </ol>
 </dd></dl>
 
-<p>By default, the symbol table will be created with <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_symbol_table()</span></code></a>
-that will include several standard python builtin functions, several
-functions from the <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.12)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module and (if available and not turned off)
-several functions from <a class="reference external" href="https://numpy.org">numpy</a>.</p>
+<p>If not provided, a symbol table will be created with <a class="reference internal" href="#asteval.make_symbol_table" title="asteval.make_symbol_table"><code class="xref py py-func docutils literal notranslate"><span class="pre">make_symbol_table()</span></code></a>
+that will include several standard python builtin functions, several functions
+from the <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.12)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module and (if available and not turned off) several
+functions from <a class="reference external" href="https://numpy.org">numpy</a>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">writer</span></code> argument can be used to provide a place to send all output
 that would normally go to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.  The default is, of
 course, to send output to <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stdout" title="(in Python v3.12)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stdout</span></code></a>.  Similarly, <code class="docutils literal notranslate"><span class="pre">err_writer</span></code>
@@ -381,7 +380,7 @@ and alter that to use as the <code class="docutils literal notranslate"><span cl
 That is, the calling program can fully control the symbol table, either
 pre-loading custom variables and functions or removing default functions.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">New in version 0.9.31.</span></p>
+<p><span class="versionmodified added">Added in version 0.9.31.</span></p>
 </div>
 <section id="new-style-symbol-table">
 <h3>New Style Symbol Table<a class="headerlink" href="#new-style-symbol-table" title="Link to this heading">¶</a></h3>
@@ -406,18 +405,18 @@ identifiers, and cannot be reserved words.</p>
 special attribute called <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code> that give the name of sub-Groups to
 search for symbols.  By default, when using this new-style symbol table, the
 mathematical functions imported from the <code class="docutils literal notranslate"><span class="pre">math</span></code> and <code class="docutils literal notranslate"><span class="pre">numpy</span></code> modules) are
-placed in a subgroup named <code class="docutils literal notranslate"><span class="pre">math</span></code> (with more that 350 named functions and
+placed in a subgroup named <code class="docutils literal notranslate"><span class="pre">math</span></code> (with about 300 named functions and
 variables), and the <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code> variable is set to the tuple
 <code class="docutils literal notranslate"><span class="pre">('math',)</span></code>.  When looking for the a symbol in an expression like <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">b</span> <span class="pre">*</span>
 <span class="pre">cos(</span> <span class="pre">pi</span> <span class="pre">/3)</span></code>, the Interpreter will have to find and use the symbols names for
-<code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code> and <code class="docutils literal notranslate"><span class="pre">pi</span></code>.  With the old-style symbol table, all of these
-must be in the flat dictionary, which makes it difficult to browse through the
-symbol table.  With the new, nested symbol table, the names <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code>
-and <code class="docutils literal notranslate"><span class="pre">pi</span></code> are first looked for in the top-level Group. If not found there,
-they are looked for in the subgroups named in <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code>, in order and
+<code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code> and <code class="docutils literal notranslate"><span class="pre">pi</span></code>.  With the old-style symbol table, all of these must
+be in the flat dictionary, which makes it difficult to browse through the
+symbol table.  With the new, nested symbol table, the names <code class="docutils literal notranslate"><span class="pre">b</span></code>, <code class="docutils literal notranslate"><span class="pre">cos</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pi</span></code> are first looked for in the top-level Group. If not found there, they
+are looked for in the subgroups named in <code class="docutils literal notranslate"><span class="pre">_searchgroups</span></code>, in order and
 returned as soon as one is found.  That is the expectation is that <cite>b</cite> would be
-found in the “top-level user Group”, while <code class="docutils literal notranslate"><span class="pre">cos</span></code> and <code class="docutils literal notranslate"><span class="pre">pi</span></code> would be found in the
-<code class="docutils literal notranslate"><span class="pre">math</span></code> Group, and that:</p>
+found in the “top-level user Group”, while <code class="docutils literal notranslate"><span class="pre">cos</span></code> and <code class="docutils literal notranslate"><span class="pre">pi</span></code> would be found in
+the <code class="docutils literal notranslate"><span class="pre">math</span></code> Group, and that:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;a = b * cos( pi /3)&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval</span><span class="p">(</span><span class="s1">&#39;a = b * math.cos(math.pi /3)&#39;</span><span class="p">)</span>
 </pre></div>
@@ -551,7 +550,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
             rel="nofollow">Show Source</a></li>
     </ul>
    </div>
-<div id="searchbox" style="display: none" role="search">
+<search id="searchbox" style="display: none" role="search">
   <h3 id="searchlabel">Quick search</h3>
     <div class="searchformwrapper">
     <form class="search" action="search.html" method="get">
@@ -559,7 +558,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
       <input type="submit" value="Go" />
     </form>
     </div>
-</div>
+</search>
 <script>document.getElementById('searchbox').style.display = "block"</script>
         </div>
       </div>
@@ -586,7 +585,7 @@ the regular expression <code class="docutils literal notranslate"><span class="p
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright 2024, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     </div>
   </body>
 </html>
