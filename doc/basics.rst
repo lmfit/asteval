@@ -7,9 +7,8 @@ most important features.  Further details can be found in the next chapter
 (:ref:`asteval_api`).
 
 
-creating and using an asteval Interpreter
+Creating and using an asteval Interpreter
 =============================================
-
 
 The asteval module is very easy to use.  Import the module and create an Interpreter:
 
@@ -22,8 +21,9 @@ that is very much like python::
     >>> aeval('x = sqrt(3)')
     >>> aeval('print(x)')
     1.73205080757
-    >>> aeval('''for i in range(10):
-    print(i, sqrt(i), log(1+1))
+    >>> aeval('''
+    for i in range(10):
+        print(i, sqrt(i), log(1+1))
     ''')
     0 0.0 0.0
     1 1.0 0.69314718056
@@ -36,6 +36,9 @@ that is very much like python::
     8 2.82842712475 2.19722457734
     9 3.0 2.30258509299
 
+There are lots of options when creating the Interpreter to controller what
+functionality is and isn't allowed and to pre-load data and functions.  The
+default interpreter gives a limited but useful version of the Python language.
 
 
 accessing the symbol table
@@ -108,15 +111,14 @@ The symbols imported from Python's ``math`` module include:
 
 .. _numpy: https://numpy.org/
 
-If available, a very large number (~350) additional symbols are imported from
-`numpy`_.
+If available, about 300 additional symbols are imported from `numpy`_.
 
 conditionals and loops
 ==========================
 
-If-then-else blocks, for-loops (including the optional ``else`` block), while
-loops (also including optional ``else`` block), and with blocks are supported,
-and work exactly as they do in python.  Thus:
+If-then-else blocks, for-loops (including the optional ``else`` block),
+``while`` loops (also including optional ``else`` block), and ``with`` blocks
+are supported, and work exactly as they do in python.  Thus:
 
     >>> code = """
     sum = 0
@@ -154,7 +156,7 @@ User-defined functions can be written and executed, as in python with a
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()
    >>> code = """def func(a, b, norm=1.0):
-   ... return (a + b)/norm
+   ...     return (a + b)/norm
    ... """
    >>> aeval(code)
    >>> aeval("func(1, 3, norm=10.0)")

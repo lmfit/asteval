@@ -96,36 +96,48 @@ If you are paranoid about safe user input that can never cause a segmentation
 fault, you may want to consider disabling the use of numpy, or take extra care
 to specify what can be used.
 
-There are important categories of safety that asteval does not even attempt
-to address. The most important of these is resource hogging, which might be
-used for a denial-of-service attack.  There is no guaranteed timeout on any
-calculation, and so a reasonable looking calculation such as::
+There are important categories of safety that asteval may attempt to address,
+but cannot guarantee success.  The most important of these is resource hogging,
+which might be used for a denial-of-service attack.  There is no guaranteed
+timeout on any calculation, and so a reasonable looking calculation such as::
 
    from asteval import Interpreter
    aeval = Interpreter()
    txt = """nmax = 1e8
-   a = sqrt(arange(nmax))
+   a = sqrt(arange(nmax))   # using numpy.sqrt() and numpy.arange()
    """
    aeval.eval(txt)
 
-can take a noticeable amount of CPU time - if it does not, changing ``1e8`` to
-``9e13`` almost certainly will.  As another example, consider the expression
-``x**y**z``.  For values ``x=y=z=5``, the run time will be well under 0.001
-seconds.  For ``x=y=z=8``, run time will still be under 1 sec.  Changing to
-``x=8, y=9, z=9``, will cause the statement to take several seconds.  With
-``x=y=z=9``, executing that statement may take more than 1 hour on some
-machines.  It is not hard to come up with short program that would run for
-hundreds of years, which probably exceeds anyones threshold for an acceptable
-run-time.  There simply is not a good way to predict how long any code will
-take to run from the text of the code itself: run time cannot be determined
-lexically.  To be clear, for this exponentiation example, asteval will raise a
+can take a noticeable amount of CPU time - if it does not, increasing that
+value of ``nmax`` almost certainly will, and can even crash the Python shell.
+
+As another example, consider the expression ``x**y**z``.  For values
+``x=y=z=5``, the run time will be well under 0.001 seconds.  For ``x=y=z=8``,
+run time will still be under 1 sec.  Changing to ``x=8, y=9, z=9``, will cause
+the statement to take several seconds.  With ``x=y=z=9``, executing that
+statement may take more than 1 hour on some machines.  It is not hard to come
+up with short program that would run for hundreds of years, which probably
+exceeds anyones threshold for an acceptable run-time.  There simply is not a
+good way to predict how long any code will take to run from the text of the
+code itself: run time cannot be determined lexically.
+
+To be clear, for the ``x**y**z`` exponentiation example, asteval will raise a
 runtime error, telling you that an exponent > 10,000 is not allowed.  Several
-other attempts are made to prevent long-running operations.  But these checks
-happen at runtime (that is, after the value of the exponent has been
-evaluated), it does not happen by looking at the text of the code.  Very large
-arrays and lists can be created that might approach memory limits.  There are
-countless other "clever ways" to have very long run times that cannot be
-readily predicted from the text.
+other attempts are made to prevent long-running operations or memory
+exhaustion.  These checks will prevent:
+
+  * statements longer than 50,000 bytes.
+  * values of exponents (``p`` in ``x**p``) > 10,000.
+  * string operations with strings longer than 262144 bytes
+  * shift operations with shifts (``p`` in ``x << p``) > 1000.
+  * more than 262144 open buffers
+  * opening a file with a mode other than ``'r'``, ``'rb'``, or ``'ru'``.
+
+These checks happen at runtime, not by analyzing the text of the code.  As with
+the example above using ``numpy.arange``, very large arrays and lists can be
+created that might approach memory limits.  There are countless other "clever
+ways" to have very long run times that cannot be readily predicted from the
+text.
 
 The exponential example also highlights the issue that there is not a good way
 to check for a long-running calculation within a single Python process.  That
@@ -133,12 +145,12 @@ calculation is not stuck within the Python interpreter, but in C code (no doubt
 the ``pow()`` function) called by the Python interpreter itself.  That call
 will not return from the C library to the Python interpreter or allow other
 threads to run until that call is done.  That means that from within a single
-process, there would not be a reliable way to tell asteval (or really, even
-Python) when a calculation has taken too long: Denial of Service is hard to
-detect before it happens, and even challenging to detect while it is happening.
-The only reliable way to limit run time is at the level of the operating
-system, with a second process watching the execution time of the asteval
-process and either try to interrupt it or kill it.
+process, there is not a reliable way to tell asteval (or really, even Python)
+when a calculation has taken too long: Denial of Service is hard to detect
+before it happens, and even challenging to detect while it is happening.  The
+only reliable way to limit run time is at the level of the operating system,
+with a second process watching the execution time of the asteval process and
+either try to interrupt it or kill it.
 
 For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the *recursion limit* when

@@ -24,10 +24,10 @@ The :class:`Interpreter` class
 .. autoclass:: Interpreter
 
 
-By default, the symbol table will be created with :func:`make_symbol_table`
-that will include several standard python builtin functions, several
-functions from the :py:mod:`math` module and (if available and not turned off)
-several functions from `numpy`_.
+If not provided, a symbol table will be created with :func:`make_symbol_table`
+that will include several standard python builtin functions, several functions
+from the :py:mod:`math` module and (if available and not turned off) several
+functions from `numpy`_.
 
 The ``writer`` argument can be used to provide a place to send all output
 that would normally go to :py:data:`sys.stdout`.  The default is, of
