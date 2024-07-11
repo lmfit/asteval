@@ -44,9 +44,9 @@ import inspect
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, ExceptionHolder, ReturnedNone, Empty,
-                       make_symbol_table, numpy, op2func, valid_symbol_name,
-                       Procedure)
+from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, UNSAFE_ATTRS_DTYPES,
+                       ExceptionHolder, ReturnedNone, Empty, make_symbol_table,
+                       numpy, op2func, valid_symbol_name, Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'bytes', 'call', 'compare', 'constant',
@@ -492,10 +492,11 @@ class Interpreter:
         fstring_converters = {115: str, 114: repr, 97: ascii}
         if node.conversion in fstring_converters:
             val = fstring_converters[node.conversion](val)
-        fmt = '{0}'
+        fmt = '{__fstring__}'
         if node.format_spec is not None:
-            fmt = f'{{0:{self.run(node.format_spec)}}}'
-        return fmt.format(val)
+            fmt = f'{{__fstring__:{self.run(node.format_spec)}}}'
+        else:
+            return fmt.format(__fstring__=val)
 
     def _getsym(self, node):
         val = self.symtable.get(node.id, ReturnedNone)
@@ -546,6 +547,7 @@ class Interpreter:
 
     def on_attribute(self, node):    # ('value', 'attr', 'ctx')
         """Extract attribute."""
+
         ctx = node.ctx.__class__
         if ctx == ast.Store:
             msg = "attribute for storage: shouldn't be here!"
@@ -554,20 +556,23 @@ class Interpreter:
         sym = self.run(node.value)
         if ctx == ast.Del:
             return delattr(sym, node.attr)
-
-        # ctx is ast.Load
-        if not (node.attr in UNSAFE_ATTRS or
-                (node.attr.startswith('__') and
-                 node.attr.endswith('__'))):
+        #
+        unsafe = (node.attr in UNSAFE_ATTRS or
+                 (node.attr.startswith('__') and node.attr.endswith('__')))
+        if not unsafe:
+            for dtype, attrlist in UNSAFE_ATTRS_DTYPES.items():
+                unsafe = isinstance(sym, dtype) and node.attr in attrlist
+                if unsafe:
+                    break
+        if unsafe:
+            msg = f"no safe attribute '{node.attr}' for {repr(sym)}"
+            self.raise_exception(node, exc=AttributeError, msg=msg)
+        else:
             try:
                 return getattr(sym, node.attr)
             except AttributeError:
                 pass
 
-        # AttributeError or accessed unsafe attribute
-        msg = f"no attribute '{node.attr}' for {self.run(node.value)}"
-        self.raise_exception(node, exc=AttributeError, msg=msg)
-        return None
 
     def on_assign(self, node):    # ('targets', 'value')
         """Simple assignment."""
