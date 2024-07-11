@@ -41,15 +41,17 @@ MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
 
 RESERVED_WORDS = ('False', 'None', 'True', 'and', 'as', 'assert',
-                  'async', 'await', 'break', 'class', 'continue',
-                  'def', 'del', 'elif', 'else', 'except', 'finally',
-                  'for', 'from', 'global', 'if', 'import', 'in', 'is',
+                  'async', 'await', 'break', 'class', 'continue', 'def',
+                  'del', 'elif', 'else', 'except', 'finally', 'for',
+                  'from', 'global', 'if', 'import', 'in', 'is',
                   'lambda', 'nonlocal', 'not', 'or', 'pass', 'raise',
                   'return', 'try', 'while', 'with', 'yield', 'exec',
-                  'eval', 'execfile', '__import__', '__package__')
+                  'eval', 'execfile', '__import__', '__package__',
+                  '__fstring__')
 
 NAME_MATCH = re.compile(r"[a-zA-Z_][a-zA-Z0-9_]*$").match
 
+# unsafe attributes for all objects:
 UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
                 '__reduce__', '__reduce_ex__',  '__mro__',
                 '__closure__', '__func__', '__self__', '__module__',
@@ -58,6 +60,10 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
                 '__init__', 'func_globals', 'func_code', 'func_closure',
                 'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
                 'f_locals', '__asteval__')
+
+# unsafe attributes for particular objects, by type
+UNSAFE_ATTRS_DTYPES = {str: ('format', 'format_map')}
+
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -105,7 +111,7 @@ FROM_NUMPY = ('abs', 'add', 'all', 'amax', 'amin', 'angle', 'any', 'append',
     'diag', 'diag_indices', 'diag_indices_from', 'diagflat', 'diagonal',
     'diff', 'digitize', 'divide', 'dot', 'dsplit', 'dstack', 'dtype', 'e',
     'ediff1d', 'empty', 'empty_like', 'equal', 'exp', 'exp2', 'expand_dims',
-    'expm1', 'extract', 'eye', 'fabs', 'fft', 'fill_diagonal', 'finfo', 'fix',
+    'expm1', 'extract', 'eye', 'fabs', 'fill_diagonal', 'finfo', 'fix',
     'flatiter', 'flatnonzero', 'fliplr', 'flipud', 'float64', 'floor',
     'floor_divide', 'fmax', 'fmin', 'fmod', 'format_parser', 'frexp',
     'frombuffer', 'fromfile', 'fromfunction', 'fromiter', 'frompyfunc',
@@ -126,21 +132,20 @@ FROM_NUMPY = ('abs', 'add', 'all', 'amax', 'amin', 'angle', 'any', 'append',
     'ndenumerate', 'ndim', 'ndindex', 'negative', 'nextafter', 'nonzero',
     'not_equal', 'number', 'ones', 'ones_like', 'outer', 'packbits',
     'percentile', 'pi', 'piecewise', 'place', 'poly', 'poly1d', 'polyadd',
-    'polyder', 'polydiv', 'polyint', 'polymul', 'polynomial', 'polysub',
-    'polyval', 'power', 'prod', 'ptp', 'put', 'putmask', 'rad2deg', 'radians',
-    'random', 'ravel', 'real', 'real_if_close', 'reciprocal', 'record',
-    'remainder', 'repeat', 'reshape', 'resize', 'right_shift', 'rint', 'roll',
-    'rollaxis', 'roots', 'rot90', 'round', 'searchsorted', 'select',
-    'setbufsize', 'setdiff1d', 'seterr', 'setxor1d', 'shape', 'short', 'sign',
-    'signbit', 'signedinteger', 'sin', 'sinc', 'single', 'sinh', 'size',
-    'sort', 'sort_complex', 'spacing', 'split', 'sqrt', 'square', 'squeeze',
-    'std', 'subtract', 'sum', 'swapaxes', 'take', 'tan', 'tanh', 'tensordot',
-    'tile', 'trace', 'transpose', 'tri', 'tril', 'tril_indices',
-    'tril_indices_from', 'trim_zeros', 'triu', 'triu_indices',
-    'triu_indices_from', 'true_divide', 'trunc', 'ubyte', 'uint', 'uint32',
-    'union1d', 'unique', 'unravel_index', 'unsignedinteger', 'unwrap',
-    'ushort', 'vander', 'var', 'vdot', 'vectorize', 'vsplit', 'vstack',
-    'where', 'zeros', 'zeros_like')
+    'polyder', 'polydiv', 'polyint', 'polymul', 'polysub', 'polyval', 'power',
+    'prod', 'ptp', 'put', 'putmask', 'rad2deg', 'radians', 'ravel', 'real',
+    'real_if_close', 'reciprocal', 'record', 'remainder', 'repeat', 'reshape',
+    'resize', 'right_shift', 'rint', 'roll', 'rollaxis', 'roots', 'rot90',
+    'round', 'searchsorted', 'select', 'setbufsize', 'setdiff1d', 'seterr',
+    'setxor1d', 'shape', 'short', 'sign', 'signbit', 'signedinteger', 'sin',
+    'sinc', 'single', 'sinh', 'size', 'sort', 'sort_complex', 'spacing',
+    'split', 'sqrt', 'square', 'squeeze', 'std', 'subtract', 'sum', 'swapaxes',
+    'take', 'tan', 'tanh', 'tensordot', 'tile', 'trace', 'transpose', 'tri',
+    'tril', 'tril_indices', 'tril_indices_from', 'trim_zeros', 'triu',
+    'triu_indices', 'triu_indices_from', 'true_divide', 'trunc', 'ubyte',
+    'uint', 'uint32', 'union1d', 'unique', 'unravel_index', 'unsignedinteger',
+    'unwrap', 'ushort', 'vander', 'var', 'vdot', 'vectorize', 'vsplit',
+    'vstack', 'where', 'zeros', 'zeros_like')
 
 
 FROM_NUMPY_FINANCIAL = ('fv', 'ipmt', 'irr', 'mirr', 'nper', 'npv',
