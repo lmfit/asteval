@@ -71,6 +71,8 @@ Some of the things not allowed in the asteval interpreter for safety reasons inc
     default.  If you do want to support ``import`` and ``import from``, you have to
     explicitly enable these.
   * create classes or modules.
+  * use ``string.format()``, though f-string formatting and using the ``%``
+    operator for string formatting are supported.
   * access to Python's :py:func:`eval`, :py:func:`getattr`, :py:func:`hasattr`,
       :py:func:`setattr`, and    :py:func:`delattr`.
   * accessing object attributes that begin and end with ``__``, the so-called
@@ -95,6 +97,16 @@ numpy module. Several of these can seg-fault Python without too much trouble.
 If you are paranoid about safe user input that can never cause a segmentation
 fault, you may want to consider disabling the use of numpy, or take extra care
 to specify what can be used.
+
+In 2024, an independent security audit of asteval done by Andrew Effenhauser,
+Ayman Hammad, and Daniel Crowley in the X-Force Security Research division of
+IBM showed insecurities with ``string.format``, so that access to this and
+``string.format_map`` method were removed.  In addition, this audit showed
+thatZ the ``numpy`` submodules ``linalg``, ``fft``, and ``polynomial`` expose
+many exploitable objects, so these submodules were removed by default.  If
+needed, these modules can be added to any Interpreter either using the
+``user_symbols`` argument when creating it, or adding the needed symbols to the
+symbol table after the Interpreter is created.
 
 There are important categories of safety that asteval may attempt to address,
 but cannot guarantee success.  The most important of these is resource hogging,
