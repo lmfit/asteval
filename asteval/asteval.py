@@ -68,6 +68,7 @@ for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
     MINIMAL_CONFIG[_tnode] = False
     DEFAULT_CONFIG[_tnode] = True
 
+
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
     of mathematical expressions using Python syntax.
@@ -295,9 +296,8 @@ class Interpreter:
             return ret
         except:
             if with_raise:
-                if len(self.error) == 0:
-                    # Unhandled exception that didn't use raise_exception
-                    self.raise_exception(node, expr=expr)
+                # Unhandled exception that didn't use raise_exception
+                self.raise_exception(node, expr=expr)
                 raise
         return None
 
