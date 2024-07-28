@@ -346,8 +346,8 @@ class ExceptionHolder:
 
         out = [f"   {self.expr}"]
         if col_offset > 0:
-            out.append(f"    {col_offset*' '}^^^")
-        out.append(str(self.msg))
+            out.append(f"    {col_offset*' '}^^^^")
+        out.append(f"{exc_name}: {self.msg}")
         return (exc_name, '\n'.join(out))
 
 
