@@ -68,7 +68,6 @@ for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
     MINIMAL_CONFIG[_tnode] = False
     DEFAULT_CONFIG[_tnode] = True
 
-
 class Interpreter:
     """create an asteval Interpreter: a restricted, simplified interpreter
     of mathematical expressions using Python syntax.
@@ -223,6 +222,8 @@ class Interpreter:
         """Add an exception."""
         if self.error is None:
             self.error = []
+        if len(self.error) > 1:
+            return
         if expr is None:
             expr = self.expr
         if len(self.error) > 0 and not isinstance(node, ast.Module):
@@ -231,9 +232,9 @@ class Interpreter:
         self._interrupt = ast.Raise()
         self.error.append(err)
         if self.error_msg is None:
-            self.error_msg = (' '.join([msg, f"at expr='{self.expr}'"])).strip()
-        elif len(msg) > 0:
             self.error_msg = msg
+        elif len(msg) > 0:
+            self.error_msg = f"{exc:s}: {msg}"
         if exc is None:
             try:
                 exc = self.error[0].exc
@@ -289,6 +290,7 @@ class Interpreter:
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
+
         try:
             ret = handler(node)
             if isinstance(ret, enumerate):
@@ -296,7 +298,6 @@ class Interpreter:
             return ret
         except:
             if with_raise:
-                # Unhandled exception that didn't use raise_exception
                 self.raise_exception(node, expr=expr)
                 raise
         return None
@@ -316,7 +317,7 @@ class Interpreter:
             except Exception:
                 errmsg = exc_info()[1]
                 if len(self.error) > 0:
-                    errmsg = "\n".join(self.error[0].get_error())
+                    errmsg = self.error[0].get_error()[1]
                 if raise_errors:
                     try:
                         exc = self.error[0].exc
@@ -333,7 +334,7 @@ class Interpreter:
         except:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
-                errmsg = "\n".join(self.error[0].get_error())
+                errmsg = self.error[0].get_error()[1]
             if raise_errors:
                 try:
                     exc = self.error[0].exc
