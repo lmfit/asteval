@@ -102,7 +102,7 @@ In 2024, an independent security audit of asteval done by Andrew Effenhauser,
 Ayman Hammad, and Daniel Crowley in the X-Force Security Research division of
 IBM showed insecurities with ``string.format``, so that access to this and
 ``string.format_map`` method were removed.  In addition, this audit showed
-thatZ the ``numpy`` submodules ``linalg``, ``fft``, and ``polynomial`` expose
+that the ``numpy`` submodules ``linalg``, ``fft``, and ``polynomial`` expose
 many exploitable objects, so these submodules were removed by default.  If
 needed, these modules can be added to any Interpreter either using the
 ``user_symbols`` argument when creating it, or adding the needed symbols to the
