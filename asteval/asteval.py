@@ -651,23 +651,18 @@ class Interpreter:
         """comparison operators, including chained comparisons (a<b<c)"""
         lval = self.run(node.left)
         results = []
+        multi = (len(node.ops) > 1)
         for oper, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
             ret = op2func(oper)(lval, rval)
-            results.append(ret)
-            try:
-                if not ret:
-                    break
-            except ValueError:
-                pass
-            lval = rval
-        if len(results) == 1:
-            out = results[0]
-        else:
-            out = True
-            for ret in results:
-                out = out and ret
-        return out
+            if multi:
+                results.append(ret)
+                if not all(results):
+                    return False
+                lval = rval
+        if multi:
+            ret = all(results)
+        return ret
 
     def _printer(self, *out, **kws):
         """Generic print function."""
