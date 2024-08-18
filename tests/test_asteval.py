@@ -479,6 +479,26 @@ def test_cmp(nested):
     isfalse(interp, "5 < 3")
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_comparisons_return(nested):
+    """test comparisons that do not return a bool"""
+    interp = make_interpreter(nested_symtable=nested)
+    if HAS_NUMPY:
+
+        x = np.arange(10)/1.2
+        out = x > 2.3
+
+        interp("x = arange(10)/1.2")
+        interp("out = x > 2.3")
+
+        assert all(interp.symtable['out'] == out)
+        assert interp.symtable['out'].sum() == 7
+
+        interp("out = (x > 2.3 < 6.2)")
+
+        assert interp.error.pop().exc == ValueError
+
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_bool(nested):
     """boolean logic"""
     interp = make_interpreter(nested_symtable=nested)
