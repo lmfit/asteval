@@ -520,7 +520,13 @@ class Procedure:
         self.__dict__[attr] = val
 
     def __dir__(self):
-        return ['name']
+        return ['_getdoc', 'argnames', 'kwargs', 'name', 'vararg', 'varkws']
+
+    def _getdoc(self):
+        doc = self.__doc__
+        if isinstance(doc, ast.Constant):
+            doc = doc.s
+        return doc
 
     def __repr__(self):
         """TODO: docstring in magic method."""
@@ -538,8 +544,9 @@ class Procedure:
         if self.varkws is not None:
             sig = f"%sig, **{self.varkws}"
         sig = f"<Procedure {self.name}({sig})>"
-        if self.__doc__ is not None:
-            sig = f"{sig}\n {self.__doc__}"
+        doc = self._getdoc()
+        if doc is not None:
+            sig = f"{sig}\n {doc}"
         return sig
 
     def __call__(self, *args, **kwargs):
