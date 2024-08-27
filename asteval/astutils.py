@@ -525,7 +525,7 @@ class Procedure:
     def _getdoc(self):
         doc = self.__doc__
         if isinstance(doc, ast.Constant):
-            doc = doc.s
+            doc = doc.value
         return doc
 
     def __repr__(self):
