@@ -327,7 +327,7 @@ class ExceptionHolder:
         if self.exc is None and self.exc_info[0] is not None:
             self.exc = self.exc_info[0]
         if self.msg == '' and self.exc_info[1] is not None:
-            self.msg = self.exc_info[1]
+            self.msg = str(self.exc_info[1])
 
     def get_error(self):
         """Retrieve error data."""
@@ -350,6 +350,8 @@ class ExceptionHolder:
         out.append(f"{exc_name}: {self.msg}")
         return (exc_name, '\n'.join(out))
 
+    def __repr__(self):
+        return f"ExceptionHolder({self.exc}, {self.msg})"
 
 class NameFinder(ast.NodeVisitor):
     """Find all symbol names used by a parsed node."""
