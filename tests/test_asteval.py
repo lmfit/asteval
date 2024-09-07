@@ -1505,6 +1505,32 @@ def test_stringio(nested):
     intrep("print('out')")
     assert out.getvalue() == 'out\n'
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_gh129(nested):
+    """ test that errors are propagated correctly, GH #129
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    interp('one, two, default  = 1, 2, 3')
+    interp(textwrap.dedent("""
+    try:
+        output = some_var
+    except NameError:
+        output = None
+    foo = output or default
+    """))
+    assert len(interp.error) == 0
+    assert interp('foo') == 3
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_no_duplicate_exception(nested):
+    """ test that errors are not repeated GH #132
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    interp.run("print(hi)", with_raise = False)
+    assert len(interp.error) == 1
+    assert interp.error[0].exc == NameError
+
+
 
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])
