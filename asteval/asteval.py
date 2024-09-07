@@ -222,13 +222,11 @@ class Interpreter:
         """Add an exception."""
         if self.error is None:
             self.error = []
-        if len(self.error) > 1:
-            return
         if expr is None:
             expr = self.expr
-        if len(self.error) > 0 and not isinstance(node, ast.Module):
-            msg = f'{msg!s}'
+        msg = str(msg)
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
+
         self._interrupt = ast.Raise()
         self.error.append(err)
         if self.error_msg is None:
@@ -237,7 +235,7 @@ class Interpreter:
             self.error_msg = f"{exc:s}: {msg}"
         if exc is None:
             try:
-                exc = self.error[0].exc
+                exc = self.error[-1].exc
             except:
                 exc = RuntimeError
         raise exc(self.error_msg)
@@ -290,7 +288,6 @@ class Interpreter:
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
-
         try:
             ret = handler(node)
             if isinstance(ret, enumerate):
@@ -300,6 +297,15 @@ class Interpreter:
             if with_raise:
                 self.raise_exception(node, expr=expr)
                 raise
+
+        # avoid too many repeated error messages (yes, this needs to be "2")
+        if len(self.error) > 2:
+            error = [self.error[0]]
+            for err in self.error[1:]:
+                le = error[-1]
+                if err.exc != le.exc or err.expr != le.expr or err.msg !=  le.msg:
+                    error.append(err)
+            self.error = error
         return None
 
     def __call__(self, expr, **kw):
@@ -317,10 +323,10 @@ class Interpreter:
             except Exception:
                 errmsg = exc_info()[1]
                 if len(self.error) > 0:
-                    errmsg = self.error[0].get_error()[1]
+                    errmsg = self.error[-1].get_error()[1]
                 if raise_errors:
                     try:
-                        exc = self.error[0].exc
+                        exc = self.error[-1].exc
                     except Exception:
                         exc = RuntimeError
                     raise exc(errmsg)
@@ -334,10 +340,10 @@ class Interpreter:
         except:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
-                errmsg = self.error[0].get_error()[1]
+                errmsg = self.error[-1].get_error()[1]
             if raise_errors:
                 try:
-                    exc = self.error[0].exc
+                    exc = self.error[-1].exc
                 except Exception:
                     exc = RuntimeError
                 raise exc(errmsg)
