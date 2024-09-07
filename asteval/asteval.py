@@ -220,8 +220,6 @@ class Interpreter:
     def raise_exception(self, node, exc=None, msg='', expr=None,
                         lineno=None):
         """Add an exception."""
-        if self.error is None:
-            self.error = []
         if expr is None:
             expr = self.expr
         msg = str(msg)
@@ -234,10 +232,7 @@ class Interpreter:
         elif len(msg) > 0:
             self.error_msg = f"{exc:s}: {msg}"
         if exc is None:
-            try:
-                exc = self.error[-1].exc
-            except:
-                exc = RuntimeError
+            exc = self.error[-1].exc
         raise exc(self.error_msg)
 
     # main entry point for Ast node evaluation
@@ -323,13 +318,10 @@ class Interpreter:
             except Exception:
                 errmsg = exc_info()[1]
                 if len(self.error) > 0:
-                    errmsg = self.error[-1].get_error()[1]
-                if raise_errors:
-                    try:
-                        exc = self.error[-1].exc
-                    except Exception:
-                        exc = RuntimeError
-                    raise exc(errmsg)
+                    lerr = self.error[-1]
+                    errmsg = lerr.get_error()[1]
+                    if raise_errors:
+                        raise lerr.exc(errmsg)
                 if show_errors:
                     print(errmsg, file=self.err_writer)
                 return None
@@ -342,11 +334,7 @@ class Interpreter:
             if len(self.error) > 0:
                 errmsg = self.error[-1].get_error()[1]
             if raise_errors:
-                try:
-                    exc = self.error[-1].exc
-                except Exception:
-                    exc = RuntimeError
-                raise exc(errmsg)
+                raise self.error[-1].exc(errmsg)
             if show_errors:
                 print(errmsg, file=self.err_writer)
         return None
