@@ -321,7 +321,7 @@ class Interpreter:
                     lerr = self.error[-1]
                     errmsg = lerr.get_error()[1]
                     if raise_errors:
-                        raise lerr.exc(errmsg)
+                        raise lerr.exc(errmsg) from exc
                 if show_errors:
                     print(errmsg, file=self.err_writer)
                 return None
@@ -334,7 +334,7 @@ class Interpreter:
             if len(self.error) > 0:
                 errmsg = self.error[-1].get_error()[1]
             if raise_errors:
-                raise self.error[-1].exc(errmsg)
+                raise self.error[-1].exc(errmsg) from exc
             if show_errors:
                 print(errmsg, file=self.err_writer)
         return None
@@ -490,8 +490,7 @@ class Interpreter:
         fmt = '{__fstring__}'
         if node.format_spec is not None:
             fmt = f'{{__fstring__:{self.run(node.format_spec)}}}'
-        else:
-            return fmt.format(__fstring__=val)
+        return fmt.format(__fstring__=val)
 
     def _getsym(self, node):
         val = self.symtable.get(node.id, ReturnedNone)
@@ -645,7 +644,7 @@ class Interpreter:
         """comparison operators, including chained comparisons (a<b<c)"""
         lval = self.run(node.left)
         results = []
-        multi = (len(node.ops) > 1)
+        multi = len(node.ops) > 1
         for oper, rnode in zip(node.ops, node.comparators):
             rval = self.run(rnode)
             ret = op2func(oper)(lval, rval)
@@ -750,7 +749,6 @@ class Interpreter:
                     saved_syms[tnode.target.id] = copy.deepcopy(self._getsym(tnode.target))
 
             elif tnode.target.__class__ == ast.Tuple:
-                target = []
                 for tval in tnode.target.elts:
                     if tval.id in self.symtable:
                         saved_syms[tval.id] = copy.deepcopy(self._getsym(tval))
@@ -758,8 +756,10 @@ class Interpreter:
 
 
     def do_generator(self, gnodes, node, out):
+        """general purpose generator """
         gnode = gnodes[0]
         nametype = True
+        target = None
         if gnode.target.__class__ == ast.Name:
             if (not valid_symbol_name(gnode.target.id) or
                 gnode.target.id in self.readonly_symbols):
@@ -771,7 +771,7 @@ class Interpreter:
             target = tuple([gval.id for gval in gnode.target.elts])
 
         for val in self.run(gnode.iter):
-            if nametype:
+            if nametype and target is not None:
                 self.symtable[target] = val
             else:
                 for telem, tval in zip(target, val):

@@ -190,9 +190,9 @@ def _open(filename, mode='r', buffering=-1, encoding=None):
     return open(filename, mode, buffering, encoding=encoding)
 
 
-def _type(obj):
+def _type(x):
     """type that prevents varargs and varkws"""
-    return type(obj).__name__
+    return type(x).__name__
 
 
 LOCALFUNCS = {'open': _open, 'type': _type}
@@ -465,6 +465,7 @@ def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
 
     """
     if nested:
+        name = '_'
         if top:
             name = '_main'
             if 'name' in kws:
