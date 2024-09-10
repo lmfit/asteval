@@ -591,16 +591,10 @@ class Interpreter:
         """Extended slice."""
         return tuple([self.run(tnode) for tnode in node.dims])
 
-    def on_subscript(self, node):    # ('value', 'slice', 'ctx')
-        """Subscript handling -- one of the tricky parts."""
-        val = self.run(node.value)
-        nslice = self.run(node.slice)
-        ctx = node.ctx.__class__
-        if ctx in (ast.Load, ast.Store):
-            return val[nslice]
-        msg = "subscript with unknown context"
-        self.raise_exception(node, msg=msg)
-        return None
+    def on_subscript(self, node): # ('value', 'slice', 'ctx')
+        """Subscript handling"""
+        return self.run(node.value)[self.run(node.slice)]
+
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
@@ -616,9 +610,27 @@ class Interpreter:
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
-            else:
-                msg = "could not delete symbol"
-                self.raise_exception(node, msg=msg)
+            elif tnode.__class__ == ast.Subscript:
+                nslice = self.run(tnode.slice)
+                children = []
+                tnode = tnode.value
+                while tnode.__class__ == ast.Attribute:
+                    children.append(tnode.attr)
+                    tnode = tnode.value
+                if (tnode.__class__ == ast.Name and not
+                    tnode.id in self.readonly_symbols):
+                    children.append(tnode.id)
+                    children.reverse()
+                    sname = '.'.join(children)
+                    val = self.run(sname)
+                    del val[nslice]
+                    if len(children) == 1:
+                        self.symtable[sname] = val
+                    else:
+                        child = self.symtable[children[0]]
+                        for cname in children[1:-1]:
+                            child = child[cname]
+                        setattr(child, children[-1], val)
 
     def on_unaryop(self, node):    # ('op', 'operand')
         """Unary operator."""
