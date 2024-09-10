@@ -385,8 +385,6 @@ class Group(dict):
     """
     Group: a container of objects that can be accessed either as an object attributes
     or dictionary  key/value.  Attribute names must follow Python naming conventions.
-
-
     """
     def __init__(self, name=None, searchgroups=None, **kws):
         if name is None:
@@ -408,9 +406,10 @@ class Group(dict):
         raise KeyError(f"no attribute named '{name}'")
 
     def __setitem__(self, name, value):
-        if not valid_varname(name):
-            raise SyntaxError(f"invalid attribute name '{name}'")
-        dict.__setitem__(self, name, value)
+        if valid_varname(name):
+            dict.__setitem__(self, name, value)
+        else: # raise SyntaxError(f"invalid attribute name '{name}'")
+            return setattr(self, name, value)
 
     def get(self, key, default=None):
         val = self.__getattr__(key, ReturnedNone)
@@ -470,7 +469,7 @@ def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
             name = '_main'
             if 'name' in kws:
                 name = kws.pop('name')
-        symtable = Group(name=name)
+        symtable = Group(name=name, Group=Group)
     else:
         symtable = {}
 
@@ -483,6 +482,7 @@ def make_symbol_table(use_numpy=True, nested=False, top=True,  **kws):
 
     if nested:
         symtable['math'] = Group(name='math', **math_functions)
+        symtable['Group'] = Group
         symtable._searchgroups = ('math',)
     else:
         symtable.update(math_functions)
