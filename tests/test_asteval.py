@@ -1531,6 +1531,21 @@ def test_no_duplicate_exception(nested):
     assert interp.error[0].exc == NameError
 
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_delete_slice(nested):
+    """ test that a slice can be deleted"""
+
+    interp = make_interpreter(nested_symtable=nested)
+    interp.run("dlist = [1,3,5,7,9,11,13,15,17,19,21]")
+    interp.run("del dlist[4:7]")
+    assert interp("dlist") == [1, 3, 5, 7, 15, 17, 19, 21]
+
+    if nested:
+        interp.run("g = Group()")
+        interp.run("g.dlist = [1,3,5,7,9,11,13,15,17,19,21]")
+        interp.run("del g.dlist[4:7]")
+        assert interp("g.dlist") == [1, 3, 5, 7, 15, 17, 19, 21]
+
 
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])
