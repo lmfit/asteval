@@ -533,9 +533,18 @@ class Procedure:
 
     def __repr__(self):
         """TODO: docstring in magic method."""
+        sig = self._signature()
+        rep = f"<Procedure {sig}>"
+        doc = self._getdoc()
+        if doc is not None:
+            rep = f"{rep}\n {doc}"
+        return rep
+
+    def _signature(self):
+        "call signature"
         sig = ""
         if len(self.argnames) > 0:
-            sig = sig + ', '.join(self.argnames)
+            sig = sig +  ', '.join(self.argnames)
         if self.vararg is not None:
             sig = sig + f"*{self.vararg}"
         if len(self.kwargs) > 0:
@@ -544,13 +553,9 @@ class Procedure:
             _kw = [f"{k}={v}" for k, v in self.kwargs]
             sig = f"{sig}{', '.join(_kw)}"
 
-        if self.varkws is not None:
-            sig = f"%sig, **{self.varkws}"
-        sig = f"<Procedure {self.name}({sig})>"
-        doc = self._getdoc()
-        if doc is not None:
-            sig = f"{sig}\n {doc}"
-        return sig
+            if self.varkws is not None:
+                sig = f"{sig}, **{self.varkws}"
+        return f"{self.name}({sig})"
 
     def __call__(self, *args, **kwargs):
         """TODO: docstring in public method."""
