@@ -233,6 +233,12 @@ class Interpreter:
             self.error_msg = f"{exc:s}: {msg}"
         if exc is None:
             exc = self.error[-1].exc
+            if exc is None and len(self.error) > 0:
+                while exc is None and len(self.error) > 0:
+                    err = self.error.pop()
+                    exc = err.exc
+        if exc is None:
+            exc = Exception
         raise exc(self.error_msg)
 
     # main entry point for Ast node evaluation
@@ -328,7 +334,7 @@ class Interpreter:
         else:
             node = expr
         try:
-            return self.run(node, expr=expr, lineno=lineno)
+            return self.run(node, expr=expr, lineno=lineno, with_raise=raise_errors)
         except:
             errmsg = exc_info()[1]
             if len(self.error) > 0:
