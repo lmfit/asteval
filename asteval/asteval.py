@@ -217,14 +217,13 @@ class Interpreter:
         msg = f"{node.__class__.__name__} not supported"
         self.raise_exception(node, exc=NotImplementedError, msg=msg)
 
-    def raise_exception(self, node, exc=None, msg='', expr=None,
-                        lineno=None):
+    def raise_exception(self, node, exc=None, msg='', expr=None, lineno=None):
         """Add an exception."""
-        if expr is None:
-            expr = self.expr
+        if expr is not None:
+            self.expr = expr
         msg = str(msg)
-        err = ExceptionHolder(node, exc=exc, msg=msg, expr=expr, lineno=lineno)
 
+        err = ExceptionHolder(node, exc=exc, msg=msg, expr=self.expr, lineno=lineno)
         self._interrupt = ast.Raise()
         self.error.append(err)
         if self.error_msg is None:
@@ -285,7 +284,7 @@ class Interpreter:
         try:
             handler = self.node_handlers[node.__class__.__name__.lower()]
         except KeyError:
-            self.raise_exception(None, exc=NotImplementedError, expr=expr)
+            self.raise_exception(None, exc=NotImplementedError, expr=self.expr)
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
@@ -295,9 +294,8 @@ class Interpreter:
                 ret = list(ret)
             return ret
         except:
-            if with_raise:
-                self.raise_exception(node, expr=expr)
-                raise
+            if with_raise and self.expr is not None:
+                self.raise_exception(node, expr=self.expr)
 
         # avoid too many repeated error messages (yes, this needs to be "2")
         if len(self.error) > 2:
@@ -327,7 +325,7 @@ class Interpreter:
                     lerr = self.error[-1]
                     errmsg = lerr.get_error()[1]
                     if raise_errors:
-                        raise lerr.exc(errmsg) from exc
+                        raise lerr.exc(errmsg)
                 if show_errors:
                     print(errmsg, file=self.err_writer)
                 return None
@@ -335,14 +333,15 @@ class Interpreter:
             node = expr
         try:
             return self.run(node, expr=expr, lineno=lineno, with_raise=raise_errors)
-        except:
-            errmsg = exc_info()[1]
-            if len(self.error) > 0:
-                errmsg = self.error[-1].get_error()[1]
-            if raise_errors:
-                raise self.error[-1].exc(errmsg) from exc
-            if show_errors:
+        except Exception:
+            if show_errors and not raise_errors:
+                errmsg = exc_info()[1]
+                if len(self.error) > 0:
+                    errmsg = self.error[-1].get_error()[1]
                 print(errmsg, file=self.err_writer)
+        if raise_errors and len(self.error) > 0:
+            err = self.error[-1]
+            raise err.exc(err.get_error()[1])
         return None
 
     @staticmethod
