@@ -1530,6 +1530,18 @@ def test_no_duplicate_exception(nested):
     assert len(interp.error) == 1
     assert interp.error[0].exc == NameError
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_raise_errors_unknown_symbol(nested):
+    """ test that raise_error raises corret error type. GH #133
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    try:
+        saw_exception = False
+        interp.run("unknown_value", with_raise=True)
+    except NameError:
+        saw_exception = True
+    assert saw_exception
+
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_delete_slice(nested):
