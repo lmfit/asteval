@@ -1541,6 +1541,8 @@ def test_raise_errors_unknown_symbol(nested):
     except NameError:
         saw_exception = True
     assert saw_exception
+    assert len(interp.error) > 0
+    assert interp.error[0].exc == NameError
 
 
 @pytest.mark.parametrize("nested", [False, True])

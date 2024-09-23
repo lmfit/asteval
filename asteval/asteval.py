@@ -225,6 +225,7 @@ class Interpreter:
 
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=self.expr, lineno=lineno)
         self._interrupt = ast.Raise()
+
         self.error.append(err)
         if self.error_msg is None:
             self.error_msg = msg
@@ -301,13 +302,18 @@ class Interpreter:
 
         # avoid too many repeated error messages (yes, this needs to be "2")
         if len(self.error) > 2:
-            error = [self.error[0]]
-            for err in self.error[1:]:
-                le = error[-1]
-                if err.exc != le.exc or err.expr != le.expr or err.msg !=  le.msg:
-                    error.append(err)
-            self.error = error
+            self._remove_duplicate_errors()
+
         return None
+
+    def _remove_duplicate_errors(self):
+        """remove duplicate exceptions"""
+        error = [self.error[0]]
+        for err in self.error[1:]:
+            lerr = error[-1]
+            if err.exc != lerr.exc or err.expr != lerr.expr or err.msg !=  lerr.msg:
+                error.append(err)
+        self.error = error
 
     def __call__(self, expr, **kw):
         """Call class instance as function."""
@@ -343,6 +349,7 @@ class Interpreter:
                     errmsg = self.error[-1].get_error()[1]
                 print(errmsg, file=self.err_writer)
         if raise_errors and len(self.error) > 0:
+            self._remove_duplicate_errors()
             err = self.error[-1]
             raise err.exc(err.get_error()[1])
         return None
