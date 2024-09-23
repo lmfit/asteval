@@ -229,7 +229,9 @@ class Interpreter:
         if self.error_msg is None:
             self.error_msg = msg
         elif len(msg) > 0:
-            self.error_msg = f"{exc:s}: {msg}"
+            pass
+            # if err.exc is not None:
+            #     self.error_msg = f"{err.exc.__name__}: {msg}"
         if exc is None:
             exc = self.error[-1].exc
             if exc is None and len(self.error) > 0:
@@ -315,6 +317,7 @@ class Interpreter:
         """Evaluate a single statement."""
         self.lineno = lineno
         self.error = []
+        self.error_msg = None
         self.start_time = time.time()
         if isinstance(expr, str):
             try:
