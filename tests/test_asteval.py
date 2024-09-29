@@ -1526,7 +1526,13 @@ def test_no_duplicate_exception(nested):
     """ test that errors are not repeated GH #132
     """
     interp = make_interpreter(nested_symtable=nested)
-    interp.run("print(hi)", with_raise = False)
+    interp.run("print(hi)", with_raise=False)
+    assert len(interp.error) == 1
+    assert interp.error[0].exc == NameError
+
+    # with plain eval too
+    interp.error = []
+    interp("print(hi)", raise_errors=False)
     assert len(interp.error) == 1
     assert interp.error[0].exc == NameError
 
@@ -1535,13 +1541,14 @@ def test_raise_errors_unknown_symbol(nested):
     """ test that raise_error raises corret error type. GH #133
     """
     interp = make_interpreter(nested_symtable=nested)
+    interp.error = []
     try:
         saw_exception = False
         interp.run("unknown_value", with_raise=True)
     except NameError:
         saw_exception = True
     assert saw_exception
-    assert len(interp.error) > 0
+    assert len(interp.error) == 1
     assert interp.error[0].exc == NameError
 
 
