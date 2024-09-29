@@ -222,7 +222,6 @@ class Interpreter:
         if expr is not None:
             self.expr = expr
         msg = str(msg)
-
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=self.expr, lineno=lineno)
         self._interrupt = ast.Raise()
 
@@ -241,7 +240,13 @@ class Interpreter:
                     exc = err.exc
         if exc is None:
             exc = Exception
-        raise exc(self.error_msg)
+        if len(err.msg) == 0 and len(self.error_msg) == 0 and len(self.error) > 1:
+            err = self.error.pop(-1)
+            raise err.exc(err.msg)
+        else:
+            if len(err.msg) == 0:
+                err.msg = self.error_msg
+            raise exc(self.error_msg)
 
     # main entry point for Ast node evaluation
     #  parse:  text of statements -> ast
@@ -266,6 +271,9 @@ class Interpreter:
         """Execute parsed Ast representation for an expression."""
         # Note: keep the 'node is None' test: internal code here may run
         #    run(None) and expect a None in return.
+        if isinstance(node, str):
+            return self.eval(node, raise_errors=with_raise)
+
         out = None
         if len(self.error) > 0:
             return out
@@ -275,8 +283,7 @@ class Interpreter:
             return self._interrupt
         if node is None:
             return out
-        if isinstance(node, str):
-            node = self.parse(node)
+
         if lineno is not None:
             self.lineno = lineno
         if expr is not None:
@@ -312,7 +319,8 @@ class Interpreter:
         for err in self.error[1:]:
             lerr = error[-1]
             if err.exc != lerr.exc or err.expr != lerr.expr or err.msg !=  lerr.msg:
-                error.append(err)
+                if isinstance(err.msg, str) and len(err.msg) > 0:
+                    error.append(err)
         self.error = error
 
     def __call__(self, expr, **kw):
