@@ -533,7 +533,7 @@ class Procedure:
 
     def __repr__(self):
         """TODO: docstring in magic method."""
-        sig = self._signature()
+        sig = self.__signature__()
         rep = f"<Procedure {sig}>"
         doc = self.__getdoc__()
         if doc is not None:
