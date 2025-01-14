@@ -1568,5 +1568,25 @@ def test_delete_slice(nested):
         assert interp("g.dlist") == [1, 3, 5, 7, 15, 17, 19, 21]
 
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_unsafe_procedure_access(nested):
+    """
+    addressing https://github.com/lmfit/asteval/security/advisories/GHSA-vp47-9734-prjw
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            def my_func(x, y):
+                return x+y
+
+            my_func.__body__[0]  = 'something else'
+
+     """),  raise_errors=False)
+
+    error = interp.error[0]
+    etype, fullmsg = error.get_error()
+    assert 'no safe attribute' in error.msg
+    assert etype == 'AttributeError'
+
+
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])
