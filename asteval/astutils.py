@@ -506,7 +506,7 @@ class Procedure:
         self.name = name
         self.__name__ = self.name
         self.__asteval__ = interp
-        self.__raise_exc__ =y self.__asteval__.raise_exception
+        self.__raise_exc__ = self.__asteval__.raise_exception
         self.__doc__ = doc
         self.__body__ = body
         self.__argnames__ = args
