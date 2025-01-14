@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-PAPER         =
+PAPER         = letter
 BUILDDIR      = _build
 
 INSTALLDIR = /home/newville/public_html/asteval/
@@ -30,6 +30,10 @@ html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+tarball: all
+	cd $(BUILDDIR)/html && tar cvzf ../../../_doc.tgz *  & cd ../../
+
 
 pdf: latex
 	cd $(BUILDDIR)/latex && make all-pdf
