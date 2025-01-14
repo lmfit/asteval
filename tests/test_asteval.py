@@ -1588,5 +1588,21 @@ def test_unsafe_procedure_access(nested):
     assert etype == 'AttributeError'
 
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_naming_exceptions(nested):
+    """ fixing Github issue #137"
+    interp = make_interpreter(nested_symtable=nested)
+    try_with_named_error = textwrap.dedent("""
+         try:
+             2 + ''
+         except Exception as my_error:
+            print(my_error)
+     """)
+
+    interp(try_with_named_error, raise_errors=True)
+    out = read_stdout(interp)
+    assert 'unsupported operand' in out
+    assert len(interp.error) == 0
+
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])

@@ -867,7 +867,7 @@ class Interpreter:
                     if htype is None or isinstance(e_type(), htype):
                         self.error = []
                         if hnd.name is not None:
-                            self.node_assign(hnd.name, e_value)
+                            self.symtable[hnd.name] = e_value
                         for tline in hnd.body:
                             self.run(tline)
                         break
