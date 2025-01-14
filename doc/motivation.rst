@@ -108,10 +108,16 @@ needed, these modules can be added to any Interpreter either using the
 ``user_symbols`` argument when creating it, or adding the needed symbols to the
 symbol table after the Interpreter is created.
 
-There are important categories of safety that asteval may attempt to address,
-but cannot guarantee success.  The most important of these is resource hogging,
-which might be used for a denial-of-service attack.  There is no guaranteed
-timeout on any calculation, and so a reasonable looking calculation such as::
+In 2025, a security audit by William Khem Marquez showed a
+vulnerability from leaving some AST objects exposed within the
+interpreter for user-defined functions ("Procedures"), and this was
+fixed for version 1.0.6.
+
+There are other categories of safety that asteval may attempt to
+address, but cannot guarantee success.  The most important of these is
+resource hogging, which might be used for a denial-of-service attack.
+There is no guaranteed timeout on any calculation, and so a reasonable
+looking calculation such as::
 
    from asteval import Interpreter
    aeval = Interpreter()
