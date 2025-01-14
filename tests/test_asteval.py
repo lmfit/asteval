@@ -1590,11 +1590,11 @@ def test_unsafe_procedure_access(nested):
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_naming_exceptions(nested):
-    """ fixing Github issue #137"
+    """ fixing Github issue #137"""
     interp = make_interpreter(nested_symtable=nested)
     try_with_named_error = textwrap.dedent("""
          try:
-             2 + ''
+            2 + ''
          except Exception as my_error:
             print(my_error)
      """)
