@@ -1,11 +1,13 @@
 # Makefile for Sphinx documentation
 #
-
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
+<<<<<<< Updated upstream
+=======
+PAPER         = letter
+>>>>>>> Stashed changes
 BUILDDIR      = _build
-INSTALLDIR = /home/newville/public_html/asteval/
 
 # Internal variables.
 ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
@@ -27,9 +29,13 @@ html:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 tarball: all
+<<<<<<< Updated upstream
 	cd $(BUILDDIR)/html && tar cvzf ../../../_doc.tgz *
 	cd ../../
 	@echo
+=======
+	cd $(BUILDDIR)/html && tar cvzf ../../../_doc.tgz *  & cd ../../
+>>>>>>> Stashed changes
 
 
 pdf: latex
