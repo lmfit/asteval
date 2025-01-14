@@ -4,16 +4,11 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
-PAPER         = letter
 BUILDDIR      = _build
-
 INSTALLDIR = /home/newville/public_html/asteval/
 
-
 # Internal variables.
-PAPEROPT_a4     = -D latex_paper_size=a4
-PAPEROPT_letter = -D latex_paper_size=letter
-ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) .
+ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
 
 .PHONY: html pdf all help clean dirhtml latex
 
@@ -32,7 +27,9 @@ html:
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 tarball: all
-	cd $(BUILDDIR)/html && tar cvzf ../../../_doc.tgz *  & cd ../../
+	cd $(BUILDDIR)/html && tar cvzf ../../../_doc.tgz *
+	cd ../../
+	@echo
 
 
 pdf: latex
