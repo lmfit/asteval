@@ -13,6 +13,7 @@ from sys import exc_info
 from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
+from string import Formatter
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -32,6 +33,14 @@ try:
     HAS_NUMPY_FINANCIAL = True
 except ImportError:
     pass
+
+# This is a necessary API but it's undocumented and moved around
+# between Python releases
+try:
+    from _string import formatter_field_name_split
+except ImportError:
+    formatter_field_name_split = lambda \
+        x: x._formatter_field_name_split()
 
 
 
@@ -285,16 +294,6 @@ def safe_getattr(obj, attr, raise_exc, node):
             return getattr(obj, attr)
         except AttributeError:
             pass
-
-from string import Formatter
-
-# This is a necessary API but it's undocumented and moved around
-# between Python releases
-try:
-    from _string import formatter_field_name_split
-except ImportError:
-    formatter_field_name_split = lambda \
-        x: x._formatter_field_name_split()
 
 class SafeFormatter(Formatter):
     def __init__(self, raise_exc, node):
