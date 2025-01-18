@@ -13,6 +13,7 @@ from sys import exc_info
 from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
+from string import Formatter
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
@@ -32,6 +33,14 @@ try:
     HAS_NUMPY_FINANCIAL = True
 except ImportError:
     pass
+
+# This is a necessary API but it's undocumented and moved around
+# between Python releases
+try:
+    from _string import formatter_field_name_split
+except ImportError:
+    formatter_field_name_split = lambda \
+        x: x._formatter_field_name_split()
 
 
 
@@ -59,7 +68,7 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
                 '__getattribute__', '__subclasshook__', '__new__',
                 '__init__', 'func_globals', 'func_code', 'func_closure',
                 'im_class', 'im_func', 'im_self', 'gi_code', 'gi_frame',
-                'f_locals', '__asteval__')
+                'f_locals', '__asteval__','mro')
 
 # unsafe attributes for particular objects, by type
 UNSAFE_ATTRS_DTYPES = {str: ('format', 'format_map')}
@@ -266,6 +275,45 @@ OPERATORS = {ast.Is: lambda a, b: a is b,
              ast.UAdd: lambda a: +a,
              ast.USub: lambda a: -a}
 
+# Safe version of getattr
+
+def safe_getattr(obj, attr, raise_exc, node):
+    """safe version of getattr"""
+    unsafe = (attr in UNSAFE_ATTRS or
+            (attr.startswith('__') and attr.endswith('__')))
+    if not unsafe:
+        for dtype, attrlist in UNSAFE_ATTRS_DTYPES.items():
+            unsafe = (isinstance(obj, dtype) or obj is dtype) and attr in attrlist
+            if unsafe:
+                break
+    if unsafe:
+        msg = f"no safe attribute '{attr}' for {repr(obj)}"
+        raise_exc(node, exc=AttributeError, msg=msg)
+    else:
+        try:
+            return getattr(obj, attr)
+        except AttributeError:
+            pass
+
+class SafeFormatter(Formatter):
+    def __init__(self, raise_exc, node):
+        self.raise_exc = raise_exc
+        self.node = node
+        super().__init__()
+
+    def get_field(self, field_name, args, kwargs):
+        first, rest = formatter_field_name_split(field_name)
+        obj = self.get_value(first, args, kwargs)
+        for is_attr, i in rest:
+            if is_attr:
+                obj = safe_getattr(obj, i, self.raise_exc, self.node)
+            else:
+                obj = obj[i]
+        return obj, first
+    
+def safe_format(_string, raise_exc, node, *args, **kwargs):
+    formatter = SafeFormatter(raise_exc, node)
+    return formatter.vformat(_string, args, kwargs)                    
 
 def valid_symbol_name(name):
     """Determine whether the input symbol name is a valid name.

@@ -1586,6 +1586,47 @@ def test_unsafe_procedure_access(nested):
     etype, fullmsg = error.get_error()
     assert 'no safe attribute' in error.msg
     assert etype == 'AttributeError'
+    
+@pytest.mark.parametrize("nested", [False, True])
+def test_unsafe_format_string_access(nested):
+    """
+    addressing https://github.com/lmfit/asteval/security/advisories/GHSA-3wwr-3g9f-9gc7
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            f"{dict:'\\x7B__fstring__.__class__.s\\x7D'}"
+
+     """),  raise_errors=False)
+
+    error = interp.error[0]
+    etype, fullmsg = error.get_error()
+    assert 'no safe attribute' in error.msg
+    assert etype == 'AttributeError'
+    
+@pytest.mark.parametrize("nested", [False, True])
+def test_unsafe_attr_dtypes(nested):
+    """
+    addressing https://github.com/lmfit/asteval/security/advisories/GHSA-3wwr-3g9f-9gc7
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            '{0}'.format(dict)
+     """),  raise_errors=False)
+
+    error = interp.error[0]
+    etype, fullmsg = error.get_error()
+    assert 'no safe attribute' in error.msg
+    assert etype == 'AttributeError'
+    
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            str.format('{0}', dict)
+     """),  raise_errors=False)
+    
+    error = interp.error[0]
+    etype, fullmsg = error.get_error()
+    assert 'no safe attribute' in error.msg
+    assert etype == 'AttributeError'
 
 
 @pytest.mark.parametrize("nested", [False, True])

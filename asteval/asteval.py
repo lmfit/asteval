@@ -44,9 +44,9 @@ import inspect
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (HAS_NUMPY, UNSAFE_ATTRS, UNSAFE_ATTRS_DTYPES,
+from .astutils import (HAS_NUMPY,
                        ExceptionHolder, ReturnedNone, Empty, make_symbol_table,
-                       numpy, op2func, valid_symbol_name, Procedure)
+                       numpy, op2func, safe_getattr, safe_format, valid_symbol_name, Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
              'boolop', 'break', 'bytes', 'call', 'compare', 'constant',
@@ -513,7 +513,7 @@ class Interpreter:
         fmt = '{__fstring__}'
         if node.format_spec is not None:
             fmt = f'{{__fstring__:{self.run(node.format_spec)}}}'
-        return fmt.format(__fstring__=val)
+        return safe_format(fmt, self.raise_exception, node, __fstring__=val)
 
     def _getsym(self, node):
         val = self.symtable.get(node.id, ReturnedNone)
@@ -573,22 +573,8 @@ class Interpreter:
         sym = self.run(node.value)
         if ctx == ast.Del:
             return delattr(sym, node.attr)
-        #
-        unsafe = (node.attr in UNSAFE_ATTRS or
-                 (node.attr.startswith('__') and node.attr.endswith('__')))
-        if not unsafe:
-            for dtype, attrlist in UNSAFE_ATTRS_DTYPES.items():
-                unsafe = isinstance(sym, dtype) and node.attr in attrlist
-                if unsafe:
-                    break
-        if unsafe:
-            msg = f"no safe attribute '{node.attr}' for {repr(sym)}"
-            self.raise_exception(node, exc=AttributeError, msg=msg)
-        else:
-            try:
-                return getattr(sym, node.attr)
-            except AttributeError:
-                pass
+        
+        return safe_getattr(sym, node.attr, self.raise_exception, node)
 
 
     def on_assign(self, node):    # ('targets', 'value')
