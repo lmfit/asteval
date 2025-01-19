@@ -150,6 +150,7 @@ class Interpreter:
         self.retval = None
         self._calldepth = 0
         self.lineno = 0
+        self.code_text = []
         self.start_time = time.time()
 
         self.node_handlers = {}
@@ -221,8 +222,13 @@ class Interpreter:
         """Add an exception."""
         if expr is not None:
             self.expr = expr
+
         msg = str(msg)
-        err = ExceptionHolder(node, exc=exc, msg=msg, expr=self.expr, lineno=lineno)
+        text = self.expr
+        if len(self.code_text) > 0:
+            text = self.code_text[-1]
+        err = ExceptionHolder(node, exc=exc, msg=msg, expr=self.expr,
+                             text=text, lineno=lineno)
         self._interrupt = ast.Raise()
 
         self.error.append(err)
@@ -238,6 +244,7 @@ class Interpreter:
                 while exc is None and len(self.error) > 0:
                     err = self.error.pop()
                     exc = err.exc
+
         if exc is None:
             exc = Exception
         if len(err.msg) == 0 and len(self.error_msg) == 0 and len(self.error) > 1:
@@ -264,7 +271,7 @@ class Interpreter:
             self.raise_exception(None, exc=SyntaxError, expr=text)
         except:
             self.raise_exception(None, exc=RuntimeError, expr=text)
-
+        out = ast.fix_missing_locations(out)
         return out
 
     def run(self, node, expr=None, lineno=None, with_raise=True):
@@ -273,7 +280,6 @@ class Interpreter:
         #    run(None) and expect a None in return.
         if isinstance(node, str):
             return self.eval(node, raise_errors=with_raise)
-
         out = None
         if len(self.error) > 0:
             return out
@@ -288,6 +294,7 @@ class Interpreter:
             self.lineno = lineno
         if expr is not None:
             self.expr = expr
+            self.code_text.append(expr)
 
         # get handler for this node:
         #   on_xxx with handle nodes of type 'xxx', etc
@@ -295,6 +302,7 @@ class Interpreter:
             handler = self.node_handlers[node.__class__.__name__.lower()]
         except KeyError:
             self.raise_exception(None, exc=NotImplementedError, expr=self.expr)
+
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
@@ -306,6 +314,7 @@ class Interpreter:
         except:
             if with_raise and self.expr is not None:
                 self.raise_exception(node, expr=self.expr)
+
 
         # avoid too many repeated error messages (yes, this needs to be "2")
         if len(self.error) > 2:
@@ -573,7 +582,7 @@ class Interpreter:
         sym = self.run(node.value)
         if ctx == ast.Del:
             return delattr(sym, node.attr)
-        
+
         return safe_getattr(sym, node.attr, self.raise_exception, node)
 
 
@@ -958,6 +967,7 @@ class Interpreter:
         self.symtable[node.name] = Procedure(node.name, self, doc=doc,
                                              lineno=self.lineno,
                                              body=node.body,
+                                             text=ast.unparse(node),
                                              args=args, kwargs=kwargs,
                                              vararg=vararg, varkws=varkws)
         if node.name in self.no_deepcopy:
