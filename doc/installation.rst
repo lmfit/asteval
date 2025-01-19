@@ -11,7 +11,7 @@ Requirements
 ~~~~~~~~~~~~~~~
 
 Asteval is a pure Python module. The latest stable version is |release|, which
-supports Python 3.8 through 3.12.
+supports Python 3.9 through 3.13.
 
 Installing `asteval` requires `setuptools` and `setuptools_scm`. No other
 libraries outside of the standard library are required.  If `numpy`_ and
@@ -20,11 +20,12 @@ Running the test suite requires the `pytest`, `coverage`, and `pytest-cov`
 modules, deployment uses `build` and `twine`, and building the documentation
 requires `sphinx`.
 
-Python 3.8 through 3.12 are tested on Windows, MacOS, and Linux, with and
-without `numpy`_ installed.  Older Python versions have generally been
-supported by `asteval` until they are well past the end of security fixes. That
-is, while `asteval` is no longer tested with Python 3.7, the latest release may
-continue to work with that version.
+Python 3.9 through 3.13 are tested on Windows, MacOS, and Linux, with
+and without `numpy`_ installed.  Older Python versions have generally
+been supported by `asteval` until they are well past the end of
+security fixes. While `asteval` may continue to work with Python 3.8
+or even 3.7, these are not supported.
+
 
 Support for new versions of the Python 3 series is not guaranteed until some
 time after the official release of that version, as we may not start testing
