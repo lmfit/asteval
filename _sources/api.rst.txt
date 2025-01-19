@@ -153,7 +153,7 @@ Interpreter methods and attributes
 
 An Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should
-not be considered as part of the usable API.  The methods described be low,
+not be considered as part of the usable API.  The methods described below,
 and the examples elsewhere in this documentation should be used as the
 stable API.
 

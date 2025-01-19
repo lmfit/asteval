@@ -7,11 +7,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <title>Installing Asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
-    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=658d757c" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
     
-    <script src="_static/documentation_options.js?v=d55fa986"></script>
-    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/documentation_options.js?v=e2a723ec"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/bizstyle.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
@@ -52,19 +52,19 @@
 <h1>Installing Asteval<a class="headerlink" href="#installing-asteval" title="Link to this heading">¶</a></h1>
 <section id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
-<p>Asteval is a pure Python module. The latest stable version is 1.0.5, which
-supports Python 3.8 through 3.12.</p>
+<p>Asteval is a pure Python module. The latest stable version is 1.0.6, which
+supports Python 3.9 through 3.13.</p>
 <p>Installing <cite>asteval</cite> requires <cite>setuptools</cite> and <cite>setuptools_scm</cite>. No other
 libraries outside of the standard library are required.  If <a class="reference external" href="https://numpy.org/">numpy</a> and
 <a class="reference external" href="https://numpy.org/numpy-financial/">numpy_financial</a> are available, <cite>asteval</cite> will make use of these libraries.
 Running the test suite requires the <cite>pytest</cite>, <cite>coverage</cite>, and <cite>pytest-cov</cite>
 modules, deployment uses <cite>build</cite> and <cite>twine</cite>, and building the documentation
 requires <cite>sphinx</cite>.</p>
-<p>Python 3.8 through 3.12 are tested on Windows, MacOS, and Linux, with and
-without <a class="reference external" href="https://numpy.org/">numpy</a> installed.  Older Python versions have generally been
-supported by <cite>asteval</cite> until they are well past the end of security fixes. That
-is, while <cite>asteval</cite> is no longer tested with Python 3.7, the latest release may
-continue to work with that version.</p>
+<p>Python 3.9 through 3.13 are tested on Windows, MacOS, and Linux, with
+and without <a class="reference external" href="https://numpy.org/">numpy</a> installed.  Older Python versions have generally
+been supported by <cite>asteval</cite> until they are well past the end of
+security fixes. While <cite>asteval</cite> may continue to work with Python 3.8
+or even 3.7, these are not supported.</p>
 <p>Support for new versions of the Python 3 series is not guaranteed until some
 time after the official release of that version, as we may not start testing
 until late in the “beta” period of development.  Historically, the delay has
@@ -73,7 +73,7 @@ features.</p>
 </section>
 <section id="installing-with-pip">
 <h2>Installing with <cite>pip</cite><a class="headerlink" href="#installing-with-pip" title="Link to this heading">¶</a></h2>
-<p>The latest stable version of <cite>asteval</cite> is 1.0.5 and is available at
+<p>The latest stable version of <cite>asteval</cite> is 1.0.6 and is available at
 <a class="reference external" href="https://pypi.org/project/asteval/">PyPI</a> or as a conda package.  You should be able to install <cite>asteval</cite>
 with:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">asteval</span>
@@ -101,7 +101,7 @@ environments.</p>
 license:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">The</span> <span class="n">MIT</span> <span class="n">License</span>
 
-<span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2024</span> <span class="n">Matthew</span> <span class="n">Newville</span><span class="p">,</span> <span class="n">The</span> <span class="n">University</span> <span class="n">of</span> <span class="n">Chicago</span>
+<span class="n">Copyright</span> <span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="mi">2025</span> <span class="n">Matthew</span> <span class="n">Newville</span><span class="p">,</span> <span class="n">The</span> <span class="n">University</span> <span class="n">of</span> <span class="n">Chicago</span>
 
 <span class="n">Permission</span> <span class="ow">is</span> <span class="n">hereby</span> <span class="n">granted</span><span class="p">,</span> <span class="n">free</span> <span class="n">of</span> <span class="n">charge</span><span class="p">,</span> <span class="n">to</span> <span class="nb">any</span> <span class="n">person</span> <span class="n">obtaining</span> <span class="n">a</span> <span class="n">copy</span> <span class="n">of</span>
 <span class="n">this</span> <span class="n">software</span> <span class="ow">and</span> <span class="n">associated</span> <span class="n">documentation</span> <span class="n">files</span> <span class="p">(</span><span class="n">the</span> <span class="s2">&quot;Software&quot;</span><span class="p">),</span> <span class="n">to</span> <span class="n">deal</span> <span class="ow">in</span>
@@ -196,8 +196,8 @@ license:</p>
       </ul>
     </div>
     <div class="footer" role="contentinfo">
-    &#169; Copyright 2024, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.6.
+    &#169; Copyright 2025, Matthew Newville, The University of Chicago.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
     </div>
   </body>
 </html>
