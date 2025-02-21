@@ -6,10 +6,13 @@ utility functions for asteval
 """
 import ast
 import io
+import os
+import sys
+import ctypes
 import math
 import numbers
 import re
-from sys import exc_info
+
 from tokenize import ENCODING as tk_ENCODING
 from tokenize import NAME as tk_NAME
 from tokenize import tokenize as generate_tokens
@@ -73,6 +76,9 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
 # unsafe attributes for particular objects, by type
 UNSAFE_ATTRS_DTYPES = {str: ('format', 'format_map')}
 
+# unsafe modules that may be exposed in other modules
+# but should be prevented from being accessed
+UNSAFE_MODULES = (io, os, sys, ctypes)
 
 # inherit these from python's __builtins__
 FROM_PY = ('ArithmeticError', 'AssertionError', 'AttributeError',
@@ -277,13 +283,18 @@ OPERATORS = {ast.Is: lambda a, b: a is b,
 
 # Safe version of getattr
 
-def safe_getattr(obj, attr, raise_exc, node):
+def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
     """safe version of getattr"""
     unsafe = (attr in UNSAFE_ATTRS or
             (attr.startswith('__') and attr.endswith('__')))
     if not unsafe:
         for dtype, attrlist in UNSAFE_ATTRS_DTYPES.items():
             unsafe = (isinstance(obj, dtype) or obj is dtype) and attr in attrlist
+            if unsafe:
+                break
+    if not unsafe and not allow_unsafe_modules:
+        for mod in UNSAFE_MODULES:
+            unsafe = obj is mod or getattr(obj, attr) is mod
             if unsafe:
                 break
     if unsafe:
@@ -382,7 +393,7 @@ class ExceptionHolder:
                 self.col_offset = node.col_offset
             except:
                 pass
-        self.exc_info = exc_info()
+        self.exc_info = sys.exc_info()
         if self.exc is None and self.exc_info[0] is not None:
             self.exc = self.exc_info[0]
         if self.msg == '' and self.exc_info[1] is not None:
