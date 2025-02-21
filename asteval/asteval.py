@@ -152,13 +152,14 @@ class Interpreter:
         self.lineno = 0
         self.code_text = []
         self.start_time = time.time()
-
         self.node_handlers = {}
         for node in ALL_NODES:
             handler = self.unimplemented
             if self.config.get(node, True):
                 handler = getattr(self, f"on_{node}", self.unimplemented)
             self.node_handlers[node] = handler
+
+        self.allow_unsafe_modules = self.config.get('import', False)
 
         # to rationalize try/except try/finally
         if 'try' in self.node_handlers:
@@ -186,6 +187,8 @@ class Interpreter:
         out = None
         if node in self.node_handlers:
             out = self.node_handlers.pop(node)
+        if node == 'import':
+            self.allow_unsafe_modules = False
         return out
 
     def set_nodehandler(self, node, handler=None):
@@ -193,6 +196,8 @@ class Interpreter:
         if handler is None:
             handler = getattr(self, f"on_{node}", self.unimplemented)
         self.node_handlers[node] = handler
+        if node == 'import':
+            self.allow_unsafe_modules = True
         return handler
 
     def user_defined_symbols(self):
@@ -582,8 +587,8 @@ class Interpreter:
         sym = self.run(node.value)
         if ctx == ast.Del:
             return delattr(sym, node.attr)
-
-        return safe_getattr(sym, node.attr, self.raise_exception, node)
+        return safe_getattr(sym, node.attr, self.raise_exception, node,
+                            allow_unsafe_modules=self.allow_unsafe_modules)
 
 
     def on_assign(self, node):    # ('targets', 'value')
