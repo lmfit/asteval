@@ -48,15 +48,16 @@ from .astutils import (HAS_NUMPY,
                        ExceptionHolder, ReturnedNone, Empty, make_symbol_table,
                        numpy, op2func, safe_getattr, safe_format, valid_symbol_name, Procedure)
 
-ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign', 'binop',
-             'boolop', 'break', 'bytes', 'call', 'compare', 'constant',
-             'continue', 'delete', 'dict', 'dictcomp', 'ellipsis',
-             'excepthandler', 'expr', 'extslice', 'for', 'functiondef', 'if',
-             'ifexp', 'import', 'importfrom', 'index', 'interrupt', 'list',
-             'listcomp', 'module', 'name', 'nameconstant', 'num', 'pass',
-             'raise', 'repr', 'return', 'set', 'setcomp', 'slice', 'str',
-             'subscript', 'try', 'tuple', 'unaryop', 'while', 'with',
-             'formattedvalue', 'joinedstr']
+ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
+             'binop', 'boolop', 'break', 'call', 'compare',
+             'constant', 'continue', 'delete', 'dict', 'dictcomp',
+             'excepthandler', 'expr', 'extslice', 'for',
+             'functiondef', 'if', 'ifexp', 'import', 'importfrom',
+             'index', 'interrupt', 'list', 'listcomp', 'module',
+             'name', 'pass', 'raise', 'repr', 'return', 'set',
+             'setcomp', 'slice', 'subscript', 'try', 'tuple',
+             'unaryop', 'while', 'with', 'formattedvalue',
+             'joinedstr']
 
 
 MINIMAL_CONFIG = {'import': False, 'importfrom': False}
