@@ -600,10 +600,18 @@ class Interpreter:
 
     def on_augassign(self, node):    # ('target', 'op', 'value')
         """Augmented assign."""
+        line_info = {
+            'lineno': node.lineno,
+            'col_offset': node.col_offset,
+            'end_lineno': node.end_lineno,
+            'end_col_offset': node.end_col_offset
+        }
         return self.on_assign(ast.Assign(targets=[node.target],
                                          value=ast.BinOp(left=node.target,
                                                          op=node.op,
-                                                         right=node.value)))
+                                                         right=node.value,
+                                                         **line_info),
+                                                         **line_info))
 
     def on_slice(self, node):    # ():('lower', 'upper', 'step')
         """Simple slice."""

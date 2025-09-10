@@ -1645,5 +1645,17 @@ def test_naming_exceptions(nested):
     assert 'unsupported operand' in out
     assert len(interp.error) == 0
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_augassign_lineno(nested):
+    """test lineno on augassign operation"""
+    interp = make_interpreter(nested_symtable=nested)
+
+    interp(textwrap.dedent("""
+    x = 1
+    x /= 0
+    """))
+    check_error(interp, 'ZeroDivisionError', 'x /= 0')
+    assert interp.error[0].lineno == 3
+
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])
