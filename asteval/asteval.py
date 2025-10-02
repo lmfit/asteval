@@ -96,7 +96,7 @@ class Interpreter:
     minimal : bool
         create a minimal interpreter: disable many nodes (see Note 1).
     config : dict
-        dictionay listing which nodes to support (see note 2))
+        dictionary listing which nodes to support (see note 2))
 
     Notes
     -----

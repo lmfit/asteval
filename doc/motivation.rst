@@ -40,7 +40,7 @@ involving parsing, lexing, and defining a grammar disappear.  Any valid python
 expression will be parsed correctly and converted into an Abstract Syntax Tree.
 Furthermore, the resulting AST is easy to walk through, greatly simplifying the
 evaluation process.  What started as a desire for a simple expression evaluator
-grew into a quite useable procedural domain-specific language for mathematical
+grew into a quite usable procedural domain-specific language for mathematical
 applications.
 
 Asteval makes no claims about speed. Evaluating the AST involves many
@@ -70,6 +70,8 @@ useful.  We also note that several other Python libraries that
 evaluate user-supplied expressions, including `numexpr` and `sympy`
 use the builtin :py:func:`eval` as part of their processing.
 
+Prohibited Python statements and attributes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Some of the things not allowed in the asteval interpreter for safety reasons include:
 
@@ -107,20 +109,25 @@ input causing segmentation fault is a primary concern, you may want to
 consider disabling the use of numpy, or take extra care to specify
 what numpy functions can be used.
 
-In 2024, an independent security audit of asteval done by Andrew Effenhauser,
-Ayman Hammad, and Daniel Crowley in the X-Force Security Research division of
-IBM showed insecurities with ``string.format``, so that access to this and
-``string.format_map`` method were removed.  In addition, this audit showed
-that the ``numpy`` submodules ``linalg``, ``fft``, and ``polynomial`` expose
-many exploitable objects, so these submodules were removed by default.  If
-needed, these modules can be added to any Interpreter either using the
-``user_symbols`` argument when creating it, or adding the needed symbols to the
-symbol table after the Interpreter is created.
+In 2024, an independent security audit of asteval done by Andrew
+Effenhauser, Ayman Hammad, and Daniel Crowley in the X-Force Security
+Research division of IBM showed insecurities with ``string.format``,
+so that access to this and ``string.format_map`` method were removed.
+In addition, this audit showed that the ``numpy`` submodules
+``linalg``, ``fft``, and ``polynomial`` expose many exploitable
+objects, so these submodules were removed by default.  If needed,
+these modules can be added to any Interpreter either using the
+``user_symbols`` argument when creating it, or adding the needed
+symbols to the symbol table after the Interpreter is created.
 
 In 2025, William Khem Marquez demonstrated two vulnerabilities: one
 from leaving some AST objects exposed within the interpreter for
 user-defined functions ("Procedures"), and one with f-string
 formatting.  Both of these were fixed for version 1.0.6.
+
+
+Avoiding resource hogging
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There are other categories of safety that asteval may attempt to
 address, but cannot guarantee success.  The most important of these is
@@ -140,23 +147,24 @@ can take a noticeable amount of CPU time - if it does not, increasing
 that value of ``nmax`` almost certainly will, and can even crash the
 Python shell.
 
-As another example, and an illustration of the fundamental problem,
-consider the Python expression ``a = x**y**z``.  For values
-``x=y=z=5``, the run time will be well under 0.001 seconds.  For
-``x=y=z=8``, run time will still be under 1 sec.  Changing to ``x=8,
-y=9, z=9``, Python will ake several seconds (the value is :math:`\sim
-10^{350,000,000}`) With ``x=y=z=9``, executing that statement may take
-more than 1 hour on some machines.  It is not hard to come up with
+As another illustration of the fundamental challenge, consider the
+Python expression ``a = x**y**z``. With values ``x=y=z=5``, the run
+time will be well under 0.001 seconds.  Even with ``x=y=z=8``, run
+time will be under 1 sec.  Changing to ``x=8, y=9, z=9``, Python will
+take several seconds (the value is :math:`\sim 10^{350,000,000}`) With
+``x=y=z=9``, executing that statement may take more than 1 hour on
+some machines.  The result is that it is not hard to come up with
 short program that would run for hundreds of years, which probably
 exceeds everyones threshold for an acceptable run-time.  The point
-here is tha there simply is not a good way to predict how long any
-code will take to run from the text of the code itself: run time
-cannot be determined lexically.
+here is that there simply is not a good way to predict runtime for any
+code from the text of the code alone: run time cannot be determined
+lexically.
 
 To be clear, for the ``x**y**z`` exponentiation example, asteval will
 raise a runtime error, telling you that an exponent > 10,000 is not
 allowed.  Several other attempts are also made to prevent long-running
-operations or memory exhaustion.  These checks will prevent:
+operations or memory exhaustion.  These checks will prevent the
+following ways to hog resources:
 
   * statements longer than 50,000 bytes.
   * values of exponents (``p`` in ``x**p``) > 10,000.
@@ -165,11 +173,16 @@ operations or memory exhaustion.  These checks will prevent:
   * more than 262144 open buffers
   * opening a file with a mode other than ``'r'``, ``'rb'``, or ``'ru'``.
 
-These checks happen at runtime, not by analyzing the text of the code.
-As with the example above using ``numpy.arange``, very large arrays
-and lists can be created that might approach memory limits.  There are
-countless other "clever ways" to have very long run times that cannot
-be readily predicted from the text of the code.
+These checks happen at runtime, not by analyzing the text of the code,
+but the values for these operations.  Still, as with the example above
+using ``numpy.arange``, very large arrays and lists can be created
+that can approach memory limits.  There are countless "clever ways" to
+have very long run times that cannot be readily predicted from the
+text of the code.
+
+
+File access
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, the list of supported functions does include Python's
 ``open()`` -- in read-only mode -- which will allow disk access to the
@@ -183,18 +196,24 @@ may want to remove some of these functions from the symbol table,
 re-implement them, or ensure that your program cannot access
 information on disk that should be kept private.
 
-The exponential example also highlights the issue that there is not a good way
-to check for a long-running calculation within a single Python process.  That
-calculation is not stuck within the Python interpreter, but in C code (no doubt
-the ``pow()`` function) called by the Python interpreter itself.  That call
-will not return from the C library to the Python interpreter or allow other
-threads to run until that call is done.  That means that from within a single
-process, there is not a reliable way to tell asteval (or really, even Python)
-when a calculation has taken too long: Denial of Service is hard to detect
-before it happens, and even challenging to detect while it is happening.  The
-only reliable way to limit run time is at the level of the operating system,
-with a second process watching the execution time of the asteval process and
-either try to interrupt it or kill it.
+
+Monitoring Runtime and interrupting processes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+The exponential example also highlights the issue that there is not a
+good way to check for a long-running calculation within a single
+Python process.  That calculation is not stuck within the Python
+interpreter, but in C code (no doubt the ``pow()`` function) called by
+the Python interpreter itself.  That call will not return from the C
+library to the Python interpreter or allow other threads to run until
+that call is done.  That means that from within a single process,
+there is not a reliable way to tell asteval (or really, even Python)
+when a calculation has taken too long: Denial of Service is hard to
+detect before it happens, and even challenging to detect while it is
+happening.  The only reliable way to limit run time is at the level of
+the operating system, with a second process watching the execution
+time of the asteval process and either try to interrupt it or kill it.
 
 For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the *recursion limit* when
