@@ -89,7 +89,6 @@ def check_error(interp, chk_type='', chk_msg=''):
         if chk_type:
             assert False
 
-
 def test_py3():
     assert version_info.major > 2
 
@@ -321,6 +320,39 @@ def test_while_break(nested):
             print( 'finish: n = ', n)
             """))
     isvalue(interp, 'n', 7)
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_while_return(nested):
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            def func_while(nmax=10):
+                n = 0
+                while n < nmax:
+                    n += 1
+                    if n > 6:
+                        return 99
+                return n
+            o1 = func_while(3)
+            o2 = func_while(12)
+            """))
+    isvalue(interp, 'o1', 3)
+    isvalue(interp, 'o2', 99)
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_for_return(nested):
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            def func_for(nmax=10):
+                for n in range(nmax):
+                    if n > 10:
+                        return -2
+                return n
+            o1 = func_for(7)
+            o2 = func_for(99)
+            """))
+    isvalue(interp, 'o1', 6)
+    isvalue(interp, 'o2', -2)
+
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_with(nested):
@@ -1586,7 +1618,7 @@ def test_unsafe_procedure_access(nested):
     etype, fullmsg = error.get_error()
     assert 'no safe attribute' in error.msg
     assert etype == 'AttributeError'
-    
+
 @pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_format_string_access(nested):
     """
@@ -1602,7 +1634,7 @@ def test_unsafe_format_string_access(nested):
     etype, fullmsg = error.get_error()
     assert 'no safe attribute' in error.msg
     assert etype == 'AttributeError'
-    
+
 @pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_attr_dtypes(nested):
     """
@@ -1617,12 +1649,12 @@ def test_unsafe_attr_dtypes(nested):
     etype, fullmsg = error.get_error()
     assert 'no safe attribute' in error.msg
     assert etype == 'AttributeError'
-    
+
     interp = make_interpreter(nested_symtable=nested)
     interp(textwrap.dedent("""
             str.format('{0}', dict)
      """),  raise_errors=False)
-    
+
     error = interp.error[0]
     etype, fullmsg = error.get_error()
     assert 'no safe attribute' in error.msg
