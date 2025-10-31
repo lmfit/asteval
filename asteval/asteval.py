@@ -452,6 +452,7 @@ class Interpreter:
         self.retval = self.run(node.value)
         if self.retval is None:
             self.retval = ReturnedNone
+        self._interrupt = node
 
     def on_repr(self, node):
         """Repr."""
@@ -735,7 +736,7 @@ class Interpreter:
                 self.run(tnode)
                 if self._interrupt is not None:
                     break
-            if isinstance(self._interrupt, ast.Break):
+            if isinstance(self._interrupt, (ast.Break, ast.Return)):
                 break
         else:
             for tnode in node.orelse:
@@ -751,7 +752,7 @@ class Interpreter:
                 self.run(tnode)
                 if self._interrupt is not None:
                     break
-            if isinstance(self._interrupt, ast.Break):
+            if isinstance(self._interrupt, (ast.Break, ast.Return)):
                 break
         else:
             for tnode in node.orelse:
@@ -775,10 +776,10 @@ class Interpreter:
             self.run(bnode)
             if self._interrupt is not None:
                 break
-
         for ctx in contexts:
             if hasattr(ctx, '__exit__'):
                 ctx.__exit__()
+
 
     def _comp_save_syms(self, node):
         """find and save symbols that will be used in a comprehension"""
