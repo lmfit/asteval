@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
     
-    <script src="_static/documentation_options.js?v=e2a723ec"></script>
+    <script src="_static/documentation_options.js?v=46dfa7f5"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -48,38 +48,38 @@
   <section id="motivation-for-asteval">
 <h1>Motivation for Asteval<a class="headerlink" href="#motivation-for-asteval" title="Link to this heading">¶</a></h1>
 <p>The asteval module allows you to evaluate a large subset of the Python language
-from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is, in effect,
-a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, forbidding several
+from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is, in effect,
+a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, forbidding several
 actions, and using (by default) a simple dictionary as a flat namespace.  A
 completely fair question is: Why is this desirable?  That is, why not simply
-use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
+use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, or just use Python itself?</p>
 <p>The short answer is that sometimes you want to allow evaluation of user input,
 or expose a simple or even scientific calculator inside a larger application.
-For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes <em>all</em> of Python, which
+For this, <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> is pretty scary, as it exposes <em>all</em> of Python, which
 makes user input difficult to trust.  Since asteval does not support the
 <strong>import</strong> statement (unless explicitly enabled) or many other constructs, user
-code cannot access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any functions
+code cannot access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any functions
 or classes outside those provided in the symbol table.</p>
 <p>Many of the other missing features (modules, classes, lambda, yield,
 generators) are similarly motivated by a desire for a safer version of
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
 mathematically-oriented language that can be embedded into larger applications.</p>
 <p>In fact, the asteval module grew out the the need for a simple expression
 evaluator for scientific applications such as the <a class="reference external" href="https://github.com/lmfit/lmfit-py">lmfit</a> and <a class="reference external" href="https://github.com/xraypy/xraylarch">xraylarch</a>
 modules.  An early attempt using the <cite>pyparsing</cite> module worked but was
 error-prone and difficult to maintain.  While the simplest of calculators or
 expressiona-evaluators is not hard with pyparsing, it turned out that using the
-Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes it much easier to implement a feature-rich
+Python <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module makes it much easier to implement a feature-rich
 scientific calculator, including slicing, complex numbers, keyword arguments to
 functions, etc. In fact, this approach meant that adding more complex
 programming constructs like conditionals, loops, exception handling, and even
 user-defined functions was fairly simple.  An important benefit of using the
-<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.13)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module is that whole categories of implementation errors
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module is that whole categories of implementation errors
 involving parsing, lexing, and defining a grammar disappear.  Any valid python
 expression will be parsed correctly and converted into an Abstract Syntax Tree.
 Furthermore, the resulting AST is easy to walk through, greatly simplifying the
 evaluation process.  What started as a desire for a simple expression evaluator
-grew into a quite useable procedural domain-specific language for mathematical
+grew into a quite usable procedural domain-specific language for mathematical
 applications.</p>
 <p>Asteval makes no claims about speed. Evaluating the AST involves many
 function calls, which is going to be slower than Python - often 4x slower
@@ -89,10 +89,10 @@ approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p
 <section id="how-safe-is-asteval">
 <h2>How Safe is asteval?<a class="headerlink" href="#how-safe-is-asteval" title="Link to this heading">¶</a></h2>
 <p>Asteval avoids all of the exploits we know about that make
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> dangerous. For reference, see, <a class="reference external" href="https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really
+<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> dangerous. For reference, see, <a class="reference external" href="https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really
 dangerous</a>
 and the comments and links therein.  From this discussion it is
-apparent that not only is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a
+apparent that not only is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a
 difficult prospect to make any program that takes user input perfectly
 safe.  In particular, if a user can cause Python to crash with a
 segmentation fault, safety cannot be guaranteed.  Asteval explicitly
@@ -100,10 +100,12 @@ forbids the exploits described in the above link, and works hard to
 prevent malicious code from crashing Python or accessing the
 underlying operating system.  That said, we cannot guarantee that
 asteval is completely safe from malicious code.  We claim only that it
-is safer than the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it
+is safer than the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it
 useful.  We also note that several other Python libraries that
 evaluate user-supplied expressions, including <cite>numexpr</cite> and <cite>sympy</cite>
-use the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> as part of their processing.</p>
+use the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> as part of their processing.</p>
+<section id="prohibited-python-statements-and-attributes">
+<h3>Prohibited Python statements and attributes<a class="headerlink" href="#prohibited-python-statements-and-attributes" title="Link to this heading">¶</a></h3>
 <p>Some of the things not allowed in the asteval interpreter for safety reasons include:</p>
 <blockquote>
 <div><ul class="simple">
@@ -114,7 +116,7 @@ explicitly enable these.</p></li>
 <li><p>use <code class="docutils literal notranslate"><span class="pre">string.format()</span></code>, though f-string formatting and using the <code class="docutils literal notranslate"><span class="pre">%</span></code>
 operator for string formatting are supported.</p></li>
 <li><dl class="simple">
-<dt>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>,</dt><dd><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and    <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p>
+<dt>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>,</dt><dd><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and    <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p>
 </dd>
 </dl>
 </li>
@@ -143,19 +145,23 @@ seg-fault Python without too much trouble.  If you safety from user
 input causing segmentation fault is a primary concern, you may want to
 consider disabling the use of numpy, or take extra care to specify
 what numpy functions can be used.</p>
-<p>In 2024, an independent security audit of asteval done by Andrew Effenhauser,
-Ayman Hammad, and Daniel Crowley in the X-Force Security Research division of
-IBM showed insecurities with <code class="docutils literal notranslate"><span class="pre">string.format</span></code>, so that access to this and
-<code class="docutils literal notranslate"><span class="pre">string.format_map</span></code> method were removed.  In addition, this audit showed
-that the <code class="docutils literal notranslate"><span class="pre">numpy</span></code> submodules <code class="docutils literal notranslate"><span class="pre">linalg</span></code>, <code class="docutils literal notranslate"><span class="pre">fft</span></code>, and <code class="docutils literal notranslate"><span class="pre">polynomial</span></code> expose
-many exploitable objects, so these submodules were removed by default.  If
-needed, these modules can be added to any Interpreter either using the
-<code class="docutils literal notranslate"><span class="pre">user_symbols</span></code> argument when creating it, or adding the needed symbols to the
-symbol table after the Interpreter is created.</p>
+<p>In 2024, an independent security audit of asteval done by Andrew
+Effenhauser, Ayman Hammad, and Daniel Crowley in the X-Force Security
+Research division of IBM showed insecurities with <code class="docutils literal notranslate"><span class="pre">string.format</span></code>,
+so that access to this and <code class="docutils literal notranslate"><span class="pre">string.format_map</span></code> method were removed.
+In addition, this audit showed that the <code class="docutils literal notranslate"><span class="pre">numpy</span></code> submodules
+<code class="docutils literal notranslate"><span class="pre">linalg</span></code>, <code class="docutils literal notranslate"><span class="pre">fft</span></code>, and <code class="docutils literal notranslate"><span class="pre">polynomial</span></code> expose many exploitable
+objects, so these submodules were removed by default.  If needed,
+these modules can be added to any Interpreter either using the
+<code class="docutils literal notranslate"><span class="pre">user_symbols</span></code> argument when creating it, or adding the needed
+symbols to the symbol table after the Interpreter is created.</p>
 <p>In 2025, William Khem Marquez demonstrated two vulnerabilities: one
 from leaving some AST objects exposed within the interpreter for
 user-defined functions (“Procedures”), and one with f-string
 formatting.  Both of these were fixed for version 1.0.6.</p>
+</section>
+<section id="avoiding-resource-hogging">
+<h3>Avoiding resource hogging<a class="headerlink" href="#avoiding-resource-hogging" title="Link to this heading">¶</a></h3>
 <p>There are other categories of safety that asteval may attempt to
 address, but cannot guarantee success.  The most important of these is
 resource hogging, which might be used for a denial-of-service attack.
@@ -173,22 +179,23 @@ looking calculation such as:</p>
 <p>can take a noticeable amount of CPU time - if it does not, increasing
 that value of <code class="docutils literal notranslate"><span class="pre">nmax</span></code> almost certainly will, and can even crash the
 Python shell.</p>
-<p>As another example, and an illustration of the fundamental problem,
-consider the Python expression <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">x**y**z</span></code>.  For values
-<code class="docutils literal notranslate"><span class="pre">x=y=z=5</span></code>, the run time will be well under 0.001 seconds.  For
-<code class="docutils literal notranslate"><span class="pre">x=y=z=8</span></code>, run time will still be under 1 sec.  Changing to <code class="docutils literal notranslate"><span class="pre">x=8,</span>
-<span class="pre">y=9,</span> <span class="pre">z=9</span></code>, Python will ake several seconds (the value is <span class="math notranslate nohighlight">\(\sim
-10^{350,000,000}\)</span>) With <code class="docutils literal notranslate"><span class="pre">x=y=z=9</span></code>, executing that statement may take
-more than 1 hour on some machines.  It is not hard to come up with
+<p>As another illustration of the fundamental challenge, consider the
+Python expression <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">x**y**z</span></code>. With values <code class="docutils literal notranslate"><span class="pre">x=y=z=5</span></code>, the run
+time will be well under 0.001 seconds.  Even with <code class="docutils literal notranslate"><span class="pre">x=y=z=8</span></code>, run
+time will be under 1 sec.  Changing to <code class="docutils literal notranslate"><span class="pre">x=8,</span> <span class="pre">y=9,</span> <span class="pre">z=9</span></code>, Python will
+take several seconds (the value is <span class="math notranslate nohighlight">\(\sim 10^{350,000,000}\)</span>) With
+<code class="docutils literal notranslate"><span class="pre">x=y=z=9</span></code>, executing that statement may take more than 1 hour on
+some machines.  The result is that it is not hard to come up with
 short program that would run for hundreds of years, which probably
 exceeds everyones threshold for an acceptable run-time.  The point
-here is tha there simply is not a good way to predict how long any
-code will take to run from the text of the code itself: run time
-cannot be determined lexically.</p>
+here is that there simply is not a good way to predict runtime for any
+code from the text of the code alone: run time cannot be determined
+lexically.</p>
 <p>To be clear, for the <code class="docutils literal notranslate"><span class="pre">x**y**z</span></code> exponentiation example, asteval will
 raise a runtime error, telling you that an exponent &gt; 10,000 is not
 allowed.  Several other attempts are also made to prevent long-running
-operations or memory exhaustion.  These checks will prevent:</p>
+operations or memory exhaustion.  These checks will prevent the
+following ways to hog resources:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>statements longer than 50,000 bytes.</p></li>
@@ -199,11 +206,15 @@ operations or memory exhaustion.  These checks will prevent:</p>
 <li><p>opening a file with a mode other than <code class="docutils literal notranslate"><span class="pre">'r'</span></code>, <code class="docutils literal notranslate"><span class="pre">'rb'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'ru'</span></code>.</p></li>
 </ul>
 </div></blockquote>
-<p>These checks happen at runtime, not by analyzing the text of the code.
-As with the example above using <code class="docutils literal notranslate"><span class="pre">numpy.arange</span></code>, very large arrays
-and lists can be created that might approach memory limits.  There are
-countless other “clever ways” to have very long run times that cannot
-be readily predicted from the text of the code.</p>
+<p>These checks happen at runtime, not by analyzing the text of the code,
+but the values for these operations.  Still, as with the example above
+using <code class="docutils literal notranslate"><span class="pre">numpy.arange</span></code>, very large arrays and lists can be created
+that can approach memory limits.  There are countless “clever ways” to
+have very long run times that cannot be readily predicted from the
+text of the code.</p>
+</section>
+<section id="file-access">
+<h3>File access<a class="headerlink" href="#file-access" title="Link to this heading">¶</a></h3>
 <p>By default, the list of supported functions does include Python’s
 <code class="docutils literal notranslate"><span class="pre">open()</span></code> – in read-only mode – which will allow disk access to the
 untrusted user.  If <code class="docutils literal notranslate"><span class="pre">numpy</span></code> is supported, its <code class="docutils literal notranslate"><span class="pre">load()</span></code> and
@@ -215,18 +226,22 @@ calling program.  In some cases, this may not be desirable, and you
 may want to remove some of these functions from the symbol table,
 re-implement them, or ensure that your program cannot access
 information on disk that should be kept private.</p>
-<p>The exponential example also highlights the issue that there is not a good way
-to check for a long-running calculation within a single Python process.  That
-calculation is not stuck within the Python interpreter, but in C code (no doubt
-the <code class="docutils literal notranslate"><span class="pre">pow()</span></code> function) called by the Python interpreter itself.  That call
-will not return from the C library to the Python interpreter or allow other
-threads to run until that call is done.  That means that from within a single
-process, there is not a reliable way to tell asteval (or really, even Python)
-when a calculation has taken too long: Denial of Service is hard to detect
-before it happens, and even challenging to detect while it is happening.  The
-only reliable way to limit run time is at the level of the operating system,
-with a second process watching the execution time of the asteval process and
-either try to interrupt it or kill it.</p>
+</section>
+<section id="monitoring-runtime-and-interrupting-processes">
+<h3>Monitoring Runtime and interrupting processes<a class="headerlink" href="#monitoring-runtime-and-interrupting-processes" title="Link to this heading">¶</a></h3>
+<p>The exponential example also highlights the issue that there is not a
+good way to check for a long-running calculation within a single
+Python process.  That calculation is not stuck within the Python
+interpreter, but in C code (no doubt the <code class="docutils literal notranslate"><span class="pre">pow()</span></code> function) called by
+the Python interpreter itself.  That call will not return from the C
+library to the Python interpreter or allow other threads to run until
+that call is done.  That means that from within a single process,
+there is not a reliable way to tell asteval (or really, even Python)
+when a calculation has taken too long: Denial of Service is hard to
+detect before it happens, and even challenging to detect while it is
+happening.  The only reliable way to limit run time is at the level of
+the operating system, with a second process watching the execution
+time of the asteval process and either try to interrupt it or kill it.</p>
 <p>For a limited range of problems, you can try to avoid asteval taking too
 long.  For example, you may try to limit the <em>recursion limit</em> when
 executing expressions, with a code like this:</p>
@@ -246,9 +261,10 @@ executing expressions, with a code like this:</p>
 </pre></div>
 </div>
 <p>In summary, while asteval attempts to be safe and is definitely safer than
-using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.13)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, there may be ways that using asteval could lead to
+using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, there may be ways that using asteval could lead to
 increased risk of malicious use. Recommendations for how to improve this
 situation would be greatly appreciated.</p>
+</section>
 </section>
 </section>
 
@@ -263,7 +279,13 @@ situation would be greatly appreciated.</p>
     <h3><a href="index.html">Table of Contents</a></h3>
     <ul>
 <li><a class="reference internal" href="#">Motivation for Asteval</a><ul>
-<li><a class="reference internal" href="#how-safe-is-asteval">How Safe is asteval?</a></li>
+<li><a class="reference internal" href="#how-safe-is-asteval">How Safe is asteval?</a><ul>
+<li><a class="reference internal" href="#prohibited-python-statements-and-attributes">Prohibited Python statements and attributes</a></li>
+<li><a class="reference internal" href="#avoiding-resource-hogging">Avoiding resource hogging</a></li>
+<li><a class="reference internal" href="#file-access">File access</a></li>
+<li><a class="reference internal" href="#monitoring-runtime-and-interrupting-processes">Monitoring Runtime and interrupting processes</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -313,7 +335,7 @@ situation would be greatly appreciated.</p>
     </div>
     <div class="footer" role="contentinfo">
     &#169; Copyright 2025, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     </div>
   </body>
 </html>
