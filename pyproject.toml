@@ -18,20 +18,19 @@ addopts = "--cov=asteval --cov-report html"
 [project]
 name = "asteval"
 dynamic = ["version"]
-requires-python = ">= 3.9"
+requires-python = ">= 3.10"
 description = "Safe, minimalistic evaluator of python expression using ast module"
 readme = "README.rst"
 authors = [
      {name = "Matthew Newville", email = "matt.newville@gmail.com"}
 ]
-license = {file = "LICENSE"}
+license = "MIT"
+license-files = ["LICENSE"]
 keywords = ["AST", "expression evaluation", "eval"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
