@@ -312,21 +312,10 @@ class Interpreter:
 
         # run the handler:  this will likely generate
         # recursive calls into this run method.
-        try:
-            ret = handler(node)
-            if isinstance(ret, enumerate):
-                ret = list(ret)
-            return ret
-        except:
-            if with_raise and self.expr is not None:
-                self.raise_exception(node, expr=self.expr)
-
-
-        # avoid too many repeated error messages (yes, this needs to be "2")
-        if len(self.error) > 2:
-            self._remove_duplicate_errors()
-
-        return None
+        ret = handler(node)
+        if isinstance(ret, enumerate):
+            ret = list(ret)
+        return ret
 
     def _remove_duplicate_errors(self):
         """remove duplicate exceptions"""
@@ -461,8 +450,12 @@ class Interpreter:
     def on_module(self, node):    # ():('body',)
         """Module def."""
         out = None
-        for tnode in node.body:
-            out = self.run(tnode)
+        try:
+            for tnode in node.body:
+                out = self.run(tnode)
+        except Exception:
+            if self.expr is not None:
+                self.raise_exception(node, expr=self.expr)
         return out
 
     def on_expression(self, node):
