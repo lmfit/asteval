@@ -42,8 +42,8 @@ except ImportError:
 try:
     from _string import formatter_field_name_split
 except ImportError:
-    formatter_field_name_split = lambda \
-        x: x._formatter_field_name_split()
+    def formatter_field_name_split(x):
+        return x._formatter_field_name_split()
 
 
 
@@ -391,7 +391,7 @@ class ExceptionHolder:
                 self.lineno = node.lineno
                 self.end_lineno = node.end_lineno
                 self.col_offset = node.col_offset
-            except:
+            except Exception:
                 pass
         self.exc_info = sys.exc_info()
         if self.exc is None and self.exc_info[0] is not None:
@@ -409,12 +409,12 @@ class ExceptionHolder:
             exc_name = 'UnknownError'
 
         out = []
-        self.code = [f'{l}' for l  in self.text.split('\n')]
-        self.codelines = [f'{i+1}: {l}' for i, l in enumerate(self.code)]
+        self.code = [f'{word}' for word  in self.text.split('\n')]
+        self.codelines = [f'{i+1}: {word}' for i, word in enumerate(self.code)]
 
         try:
             out.append('\n'.join(self.code[self.lineno-1:self.end_lineno]))
-        except:
+        except Exception:
             out.append(f"{self.expr}")
         if self.col_offset > 0:
             out.append(f"{self.col_offset*' '}^^^^")

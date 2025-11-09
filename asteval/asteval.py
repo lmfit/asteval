@@ -44,9 +44,10 @@ import inspect
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (HAS_NUMPY,
-                       ExceptionHolder, ReturnedNone, Empty, make_symbol_table,
-                       numpy, op2func, safe_getattr, safe_format, valid_symbol_name, Procedure)
+from .astutils import (HAS_NUMPY, ExceptionHolder, ReturnedNone,
+                       Empty, make_symbol_table, op2func,
+                       safe_getattr, safe_format, valid_symbol_name,
+                       Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
              'binop', 'boolop', 'break', 'call', 'compare',
@@ -275,7 +276,7 @@ class Interpreter:
             out = ast.parse(text)
         except SyntaxError:
             self.raise_exception(None, exc=SyntaxError, expr=text)
-        except:
+        except Exception:
             self.raise_exception(None, exc=RuntimeError, expr=text)
         out = ast.fix_missing_locations(out)
         return out
@@ -317,7 +318,7 @@ class Interpreter:
             if isinstance(ret, enumerate):
                 ret = list(ret)
             return ret
-        except:
+        except Exception:
             if with_raise and self.expr is not None:
                 self.raise_exception(node, expr=self.expr)
 
@@ -419,7 +420,7 @@ class Interpreter:
             try:
                 __import__(name)
                 thismod = sys.modules[name]
-            except:
+            except Exception:
                 self.raise_exception(None, exc=ImportError, msg='Import Error')
 
         if fromlist is None:
@@ -650,8 +651,8 @@ class Interpreter:
                 while tnode.__class__ == ast.Attribute:
                     children.append(tnode.attr)
                     tnode = tnode.value
-                if (tnode.__class__ == ast.Name and not
-                    tnode.id in self.readonly_symbols):
+                if (tnode.__class__ == ast.Name and
+                    tnode.id not in self.readonly_symbols):
                     children.append(tnode.id)
                     children.reverse()
                     sname = '.'.join(children)
