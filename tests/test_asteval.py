@@ -1150,6 +1150,19 @@ def test_nested_functions(nested):
     isvalue(interp, 'o2', 1.5)
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_lambda(nested):
+    """test using lambda definitions"""
+    interp = make_interpreter(nested_symtable=nested)
+
+    interp(textwrap.dedent("""
+    my_func = lambda x: 2 + 3*x
+    out = my_func(3)
+    """))
+    assert len(interp.error) == 0
+    isvalue(interp, 'out', 11.0)
+
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_astdump(nested):
     """test ast parsing and dumping"""
     interp = make_interpreter(nested_symtable=nested)
@@ -1231,7 +1244,7 @@ def test_kaboom(nested):
     interp("""(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]):
     fc("function")(fc("code")(0,0,0,0,"KABOOM",(),(),(),"","",0,""),{})()
 )()""")
-    check_error(interp, 'NotImplementedError')  # Safe, lambda is not supported
+    check_error(interp, 'AttributeError')  # Safe, unassigned lambda is not supported
 
     interp("""[print(c) for c in ().__class__.__bases__[0].__subclasses__()]""")  # Try a portion of the kaboom...
 
