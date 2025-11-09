@@ -42,45 +42,51 @@ Installation
 
 Use ``pip install asteval`` to install the asteval library.
 
-Asteval requires Python 3.8 or higher.  If installed, many functions and
-constants from Numpy will be used by default.
+Asteval supports Python 3.10 or higher. No modules outside of the
+standard library are required, though if `NumPy` is installed, many
+functions from it will be used by default.
 
-About ASTEVAL
+About Asteval
 --------------
 
-ASTEVAL is a safe(ish) evaluator of Python expressions and statements,
-using Python's ast module.  The idea is to provide a simple, safe, and
-robust miniature mathematical language that can handle user input.  The
-emphasis here is on mathematical expressions so that many functions from
-``numpy`` are imported and used if available.
+Asteval is a safe(ish) evaluator of Python expressions and statements,
+using Python's ast module. It provides a simple and robust restricted
+Python interpreter that can safely handle user input.  The emphasis
+here is on mathematical expressions so that many functions from
+``NumPy`` are imported and used if available.
 
-Many Python language constructs are supported by default, These include
-slicing, subscripting, list comprehension, conditionals (if-elif-else
-blocks and if expressions), flow control (for loops, while loops, and
-try-except-finally blocks). All data are Python objects and built-in data
-structures (dictionaries, tuples, lists, Numpy arrays, strings) are fully
-supported by default.
+Asteval supports many Python language constructs by default. These
+include conditionals (if-elif-else blocks and if expressions), flow
+control (for loops, while loops, and try-except-finally blocks), list
+comprehension, slicing, subscripting, f-strings, and more.  All data
+are Python objects and built-in data structures (dictionaries, tuples,
+lists, strings, and ``Numpy`` nd-arrays) are fully supported by
+default.  It supports these language features by converting input into
+Python's own abstract syntax tree (AST) representation and walking
+through that tree.  This approach effectively guarantees that parsing
+of input will be identical to that of Python.
 
-Many of the standard built-in Python functions are available, as are all
-mathematical functions from the math module.  If the Numpy module is
-installed, many of its functions will also be available.  Users can define
-and run their own functions within the confines of the limitations of
-Asteval.
+Many of the standard built-in Python functions are available, as are
+all mathematical functions from the ``math`` module.  If the ``NumPy``
+is installed, many of its functions will also be available.  Users can
+define and run their own functions within the confines of the
+limitations of Asteval.
 
-There are several absences and differences with Python, and Asteval is by
-no means an attempt to reproduce Python with its own ast module.  Some of
-the most important differences and absences are:
+There are several absences and differences with Python, and Asteval is
+by no means an attempt to reproduce Python with its own ``ast``
+module.  Some of the most important differences and absences are:
 
- 1. Variable and function symbol names are held in a simple symbol
-    table (a single dictionary), giving a flat namespace.
+ 1. accessing many internal methods and classes of Python objects is
+    forbidden. This strengthens Asteval against malicious user code.
  2. creating classes is not supported.
- 3. importing modules is not supported by default - it can be enabled.
- 4. function decorators, yield, lambda, exec, and eval are not supported.
- 5. files can only be opened in read-only mode.
+ 3. function decorators, `yield`, `async`, `lambda`, `exec`, and
+    `eval` are not supported.
+ 4. importing modules is not supported by default (it can be enabled).
+ 5. files will be opened in read-only mode by default.
 
-In addition, accessing many internal methods and classes of objects is
-forbidden in order to strengthen Asteval against malicious user code.
+Even with these restrictions, Asteval provides a pretty full-features
+``mini-Python`` language that might be useful to expose to user input.
 
 
 Matt Newville <newville@cars.uchicago.edu>
-Last Update:  30-June-2024
+Last Update:  09-Nov-2025
