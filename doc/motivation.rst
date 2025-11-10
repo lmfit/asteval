@@ -20,7 +20,7 @@ makes user input difficult to trust.  Since asteval does not support the
 code cannot access the :py:mod:`os` and :py:mod:`sys` modules or any functions
 or classes outside those provided in the symbol table.
 
-Many of the other missing features (modules, classes, lambda, yield,
+Many of the other missing features (modules, classes, yield,
 generators) are similarly motivated by a desire for a safer version of
 :py:func:`eval`.  The idea for asteval is to make a simple procedural,
 mathematically-oriented language that can be embedded into larger applications.
