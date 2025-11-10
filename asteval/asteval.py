@@ -54,9 +54,9 @@ ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
              'constant', 'continue', 'delete', 'dict', 'dictcomp',
              'excepthandler', 'expr', 'extslice', 'for',
              'functiondef', 'if', 'ifexp', 'import', 'importfrom',
-             'index', 'interrupt', 'list', 'listcomp', 'module',
-             'name', 'pass', 'raise', 'repr', 'return', 'set',
-             'setcomp', 'slice', 'subscript', 'try', 'tuple',
+             'index', 'interrupt', 'lambda', 'list', 'listcomp',
+             'module', 'name', 'pass', 'raise', 'repr', 'return',
+             'set', 'setcomp', 'slice', 'subscript', 'try', 'tuple',
              'unaryop', 'while', 'with', 'formattedvalue',
              'joinedstr']
 
@@ -65,8 +65,9 @@ MINIMAL_CONFIG = {'import': False, 'importfrom': False}
 DEFAULT_CONFIG = {'import': False, 'importfrom': False}
 
 for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
-             'formattedvalue', 'functiondef', 'print', 'raise', 'listcomp',
-             'dictcomp', 'setcomp', 'try', 'while', 'with'):
+             'formattedvalue', 'functiondef', 'print', 'raise',
+             'lambda', 'listcomp', 'dictcomp', 'setcomp', 'try',
+             'while', 'with'):
     MINIMAL_CONFIG[_tnode] = False
     DEFAULT_CONFIG[_tnode] = True
 
@@ -103,7 +104,7 @@ class Interpreter:
     -----
     1. setting `minimal=True` is equivalent to setting a config with the following
        nodes disabled: ('import', 'importfrom', 'if', 'for', 'while', 'try', 'with',
-       'functiondef', 'ifexp', 'listcomp', 'dictcomp', 'setcomp', 'augassign',
+       'functiondef', 'ifexp', 'lambda', 'listcomp', 'dictcomp', 'setcomp', 'augassign',
        'assert', 'delete', 'raise', 'print')
     2. by default 'import' and 'importfrom' are disabled, though they can be enabled.
     """
@@ -951,18 +952,24 @@ class Interpreter:
         """Arg for function definitions."""
         return node.arg
 
-    def on_functiondef(self, node):
+    def on_functiondef(self, node, is_lambda=False):
         """Define procedures."""
         # ('name', 'args', 'body', 'decorator_list')
-        if node.decorator_list:
-            raise Warning("decorated procedures not supported!")
+        if is_lambda:
+            name = 'lambda'
+            body = [node.body]
+        else:
+            name = node.name
+            body = node.body
+
+            if node.decorator_list:
+                raise Warning("decorated procedures not supported!")
+            if (not valid_symbol_name(name) or
+                    name in self.readonly_symbols):
+                errmsg = f"invalid function name (reserved word?) {name}"
+                self.raise_exception(node, exc=NameError, msg=errmsg)
+
         kwargs = []
-
-        if (not valid_symbol_name(node.name) or
-                node.name in self.readonly_symbols):
-            errmsg = f"invalid function name (reserved word?) {node.name}"
-            self.raise_exception(node, exc=NameError, msg=errmsg)
-
         offset = len(node.args.args) - len(node.args.defaults)
         for idef, defnode in enumerate(node.args.defaults):
             defval = self.run(defnode)
@@ -971,7 +978,7 @@ class Interpreter:
 
         args = [tnode.arg for tnode in node.args.args[:offset]]
         doc = None
-        nb0 = node.body[0]
+        nb0 = body[0]
         if isinstance(nb0, ast.Expr) and isinstance(nb0.value, ast.Constant):
             doc = nb0.value
         varkws = node.args.kwarg
@@ -980,11 +987,19 @@ class Interpreter:
             vararg = vararg.arg
         if isinstance(varkws, ast.arg):
             varkws = varkws.arg
-        self.symtable[node.name] = Procedure(node.name, self, doc=doc,
-                                             lineno=self.lineno,
-                                             body=node.body,
-                                             text=ast.unparse(node),
-                                             args=args, kwargs=kwargs,
-                                             vararg=vararg, varkws=varkws)
-        if node.name in self.no_deepcopy:
-            self.no_deepcopy.remove(node.name)
+
+        proc = Procedure(name, self, doc=doc, lineno=self.lineno,
+                         body=body, text=ast.unparse(node),
+                         args=args, kwargs=kwargs, vararg=vararg,
+                         varkws=varkws, is_lambda=is_lambda)
+
+        if is_lambda:
+            return proc
+        else:
+            self.symtable[name] = proc
+            if name in self.no_deepcopy:
+                self.no_deepcopy.remove(name)
+
+    def on_lambda(self, node):
+        """Lambda."""
+        return self.on_functiondef(node, is_lambda=True)

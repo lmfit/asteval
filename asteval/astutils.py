@@ -571,7 +571,7 @@ class Procedure:
 
     def __init__(self, name, interp, doc=None, lineno=None,
                  body=None, text=None, args=None, kwargs=None,
-                 vararg=None, varkws=None):
+                 vararg=None, varkws=None, is_lambda=False):
         """TODO: docstring in public method."""
         self.__ininit__ = True
         self.name = name
@@ -586,6 +586,10 @@ class Procedure:
         self.__varkws__ = varkws
         self.lineno = lineno
         self.__text__ = text
+        self.__is_lambda__ = is_lambda
+        if is_lambda:
+            self.name = self.__name__ = 'lambda'
+
         if text is None:
             self.__text__ = f'{self.__signature__()}\n' + ast.unparse(self.__body__)
         self.__ininit__ = False
@@ -732,8 +736,11 @@ class Procedure:
         # evaluate script of function
         self.__asteval__.code_text.append(self.__text__)
         for node in self.__body__:
-            self.__asteval__.run(node, lineno=node.lineno)
+            out = self.__asteval__.run(node, lineno=node.lineno)
             if len(self.__asteval__.error) > 0:
+                break
+            if self.__is_lambda__:
+                retval = out
                 break
             if self.__asteval__.retval is not None:
                 retval = self.__asteval__.retval

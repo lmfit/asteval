@@ -80,6 +80,8 @@ but will full support for Python data types and array slicing.
   +----------------+----------------------+-------------------+-------------------+
   | raise          | raise statements     |  True             | False             |
   +----------------+----------------------+-------------------+-------------------+
+  | lambda         | lambda expressions   |  True             | False             |
+  +----------------+----------------------+-------------------+-------------------+
   | listcomp       | list comprehension   |  True             | False             |
   +----------------+----------------------+-------------------+-------------------+
   | dictcomp       | dict comprehension   |  True             | False             |
@@ -105,6 +107,7 @@ The ``default`` configuration adds many language constructs, including
   *  with blocks
   *  augmented assignments:  ``x += 1``
   *  if-expressions:      ``x = a if TEST else b``
+  *  lambda expressions:  ``dist = lambda x,y: sqrt(x**2 + y**2)``
   *  list comprehension:  ``out = [sqrt(i) for i in values]``
   *  set and dict comprehension, too.
   *  print formatting with ``%``, ``str.format()``, or f-strings.
@@ -133,11 +136,13 @@ Passing, ``minimal=True`` will turn off all the nodes listed in Table
     >>>
     >>> aeval_min = Interpreter(minimal=True)
     >>> aeval_min.config
-    {'import': False, 'importfrom': False, 'assert': False, 'augassign': False,
-    'delete': False, 'if': False, 'ifexp': False, 'for': False,
-    'formattedvalue': False, 'functiondef': False, 'print': False,
-    'raise': False, 'listcomp': False, 'dictcomp': False, 'setcomp': False,
-    'try': False, 'while': False, 'with': False}
+    {'import': False, 'importfrom': False, 'assert': False,
+    'augassign': False, 'delete': False, 'if': False, 'ifexp': False,
+    'for': False, 'formattedvalue': False, 'functiondef': False,
+    'print': False, 'raise': False, 'lambda': False,
+    'listcomp': False, 'dictcomp': False, 'setcomp': False,
+    'try': False, 'while': False, 'with': False,
+    'nested_symtable': False}
 
 As shown above, importing Python modules with ``import module`` or ``from
 module import method`` can be enabled, but is disabled by default.  To enable
@@ -146,12 +151,13 @@ these, use ``with_import=True`` and ``with_importfrom=True``, as ::
     >>> from asteval import Interpreter
     >>> aeval_max = Interpreter(with_import=True, with_importfrom=True)
 
-or by setting the config dictionary as described above:
+or by setting the config dictionary passed to ``Interpreter`` as
+described above.
 
 Interpreter methods and attributes
 ====================================
 
-An Interpreter instance has many methods, but most of them are
+The Asteval Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should
 not be considered as part of the usable API.  The methods described below,
 and the examples elsewhere in this documentation should be used as the
@@ -311,8 +317,6 @@ Utility Functions
 ====================
 
 .. autofunction:: valid_symbol_name
-
-
 
 .. autofunction:: make_symbol_table
 

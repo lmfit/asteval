@@ -155,7 +155,8 @@ User-defined functions can be written and executed, as in python with a
 
    >>> from asteval import Interpreter
    >>> aeval = Interpreter()
-   >>> code = """def func(a, b, norm=1.0):
+   >>> code = """
+   ... def func(a, b, norm=1.0):
    ...     return (a + b)/norm
    ... """
    >>> aeval(code)
