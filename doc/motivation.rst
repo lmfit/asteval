@@ -102,12 +102,14 @@ guaranteed to be complete, it does eliminate entire classes of attacks
 known to be able to seg-fault the Python interpreter or give access to
 the operating system.
 
-An important caveat is that a typical use of asteval will import and
-expose numpy ``ufuncs`` from the numpy module. Several of these can
-seg-fault Python without too much trouble.  If you safety from user
-input causing segmentation fault is a primary concern, you may want to
-consider disabling the use of numpy, or take extra care to specify
-what numpy functions can be used.
+An important caveat is that by default asteval will use ``numpy`` and
+import and expose numpy ``ufuncs`` from the numpy module. Several of
+these can seg-fault Python without much difficulty.  In addition,
+several numpy objects, including the basic `ndarray` have methods to
+write data to disk. If you safety from user input causing segmentation
+fault is a primary concern, you may want to consider disabling the use
+of numpy, or take extra care to specify what numpy functions can be
+used.
 
 In 2024, an independent security audit of asteval done by Andrew
 Effenhauser, Ayman Hammad, and Daniel Crowley in the X-Force Security
@@ -185,16 +187,19 @@ File access
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, the list of supported functions does include Python's
-``open()`` -- in read-only mode -- which will allow disk access to the
-untrusted user.  If ``numpy`` is supported, its ``load()`` and
-``loadtxt()`` functions will also normally be supported.  By itself,
-including these functions does not elevate permissions, and access is
-restricted to 'read-only mode'.  Still, the user of the asteval
-interpreter would be able to read files with the privileges of the
-calling program.  In some cases, this may not be desirable, and you
-may want to remove some of these functions from the symbol table,
-re-implement them, or ensure that your program cannot access
-information on disk that should be kept private.
+``open()`` which will allow disk access to the untrusted user.  By
+default, Asteval limits ``open()` to work in read-only mode, and with
+the permissions of the calling program.
+
+When ``numpy`` is supported, its ``load()`` and ``loadtxt()`` functions
+will also normally be supported to read data.  But it should be noted
+that ``numpy`` ndarrays do have a ``tofile()`` method that will write to
+disk, limited by the permissions of the calling program.
+
+If writing to disk is a concern, ``numpy`` should be disabled.  If
+reading from disk must be forbidden, you will want to overwrite the
+``open()`` function from the symbol table, or re-implement this to
+restrict access.  to information on disk that should be kept private.
 
 
 Monitoring Runtime and interrupting processes
