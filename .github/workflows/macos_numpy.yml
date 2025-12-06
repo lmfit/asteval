@@ -1,4 +1,7 @@
 name: test on macos, with numpy
+permissions:
+  contents: read
+  pull-requests: write
 
 on: [push]
 
