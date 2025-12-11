@@ -752,5 +752,6 @@ class Procedure:
         self.__asteval__.symtable = save_symtable
         self.__asteval__.code_text.pop()
         self.__asteval__._calldepth -= 1
+        self.__asteval__._interrupt = None
         symlocals = None
         return retval
