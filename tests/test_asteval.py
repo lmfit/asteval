@@ -1702,5 +1702,41 @@ def test_augassign_lineno(nested):
     check_error(interp, 'ZeroDivisionError', 'x /= 0')
     assert interp.error[0].lineno == 3
 
+@pytest.mark.parametrize("nested", [False, True])
+def test_unreachable_statement_while_loop(nested):
+    """unreachable statement inside while loop"""
+
+    interp = make_interpreter(nested_symtable=nested)
+    interp("""
+def f():
+    return "ok"
+
+x_before = 0
+x_after = 0
+while True:
+    x_before += 1
+    _ = f()
+    x_after += 1
+    if x_after >= 10:
+        break
+
+result = (x_before, x_after)
+
+xa = xb = 0
+for i in range(4):
+    xb += 1
+    _ = f()
+    xa += 1
+result2 = (xb, xa)
+
+""")
+
+    (x, y) = interp("result")
+    assert x == 10
+    assert y == 10
+    (x, y) = interp("result2")
+    assert x == 4
+    assert y == 4
+
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])
