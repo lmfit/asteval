@@ -184,11 +184,11 @@ text of the code.
 
 
 File access
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
 
 By default, the list of supported functions does include Python's
 ``open()`` which will allow disk access to the untrusted user.  By
-default, Asteval limits ``open()` to work in read-only mode, and with
+default, Asteval limits ``open()`` to work in read-only mode, and with
 the permissions of the calling program.
 
 When ``numpy`` is supported, its ``load()`` and ``loadtxt()`` functions
