@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
     
-    <script src="_static/documentation_options.js?v=46dfa7f5"></script>
+    <script src="_static/documentation_options.js?v=aec50437"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -60,7 +60,7 @@ makes user input difficult to trust.  Since asteval does not support the
 <strong>import</strong> statement (unless explicitly enabled) or many other constructs, user
 code cannot access the <a class="reference external" href="https://docs.python.org/3/library/os.html#module-os" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">os</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> modules or any functions
 or classes outside those provided in the symbol table.</p>
-<p>Many of the other missing features (modules, classes, lambda, yield,
+<p>Many of the other missing features (modules, classes, yield,
 generators) are similarly motivated by a desire for a safer version of
 <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  The idea for asteval is to make a simple procedural,
 mathematically-oriented language that can be embedded into larger applications.</p>
@@ -139,12 +139,14 @@ attributes]. While this approach of making a blacklist cannot be
 guaranteed to be complete, it does eliminate entire classes of attacks
 known to be able to seg-fault the Python interpreter or give access to
 the operating system.</p>
-<p>An important caveat is that a typical use of asteval will import and
-expose numpy <code class="docutils literal notranslate"><span class="pre">ufuncs</span></code> from the numpy module. Several of these can
-seg-fault Python without too much trouble.  If you safety from user
-input causing segmentation fault is a primary concern, you may want to
-consider disabling the use of numpy, or take extra care to specify
-what numpy functions can be used.</p>
+<p>An important caveat is that by default asteval will use <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and
+import and expose numpy <code class="docutils literal notranslate"><span class="pre">ufuncs</span></code> from the numpy module. Several of
+these can seg-fault Python without much difficulty.  In addition,
+several numpy objects, including the basic <cite>ndarray</cite> have methods to
+write data to disk. If you safety from user input causing segmentation
+fault is a primary concern, you may want to consider disabling the use
+of numpy, or take extra care to specify what numpy functions can be
+used.</p>
 <p>In 2024, an independent security audit of asteval done by Andrew
 Effenhauser, Ayman Hammad, and Daniel Crowley in the X-Force Security
 Research division of IBM showed insecurities with <code class="docutils literal notranslate"><span class="pre">string.format</span></code>,
@@ -216,16 +218,17 @@ text of the code.</p>
 <section id="file-access">
 <h3>File access<a class="headerlink" href="#file-access" title="Link to this heading">¶</a></h3>
 <p>By default, the list of supported functions does include Python’s
-<code class="docutils literal notranslate"><span class="pre">open()</span></code> – in read-only mode – which will allow disk access to the
-untrusted user.  If <code class="docutils literal notranslate"><span class="pre">numpy</span></code> is supported, its <code class="docutils literal notranslate"><span class="pre">load()</span></code> and
-<code class="docutils literal notranslate"><span class="pre">loadtxt()</span></code> functions will also normally be supported.  By itself,
-including these functions does not elevate permissions, and access is
-restricted to ‘read-only mode’.  Still, the user of the asteval
-interpreter would be able to read files with the privileges of the
-calling program.  In some cases, this may not be desirable, and you
-may want to remove some of these functions from the symbol table,
-re-implement them, or ensure that your program cannot access
-information on disk that should be kept private.</p>
+<code class="docutils literal notranslate"><span class="pre">open()</span></code> which will allow disk access to the untrusted user.  By
+default, Asteval limits <code class="docutils literal notranslate"><span class="pre">open()</span></code> to work in read-only mode, and with
+the permissions of the calling program.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">numpy</span></code> is supported, its <code class="docutils literal notranslate"><span class="pre">load()</span></code> and <code class="docutils literal notranslate"><span class="pre">loadtxt()</span></code> functions
+will also normally be supported to read data.  But it should be noted
+that <code class="docutils literal notranslate"><span class="pre">numpy</span></code> ndarrays do have a <code class="docutils literal notranslate"><span class="pre">tofile()</span></code> method that will write to
+disk, limited by the permissions of the calling program.</p>
+<p>If writing to disk is a concern, <code class="docutils literal notranslate"><span class="pre">numpy</span></code> should be disabled.  If
+reading from disk must be forbidden, you will want to overwrite the
+<code class="docutils literal notranslate"><span class="pre">open()</span></code> function from the symbol table, or re-implement this to
+restrict access.  to information on disk that should be kept private.</p>
 </section>
 <section id="monitoring-runtime-and-interrupting-processes">
 <h3>Monitoring Runtime and interrupting processes<a class="headerlink" href="#monitoring-runtime-and-interrupting-processes" title="Link to this heading">¶</a></h3>

@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
     
-    <script src="_static/documentation_options.js?v=46dfa7f5"></script>
+    <script src="_static/documentation_options.js?v=aec50437"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/bizstyle.js"></script>
@@ -86,7 +86,7 @@ of mathematical expressions using Python syntax.</p>
 <ol class="arabic simple">
 <li><p>setting <cite>minimal=True</cite> is equivalent to setting a config with the following
 nodes disabled: (‘import’, ‘importfrom’, ‘if’, ‘for’, ‘while’, ‘try’, ‘with’,
-‘functiondef’, ‘ifexp’, ‘listcomp’, ‘dictcomp’, ‘setcomp’, ‘augassign’,
+‘functiondef’, ‘ifexp’, ‘lambda’, ‘listcomp’, ‘dictcomp’, ‘setcomp’, ‘augassign’,
 ‘assert’, ‘delete’, ‘raise’, ‘print’)</p></li>
 <li><p>by default ‘import’ and ‘importfrom’ are disabled, though they can be enabled.</p></li>
 </ol>
@@ -183,32 +183,37 @@ but will full support for Python data types and array slicing.</p>
 <td><p>True</p></td>
 <td><p>False</p></td>
 </tr>
-<tr class="row-even"><td><p>listcomp</p></td>
+<tr class="row-even"><td><p>lambda</p></td>
+<td><p>lambda expressions</p></td>
+<td><p>True</p></td>
+<td><p>False</p></td>
+</tr>
+<tr class="row-odd"><td><p>listcomp</p></td>
 <td><p>list comprehension</p></td>
 <td><p>True</p></td>
 <td><p>False</p></td>
 </tr>
-<tr class="row-odd"><td><p>dictcomp</p></td>
+<tr class="row-even"><td><p>dictcomp</p></td>
 <td><p>dict comprehension</p></td>
 <td><p>True</p></td>
 <td><p>False</p></td>
 </tr>
-<tr class="row-even"><td><p>setcomp</p></td>
+<tr class="row-odd"><td><p>setcomp</p></td>
 <td><p>set comprehension</p></td>
 <td><p>True</p></td>
 <td><p>False</p></td>
 </tr>
-<tr class="row-odd"><td><p>try</p></td>
+<tr class="row-even"><td><p>try</p></td>
 <td><p>try/except blocks</p></td>
 <td><p>True</p></td>
 <td><p>False</p></td>
 </tr>
-<tr class="row-even"><td><p>while</p></td>
+<tr class="row-odd"><td><p>while</p></td>
 <td><p>while blocks</p></td>
 <td><p>True</p></td>
 <td><p>False</p></td>
 </tr>
-<tr class="row-odd"><td><p>with</p></td>
+<tr class="row-even"><td><p>with</p></td>
 <td><p>with blocks</p></td>
 <td><p>True</p></td>
 <td><p>False</p></td>
@@ -228,6 +233,7 @@ The <code class="docutils literal notranslate"><span class="pre">default</span><
 <li><p>with blocks</p></li>
 <li><p>augmented assignments:  <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">+=</span> <span class="pre">1</span></code></p></li>
 <li><p>if-expressions:      <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">=</span> <span class="pre">a</span> <span class="pre">if</span> <span class="pre">TEST</span> <span class="pre">else</span> <span class="pre">b</span></code></p></li>
+<li><p>lambda expressions:  <code class="docutils literal notranslate"><span class="pre">dist</span> <span class="pre">=</span> <span class="pre">lambda</span> <span class="pre">x,y:</span> <span class="pre">sqrt(x**2</span> <span class="pre">+</span> <span class="pre">y**2)</span></code></p></li>
 <li><p>list comprehension:  <code class="docutils literal notranslate"><span class="pre">out</span> <span class="pre">=</span> <span class="pre">[sqrt(i)</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">values]</span></code></p></li>
 <li><p>set and dict comprehension, too.</p></li>
 <li><p>print formatting with <code class="docutils literal notranslate"><span class="pre">%</span></code>, <code class="docutils literal notranslate"><span class="pre">str.format()</span></code>, or f-strings.</p></li>
@@ -253,11 +259,13 @@ specifying a <code class="docutils literal notranslate"><span class="pre">config
 <span class="gp">&gt;&gt;&gt;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_min</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">minimal</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_min</span><span class="o">.</span><span class="n">config</span>
-<span class="go">{&#39;import&#39;: False, &#39;importfrom&#39;: False, &#39;assert&#39;: False, &#39;augassign&#39;: False,</span>
-<span class="go">&#39;delete&#39;: False, &#39;if&#39;: False, &#39;ifexp&#39;: False, &#39;for&#39;: False,</span>
-<span class="go">&#39;formattedvalue&#39;: False, &#39;functiondef&#39;: False, &#39;print&#39;: False,</span>
-<span class="go">&#39;raise&#39;: False, &#39;listcomp&#39;: False, &#39;dictcomp&#39;: False, &#39;setcomp&#39;: False,</span>
-<span class="go">&#39;try&#39;: False, &#39;while&#39;: False, &#39;with&#39;: False}</span>
+<span class="go">{&#39;import&#39;: False, &#39;importfrom&#39;: False, &#39;assert&#39;: False,</span>
+<span class="go">&#39;augassign&#39;: False, &#39;delete&#39;: False, &#39;if&#39;: False, &#39;ifexp&#39;: False,</span>
+<span class="go">&#39;for&#39;: False, &#39;formattedvalue&#39;: False, &#39;functiondef&#39;: False,</span>
+<span class="go">&#39;print&#39;: False, &#39;raise&#39;: False, &#39;lambda&#39;: False,</span>
+<span class="go">&#39;listcomp&#39;: False, &#39;dictcomp&#39;: False, &#39;setcomp&#39;: False,</span>
+<span class="go">&#39;try&#39;: False, &#39;while&#39;: False, &#39;with&#39;: False,</span>
+<span class="go">&#39;nested_symtable&#39;: False}</span>
 </pre></div>
 </div>
 <p>As shown above, importing Python modules with <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">module</span></code> or <code class="docutils literal notranslate"><span class="pre">from</span>
@@ -267,11 +275,12 @@ these, use <code class="docutils literal notranslate"><span class="pre">with_imp
 <span class="gp">&gt;&gt;&gt; </span><span class="n">aeval_max</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">(</span><span class="n">with_import</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">with_importfrom</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>or by setting the config dictionary as described above:</p>
+<p>or by setting the config dictionary passed to <code class="docutils literal notranslate"><span class="pre">Interpreter</span></code> as
+described above.</p>
 </section>
 <section id="interpreter-methods-and-attributes">
 <h2>Interpreter methods and attributes<a class="headerlink" href="#interpreter-methods-and-attributes" title="Link to this heading">¶</a></h2>
-<p>An Interpreter instance has many methods, but most of them are
+<p>The Asteval Interpreter instance has many methods, but most of them are
 implementation details for how to handle particular AST nodes, and should
 not be considered as part of the usable API.  The methods described below,
 and the examples elsewhere in this documentation should be used as the

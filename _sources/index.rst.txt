@@ -41,7 +41,7 @@ These differences and absences include:
     access can also be used.
  2. creating classes is not allowed.
  3. importing modules is not allowed, unless specifically enabled.
- 4. decorators, generators, type hints, and ``lambda`` are not supported.
+ 4. decorators, generators, and type hints are not supported.
  5. ``yield``, ``await``,  and async programming are not supported.
  6. Many builtin functions (:py:func:`eval`, :py:func:`getattr`,
     :py:func:`hasattr`, :py:func:`setattr`, and :py:func:`delattr`) are not allowed.
