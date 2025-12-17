@@ -47,15 +47,17 @@ standard library are required, though if `NumPy` is installed, many
 functions from it will be used by default.
 
 About Asteval
---------------
+----------------
 
 Asteval is a safe(ish) evaluator of Python expressions and statements,
-using Python's ast module.  It emphasizes mathematical expressions so
-that many functions from ``NumPy`` are imported and used if available,
-but also provides a pretty complete subset of the Python language.
-Asteval provides a simple and robust restricted Python interpreter
-that can safely handle user input, and can be used as an embedded
-macro language within a large application.
+using Python's ast module.  It provides an easy-to-use restricted
+Python interpreter that supports a pretty complete subset of the
+Python language and can handle user input more safely than Python's
+``eval()``.  Asteval emphasizes mathematical expressions so that many
+functions from ``NumPy`` are imported and used if available, but also
+provides a pretty complete subset of the Python language.  It can be
+used as an embedded macro language within a large application or as a
+simple calculator for mathematical calculations.
 
 Asteval supports many Python language constructs by default, including
 conditionals (if-elif-else blocks and if expressions), flow control
@@ -63,17 +65,19 @@ conditionals (if-elif-else blocks and if expressions), flow control
 list comprehension, slicing, subscripting, and f-strings.  All data
 are Python objects and the standard built-in data structures
 (dictionaries, tuples, lists, sets, strings, functions, and ``Numpy``
-nd-arrays) are well supported, but with limited to look "under the
-hood" and get private and unsafe methods.
+nd-arrays) are well supported, and most public attributes and methods
+of these objects are available.  Asteval does place some limitations
+on "looking under the hood" to get private and potentially unsafe
+methods.
 
 Many of the standard built-in Python functions are available, as are
-the functions from the ``math`` module.  Some of the built-in
-operators and functions, such as `getattr`, and `setattr` are not
-allowed, and some including `open` and `**` are replaced with versions
-intended to make them safer for user input.  If the ``NumPy`` is
-installed, many of its functions will also be available.  Programmers
-can add custom functions and data into each Asteval session.  Users
-can define and run their own functions within the confines of the
+the functions from the ``math`` module.  Some built-in operators and
+functions, such as `getattr`, and `setattr` are not allowed, and some
+including `open` and `**` are replaced with versions intended to make
+them safer for user input.  If the ``NumPy`` is installed, many of its
+functions will also be available.  Programmers can add custom
+functions and data of their own into each Asteval session.  Users can
+define and run their own functions within the confines of the
 limitations of the Asteval language.
 
 Asteval converts user input into Python's own abstract syntax tree
@@ -82,16 +86,16 @@ tree.  This approach guarantees the parsing of input will be identical
 to that of Python, eliminating many lexing and parsing challenges and
 generating a result that is straightforward to interpret.  This makes
 "correctness" easy to test and verify with high confidence, so that
-the emphasis can be placed on balancing features with safety.
+the emphasis can be placed on balancing functionality with safety.
 
 There are several absences and differences with Python, and Asteval is
 by no means an attempt to reproduce Python with its own ``ast``
 module.  While, it does support a large subset of Python, the
 following features found in Python are not supported in Asteval:
 
- 1. many internal methods and classes of Python objects,
+ 1. creating classes is not supported
+ 2. many internal methods and classes of Python objects,
     especially ``__dunder__`` methods cannot be accessed.
- 2. creating classes is not supported
  3. `eval`, `exec`, `yield`, `async`, `match/case`, function
     decorators, generators, and type annotations are not supported.
  4. `f-strings` are supported, but `t-strings` are not supported.
@@ -99,14 +103,16 @@ following features found in Python are not supported in Asteval:
     enabled.
 
 Most of these omissions and limitations are intentional, and aimed to
-strengthen Asteval against dangerous user code. Some of these
-omissions may simply be viewed as not particularly compelling for an
-embedded interpreter exposed to user input.
+strengthen Asteval against dangerous user code. A few of these (say,
+`match/case` and `t-strings`) omissions may simply be viewed as not
+particularly compelling need for an embedded interpreter exposed to
+user input.
 
-Even with these
-restrictions,
-
+Even with these restrictions, Asteval provides a pretty complete and
+usable scripting or "macro" language that can easily be embedded into
+a larger GUI or Web application that can handle user input without
+many of the risks associated with using Python's `eval()`.
 
 
 Matt Newville <newville@cars.uchicago.edu>
-Last Update:  09-Nov-2025
+Last Update:  17-Dec-2025
