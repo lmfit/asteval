@@ -782,47 +782,63 @@ class Interpreter:
             if hasattr(ctx, '__exit__'):
                 ctx.__exit__()
 
+    def _extract_names_from_target(self, target):
+        """Recursively extract all Name nodes from a target (Name or Tuple)"""
+        names = []
+        if target.__class__ == ast.Name:
+            names.append(target.id)
+        elif target.__class__ == ast.Tuple:
+            for elt in target.elts:
+                names.extend(self._extract_names_from_target(elt))
+        return names
+
+    def _target_to_structure(self, target):
+        """Convert AST target to a structure for unpacking (str or nested tuple)"""
+        if target.__class__ == ast.Name:
+            return target.id
+        elif target.__class__ == ast.Tuple:
+            return tuple([self._target_to_structure(elt) for elt in target.elts])
+        return None
+
+    def _unpack_to_target(self, target_structure, value):
+        """Recursively unpack value and assign to symtable according to target_structure"""
+        if isinstance(target_structure, str):
+            self.symtable[target_structure] = value
+        elif isinstance(target_structure, tuple):
+            for target_elem, val_elem in zip(target_structure, value):
+                self._unpack_to_target(target_elem, val_elem)
 
     def _comp_save_syms(self, node):
         """find and save symbols that will be used in a comprehension"""
         saved_syms = {}
         for tnode in node.generators:
-            if tnode.target.__class__ == ast.Name:
-                if (not valid_symbol_name(tnode.target.id) or
-                    tnode.target.id in self.readonly_symbols):
-                    errmsg = f"invalid symbol name (reserved word?) {tnode.target.id}"
+            # Extract all names from the target (handles nested tuples)
+            names = self._extract_names_from_target(tnode.target)
+            for name in names:
+                if not valid_symbol_name(name) or name in self.readonly_symbols:
+                    errmsg = f"invalid symbol name (reserved word?) {name}"
                     self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
-                if tnode.target.id in self.symtable:
-                    saved_syms[tnode.target.id] = copy.deepcopy(self._getsym(tnode.target))
-
-            elif tnode.target.__class__ == ast.Tuple:
-                for tval in tnode.target.elts:
-                    if tval.id in self.symtable:
-                        saved_syms[tval.id] = copy.deepcopy(self._getsym(tval))
+                if name in self.symtable:
+                    saved_syms[name] = copy.deepcopy(self.symtable.get(name))
         return saved_syms
 
 
     def do_generator(self, gnodes, node, out):
         """general purpose generator """
         gnode = gnodes[0]
-        nametype = True
-        target = None
-        if gnode.target.__class__ == ast.Name:
-            if (not valid_symbol_name(gnode.target.id) or
-                gnode.target.id in self.readonly_symbols):
-                errmsg = f"invalid symbol name (reserved word?) {gnode.target.id}"
+        # Validate target names and convert to structure for unpacking
+        target_names = self._extract_names_from_target(gnode.target)
+        for name in target_names:
+            if not valid_symbol_name(name) or name in self.readonly_symbols:
+                errmsg = f"invalid symbol name (reserved word?) {name}"
                 self.raise_exception(gnode.target, exc=NameError, msg=errmsg)
-            target = gnode.target.id
-        elif gnode.target.__class__ == ast.Tuple:
-            nametype = False
-            target = tuple([gval.id for gval in gnode.target.elts])
+
+        target_structure = self._target_to_structure(gnode.target)
 
         for val in self.run(gnode.iter):
-            if nametype and target is not None:
-                self.symtable[target] = val
-            else:
-                for telem, tval in zip(target, val):
-                    self.symtable[telem] = tval
+            # Unpack value to target structure
+            self._unpack_to_target(target_structure, val)
+
             add = True
             for cond in gnode.ifs:
                 add = add and self.run(cond)
