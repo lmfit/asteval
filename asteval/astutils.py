@@ -747,7 +747,6 @@ class Procedure:
                 aeval.code_text.pop()
                 aeval._calldepth -= 1
                 aeval._interrupt = None
-                symlocals = None
                 raise exc
 
             if self.__is_lambda__:
