@@ -1756,7 +1756,7 @@ def test_lambda_exception_cleared(nested):
 
     exc = None
     try:
-        o = func(0)
+        func(0)
     except ZeroDivisionError as e:
         exc = e
     except Exception as e:
