@@ -850,6 +850,32 @@ def test_dict_comprehension(nested):
     check_error(interp, 'SyntaxError')
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_comprehension_tuple_unpacking(nested):
+    """test comprehensions with tuple unpacking including nested tuples"""
+    interp = make_interpreter(nested_symtable=nested)
+
+    # Simple tuple unpacking
+    interp(textwrap.dedent("""
+            pairs = [(1, 2), (3, 4), (5, 6)]
+            result = [a + b for a, b in pairs]
+            """))
+    isvalue(interp, 'result', [3, 7, 11])
+
+    # Nested tuple unpacking in dict comprehension
+    interp(textwrap.dedent("""
+            data = enumerate(zip(range(3), 'abc'))
+            d = {index: b for index, (a, b) in data}
+            """))
+    isvalue(interp, 'd', {0: 'a', 1: 'b', 2: 'c'})
+
+    # Deeply nested tuple unpacking
+    interp(textwrap.dedent("""
+            data = [(1, (2, (3, 4))), (5, (6, (7, 8)))]
+            result = [a + b + c + d for a, (b, (c, d)) in data]
+            """))
+    isvalue(interp, 'result', [10, 26])
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_ifexp(nested):
     """test if expressions"""
     interp = make_interpreter(nested_symtable=nested)
