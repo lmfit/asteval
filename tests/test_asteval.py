@@ -1764,5 +1764,35 @@ result2 = (xb, xa)
     assert x == 4
     assert y == 4
 
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_lambda_exception_cleared(nested):
+    """ an exception in a function or lambda should not
+        preveent the function or lambda from being used GH #148
+    """
+    interp = make_interpreter(nested_symtable=nested)
+    func = interp('lambda x: 1.0/x')
+    a4 = func(4)
+    assert a4 > 0.249998
+    assert a4 < 0.250002
+
+    a1 = func(1.0)
+    assert a1 > 0.999998
+    assert a1 < 1.000002
+
+    exc = None
+    try:
+        func(0)
+    except ZeroDivisionError as e:
+        exc = e
+    except Exception as e:
+        exc = e
+    assert isinstance(exc, ZeroDivisionError)
+
+    a2 = func(2)
+    assert a2 > 0.499998
+    assert a2 < 0.500002
+
+
 if __name__ == '__main__':
     pytest.main(['-v', '-x', '-s'])

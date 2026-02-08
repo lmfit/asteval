@@ -637,14 +637,14 @@ class Procedure:
 
     def __call__(self, *args, **kwargs):
         """TODO: docstring in public method."""
-        topsym = self.__asteval__.symtable
-        if self.__asteval__.config.get('nested_symtable', False):
+        aeval = self.__asteval__
+        topsym = aeval.symtable
+        if aeval.config.get('nested_symtable', False):
             sargs = {'_main': topsym}
             sgroups = topsym.get('_searchgroups', None)
             if sgroups is not None:
                 for sxname in sgroups:
                     sargs[sxname] = topsym.get(sxname)
-
 
             symlocals = Group(name=f'symtable_{self.name}_', **sargs)
             symlocals._searchgroups = list(sargs.keys())
@@ -655,7 +655,6 @@ class Procedure:
         nargs = len(args)
         nkws = len(kwargs)
         nargs_expected = len(self.__argnames__)
-
         # check for too few arguments, but the correct keyword given
         if (nargs < nargs_expected) and nkws > 0:
             for name in self.__argnames__[nargs:]:
@@ -722,36 +721,51 @@ class Procedure:
             msg = f"incorrect arguments for Procedure {self.name}"
             self.__raise_exc__(None, msg=msg, lineno=self.lineno)
 
-        if self.__asteval__.config.get('nested_symtable', False):
-            save_symtable = self.__asteval__.symtable
-            self.__asteval__.symtable = symlocals
+        if aeval.config.get('nested_symtable', False):
+            save_symtable = aeval.symtable
+            aeval.symtable = symlocals
         else:
-            save_symtable = self.__asteval__.symtable.copy()
-            self.__asteval__.symtable.update(symlocals)
+            save_symtable = aeval.symtable.copy()
+            aeval.symtable.update(symlocals)
 
-        self.__asteval__.retval = None
-        self.__asteval__._calldepth += 1
+        aeval.retval = None
+        # if top-level function/lambda call, and error is not None, clear errors.
+        if aeval._calldepth == 0 and len(aeval.error)  > 0:
+            aeval.prev_error = [e for e in aeval.error]
+            aeval.error = []
+        aeval._calldepth += 1
         retval = None
 
         # evaluate script of function
-        self.__asteval__.code_text.append(self.__text__)
+        aeval.code_text.append(self.__text__)
         for node in self.__body__:
-            out = self.__asteval__.run(node, lineno=node.lineno)
-            if len(self.__asteval__.error) > 0:
-                break
+            try:
+                out = aeval.run(node, lineno=node.lineno,
+                                          with_raise=True)
+            except Exception as exc:
+                aeval.symtable = save_symtable
+                aeval.code_text.pop()
+                aeval._calldepth -= 1
+                aeval._interrupt = None
+                raise exc
+
             if self.__is_lambda__:
                 retval = out
                 break
-            if self.__asteval__.retval is not None:
-                retval = self.__asteval__.retval
-                self.__asteval__.retval = None
+
+            if len(aeval.error) > 0:
+                break
+
+            if aeval.retval is not None:
+                retval = aeval.retval
+                aeval.retval = None
                 if retval is ReturnedNone:
                     retval = None
                 break
 
-        self.__asteval__.symtable = save_symtable
-        self.__asteval__.code_text.pop()
-        self.__asteval__._calldepth -= 1
-        self.__asteval__._interrupt = None
+        aeval.symtable = save_symtable
+        aeval.code_text.pop()
+        aeval._calldepth -= 1
+        aeval._interrupt = None
         symlocals = None
         return retval
