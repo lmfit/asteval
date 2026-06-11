@@ -78,28 +78,27 @@ built-in functions
 
 At startup, many symbols are loaded into the symbol table from Python's
 builtins and the ``math`` module.  The builtins include several basic Python
-functions:
+functions and values:
 
     abs, all, any, bin, bool, bytearray, bytes, chr, complex,
     dict, dir, divmod, enumerate, filter, float, format,
     frozenset, hash, hex, id, int, isinstance, len, list, map,
     max, min, oct, ord, pow, range, repr, reversed, round,
-    set, slice, sorted, str, sum, tuple, zip
+    set, slice, sorted, str, sum, tuple, zip, False, True, 1j
 
 and a large number of named exceptions:
 
-    ArithmeticError, AssertionError, AttributeError,
-    BaseException, BufferError, BytesWarning, DeprecationWarning,
-    EOFError, EnvironmentError, Exception, False,
-    FloatingPointError, GeneratorExit, IOError, ImportError,
-    ImportWarning, IndentationError, IndexError, KeyError,
-    KeyboardInterrupt, LookupError, MemoryError, NameError, None,
-    NotImplemented, NotImplementedError, OSError, OverflowError,
+    ArithmeticError, AssertionError, AttributeError, BaseException,
+    BufferError, BytesWarning, DeprecationWarning, EOFError,
+    EnvironmentError, Exception, FloatingPointError, IOError,
+    ImportError, ImportWarning, IndentationError, IndexError,
+    KeyError, KeyboardInterrupt, LookupError, MemoryError, NameError,
+    None, NotImplemented, NotImplementedError, OSError, OverflowError,
     ReferenceError, RuntimeError, RuntimeWarning, StopIteration,
-    SyntaxError, SyntaxWarning, SystemError, SystemExit, True,
-    TypeError, UnboundLocalError, UnicodeDecodeError,
-    UnicodeEncodeError, UnicodeError, UnicodeTranslateError,
-    UnicodeWarning, ValueError, Warning, ZeroDivisionError
+    SyntaxError, SyntaxWarning, SystemError, TypeError,
+    UnboundLocalError, UnicodeDecodeError, UnicodeEncodeError,
+    UnicodeError, UnicodeTranslateError, UnicodeWarning, ValueError,
+    Warning, ZeroDivisionError
 
 
 The symbols imported from Python's ``math`` module include:
