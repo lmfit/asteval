@@ -910,7 +910,7 @@ def test_comprehension_no_leak(nested):
     interp('m = [(i, j) for i in range(2) for j in range(3)]')
     isvalue(interp, 'm', [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)])
     assert 'i' not in interp.symtable
-    assert 'j' not in interp.symtable
+    isvalue(interp, 'j', 42)
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_ifexp(nested):
