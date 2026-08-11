@@ -817,6 +817,7 @@ class Interpreter:
     def _comp_save_syms(self, node):
         """find and save symbols that will be used in a comprehension"""
         saved_syms = {}
+        delete_syms = set()
         for tnode in node.generators:
             # Extract all names from the target (handles nested tuples)
             names = self._extract_names_from_target(tnode.target)
@@ -826,7 +827,9 @@ class Interpreter:
                     self.raise_exception(tnode.target, exc=NameError, msg=errmsg)
                 if name in self.symtable:
                     saved_syms[name] = copy.deepcopy(self.symtable.get(name))
-        return saved_syms
+                else:
+                    delete_syms.add(name)
+        return saved_syms, delete_syms
 
 
     def do_generator(self, gnodes, node, out):
@@ -860,12 +863,14 @@ class Interpreter:
 
     def on_listcomp(self, node):
         """List comprehension v2"""
-        saved_syms = self._comp_save_syms(node)
+        saved_syms, delete_syms = self._comp_save_syms(node)
 
         out = []
         self.do_generator(node.generators, node, out)
         for name, val in saved_syms.items():
             self.symtable[name] = val
+        for name in delete_syms:
+            self.symtable.pop(name, None)
         return out
 
     def on_setcomp(self, node):
@@ -874,12 +879,14 @@ class Interpreter:
 
     def on_dictcomp(self, node):
         """Dict comprehension v2"""
-        saved_syms = self._comp_save_syms(node)
+        saved_syms, delete_syms = self._comp_save_syms(node)
 
         out = {}
         self.do_generator(node.generators, node, out)
         for name, val in saved_syms.items():
             self.symtable[name] = val
+        for name in delete_syms:
+            self.symtable.pop(name, None)
         return out
 
     def on_excepthandler(self, node):  # ('type', 'name', 'body')

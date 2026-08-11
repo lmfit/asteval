@@ -876,6 +876,43 @@ def test_comprehension_tuple_unpacking(nested):
     isvalue(interp, 'result', [10, 26])
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_comprehension_no_leak(nested):
+    """comprehension loop variables must not leak into the symbol table"""
+    interp = make_interpreter(nested_symtable=nested)
+
+    # new loop variable must not remain accessible
+    interp('x = [ti for ti in range(13)]')
+    isvalue(interp, 'x', list(range(13)))
+    assert 'ti' not in interp.symtable
+
+    # pre-existing symbol shadowed by comprehension must keep its value
+    interp('j = 42')
+    interp('y = [j*j for j in range(4)]')
+    isvalue(interp, 'y', [0, 1, 4, 9])
+    isvalue(interp, 'j', 42)
+
+    # tuple-unpacking targets are also cleaned up
+    interp('z = [a + b for a, b in [(1, 2), (3, 4)]]')
+    isvalue(interp, 'z', [3, 7])
+    assert 'a' not in interp.symtable
+    assert 'b' not in interp.symtable
+
+    # set and dict comprehensions too
+    interp('s = {k for k in range(3)}')
+    isvalue(interp, 's', {0, 1, 2})
+    assert 'k' not in interp.symtable
+
+    interp('d = {n: n*2 for n in range(3)}')
+    isvalue(interp, 'd', {0: 0, 1: 2, 2: 4})
+    assert 'n' not in interp.symtable
+
+    # nested generators: each loop variable is cleaned up
+    interp('m = [(i, j) for i in range(2) for j in range(3)]')
+    isvalue(interp, 'm', [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2)])
+    assert 'i' not in interp.symtable
+    isvalue(interp, 'j', 42)
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_ifexp(nested):
     """test if expressions"""
     interp = make_interpreter(nested_symtable=nested)
