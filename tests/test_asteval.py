@@ -700,7 +700,7 @@ def test_ndarrays(nested):
         istrue(interp, "isinstance(n, ndarray)")
         istrue(interp, "n.shape == (5, 4)")
         interp("myx = n.shape")
-        interp("n.shape = (4, 5)")
+        interp("n.reshape((4, 5))")
         istrue(interp, "n.shape == (4, 5)")
         interp("a = arange(20)")
         interp("gg = a[1:13:3]")
