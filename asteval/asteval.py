@@ -280,7 +280,7 @@ class Interpreter:
         except Exception:
             self.raise_exception(None, exc=RuntimeError, expr=text)
         except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-            self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
+            self.raise_exception(None, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
         out = ast.fix_missing_locations(out)
         return out
@@ -428,7 +428,7 @@ class Interpreter:
             except Exception:
                 self.raise_exception(None, exc=ImportError, msg='Import Error')
             except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
-                self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
+                self.raise_exception(None, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
 
         if fromlist is None:
