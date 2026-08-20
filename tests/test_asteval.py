@@ -1422,14 +1422,39 @@ def test_interpreter_opts(nested):
     assert not imin.config['augassign']
     assert not imin.config['with']
 
+    imin('import socket')
+    assert len(imin.error) > 0
+    imin.error = []
+    imin('x = 9')
+    imin('y = 4 if x > 0 else -1')
+    assert len(imin.error) > 0
+
+
     ix = Interpreter(with_import=True, with_importfrom=True, nested_symtable=nested)
     assert ix.node_handlers['ifexp'] != ix.unimplemented
     assert ix.node_handlers['import'] != ix.unimplemented
     assert ix.node_handlers['importfrom'] != ix.unimplemented
 
+    ix('import socket')
+    assert len(ix.error) == 0
+    ix('from pathlib import Path')
+    assert len(ix.error) == 0
+    ix('from pathlib import not_importable')
+    assert len(ix.error) > 0
+
+    ix.error = []
+    ix('import nq77spr23as_module_not_avaiable')
+    assert len(ix.error) > 0
+
     i2 = Interpreter(config=conf, nested_symtable=nested)
     assert i2.node_handlers['ifexp'] != i2.unimplemented
     assert i2.node_handlers['import'] == i2.unimplemented
+    i2('import socket')
+    assert len(i2.error) > 0
+    i2.error = []
+    i2('x = 9')
+    i2('y = 4 if x > 0 else -1')
+    assert len(i2.error) == 0
 
 
 @pytest.mark.parametrize("nested", [False, True])
