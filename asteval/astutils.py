@@ -279,7 +279,7 @@ OPERATORS = {ast.Is: lambda a, b: a is b,
              ast.UAdd: lambda a: +a,
              ast.USub: lambda a: -a}
 
-# Safe version of getattr
+# Safe versions of getattr and setattr
 
 def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
     """safe version of getattr"""
@@ -300,6 +300,13 @@ def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
         raise_exc(node, exc=AttributeError, msg=msg)
     else:
         return getattr(obj, attr, None)
+
+def safe_setattr(obj, attr, val, raise_exc, node):
+    """safe version of setattr"""
+    if attr in UNSAFE_ATTRS or (attr.startswith('__') and attr.endswith('__')):
+        msg = f"cannot assign to unsafe attribute {attr}"
+        raise_exc(node, exc=AttributeError, msg=msg)
+    setattr(obj, attr, val)
 
 class SafeFormatter(Formatter):
     def __init__(self, raise_exc, node):

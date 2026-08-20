@@ -12,6 +12,7 @@ from functools import partial
 from io import StringIO
 from sys import version_info
 from tempfile import NamedTemporaryFile
+from types import SimpleNamespace
 
 import pytest
 
@@ -589,6 +590,20 @@ def test_assignment(nested):
         isvalue(interp, "a", np.arange(10))
         interp('a[1:5] = 1 + 0.5 * arange(4)')
         isnear(interp, "a", np.array([0., 1., 1.5, 2., 2.5, 5., 6., 7., 8., 9.]))
+
+
+@pytest.mark.parametrize("nested", [False, True])
+@pytest.mark.parametrize("attr", ["__private__", "func_globals"])
+def test_unsafe_attribute_assignment(nested, attr):
+    """unsafe attribute assignment"""
+    obj = SimpleNamespace()
+    sym_table = make_symbol_table(nested=nested, obj=obj)
+    interp = Interpreter(symtable=sym_table)
+    interp(f"obj.{attr} = 1", show_errors=False)
+    check_error(interp, 'AttributeError',
+                f'cannot assign to unsafe attribute {attr}')
+    assert not hasattr(obj, attr)
+
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_names(nested):

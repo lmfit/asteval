@@ -46,7 +46,7 @@ from sys import exc_info, stderr, stdout
 
 from .astutils import (HAS_NUMPY, ExceptionHolder, ReturnedNone,
                        Empty, make_symbol_table, op2func,
-                       safe_getattr, safe_format, valid_symbol_name,
+                       safe_getattr, safe_setattr, safe_format, valid_symbol_name,
                        Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
@@ -575,7 +575,8 @@ class Interpreter:
                 msg = f"cannot assign to attribute {node.attr}"
                 self.raise_exception(node, exc=AttributeError, msg=msg)
 
-            setattr(self.run(node.value), node.attr, val)
+            safe_setattr(self.run(node.value), node.attr, val,
+                         self.raise_exception, node)
 
         elif node.__class__ == ast.Subscript:
             self.run(node.value)[self.run(node.slice)] = val
