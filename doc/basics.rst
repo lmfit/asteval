@@ -1,5 +1,5 @@
 ================
-Using Asteval
+User Guide
 ================
 
 This chapter gives a quick overview of asteval, showing basic usage and the

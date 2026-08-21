@@ -1,5 +1,5 @@
 ====================================
-Installing Asteval
+Installation
 ====================================
 
 .. _numpy: https://numpy.org/
@@ -10,8 +10,8 @@ Installing Asteval
 Requirements
 ~~~~~~~~~~~~~~~
 
-Asteval is a pure Python module. The latest stable version is |release|, which
-supports Python 3.9 through 3.13.
+Asteval is a pure Python library. The latest version is |release|,
+supporting Python 3.10 through 3.14.
 
 Installing `asteval` requires `setuptools` and `setuptools_scm`. No other
 libraries outside of the standard library are required.  If `numpy`_ and
@@ -20,11 +20,10 @@ Running the test suite requires the `pytest`, `coverage`, and `pytest-cov`
 modules, deployment uses `build` and `twine`, and building the documentation
 requires `sphinx`.
 
-Python 3.9 through 3.13 are tested on Windows, MacOS, and Linux, with
+Python 3.10 through 3.14 are tested on Windows, MacOS, and Linux, with
 and without `numpy`_ installed.  Older Python versions have generally
 been supported by `asteval` until they are well past the end of
-security fixes. While `asteval` may continue to work with Python 3.8
-or even 3.7, these are not supported.
+security fixes.
 
 
 Support for new versions of the Python 3 series is not guaranteed until some
@@ -43,10 +42,11 @@ with::
 
    pip install asteval
 
-It may also be available on some conda channels, including `conda-forge`,
-but as it is a pure Python package with no dependencies or OS-specific
-extensions, using `pip` should be the preferred method on all platforms and
-environments.
+`asteval` may also be available on some conda channels, including
+`conda-forge`, or in other packaging systems.  Since `asteval` is a
+pure Python package with truly minimal dependencies (`setuptools`) or
+OS-specific extensions, using `pip` should be the preferred method on
+all platforms and environments.
 
 Development Version
 ~~~~~~~~~~~~~~~~~~~~~~~~
