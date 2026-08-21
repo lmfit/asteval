@@ -11,6 +11,10 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(SPHINXOPTS) .
 
 .PHONY: html pdf all help clean dirhtml latex
 
+html:
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 all: html pdf
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) _build/html
@@ -20,10 +24,6 @@ all: html pdf
 	-cd $(BUILDDIR) && ln -s html asteval_doc && zip -pur asteval_doc.zip asteval_doc/* && mv asteval_doc.zip html && rm -f asteval_doc
 	@echo "Build finished. The HTML pages are in _build/html."
 
-html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
-	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
 
 tarball: all
 	cd $(BUILDDIR)/html && tar cvzf ../../../_doc.tgz *
