@@ -361,7 +361,7 @@ class Interpreter:
                         raise lerr.exc(errmsg)
                 if show_errors:
                     print(errmsg, file=self.err_writer)
-                return None
+                return
             except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
                 self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
@@ -480,7 +480,7 @@ class Interpreter:
 
     def on_pass(self, node):
         """Pass statement."""
-        return None  # ()
+        return
 
     # for break and continue: set the instance variable _interrupt
     def on_interrupt(self, node):    # ()
@@ -943,7 +943,7 @@ class Interpreter:
     def on_call(self, node):
         """Function execution."""
         func = self.run(node.func)
-        if not hasattr(func, '__call__') and not isinstance(func, type):
+        if not callable(func) and not isinstance(func, type):
             msg = f"'{func}' is not callable!!"
             self.raise_exception(node, exc=TypeError, msg=msg)
         args = [self.run(targ) for targ in node.args]
