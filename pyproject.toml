@@ -46,6 +46,6 @@ Tracker = "https://github.com/lmfit/asteval/issues"
 
 [project.optional-dependencies]
 dev = ["build", "twine"]
-doc = ["Sphinx"]
+doc = ["Sphinx", "sphinx-breeze-theme"]
 test = ["pytest", "pytest-cov", "coverage"]
 all = ["asteval[dev, doc, test]"]

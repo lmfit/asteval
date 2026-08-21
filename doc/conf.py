@@ -26,6 +26,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
               'sphinx.ext.todo',
               'sphinx.ext.coverage',
+              'sphinx_copybutton',
               'sphinx.ext.mathjax', 'sphinx.ext.intersphinx']
 
 intersphinx_mapping = {'py': ('https://docs.python.org/3/', None)}
@@ -97,10 +98,9 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  Major themes that come with
 # Sphinx are currently 'default' and 'sphinxdoc'.
-html_theme = 'bizstyle'
+html_theme = 'breeze'
 
-# html_theme = 'nature'
-# html_theme = 'agogo'
+# html_theme = 'bizstyle'
 # html_theme_options = {'pagewidth':'85em', 'documentwidth':'60em', 'sidebarwidth': '25em',
 #                       # 'headercolor1': '#000080',
 #                       # 'headercolor2': '#0000A0',
