@@ -7,9 +7,6 @@ Installation
 .. _github:  https://github.com/lmfit/asteval
 .. _PyPI:  https://pypi.org/project/asteval/
 
-Requirements
-~~~~~~~~~~~~~~~
-
 Asteval is a pure Python library. The latest version is |release|,
 supporting Python 3.10 through 3.14.
 
@@ -31,6 +28,13 @@ time after the official release of that version, as we may not start testing
 until late in the "beta" period of development.  Historically, the delay has
 not been too long, though `asteval` may not support newly introduced language
 features.
+
+
++--------------+----------------------------------+
+| Source code  | https://github.com/lmfit/asteval |
++--------------+----------------------------------+
+| PyPI         | https://pypi.org/project/asteval |
++--------------+----------------------------------+
 
 
 Installing with `pip`
