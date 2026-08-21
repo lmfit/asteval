@@ -1,52 +1,188 @@
-
 <!DOCTYPE html>
-
 <html lang="en" data-content_root="./">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-    <title>Motivation for Asteval &#8212; ASTEVAL: Minimal Python AST evaluator</title>
-    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
-    <link rel="stylesheet" type="text/css" href="_static/bizstyle.css?v=5283bb3d" />
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta property="og:title" content="Motivation" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="motivation.html" />
+<meta property="og:site_name" content="asteval" />
+<meta property="og:description" content="The asteval module allows you to evaluate a large subset of the Python language from within a python program, without using eval(). It is, in effect, a restricted version of Python’s built-in eval(..." />
+<meta property="og:image:width" content="1146" />
+<meta property="og:image:height" content="600" />
+<meta property="og:image" content="_images/social_previews/summary_motivation_882b275c.png" />
+<meta property="og:image:alt" content="The asteval module allows you to evaluate a large subset of the Python language from within a python program, without using eval(). It is, in effect, a restricted version of Python’s built-in eval(..." />
+<meta name="description" content="The asteval module allows you to evaluate a large subset of the Python language from within a python program, without using eval(). It is, in effect, a restricted version of Python’s built-in eval(..." />
+<meta name="twitter:card" content="summary_large_image" />
+<title>Motivation - ASTEVAL: Minimal Python AST evaluator</title><link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Safety" href="safety.html"><link rel="prev" title="Reference" href="api.html"><script data-cfasync="false">(function(){
+    const m = localStorage.getItem("breeze-mode") || "auto";
+    const d = document.documentElement.dataset;
+    d.mode = m;
+    d.theme = m === "auto"
+      ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : m;
+  })();
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" /><link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" /><link rel="stylesheet" type="text/css" href="_static/styles/breeze.css?v=7c62c100" /><script defer="defer" src="_static/scripts/breeze.js?v=dac9f8c6"></script></head>
+<body>
+  
+  
+  <div class="bz-skip-to-content"><a href="#bz-main-content">Skip to main content</a></div><header class="bz-header-main">
+  <div class="bz-header-start"><a class="bz-header-brand" href="index.html">
+  
+  
+  <span>ASTEVAL: Minimal Python AST evaluator</span>
+</a>
+  </div>
+  <div class="bz-header-end"><div id="docsearch" class="bz-search-button">
+  <a
+    href="search.html#q"
+    aria-label="Search the docs"
+    data-tooltip="Search the docs"
+  >
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 -1 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+      />
+    </svg>
+    <span>Search</span>
+    <kbd>Ctrl+K</kbd>
+  </a>
+</div><div class="bz-theme-switcher">
+  <button aria-label="Switch theme" data-tooltip="Switch theme">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="only-light" fill="currentColor">
+      <path d="M8 12a4 4 0 1 1 0-8 4 4 0 0 1 0 8Zm0-1.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm5.657-8.157a.75.75 0 0 1 0 1.061l-1.061 1.06a.749.749 0 0 1-1.275-.326.749.749 0 0 1 .215-.734l1.06-1.06a.75.75 0 0 1 1.06 0Zm-9.193 9.193a.75.75 0 0 1 0 1.06l-1.06 1.061a.75.75 0 1 1-1.061-1.06l1.06-1.061a.75.75 0 0 1 1.061 0ZM8 0a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0V.75A.75.75 0 0 1 8 0ZM3 8a.75.75 0 0 1-.75.75H.75a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 3 8Zm13 0a.75.75 0 0 1-.75.75h-1.5a.75.75 0 0 1 0-1.5h1.5A.75.75 0 0 1 16 8Zm-8 5a.75.75 0 0 1 .75.75v1.5a.75.75 0 0 1-1.5 0v-1.5A.75.75 0 0 1 8 13Zm3.536-1.464a.75.75 0 0 1 1.06 0l1.061 1.06a.75.75 0 0 1-1.06 1.061l-1.061-1.06a.75.75 0 0 1 0-1.061ZM2.343 2.343a.75.75 0 0 1 1.061 0l1.06 1.061a.751.751 0 0 1-.018 1.042.751.751 0 0 1-1.042.018l-1.06-1.06a.75.75 0 0 1 0-1.06Z"></path>
+    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" class="only-dark" fill="currentColor">
+      <path d="M9.598 1.591a.749.749 0 0 1 .785-.175 7.001 7.001 0 1 1-8.967 8.967.75.75 0 0 1 .961-.96 5.5 5.5 0 0 0 7.046-7.046.75.75 0 0 1 .175-.786Zm1.616 1.945a7 7 0 0 1-7.678 7.678 5.499 5.499 0 1 0 7.678-7.678Z"></path>
+    </svg>
+  </button>
+</div><div class="bz-external-links">
+  <a
+      href="https://lmfit.github.io/asteval/asteval.pdf"
+      aria-label="PDF"
+      data-tooltip="PDF"
+      target="_blank"
+    >
     
-    <script src="_static/documentation_options.js?v=0abd802e"></script>
-    <script src="_static/doctools.js?v=fd6eb6e6"></script>
-    <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
-    <script src="_static/bizstyle.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Asteval Reference" href="api.html" />
-    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-    <!--[if lt IE 9]>
-    <script src="_static/css3-mediaqueries.js"></script>
-    <![endif]-->
-  </head><body>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="api.html" title="Asteval Reference"
-             accesskey="P">previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Motivation for Asteval</a></li> 
-      </ul>
-    </div>  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <section id="motivation-for-asteval">
-<h1>Motivation for Asteval<a class="headerlink" href="#motivation-for-asteval" title="Link to this heading">¶</a></h1>
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Z"></path><path d="M7.25 7.689V2a.75.75 0 0 1 1.5 0v5.689l1.97-1.969a.749.749 0 1 1 1.06 1.06l-3.25 3.25a.749.749 0 0 1-1.06 0L4.22 6.78a.749.749 0 1 1 1.06-1.06l1.97 1.969Z"></path></svg>
+    
+    </a>
+  <a
+      href="https://github.com/lmfit/asteval"
+      aria-label="GitHub"
+      data-tooltip="GitHub"
+      target="_blank"
+    >
+    
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M6.766 11.695C4.703 11.437 3.25 9.904 3.25 7.92c0-.806.281-1.677.75-2.258-.203-.532-.172-1.662.062-2.129.626-.081 1.469.258 1.969.726.594-.194 1.219-.291 1.985-.291.765 0 1.39.097 1.953.274.484-.451 1.343-.79 1.969-.709.218.435.25 1.564.046 2.113.5.613.766 1.436.766 2.274 0 1.984-1.453 3.485-3.547 3.759.531.355.891 1.129.891 2.016v1.678c0 .484.39.758.859.564C13.781 14.824 16 11.905 16 8.291 16 3.726 12.406 0 7.984 0 3.562 0 0 3.726 0 8.291c0 3.581 2.203 6.55 5.172 7.663A.595.595 0 0 0 6 15.389v-1.291c-.219.097-.5.162-.75.162-1.031 0-1.641-.581-2.078-1.662-.172-.435-.36-.693-.719-.742-.187-.016-.25-.097-.25-.193 0-.194.313-.339.625-.339.453 0 .844.29 1.25.887.313.468.641.678 1.031.678.391 0 .641-.146 1-.516.266-.275.469-.517.657-.678Z"></path></svg>
+    
+    </a>
+  </div>
+  </div>
+</header><nav class="bz-header-tabs" aria-label="Primary Navigation"><label
+  class="bz-sidebar-primary-toggle"
+  for="bz-sidebar-primary"
+  role="button"
+  tabindex="0"
+  aria-label="Toggle site navigation"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M3.75 6.75h16.5M3.75 12H12m-8.25 5.25h12.5"
+    />
+  </svg>
+</label><ul><li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li><li class="toctree-l1"><a class="reference internal" href="basics.html">User Guide</a></li><li class="toctree-l1"><a class="reference internal" href="api.html">Reference</a></li><li class="toctree-l1 current"><a class="current reference internal" href="#">Motivation</a></li><li class="toctree-l1"><a class="reference internal" href="safety.html">Safety</a></li></ul><div class="bz-dropdown">
+    <button aria-haspopup="true" aria-expanded="false">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <g
+          fill="none"
+          stroke="currentColor"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+        >
+          <circle cx="12" cy="12" r="1" />
+          <circle cx="19" cy="12" r="1" />
+          <circle cx="5" cy="12" r="1" />
+        </g>
+      </svg>
+    </button>
+    <ul role="menu" aria-hidden="true"></ul>
+  </div>
+</nav><hr class="bz-header-hr">
+  <div class="bz-content"><main id="bz-main-content"><header class="bz-article-header">
+  
+  
+    <nav class="bz-breadcrumbs" aria-label="Breadcrumb">
+  <ol>
+    <li class="bz-breadcrumbs-home">
+      <a href="index.html" aria-label="Home">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8.543 2.232a.75.75 0 0 0-1.085 0l-5.25 5.5A.75.75 0 0 0 2.75 9H4v4a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1a1 1 0 1 1 2 0v1a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1V9h1.25a.75.75 0 0 0 .543-1.268l-5.25-5.5Z" />
+        </svg>
+      </a>
+    </li><li class="bz-breadcrumbs-current">
+      <span>Motivation</span>
+    </li>
+  </ol>
+</nav>
+  
+<label
+  class="bz-sidebar-secondary-toggle"
+  for="bz-sidebar-secondary"
+  role="button"
+  tabindex="0"
+  aria-label="Toggle table of contents"
+>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path
+      fill="none"
+      stroke="currentColor"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M3.75 6.75H20.25 M11.25 12H20.25 M7.75 17.25H20.25"
+    />
+  </svg>
+</label></header><article class="bz-article-main" role="main"><div class="bz-page-actions" role="group" aria-label="Page actions">
+  <button data-copy-source="_sources/motivation.rst.txt">
+    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M7.024 3.75c0-.966.784-1.75 1.75-1.75H20.25c.966 0 1.75.784 1.75 1.75v11.498a1.75 1.75 0 0 1-1.75 1.75H8.774a1.75 1.75 0 0 1-1.75-1.75Zm1.75-.25a.25.25 0 0 0-.25.25v11.498c0 .139.112.25.25.25H20.25a.25.25 0 0 0 .25-.25V3.75a.25.25 0 0 0-.25-.25Z"></path><path d="M1.995 10.749a1.75 1.75 0 0 1 1.75-1.751H5.25a.75.75 0 1 1 0 1.5H3.745a.25.25 0 0 0-.25.25L3.5 20.25c0 .138.111.25.25.25h9.5a.25.25 0 0 0 .25-.25v-1.51a.75.75 0 1 1 1.5 0v1.51A1.75 1.75 0 0 1 13.25 22h-9.5A1.75 1.75 0 0 1 2 20.25l-.005-9.501Z"></path></svg>
+    <span>Copy page</span>
+  </button>
+  <div class="bz-dropdown">
+    <button
+      aria-label="More actions"
+      aria-haspopup="true"
+      aria-expanded="false"
+    ></button>
+    <ul role="menu" aria-hidden="true">
+      <li>
+        <a href="#" role="menuitem" data-copy-source="_sources/motivation.rst.txt">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M7.024 3.75c0-.966.784-1.75 1.75-1.75H20.25c.966 0 1.75.784 1.75 1.75v11.498a1.75 1.75 0 0 1-1.75 1.75H8.774a1.75 1.75 0 0 1-1.75-1.75Zm1.75-.25a.25.25 0 0 0-.25.25v11.498c0 .139.112.25.25.25H20.25a.25.25 0 0 0 .25-.25V3.75a.25.25 0 0 0-.25-.25Z"></path><path d="M1.995 10.749a1.75 1.75 0 0 1 1.75-1.751H5.25a.75.75 0 1 1 0 1.5H3.745a.25.25 0 0 0-.25.25L3.5 20.25c0 .138.111.25.25.25h9.5a.25.25 0 0 0 .25-.25v-1.51a.75.75 0 1 1 1.5 0v1.51A1.75 1.75 0 0 1 13.25 22h-9.5A1.75 1.75 0 0 1 2 20.25l-.005-9.501Z"></path></svg>
+          <span>Copy page</span>
+        </a>
+      </li>
+      <li>
+        <a href="_sources/motivation.rst.txt" role="menuitem" class="bz-page-actions-external" target="_blank" rel="noopener">
+          <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3a2 2 0 0 1 2-2h9.982a2 2 0 0 1 1.414.586l4.018 4.018A2 2 0 0 1 21 7.018V21a2 2 0 0 1-2 2H4.75a.75.75 0 0 1 0-1.5H19a.5.5 0 0 0 .5-.5V8.5h-4a2 2 0 0 1-2-2v-4H5a.5.5 0 0 0-.5.5v6.25a.75.75 0 0 1-1.5 0Zm12-.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 0-.146-.336l-4.018-4.018A.5.5 0 0 0 15 2.5Z"></path><path d="M4.53 12.24a.75.75 0 0 1-.039 1.06l-2.639 2.45 2.64 2.45a.75.75 0 1 1-1.022 1.1l-3.23-3a.75.75 0 0 1 0-1.1l3.23-3a.75.75 0 0 1 1.06.04Zm3.979 1.06a.75.75 0 1 1 1.02-1.1l3.231 3a.75.75 0 0 1 0 1.1l-3.23 3a.75.75 0 1 1-1.021-1.1l2.639-2.45-2.64-2.45Z"></path></svg>
+          <span>View source</span>
+        </a>
+      </li></ul>
+  </div>
+</div><section id="motivation">
+<h1>Motivation<a class="headerlink" href="#motivation" title="Link to this heading">#</a></h1>
 <p>The asteval module allows you to evaluate a large subset of the Python language
 from within a python program, without using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>.  It is, in effect,
 a restricted version of Python’s built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, forbidding several
@@ -86,265 +222,58 @@ function calls, which is going to be slower than Python - often 4x slower
 than Python.  That said, for certain use cases (see
 <a class="reference external" href="https://stackoverflow.com/questions/34106484">https://stackoverflow.com/questions/34106484</a>), use of asteval and numpy can
 approach the speed of <cite>eval</cite> and the <cite>numexpr</cite> modules.</p>
-<section id="how-safe-is-asteval">
-<h2>How Safe is asteval?<a class="headerlink" href="#how-safe-is-asteval" title="Link to this heading">¶</a></h2>
-<p>Asteval avoids all of the exploits we know about that make
-<a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> dangerous. For reference, see, <a class="reference external" href="https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is really
-dangerous</a>
-and the comments and links therein.  From this discussion it is
-apparent that not only is <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> unsafe, but that it is a
-difficult prospect to make any program that takes user input perfectly
-safe.  In particular, if a user can cause Python to crash with a
-segmentation fault, safety cannot be guaranteed.  Asteval explicitly
-forbids the exploits described in the above link, and works hard to
-prevent malicious code from crashing Python or accessing the
-underlying operating system.  That said, we cannot guarantee that
-asteval is completely safe from malicious code.  We claim only that it
-is safer than the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, and that you might find it
-useful.  We also note that several other Python libraries that
-evaluate user-supplied expressions, including <cite>numexpr</cite> and <cite>sympy</cite>
-use the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> as part of their processing.</p>
-<section id="prohibited-python-statements-and-attributes">
-<h3>Prohibited Python statements and attributes<a class="headerlink" href="#prohibited-python-statements-and-attributes" title="Link to this heading">¶</a></h3>
-<p>Some of the things not allowed in the asteval interpreter for safety reasons include:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>importing modules.  Neither <code class="docutils literal notranslate"><span class="pre">import</span></code> nor <code class="docutils literal notranslate"><span class="pre">__import__</span></code> are supported by
-default.  If you do want to support <code class="docutils literal notranslate"><span class="pre">import</span></code> and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">from</span></code>, you have to
-explicitly enable these.</p></li>
-<li><p>create classes or modules.</p></li>
-<li><p>use <code class="docutils literal notranslate"><span class="pre">string.format()</span></code>, though f-string formatting and using the <code class="docutils literal notranslate"><span class="pre">%</span></code>
-operator for string formatting are supported.</p></li>
-<li><dl class="simple">
-<dt>access to Python’s <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#getattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">getattr()</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#hasattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">hasattr()</span></code></a>,</dt><dd><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#setattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">setattr()</span></code></a>, and    <a class="reference external" href="https://docs.python.org/3/library/functions.html#delattr" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">delattr()</span></code></a>.</p>
-</dd>
-</dl>
-</li>
-<li><p>accessing object attributes that begin and end with <code class="docutils literal notranslate"><span class="pre">__</span></code>, the so-called
-<code class="docutils literal notranslate"><span class="pre">dunder</span></code> attributes.  This will include (but is not limited to
-<code class="docutils literal notranslate"><span class="pre">__globals__</span></code>, <code class="docutils literal notranslate"><span class="pre">__code__</span></code>, <code class="docutils literal notranslate"><span class="pre">__func__</span></code>, <code class="docutils literal notranslate"><span class="pre">__self__</span></code>, <code class="docutils literal notranslate"><span class="pre">__module__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__dict__</span></code>, <code class="docutils literal notranslate"><span class="pre">__class__</span></code>, <code class="docutils literal notranslate"><span class="pre">__call__</span></code>, and <code class="docutils literal notranslate"><span class="pre">__getattribute__</span></code>.  None of
-these can be accessed for any object.</p></li>
-</ul>
-</div></blockquote>
-<p>In addition (and following the discussion in the link above), the following
-attributes are blacklisted for all objects, and cannot be accessed:</p>
-<blockquote>
-<div><p><code class="docutils literal notranslate"><span class="pre">func_globals</span></code>, <code class="docutils literal notranslate"><span class="pre">func_code</span></code>, <code class="docutils literal notranslate"><span class="pre">func_closure</span></code>, <code class="docutils literal notranslate"><span class="pre">im_class</span></code>,
-<code class="docutils literal notranslate"><span class="pre">im_func</span></code>, <code class="docutils literal notranslate"><span class="pre">im_self</span></code>, <code class="docutils literal notranslate"><span class="pre">gi_code</span></code>, <code class="docutils literal notranslate"><span class="pre">gi_frame</span></code>, <code class="docutils literal notranslate"><span class="pre">f_locals</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__mro__</span></code>, <code class="docutils literal notranslate"><span class="pre">_mro</span></code></p>
-</div></blockquote>
-<p>[Note: this list may be incomplete - there may be other disallowed
-attributes]. While this approach of making a blacklist cannot be
-guaranteed to be complete, it does eliminate entire classes of attacks
-known to be able to seg-fault the Python interpreter or give access to
-the operating system.</p>
-<p>An important caveat is that by default asteval will use <code class="docutils literal notranslate"><span class="pre">numpy</span></code> and
-import and expose numpy <code class="docutils literal notranslate"><span class="pre">ufuncs</span></code> from the numpy module. Several of
-these can seg-fault Python without much difficulty.  In addition,
-several numpy objects, including the basic <cite>ndarray</cite> have methods to
-write data to disk. If you safety from user input causing segmentation
-fault is a primary concern, you may want to consider disabling the use
-of numpy, or take extra care to specify what numpy functions can be
-used.</p>
-<p>In 2024, an independent security audit of asteval done by Andrew
-Effenhauser, Ayman Hammad, and Daniel Crowley in the X-Force Security
-Research division of IBM showed insecurities with <code class="docutils literal notranslate"><span class="pre">string.format</span></code>,
-so that access to this and <code class="docutils literal notranslate"><span class="pre">string.format_map</span></code> method were removed.
-In addition, this audit showed that the <code class="docutils literal notranslate"><span class="pre">numpy</span></code> submodules
-<code class="docutils literal notranslate"><span class="pre">linalg</span></code>, <code class="docutils literal notranslate"><span class="pre">fft</span></code>, and <code class="docutils literal notranslate"><span class="pre">polynomial</span></code> expose many exploitable
-objects, so these submodules were removed by default.  If needed,
-these modules can be added to any Interpreter either using the
-<code class="docutils literal notranslate"><span class="pre">user_symbols</span></code> argument when creating it, or adding the needed
-symbols to the symbol table after the Interpreter is created.</p>
-<p>In 2025, William Khem Marquez demonstrated two vulnerabilities: one
-from leaving some AST objects exposed within the interpreter for
-user-defined functions (“Procedures”), and one with f-string
-formatting.  Both of these were fixed for version 1.0.6.</p>
-<p>In 2026, for version 1.0.9, the abiilty to raise some kinds exceptions
-(including <cite>SystemExit</cite>, <cite>KeyboardInterrupt</cite>, and a few others) that
-could cause the calling process to exit were either removed from the
-symbol table completely or captured to raise a more benign
-<cite>RuntimeError</cite> instead.  In addition, for Numpy ndarrays, the <cite>ctypes</cite>
-attribute and <cite>tofile</cite> and <cite>dump</cite> methods were made inaccessible.</p>
-</section>
-<section id="avoiding-resource-hogging">
-<h3>Avoiding resource hogging<a class="headerlink" href="#avoiding-resource-hogging" title="Link to this heading">¶</a></h3>
-<p>There are other categories of safety that asteval may attempt to
-address, but cannot guarantee success.  The most important of these is
-resource hogging, which might be used for a denial-of-service attack.
-There is no guaranteed timeout on any calculation, and so a reasonable
-looking calculation such as:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span><span class="w"> </span><span class="nn">asteval</span><span class="w"> </span><span class="kn">import</span> <span class="n">Interpreter</span>
-<span class="n">aeval</span> <span class="o">=</span> <span class="n">Interpreter</span><span class="p">()</span>
-<span class="n">txt</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
-<span class="s2">nmax = 1e8</span>
-<span class="s2">a = sqrt(arange(nmax))   # using numpy.sqrt() and numpy.arange()</span>
-<span class="s2">&quot;&quot;&quot;</span>
-<span class="n">aeval</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">txt</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>can take a noticeable amount of CPU time - if it does not, increasing
-that value of <code class="docutils literal notranslate"><span class="pre">nmax</span></code> almost certainly will, and can even crash the
-Python shell.</p>
-<p>As another illustration of the fundamental challenge, consider the
-Python expression <code class="docutils literal notranslate"><span class="pre">a</span> <span class="pre">=</span> <span class="pre">x**y**z</span></code>. With values <code class="docutils literal notranslate"><span class="pre">x=y=z=5</span></code>, the run
-time will be well under 0.001 seconds.  Even with <code class="docutils literal notranslate"><span class="pre">x=y=z=8</span></code>, run
-time will be under 1 sec.  Changing to <code class="docutils literal notranslate"><span class="pre">x=8,</span> <span class="pre">y=9,</span> <span class="pre">z=9</span></code>, Python will
-take several seconds (the value is <span class="math notranslate nohighlight">\(\sim 10^{350,000,000}\)</span>) With
-<code class="docutils literal notranslate"><span class="pre">x=y=z=9</span></code>, executing that statement may take more than 1 hour on
-some machines.  The result is that it is not hard to come up with
-short program that would run for hundreds of years, which probably
-exceeds everyones threshold for an acceptable run-time.  The point
-here is that there simply is not a good way to predict runtime for any
-code from the text of the code alone: run time cannot be determined
-lexically.</p>
-<p>To be clear, for the <code class="docutils literal notranslate"><span class="pre">x**y**z</span></code> exponentiation example, asteval will
-raise a runtime error, telling you that an exponent &gt; 10,000 is not
-allowed.  Several other attempts are also made to prevent long-running
-operations or memory exhaustion.  These checks will prevent the
-following ways to hog resources:</p>
-<blockquote>
-<div><ul class="simple">
-<li><p>statements longer than 50,000 bytes.</p></li>
-<li><p>values of exponents (<code class="docutils literal notranslate"><span class="pre">p</span></code> in <code class="docutils literal notranslate"><span class="pre">x**p</span></code>) &gt; 10,000.</p></li>
-<li><p>string operations with strings longer than 262144 bytes</p></li>
-<li><p>shift operations with shifts (<code class="docutils literal notranslate"><span class="pre">p</span></code> in <code class="docutils literal notranslate"><span class="pre">x</span> <span class="pre">&lt;&lt;</span> <span class="pre">p</span></code>) &gt; 1000.</p></li>
-<li><p>more than 262144 open buffers</p></li>
-<li><p>opening a file with a mode other than <code class="docutils literal notranslate"><span class="pre">'r'</span></code>, <code class="docutils literal notranslate"><span class="pre">'rb'</span></code>, or <code class="docutils literal notranslate"><span class="pre">'ru'</span></code>.</p></li>
-</ul>
-</div></blockquote>
-<p>These checks happen at runtime, not by analyzing the text of the code,
-but the values for these operations.  Still, as with the example above
-using <code class="docutils literal notranslate"><span class="pre">numpy.arange</span></code>, very large arrays and lists can be created
-that can approach memory limits.  There are countless “clever ways” to
-have very long run times that cannot be readily predicted from the
-text of the code.</p>
-</section>
-<section id="file-access">
-<h3>File access<a class="headerlink" href="#file-access" title="Link to this heading">¶</a></h3>
-<p>By default, the list of supported functions does include Python’s
-<code class="docutils literal notranslate"><span class="pre">open()</span></code> which will allow disk access to the untrusted user.  By
-default, Asteval limits <code class="docutils literal notranslate"><span class="pre">open()</span></code> to work in read-only mode, and with
-the permissions of the calling program.</p>
-<p>When <code class="docutils literal notranslate"><span class="pre">numpy</span></code> is supported, its <code class="docutils literal notranslate"><span class="pre">load()</span></code> and <code class="docutils literal notranslate"><span class="pre">loadtxt()</span></code> functions
-will also normally be supported to read data.  But it should be noted
-that <code class="docutils literal notranslate"><span class="pre">numpy</span></code> ndarrays do have a <code class="docutils literal notranslate"><span class="pre">tofile()</span></code> method that will write to
-disk, limited by the permissions of the calling program.</p>
-<p>If writing to disk is a concern, <code class="docutils literal notranslate"><span class="pre">numpy</span></code> should be disabled.  If
-reading from disk must be forbidden, you will want to overwrite the
-<code class="docutils literal notranslate"><span class="pre">open()</span></code> function from the symbol table, or re-implement this to
-restrict access.  to information on disk that should be kept private.</p>
-</section>
-<section id="monitoring-runtime-and-interrupting-processes">
-<h3>Monitoring Runtime and interrupting processes<a class="headerlink" href="#monitoring-runtime-and-interrupting-processes" title="Link to this heading">¶</a></h3>
-<p>The exponential example also highlights the issue that there is not a
-good way to check for a long-running calculation within a single
-Python process.  That calculation is not stuck within the Python
-interpreter, but in C code (no doubt the <code class="docutils literal notranslate"><span class="pre">pow()</span></code> function) called by
-the Python interpreter itself.  That call will not return from the C
-library to the Python interpreter or allow other threads to run until
-that call is done.  That means that from within a single process,
-there is not a reliable way to tell asteval (or really, even Python)
-when a calculation has taken too long: Denial of Service is hard to
-detect before it happens, and even challenging to detect while it is
-happening.  The only reliable way to limit run time is at the level of
-the operating system, with a second process watching the execution
-time of the asteval process and either try to interrupt it or kill it.</p>
-<p>For a limited range of problems, you can try to avoid asteval taking too
-long.  For example, you may try to limit the <em>recursion limit</em> when
-executing expressions, with a code like this:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">contextlib</span>
-
-<span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">limited_recursion</span><span class="p">(</span><span class="n">recursion_limit</span><span class="p">):</span>
-    <span class="n">old_limit</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getrecursionlimit</span><span class="p">()</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="n">recursion_limit</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="k">yield</span>
-    <span class="k">finally</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">setrecursionlimit</span><span class="p">(</span><span class="n">old_limit</span><span class="p">)</span>
-
-<span class="k">with</span> <span class="n">limited_recursion</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
-    <span class="n">Interpreter</span><span class="p">()</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>In summary, while asteval attempts to be safe and is definitely safer than
-using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, there may be ways that using asteval could lead to
-increased risk of malicious use. Recommendations for how to improve this
-situation would be greatly appreciated.</p>
-</section>
-</section>
 </section>
 
+</article><footer class="bz-article-footer">
+  
+  
+    <nav class="bz-related-pages" aria-label="Related pages navigation"><a class="bz-related-pages-previous" href="api.html" rel="prev">
+    <span>Previous</span><span class="bz-related-pages-title">Reference</span></a><a class="bz-related-pages-next" href="safety.html" rel="next">
+    <span>Next</span>
+    <span class="bz-related-pages-title">Safety</span>
+  </a></nav>
+  
 
-            <div class="clearer"></div>
-          </div>
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="Main">
-        <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">Motivation for Asteval</a><ul>
-<li><a class="reference internal" href="#how-safe-is-asteval">How Safe is asteval?</a><ul>
-<li><a class="reference internal" href="#prohibited-python-statements-and-attributes">Prohibited Python statements and attributes</a></li>
-<li><a class="reference internal" href="#avoiding-resource-hogging">Avoiding resource hogging</a></li>
-<li><a class="reference internal" href="#file-access">File access</a></li>
-<li><a class="reference internal" href="#monitoring-runtime-and-interrupting-processes">Monitoring Runtime and interrupting processes</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
+</footer></main>
   </div>
-  <div>
-    <h4>Previous topic</h4>
-    <p class="topless"><a href="api.html"
-                          title="previous chapter">Asteval Reference</a></p>
+<footer class="bz-footer">
+  <div class="bz-footer-copyright"><p class="bz-copyright">© Copyright 2026, Matthew Newville, The University of Chicago</p><p>
+    
+    
+    
+      Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a href="https://github.com/aksiome/breeze">Breeze theme</a>.
+    
+  </p>
+</div><div class="bz-external-links">
+  <a
+      href="https://lmfit.github.io/asteval/asteval.pdf"
+      aria-label="PDF"
+      data-tooltip="PDF"
+      target="_blank"
+    >
+    
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M4.75 17.25a.75.75 0 0 1 .75.75v2.25c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V18a.75.75 0 0 1 1.5 0v2.25A1.75 1.75 0 0 1 18.25 22H5.75A1.75 1.75 0 0 1 4 20.25V18a.75.75 0 0 1 .75-.75Z"></path><path d="M5.22 9.97a.749.749 0 0 1 1.06 0l4.97 4.969V2.75a.75.75 0 0 1 1.5 0v12.189l4.97-4.969a.749.749 0 1 1 1.06 1.06l-6.25 6.25a.749.749 0 0 1-1.06 0l-6.25-6.25a.749.749 0 0 1 0-1.06Z"></path></svg>
+    
+    </a>
+  <a
+      href="https://github.com/lmfit/asteval"
+      aria-label="GitHub"
+      data-tooltip="GitHub"
+      target="_blank"
+    >
+    
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10.303 16.652c-2.837-.344-4.835-2.385-4.835-5.028 0-1.074.387-2.235 1.031-3.008-.279-.709-.236-2.214.086-2.837.86-.107 2.02.344 2.708.967.816-.258 1.676-.386 2.728-.386 1.053 0 1.913.128 2.686.365.666-.602 1.848-1.053 2.708-.946.3.581.344 2.085.064 2.815.688.817 1.053 1.913 1.053 3.03 0 2.643-1.998 4.641-4.877 5.006.73.473 1.224 1.504 1.224 2.686v2.235c0 .644.537 1.01 1.182.752 3.889-1.483 6.94-5.372 6.94-10.185 0-6.081-4.942-11.044-11.022-11.044-6.081 0-10.98 4.963-10.98 11.044a10.84 10.84 0 0 0 7.112 10.206c.58.215 1.139-.172 1.139-.752v-1.719a2.768 2.768 0 0 1-1.032.215c-1.418 0-2.256-.773-2.857-2.213-.237-.58-.495-.924-.989-.988-.258-.022-.344-.129-.344-.258 0-.258.43-.451.86-.451.623 0 1.16.386 1.719 1.181.43.623.881.903 1.418.903.537 0 .881-.194 1.375-.688.365-.365.645-.687.903-.902Z"></path></svg>
+    
+    </a>
   </div>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/motivation.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<search id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</search>
-<script>document.getElementById('searchbox').style.display = "block"</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="related" role="navigation" aria-label="Related">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="right" >
-          <a href="api.html" title="Asteval Reference"
-             >previous</a> |</li>
-        <li class="nav-item nav-item-0"><a href="index.html">ASTEVAL: Minimal Python AST evaluator</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Motivation for Asteval</a></li> 
-      </ul>
-    </div>
-    <div class="footer" role="contentinfo">
-    &#169; Copyright 2026, Matthew Newville, The University of Chicago.
-      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 9.1.0.
-    </div>
-  </body>
+</footer><a href="#" class="bz-back-to-top">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="m5 12 7-7 7 7"/><path d="M12 19V5"/>
+    </svg>
+    <span>Back to top</span>
+  </a>
+  <label class="bz-overlay bz-overlay-primary" for="bz-sidebar-primary"></label>
+  <label class="bz-overlay bz-overlay-secondary" for="bz-sidebar-secondary"></label>
+  <input type="checkbox" name="bz-sidebar-primary" id="bz-sidebar-primary" aria-label="Toggle section navigation">
+  <input type="checkbox" name="bz-sidebar-secondary" id="bz-sidebar-secondary" aria-label="Toggle table of contents"><script src="_static/documentation_options.js?v=377e76b0"></script><script src="_static/doctools.js?v=fd6eb6e6"></script><script src="_static/sphinx_highlight.js?v=6ffebe34"></script><script src="_static/clipboard.min.js?v=a7894cd8"></script><script src="_static/copybutton.js?v=f281be69"></script></body>
 </html>

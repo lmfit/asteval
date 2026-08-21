@@ -1,7 +1,7 @@
 .. _asteval_api:
 
 ========================
-Asteval Reference
+Reference
 ========================
 
 .. _numpy: https://numpy.org
