@@ -684,7 +684,7 @@ def test_runtimeerrors_1(nested):
         # noinspection PyBroadException
         try:
             interp(expr, show_errors=False, raise_errors=True)
-        except:
+        except Exception:
             failed = True
     assert failed
     check_error(interp, errname)
@@ -794,8 +794,9 @@ def test_list_comprehension(nested):
 def test_list_comprehension_more(nested):
     """more tests of list comprehension"""
     interp = make_interpreter(nested_symtable=nested)
-    odd = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
+    odd =  [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]
     even = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]
+    assert len(odd) == len(even)
 
     interp('odd = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19]')
     interp('even = [2, 4, 6, 8, 10, 12, 14, 16, 18, 20]')

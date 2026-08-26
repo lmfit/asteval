@@ -675,7 +675,6 @@ class Procedure:
                     args.append(kwargs.pop(name))
             nargs = len(args)
             nargs_expected = len(self.__argnames__)
-            nkws = len(kwargs)
         if nargs < nargs_expected:
             msg = f"{self.name}() takes at least"
             msg = f"{msg} {nargs_expected} arguments, got {nargs}"
