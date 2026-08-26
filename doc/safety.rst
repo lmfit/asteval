@@ -90,14 +90,14 @@ from leaving some AST objects exposed within the interpreter for
 user-defined functions ("Procedures"), and one with f-string
 formatting.  Both of these were fixed for version 1.0.6.
 
-In 2026, for version 1.0.9, the abiilty to raise some kinds exceptions
-(including `SystemExit`, `KeyboardInterrupt`, and a few others) that
-could cause the calling process to exit were either removed from the
-symbol table completely or captured to raise a more benign
-`RuntimeError` instead.  In addition, for Numpy ndarrays, the `ctypes`
-attribute and `tofile` and `dump` methods were made inaccessible.
-For version 1.0.10, the ability to write to any ``dunder`` attribute
-was removed.
+In 2026, for version 1.0.9, the ability to raise some kinds of
+exceptions (including `SystemExit`, `KeyboardInterrupt`, and a few
+others) that could cause the calling process to exit were either
+removed from the symbol table completely or captured to raise a more
+benign `RuntimeError` instead.  In addition, for Numpy ndarrays, the
+`ctypes` attribute and `tofile` and `dump` methods were made
+inaccessible.  For version 1.0.10, the ability to write to any
+``dunder`` attribute was removed.
 
 
 Avoiding resource hogging

@@ -228,8 +228,8 @@ def test_ndarray_index(nested):
 def test_ndarrayslice(nested):
     """array slicing"""
     interp = make_interpreter(nested_symtable=nested)
-    interp("xlist = lisr(range(12))")
-    istrue(interp, "x[::3] == [0, 3, 6, 9]")
+    interp("xlist = list(range(12))")
+    istrue(interp, "xlist[::3] == [0, 3, 6, 9]")
     if HAS_NUMPY:
         interp("a_ndarray = arange(200).reshape(10, 20)")
         istrue(interp, "a_ndarray[1:3,5:7] == array([[25,26], [45,46]])")
@@ -240,7 +240,7 @@ def test_ndarrayslice(nested):
         interp("y[...,1] = array([2, 2, 2, 2])")
         istrue(interp, "y[1,:] == array([5, 2, 7, 8, 9])")
         interp("xarr = arange(12)")
-        istrue(interp, "x[::3] == array([0, 3, 6, 9])")
+        istrue(interp, "xlist[::3] == array([0, 3, 6, 9])")
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_while(nested):
@@ -614,7 +614,6 @@ def test_names(nested):
     interp = make_interpreter(nested_symtable=nested)
     interp('nx = 1')
     interp('nx1 = 1')
-        # use \u escape b/c python 2 complains about file encoding
     interp('\u03bb = 1')
     interp('\u03bb1 = 1')
 
@@ -768,7 +767,7 @@ def test_namefinder(nested):
     nf = NameFinder()
     nf.generic_visit(p)
     assert 'x' in nf.names
-    assert  'y' in nf.names
+    assert 'y' in nf.names
     assert 'z' in nf.names
     assert 'cos' in nf.names
 
