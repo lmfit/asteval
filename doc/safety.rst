@@ -7,8 +7,8 @@ Safety
 
 
 Astevel aims at being a safer and safe-ish replacement for Python's
-built-in :py:func:`eval` function.  It is perfectly reasonable to ask "how
-safe?".  Unfortunately, the answer is complicated.
+built-in :py:func:`eval` function.  While it is reasonable to ask "how
+safe?", the answer is complicated.
 
 For reference on the dangers of using :py:func:`eval` see, `Eval is
 really dangerous
@@ -30,6 +30,13 @@ you might find it useful.  We also note that several other Python
 libraries that evaluate user-supplied expressions, including `numexpr`
 and `sympy` use the builtin :py:func:`eval` as part of their
 processing.
+
+There are other approaches available. Python's
+:py:func:`ast.literal_eval` function is pretty safe in that it cannot
+evaluate all of Python, but also pretty limited.  Tools such as
+`numexpr` and `sympy` are interesting, but actually use `eval`
+internally, and are not at all safe against its exploits.
+
 
 Prohibited Python statements and attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

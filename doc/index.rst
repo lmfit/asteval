@@ -10,16 +10,17 @@ ASTEVAL: Minimal Python AST Evaluator
 :bdg-link-info:`PyPI <https://pypi.org/project/asteval>`
 
 
-Asteval evaluates Python expressions and statements, providing a safer
-alternative to Python's builtin :py:func:`eval` that is richer than
+Asteval evaluates Python expressions and statements in a way that is
+safer than Python's builtin :py:func:`eval` and more capable than
 :py:func:`ast.literal_eval`.  Asteval provides an embedded interpreter
-that evaluates a subset of Python using Python's :py:mod:`ast` module.
-The emphasis is the evaluation of mathematical expressions, and
-functions from Python's :py:mod:`math` module are built-in to
-asteval. If `numpy`_ is available, a large number of functions from
-`numpy`_ will be included too. For backward compatibility, a few
-functions that were moved from `numpy`_ to `numpy_financial`_ will
-also be imported, if that package is installed.
+that uses Python's :py:mod:`ast` module to evaluates a subset of the
+Python language. The emphasis is the evaluation of mathematical
+expressions, and functions from Python's :py:mod:`math` module are
+built-in to asteval. If `numpy`_ is available, a large number of
+functions from `numpy`_ will be included too. For backward
+compatibility, a few functions that were moved from `numpy`_ to
+`numpy_financial`_ will also be imported, if that package is
+installed.
 
 In addition to mathematical expressions, many features and constructs
 of the Python including array slicing and subscripting, if-then-else
