@@ -996,7 +996,11 @@ class Interpreter:
         if isinstance(func, Procedure):
             self._calldepth += 1
         try:
-            out = func(*args, **keywords)
+            if callable(func):
+                out = func(*args, **keywords)
+            else:
+                self.raise_exception(node, exc=RuntimeError,
+                                     msg=f"non-callable {func}")
         except Exception as ex:
             out = None
             func_name = getattr(func, '__name__', str(func))

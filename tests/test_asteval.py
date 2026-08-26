@@ -7,7 +7,7 @@ import math
 import os
 import textwrap
 import time
-import unittest
+
 from functools import partial
 from io import StringIO
 from sys import version_info
@@ -28,9 +28,11 @@ except ImportError:
     HAS_NUMPY = False
 
 
-def make_interpreter(nested_symtable=True):
-    interp = Interpreter(nested_symtable=nested_symtable)
-    interp.writer = NamedTemporaryFile('w', delete=False, prefix='astevaltest')
+def make_interpreter(nested_symtable=True, writer=None, **kws):
+    interp = Interpreter(nested_symtable=nested_symtable, **kws)
+    if writer is None:
+        writer = NamedTemporaryFile('w', delete=False, prefix='astevaltest')
+    interp.writer = writer
     return interp
 
 def read_stdout(interp):
@@ -528,7 +530,8 @@ def test_comparisons_return(nested):
 
         interp("out = (x > 2.3 < 6.2)")
 
-        assert interp.error.pop().exc == ValueError
+        xerr = interp.error.pop()
+        assert xerr.exc == ValueError
 
 
 @pytest.mark.parametrize("nested", [False, True])
@@ -626,7 +629,7 @@ def test_syntaxerrors_1(nested):
         # noinspection PyBroadException
         try:
             interp(expr, show_errors=False, raise_errors=True)
-        except:
+        except Exception:
             failed = True
 
         assert failed
@@ -641,7 +644,7 @@ def test_unsupportednodes(nested):
         # noinspection PyBroadException
         try:
             interp(expr, show_errors=False, raise_errors=True)
-        except:
+        except Exception:
             failed = True
     assert failed
     check_error(interp, 'NotImplementedError')
@@ -655,7 +658,7 @@ def test_syntaxerrors_2(nested):
         # noinspection PyBroadException
         try:
             interp(expr, show_errors=False, raise_errors=True)
-        except:  # RuntimeError:
+        except Exception:
             failed = True
     assert failed
     check_error(interp, 'SyntaxError')
@@ -975,19 +978,19 @@ def test_reservedwords(nested):
         # noinspection PyBroadException
         try:
             interp("%s= 2" % w, show_errors=False, raise_errors=True)
-        except:
+        except Exception:
             pass
 
         check_error(interp, 'SyntaxError')
 
-        for w in ('True', 'False'):
+        for wval in ('True', 'False'):
             interp.error = []
-            interp("%s= 2" % w)
+            interp("%s= 2" % wval)
             check_error(interp, 'SyntaxError')
 
-        for w in ('eval', '__import__'):
+        for uval in ('eval', '__import__'):
             interp.error = []
-            interp("%s= 2" % w)
+            interp("%s= 2" % uval)
             check_error(interp, 'NameError')
 
 @pytest.mark.parametrize("nested", [False, True])
@@ -1025,7 +1028,7 @@ def test_tryexcept(nested):
             try:
                 raise Exception()
                 x = 20
-            except:
+            except Exception:
                 pass
             """))
     isvalue(interp, 'x', 15)
@@ -1381,8 +1384,8 @@ def test_removenodehandler(nested):
 @pytest.mark.parametrize("nested", [False, True])
 def test_set_default_nodehandler(nested):
     interp = make_interpreter(nested_symtable=nested)
-    handler_import = interp.set_nodehandler('import')
-    handler_importfrom = interp.set_nodehandler('importfrom')
+    interp.set_nodehandler('import')
+    interp.set_nodehandler('importfrom')
     interp('import ast')
     check_error(interp, None)
 
@@ -1608,8 +1611,9 @@ def test_partial_exception(nested):
     # __name__ attribute, so we want to make sure that an AttributeError is
     # not raised.
 
-    result = aeval("sqrt(-1)")
-    assert aeval.error.pop().exc == ValueError
+    aeval("sqrt(-1)")
+    errx = aeval.error.pop()
+    assert errx.exc == ValueError
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_inner_return(nested):
@@ -1646,11 +1650,11 @@ def test_pow(nested):
 @pytest.mark.parametrize("nested", [False, True])
 def test_stringio(nested):
     """ test using stringio for output/errors """
-    interp = make_interpreter(nested_symtable=nested)
     out = StringIO()
     err = StringIO()
-    intrep = Interpreter(writer=out, err_writer=err)
-    intrep("print('out')")
+    interp = make_interpreter(nested_symtable=nested,
+                              writer=out, err_writer=err)
+    interp("print('out')")
     assert out.getvalue() == 'out\n'
 
 @pytest.mark.parametrize("nested", [False, True])
