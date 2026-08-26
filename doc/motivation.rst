@@ -32,16 +32,23 @@ error-prone and difficult to maintain.  While the simplest of calculators or
 expression-evaluators is not hard with pyparsing, it turned out that using the
 Python :py:mod:`ast` module makes it much easier to implement a feature-rich
 scientific calculator, including slicing, complex numbers, keyword arguments to
-functions, etc. In fact, this approach meant that adding more complex
-programming constructs like conditionals, loops, exception handling, and even
-user-defined functions was fairly simple.  An important benefit of using the
-:py:mod:`ast` module is that whole categories of implementation errors
-involving parsing, lexing, and defining a grammar disappear.  Any valid python
-expression will be parsed correctly and converted into an Abstract Syntax Tree.
-Furthermore, the resulting AST is easy to walk through, greatly simplifying the
-evaluation process.  What started as a desire for a simple expression evaluator
-grew into a quite usable procedural domain-specific language for mathematical
-applications.
+functions, etc.
+
+In fact, the apprach of using the :py:mod:`ast` module meant that
+adding more complex programming constructs like conditionals, loops,
+exception handling, and even user-defined functions was fairly simple.
+An important benefit of this approach is that whole categories of
+implementation errors involving parsing, lexing, and defining a
+grammar disappear.  Any valid python expression will be parsed
+correctly and converted into an Abstract Syntax Tree that matches
+Python. Thxe resulting AST is very easy to walk through, greatly
+simplifying the evaluation process.  Even nested list comprehensions
+become "not hard" with the results of the :py:mod:`ast` module.  What
+started as a desire for a simple expression evaluator, and "wouldn't
+it be great if we could add basic conditionals and looping" grew into
+a quite usable procedural domain-specific language for mathematical
+applications that looks and acts almost exactly as someone familiar
+with Python would expect.
 
 Asteval makes no claims about speed. Evaluating the AST involves many
 function calls, which is going to be slower than Python - often 4x slower
