@@ -10,7 +10,6 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import sys, os
 from datetime import date
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -29,6 +28,7 @@ extensions = ['sphinx.ext.autodoc',
               'sphinx_copybutton',
               'sphinx.ext.mathjax',
               'sphinx.ext.intersphinx',
+              "sphinx_design",
               ]
 
 intersphinx_mapping = {'py': ('https://docs.python.org/3/', None)}
@@ -103,10 +103,9 @@ pygments_style = 'sphinx'
 html_theme = 'breeze'
 
 html_theme_options = { "external_links": [
-    { "name": "PDF", "icon": "download", "url": "https://lmfit.github.io/asteval/asteval.pdf"},
-    "https://github.com/lmfit/asteval",
-]
-
+    { "name": "PDF", "icon": "download",
+      "url": "https://lmfit.github.io/asteval/asteval.pdf"},
+    "https://github.com/lmfit/asteval"]
                       }
 
 

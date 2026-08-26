@@ -29,12 +29,8 @@ until late in the "beta" period of development.  Historically, the delay has
 not been too long, though `asteval` may not support newly introduced language
 features.
 
-
-+--------------+----------------------------------+
-| Source code  | https://github.com/lmfit/asteval |
-+--------------+----------------------------------+
-| PyPI         | https://pypi.org/project/asteval |
-+--------------+----------------------------------+
+:bdg-link-info:`GitHub <https://github.com/lmfit/asteval>`
+:bdg-link-info:`PyPI <https://pypi.org/project/asteval>`
 
 
 Installing with `pip`
