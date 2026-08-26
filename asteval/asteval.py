@@ -577,11 +577,11 @@ class Interpreter:
                          self.raise_exception, node)
 
         elif node.__class__ == ast.Subscript:
-            slice = self.run(node.slice)
-            if is_hashable(slice):
-                self.run(node.value)[slice] = val
+            nslice = self.run(node.slice)
+            if is_hashable(nslice) or isinstance(nslice, slice):
+                self.run(node.value)[nslice] = val
             else:
-                errmsg = f"unhashable type {type(slice)}"
+                errmsg = f"unhashable type {type(nslice)}"
                 self.raise_exception(node.slice, exc=TypeError,
                                      msg=errmsg)
 
@@ -642,7 +642,7 @@ class Interpreter:
     def on_subscript(self, node): # ('value', 'slice', 'ctx')
         """Subscript handling"""
         mkey = self.run(node.slice)
-        if is_hashable(mkey):
+        if is_hashable(mkey) or isinstance(mkey, slice):
             return self.run(node.value)[mkey]
         else:
             errmsg = f"unhashable type {type(mkey)}"
@@ -651,6 +651,7 @@ class Interpreter:
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
+        print('on delete, ', node)
         for tnode in node.targets:
             if tnode.ctx.__class__ != ast.Del:
                 break
@@ -676,13 +677,13 @@ class Interpreter:
                     children.reverse()
                     sname = '.'.join(children)
                     val = self.run(sname)
-                    del val[nslice]
-#                     if is_hashable(nslice):
-#                         del val[nslice]
-#                     else:
-#                         errmsg = f"unhashable type {type(nslice)}"
-#                         self.raise_exception(node.slice, exc=TypeError,
-#                                              msg=errmsg)
+                    # del val[nslice]
+                    if is_hashable(nslice) or isinstance(nslice, slice):
+                        del val[nslice]
+                    else:
+                        errmsg = f"unhashable type {type(nslice)}"
+                        self.raise_exception(node.slice, exc=TypeError,
+                                             msg=errmsg)
                     if len(children) == 1:
                         self.symtable[sname] = val
                     else:
@@ -877,7 +878,7 @@ class Interpreter:
                     out.append(self.run(node.elt))
                 elif isinstance(out, dict):
                     mkey = self.run(node.key)
-                    if is_hashable(mkey):
+                    if is_hashable(mkey) or isinstance(mkey, slice):
                         out[mkey] = self.run(node.value)
                     else:
                         errmsg = f"unhashable type {type(mkey)}"
