@@ -33,9 +33,11 @@ processing.
 
 There are other approaches available. Python's
 :py:func:`ast.literal_eval` function is pretty safe in that it cannot
-evaluate all of Python, but also pretty limited.  Tools such as
-`numexpr` and `sympy` are interesting, but actually use `eval`
-internally, and are not at all safe against its exploits.
+evaluate all of Python, but also pretty limited.  While both
+``numexpr`` and ``sympy`` are interesting projects, they also actually
+use :py:func:`eval` internally, and are not at all safe against its
+exploits.  Each of the respective developer groups have been aware of
+the problem for a decade or so.
 
 
 Prohibited Python statements and attributes
