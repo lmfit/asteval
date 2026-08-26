@@ -676,12 +676,13 @@ class Interpreter:
                     children.reverse()
                     sname = '.'.join(children)
                     val = self.run(sname)
-                    if is_hashable(nslice):
-                        del val[nslice]
-                    else:
-                        errmsg = f"unhashable type {type(nslice)}"
-                        self.raise_exception(node.slice, exc=TypeError,
-                                             msg=errmsg)
+                    del val[nslice]
+#                     if is_hashable(nslice):
+#                         del val[nslice]
+#                     else:
+#                         errmsg = f"unhashable type {type(nslice)}"
+#                         self.raise_exception(node.slice, exc=TypeError,
+#                                              msg=errmsg)
                     if len(children) == 1:
                         self.symtable[sname] = val
                     else:
