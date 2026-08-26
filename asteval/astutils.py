@@ -19,26 +19,26 @@ from string import Formatter
 try:
     import ctypes
 except ImportError:
+    # some embedded systems may not have ctypes installed --
+    # we need it only to exclude access when it is installed
     ctypes = None
 
 builtins = __builtins__
 if not isinstance(builtins, dict):
     builtins = builtins.__dict__
 
-HAS_NUMPY = False
 try:
     import numpy
     numpy_version = numpy.version.version.split('.', 2)
-    HAS_NUMPY = True
 except ImportError:
+    # optional module
     numpy = None
 
-HAS_NUMPY_FINANCIAL = False
 try:
     import numpy_financial
-    HAS_NUMPY_FINANCIAL = True
 except ImportError:
-    pass
+    # optional module
+    numpy_financial = None
 
 # This is a necessary API but it's undocumented and moved around
 # between Python releases
@@ -73,7 +73,7 @@ UNSAFE_ATTRS = ('__subclasses__', '__bases__', '__globals__', '__code__',
 
 # unsafe attributes for particular objects, by type
 UNSAFE_ATTRS_DTYPES = {str: ('format', 'format_map')}
-if HAS_NUMPY:
+if numpy is not None:
     UNSAFE_ATTRS_DTYPES[numpy.ndarray] = ('ctypes', 'tofile', 'dump')
 
 # unsafe modules that may be exposed in other modules
@@ -173,7 +173,7 @@ NUMPY_RENAMES = {'ln': 'log', 'asin': 'arcsin', 'acos': 'arccos',
                  'arctanh', 'acosh': 'arccosh', 'asinh': 'arcsinh'}
 
 NUMPY_TABLE = {}
-if HAS_NUMPY:
+if numpy is not None:
     FROM_NUMPY = tuple(set(FROM_NUMPY))
     FROM_NUMPY = tuple(sym for sym in FROM_NUMPY if hasattr(numpy, sym))
     NUMPY_RENAMES = {sym: value for sym, value in NUMPY_RENAMES.items() if hasattr(numpy, value)}
@@ -187,7 +187,7 @@ if HAS_NUMPY:
         if obj is not None:
             NUMPY_TABLE[sname] = obj
 
-    if HAS_NUMPY_FINANCIAL:
+    if numpy_financial is not None:
         for sym in FROM_NUMPY_FINANCIAL:
             obj = getattr(numpy_financial, sym, None)
             if obj is not None:
@@ -210,6 +210,13 @@ def _type(x):
 
 LOCALFUNCS = {'open': _open, 'type': _type}
 
+def is_hashable(obj):
+    "test whether a value is hashable (for dict key)"
+    try:
+        hash(obj)
+        return True
+    except TypeError:
+        return False
 
 # Safe versions of functions to prevent denial of service issues
 
@@ -218,7 +225,7 @@ def safe_pow(base, exp):
     if isinstance(exp, numbers.Number):
         if exp > MAX_EXPONENT:
             raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
-    elif HAS_NUMPY and isinstance(exp, numpy.ndarray):
+    elif numpy is not None and isinstance(exp, numpy.ndarray):
         if numpy.nanmax(exp) > MAX_EXPONENT:
             raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
     return base ** exp
@@ -243,7 +250,7 @@ def safe_lshift(arg1, arg2):
     if isinstance(arg2, numbers.Number):
         if arg2 > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
-    elif HAS_NUMPY and isinstance(arg2, numpy.ndarray):
+    elif numpy is not None and isinstance(arg2, numpy.ndarray):
         if numpy.nanmax(arg2) > MAX_SHIFT:
             raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     return arg1 << arg2
@@ -463,6 +470,13 @@ class Group(dict):
         dict.__init__(self, **kws)
         self._searchgroups = searchgroups
 
+    def __eq__(self, other):
+        """note; this make '==' be the same as 'is' instead of
+        carefully checking equalitiy and existence of all attributes.
+        A copied group is not equal to its source.
+        """
+        return self is other
+
     def __setattr__(self, name, value):
         if not valid_varname(name):
             raise SyntaxError(f"invalid attribute name '{name}'")
@@ -473,7 +487,7 @@ class Group(dict):
             return self[name]
         if default is not None:
             return default
-        raise KeyError(f"no attribute named '{name}'")
+        raise AttributeError(f"no attribute named '{name}'")
 
     def __setitem__(self, name, value):
         if valid_varname(name):
@@ -759,5 +773,5 @@ class Procedure:
         aeval.code_text.pop()
         aeval._calldepth -= 1
         aeval._interrupt = None
-        symlocals = None
+        del symlocals
         return retval

@@ -44,10 +44,9 @@ import inspect
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (HAS_NUMPY, ExceptionHolder, ReturnedNone,
-                       Empty, make_symbol_table, op2func,
-                       safe_getattr, safe_setattr, safe_format, valid_symbol_name,
-                       Procedure)
+from .astutils import (numpy, ExceptionHolder, ReturnedNone, Empty,
+                       make_symbol_table, op2func, safe_getattr, safe_setattr,
+                       safe_format, valid_symbol_name, is_hashable, Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
              'binop', 'boolop', 'break', 'call', 'compare',
@@ -65,9 +64,9 @@ MINIMAL_CONFIG = {'import': False, 'importfrom': False}
 DEFAULT_CONFIG = {'import': False, 'importfrom': False}
 
 for _tnode in ('assert', 'augassign', 'delete', 'if', 'ifexp', 'for',
-             'formattedvalue', 'functiondef', 'print', 'raise',
-             'lambda', 'listcomp', 'dictcomp', 'setcomp', 'try',
-             'while', 'with'):
+               'formattedvalue', 'functiondef', 'print', 'raise',
+               'lambda', 'listcomp', 'dictcomp', 'setcomp', 'try',
+               'while', 'with'):
     MINIMAL_CONFIG[_tnode] = False
     DEFAULT_CONFIG[_tnode] = True
 
@@ -141,7 +140,7 @@ class Interpreter:
         self.err_writer = err_writer or stderr
         self.max_statement_length = max(1, min(1.e8, max_statement_length))
 
-        self.use_numpy = HAS_NUMPY and use_numpy
+        self.use_numpy = numpy is not None and use_numpy
         if symtable is None:
             symtable = make_symbol_table(nested=nested_symtable,
                                          use_numpy=self.use_numpy, **user_symbols)
@@ -238,7 +237,7 @@ class Interpreter:
         if len(self.code_text) > 0:
             text = self.code_text[-1]
         err = ExceptionHolder(node, exc=exc, msg=msg, expr=self.expr,
-                             text=text, lineno=lineno)
+                              text=text, lineno=lineno)
         self._interrupt = ast.Raise()
 
         self.error.append(err)
@@ -430,7 +429,6 @@ class Interpreter:
             except (KeyboardInterrupt, SystemExit, GeneratorExit) as exc:
                 self.raise_exception(None, exc=RuntimeError, msg=f"{NORAISE} {exc.__name__}")
 
-
         if fromlist is None:
             if asname is not None:
                 self.symtable[asname] = sys.modules[name]
@@ -579,7 +577,14 @@ class Interpreter:
                          self.raise_exception, node)
 
         elif node.__class__ == ast.Subscript:
-            self.run(node.value)[self.run(node.slice)] = val
+            slice = self.run(node.slice)
+            if is_hashable(slice):
+                self.run(node.value)[slice] = val
+            else:
+                errmsg = f"unhashable type {type(slice)}"
+                self.raise_exception(node.slice, exc=TypeError,
+                                     msg=errmsg)
+
 
         elif node.__class__ in (ast.Tuple, ast.List):
             if len(val) == len(node.elts):
@@ -622,7 +627,7 @@ class Interpreter:
                                                          op=node.op,
                                                          right=node.value,
                                                          **line_info),
-                                                         **line_info))
+                                         **line_info))
 
     def on_slice(self, node):    # ():('lower', 'upper', 'step')
         """Simple slice."""
@@ -636,7 +641,12 @@ class Interpreter:
 
     def on_subscript(self, node): # ('value', 'slice', 'ctx')
         """Subscript handling"""
-        return self.run(node.value)[self.run(node.slice)]
+        mkey = self.run(node.slice)
+        if is_hashable(mkey):
+            return self.run(node.value)[mkey]
+        else:
+            errmsg = f"unhashable type {type(mkey)}"
+            self.raise_exception(node.slice, exc=TypeError, msg=errmsg)
 
 
     def on_delete(self, node):    # ('targets',)
@@ -649,7 +659,7 @@ class Interpreter:
                 children.append(tnode.attr)
                 tnode = tnode.value
             if (tnode.__class__ == ast.Name and
-                    tnode.id not in self.readonly_symbols):
+                tnode.id not in self.readonly_symbols):
                 children.append(tnode.id)
                 children.reverse()
                 self.symtable.pop('.'.join(children))
@@ -666,7 +676,12 @@ class Interpreter:
                     children.reverse()
                     sname = '.'.join(children)
                     val = self.run(sname)
-                    del val[nslice]
+                    if is_hashable(nslice):
+                        del val[nslice]
+                    else:
+                        errmsg = f"unhashable type {type(nslice)}"
+                        self.raise_exception(node.slice, exc=TypeError,
+                                             msg=errmsg)
                     if len(children) == 1:
                         self.symtable[sname] = val
                     else:
@@ -860,7 +875,13 @@ class Interpreter:
                 elif isinstance(out, list):
                     out.append(self.run(node.elt))
                 elif isinstance(out, dict):
-                    out[self.run(node.key)] = self.run(node.value)
+                    mkey = self.run(node.key)
+                    if is_hashable(mkey):
+                        out[mkey] = self.run(node.value)
+                    else:
+                        errmsg = f"unhashable type {type(mkey)}"
+                        self.raise_exception(node.key, exc=TypeError,
+                                             msg=errmsg)
 
     def on_listcomp(self, node):
         """List comprehension v2"""
@@ -1004,7 +1025,7 @@ class Interpreter:
             if node.decorator_list:
                 raise Warning("decorated procedures not supported!")
             if (not valid_symbol_name(name) or
-                    name in self.readonly_symbols):
+                name in self.readonly_symbols):
                 errmsg = f"invalid function name (reserved word?) {name}"
                 self.raise_exception(node, exc=NameError, msg=errmsg)
 
