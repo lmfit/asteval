@@ -6,12 +6,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="safety.html" />
 <meta property="og:site_name" content="asteval" />
-<meta property="og:description" content="Astevel aims at being a safer and safe-ish replacement for Python’s built-in eval() function. It is perfectly reasonable to ask “how safe?”. Unfortunately, the answer is complicated. For reference ..." />
+<meta property="og:description" content="Astevel aims at being a safer and safe-ish replacement for Python’s built-in eval() function. While it is reasonable to ask “how safe?”, the answer is complicated. For reference on the dangers of u..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="_images/social_previews/summary_safety_01fc0347.png" />
-<meta property="og:image:alt" content="Astevel aims at being a safer and safe-ish replacement for Python’s built-in eval() function. It is perfectly reasonable to ask “how safe?”. Unfortunately, the answer is complicated. For reference ..." />
-<meta name="description" content="Astevel aims at being a safer and safe-ish replacement for Python’s built-in eval() function. It is perfectly reasonable to ask “how safe?”. Unfortunately, the answer is complicated. For reference ..." />
+<meta property="og:image" content="_images/social_previews/summary_safety_47c24fc9.png" />
+<meta property="og:image:alt" content="Astevel aims at being a safer and safe-ish replacement for Python’s built-in eval() function. While it is reasonable to ask “how safe?”, the answer is complicated. For reference on the dangers of u..." />
+<meta name="description" content="Astevel aims at being a safer and safe-ish replacement for Python’s built-in eval() function. While it is reasonable to ask “how safe?”, the answer is complicated. For reference on the dangers of u..." />
 <meta name="twitter:card" content="summary_large_image" />
 <title>Safety - ASTEVAL: Minimal Python AST evaluator</title><link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="prev" title="Motivation" href="motivation.html"><script data-cfasync="false">(function(){
     const m = localStorage.getItem("breeze-mode") || "auto";
@@ -21,7 +21,7 @@
       ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       : m;
   })();
-  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" /><link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" /><link rel="stylesheet" type="text/css" href="_static/styles/breeze.css?v=7c62c100" /><script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script><script defer="defer" src="_static/scripts/breeze.js?v=dac9f8c6"></script></head>
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" /><link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" /><link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" /><link rel="stylesheet" type="text/css" href="_static/styles/breeze.css?v=7c62c100" /><script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script><script defer="defer" src="_static/scripts/breeze.js?v=dac9f8c6"></script></head>
 <body>
   
   
@@ -184,8 +184,8 @@
 </div><section id="safety">
 <h1>Safety<a class="headerlink" href="#safety" title="Link to this heading">#</a></h1>
 <p>Astevel aims at being a safer and safe-ish replacement for Python’s
-built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> function.  It is perfectly reasonable to ask “how
-safe?”.  Unfortunately, the answer is complicated.</p>
+built-in <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> function.  While it is reasonable to ask “how
+safe?”, the answer is complicated.</p>
 <p>For reference on the dangers of using <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> see, <a class="reference external" href="https://nedbatchelder.com/blog/201206/eval_really_is_dangerous.html">Eval is
 really dangerous</a>
 and the comments and links therein.  From this discussion it is
@@ -204,6 +204,13 @@ you might find it useful.  We also note that several other Python
 libraries that evaluate user-supplied expressions, including <cite>numexpr</cite>
 and <cite>sympy</cite> use the builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> as part of their
 processing.</p>
+<p>There are other approaches available. Python’s
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#ast.literal_eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code></a> function is pretty safe in that it cannot
+evaluate all of Python, but also pretty limited.  While both
+<code class="docutils literal notranslate"><span class="pre">numexpr</span></code> and <code class="docutils literal notranslate"><span class="pre">sympy</span></code> are interesting projects, they also actually
+use <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> internally, and are not at all safe against its
+exploits.  Each of the respective developer groups have been aware of
+the problem for a decade or so.</p>
 <section id="prohibited-python-statements-and-attributes">
 <h2>Prohibited Python statements and attributes<a class="headerlink" href="#prohibited-python-statements-and-attributes" title="Link to this heading">#</a></h2>
 <p>Some of the things not allowed in the asteval interpreter for safety reasons include:</p>
@@ -259,14 +266,14 @@ symbols to the symbol table after the Interpreter is created.</p>
 from leaving some AST objects exposed within the interpreter for
 user-defined functions (“Procedures”), and one with f-string
 formatting.  Both of these were fixed for version 1.0.6.</p>
-<p>In 2026, for version 1.0.9, the abiilty to raise some kinds exceptions
-(including <cite>SystemExit</cite>, <cite>KeyboardInterrupt</cite>, and a few others) that
-could cause the calling process to exit were either removed from the
-symbol table completely or captured to raise a more benign
-<cite>RuntimeError</cite> instead.  In addition, for Numpy ndarrays, the <cite>ctypes</cite>
-attribute and <cite>tofile</cite> and <cite>dump</cite> methods were made inaccessible.
-For version 1.0.10, the ability to write to any <code class="docutils literal notranslate"><span class="pre">dunder</span></code> attribute
-was removed.</p>
+<p>In 2026, for version 1.0.9, the ability to raise some kinds of
+exceptions (including <cite>SystemExit</cite>, <cite>KeyboardInterrupt</cite>, and a few
+others) that could cause the calling process to exit were either
+removed from the symbol table completely or captured to raise a more
+benign <cite>RuntimeError</cite> instead.  In addition, for Numpy ndarrays, the
+<cite>ctypes</cite> attribute and <cite>tofile</cite> and <cite>dump</cite> methods were made
+inaccessible.  For version 1.0.10, the ability to write to any
+<code class="docutils literal notranslate"><span class="pre">dunder</span></code> attribute was removed.</p>
 </section>
 <section id="avoiding-resource-hogging">
 <h2>Avoiding resource hogging<a class="headerlink" href="#avoiding-resource-hogging" title="Link to this heading">#</a></h2>
@@ -444,5 +451,5 @@ situation would be greatly appreciated.</p>
   <label class="bz-overlay bz-overlay-primary" for="bz-sidebar-primary"></label>
   <label class="bz-overlay bz-overlay-secondary" for="bz-sidebar-secondary"></label>
   <input type="checkbox" name="bz-sidebar-primary" id="bz-sidebar-primary" aria-label="Toggle section navigation">
-  <input type="checkbox" name="bz-sidebar-secondary" id="bz-sidebar-secondary" aria-label="Toggle table of contents"><script src="_static/documentation_options.js?v=377e76b0"></script><script src="_static/doctools.js?v=fd6eb6e6"></script><script src="_static/sphinx_highlight.js?v=6ffebe34"></script><script src="_static/clipboard.min.js?v=a7894cd8"></script><script src="_static/copybutton.js?v=f281be69"></script></body>
+  <input type="checkbox" name="bz-sidebar-secondary" id="bz-sidebar-secondary" aria-label="Toggle table of contents"><script src="_static/documentation_options.js?v=377e76b0"></script><script src="_static/doctools.js?v=fd6eb6e6"></script><script src="_static/sphinx_highlight.js?v=6ffebe34"></script><script src="_static/clipboard.min.js?v=a7894cd8"></script><script src="_static/copybutton.js?v=f281be69"></script><script src="_static/design-tabs.js?v=f930bc37"></script></body>
 </html>

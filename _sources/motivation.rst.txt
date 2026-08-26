@@ -25,11 +25,11 @@ generators) are similarly motivated by a desire for a safer version of
 :py:func:`eval`.  The idea for asteval is to make a simple procedural,
 mathematically-oriented language that can be embedded into larger applications.
 
-In fact, the asteval module grew out the the need for a simple expression
+In fact, the asteval module grew out of the need for a simple expression
 evaluator for scientific applications such as the `lmfit`_ and `xraylarch`_
 modules.  An early attempt using the `pyparsing` module worked but was
 error-prone and difficult to maintain.  While the simplest of calculators or
-expressiona-evaluators is not hard with pyparsing, it turned out that using the
+expression-evaluators is not hard with pyparsing, it turned out that using the
 Python :py:mod:`ast` module makes it much easier to implement a feature-rich
 scientific calculator, including slicing, complex numbers, keyword arguments to
 functions, etc. In fact, this approach meant that adding more complex

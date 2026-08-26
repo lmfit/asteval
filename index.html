@@ -6,12 +6,12 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="index.html" />
 <meta property="og:site_name" content="asteval" />
-<meta property="og:description" content="The asteval package evaluates Python expressions and statements, providing a safer alternative to Python’s builtin eval() and a richer, easier to use alternative to ast.literal_eval(). It does this..." />
+<meta property="og:description" content="GitHub PyPI Asteval evaluates Python expressions and statements in a way that is safer than Python’s builtin eval() and more capable than ast.literal_eval(). Asteval provides an embedded interprete..." />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="_images/social_previews/summary_index_2ad36663.png" />
-<meta property="og:image:alt" content="The asteval package evaluates Python expressions and statements, providing a safer alternative to Python’s builtin eval() and a richer, easier to use alternative to ast.literal_eval(). It does this..." />
-<meta name="description" content="The asteval package evaluates Python expressions and statements, providing a safer alternative to Python’s builtin eval() and a richer, easier to use alternative to ast.literal_eval(). It does this..." />
+<meta property="og:image" content="_images/social_previews/summary_index_1a387bc3.png" />
+<meta property="og:image:alt" content="GitHub PyPI Asteval evaluates Python expressions and statements in a way that is safer than Python’s builtin eval() and more capable than ast.literal_eval(). Asteval provides an embedded interprete..." />
+<meta name="description" content="GitHub PyPI Asteval evaluates Python expressions and statements in a way that is safer than Python’s builtin eval() and more capable than ast.literal_eval(). Asteval provides an embedded interprete..." />
 <meta name="twitter:card" content="summary_large_image" />
 <title>ASTEVAL: Minimal Python AST evaluator</title><link rel="index" title="Index" href="genindex.html"><link rel="search" title="Search" href="search.html"><link rel="next" title="Installation" href="installation.html"><script data-cfasync="false">(function(){
     const m = localStorage.getItem("breeze-mode") || "auto";
@@ -21,7 +21,7 @@
       ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
       : m;
   })();
-  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" /><link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" /><link rel="stylesheet" type="text/css" href="_static/styles/breeze.css?v=7c62c100" /><script defer="defer" src="_static/scripts/breeze.js?v=dac9f8c6"></script></head>
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" /><link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" /><link rel="stylesheet" type="text/css" href="_static/sphinx-design.min.css?v=95c83b7e" /><link rel="stylesheet" type="text/css" href="_static/styles/breeze.css?v=7c62c100" /><script defer="defer" src="_static/scripts/breeze.js?v=dac9f8c6"></script></head>
 <body>
   
   
@@ -124,30 +124,32 @@
 </nav><hr class="bz-header-hr">
   <div class="bz-content"><main id="bz-main-content"><article class="bz-article-main" role="main"><section id="asteval-minimal-python-ast-evaluator">
 <h1>ASTEVAL: Minimal Python AST Evaluator<a class="headerlink" href="#asteval-minimal-python-ast-evaluator" title="Link to this heading">#</a></h1>
-<p>The asteval package evaluates Python expressions and statements, providing a
-safer alternative to Python’s builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> and a richer, easier to
-use alternative to <a class="reference external" href="https://docs.python.org/3/library/ast.html#ast.literal_eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code></a>.  It does this by building an
-embedded interpreter for a subset of the Python language using Python’s
-<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  The emphasis and main area of application is the
-evaluation of mathematical expressions. Because of this emphasis, mathematical
-functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module are built-in to asteval, and a
-large number of functions from <a class="reference external" href="https://numpy.org/">numpy</a> will be available if <a class="reference external" href="https://numpy.org/">numpy</a> is
-installed on your system.  For backward compatibility, a few functions that
-were moved from <a class="reference external" href="https://numpy.org/">numpy</a> to <a class="reference external" href="https://numpy.org/numpy-financial/">numpy_financial</a> will be imported, if that
-package is installed.</p>
-<p>While the primary goal is evaluation of mathematical expressions, many
-features and constructs of the Python language are supported by default.
-These features include array slicing and subscripting, if-then-else
+<p><a class="sd-sphinx-override sd-badge sd-bg-info sd-bg-text-info reference external" href="https://github.com/lmfit/asteval"><span>GitHub</span></a>
+<a class="sd-sphinx-override sd-badge sd-bg-info sd-bg-text-info reference external" href="https://pypi.org/project/asteval"><span>PyPI</span></a></p>
+<p>Asteval evaluates Python expressions and statements in a way that is
+safer than Python’s builtin <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a> and more capable than
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#ast.literal_eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ast.literal_eval()</span></code></a>.  Asteval provides an embedded interpreter
+that uses Python’s <a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module to evaluates a subset of the
+Python language. The emphasis is the evaluation of mathematical
+expressions, and functions from Python’s <a class="reference external" href="https://docs.python.org/3/library/math.html#module-math" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">math</span></code></a> module are
+built-in to asteval. If <a class="reference external" href="https://numpy.org/">numpy</a> is available, a large number of
+functions from <a class="reference external" href="https://numpy.org/">numpy</a> will be included too. For backward
+compatibility, a few functions that were moved from <a class="reference external" href="https://numpy.org/">numpy</a> to
+<a class="reference external" href="https://numpy.org/numpy-financial/">numpy_financial</a> will also be imported, if that package is
+installed.</p>
+<p>In addition to mathematical expressions, many features and constructs
+of the Python including array slicing and subscripting, if-then-else
 conditionals, while loops, for loops, try-except blocks, list
-comprehension, and user-defined functions.  All objects in the asteval
-interpreter are truly Python objects, and all of the basic built-in data
-structures (strings, dictionaries, tuple, lists, sets, numpy arrays) are
-supported, including the built-in methods for these objects.</p>
-<p>However, asteval is by no means an attempt to reproduce Python with its own
-<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  There are important differences and missing features
-compared to Python.  Many of these absences are intentional, and part of
-the effort to try to make a safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some
-are simply due to the reduced requirements for an embedded mini-language.
+comprehension, and user-defined functions are supported by default.
+All objects in the asteval interpreter are Python objects, and most of
+the basic built-in data structures (strings, dictionaries, tuple,
+lists, sets, numpy arrays) are supported, including the built-in
+methods for these objects.</p>
+<p>However, asteval is not an attempt to write Python in its own
+<a class="reference external" href="https://docs.python.org/3/library/ast.html#module-ast" title="(in Python v3.14)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ast</span></code></a> module.  There are important differences and missing
+features compared to Python.  Many of these absences are intentional,
+to try to make a safer version of <a class="reference external" href="https://docs.python.org/3/library/functions.html#eval" title="(in Python v3.14)"><code class="xref py py-func docutils literal notranslate"><span class="pre">eval()</span></code></a>, while some are
+simply due to the reduced requirements for an embedded mini-language.
 These differences and absences include:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -166,12 +168,13 @@ access can also be used.</p></li>
 the python interpreter are not allowed.</p></li>
 </ol>
 </div></blockquote>
-<p>The resulting “asteval language” acts very much like miniature version of
-Python, focused on mathematical calculations, and with noticeable limitations.
-It is the kind of toy programming language you might use to introduce simple
-scientific programming concepts, but also includes much of the standard Python
-features to be a reasonably complete language and not too restricted from what
-someone familiar with Python would expect.</p>
+<p>The resulting “asteval language” is then like miniature version of
+Python, focused on mathematical calculations, and with noticeable
+limitations.  It is the kind of programming language you might use to
+introduce simple scientific programming concepts, but also includes
+much of the standard Python syntax and features.  This makes Asteval
+suitable as an embedded “macro language” in a larger application that
+may want to provide some limited, controlled scripting capabilities.</p>
 <p>Because asteval is designed for evaluating user-supplied input, safety
 against malicious or incompetent user input is an important concern.
 Asteval tries as hard as possible to prevent user-supplied input from
@@ -260,5 +263,5 @@ malicious attacks.</p>
   <label class="bz-overlay bz-overlay-primary" for="bz-sidebar-primary"></label>
   <label class="bz-overlay bz-overlay-secondary" for="bz-sidebar-secondary"></label>
   <input type="checkbox" name="bz-sidebar-primary" id="bz-sidebar-primary" aria-label="Toggle section navigation">
-  <input type="checkbox" name="bz-sidebar-secondary" id="bz-sidebar-secondary" aria-label="Toggle table of contents"><script src="_static/documentation_options.js?v=377e76b0"></script><script src="_static/doctools.js?v=fd6eb6e6"></script><script src="_static/sphinx_highlight.js?v=6ffebe34"></script><script src="_static/clipboard.min.js?v=a7894cd8"></script><script src="_static/copybutton.js?v=f281be69"></script></body>
+  <input type="checkbox" name="bz-sidebar-secondary" id="bz-sidebar-secondary" aria-label="Toggle table of contents"><script src="_static/documentation_options.js?v=377e76b0"></script><script src="_static/doctools.js?v=fd6eb6e6"></script><script src="_static/sphinx_highlight.js?v=6ffebe34"></script><script src="_static/clipboard.min.js?v=a7894cd8"></script><script src="_static/copybutton.js?v=f281be69"></script><script src="_static/design-tabs.js?v=f930bc37"></script></body>
 </html>
