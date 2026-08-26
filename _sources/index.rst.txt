@@ -13,7 +13,7 @@ ASTEVAL: Minimal Python AST Evaluator
 Asteval evaluates Python expressions and statements in a way that is
 safer than Python's builtin :py:func:`eval` and more capable than
 :py:func:`ast.literal_eval`.  Asteval provides an embedded interpreter
-that uses Python's :py:mod:`ast` module to evaluates a subset of the
+that uses Python's :py:mod:`ast` module to evaluate a subset of the
 Python language. The emphasis is the evaluation of mathematical
 expressions, and functions from Python's :py:mod:`math` module are
 built-in to asteval. If `numpy`_ is available, a large number of
