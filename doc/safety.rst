@@ -26,18 +26,18 @@ and works hard to prevent malicious code from crashing Python or
 accessing the underlying operating system.  That said, we cannot
 guarantee that asteval is completely safe from malicious code.  We
 claim only that it is safer than the builtin :py:func:`eval`, and that
-you might find it useful.  We also note that several other Python
-libraries that evaluate user-supplied expressions, including `numexpr`
-and `sympy` use the builtin :py:func:`eval` as part of their
-processing.
+you might find it useful.
 
 There are other approaches available. Python's
 :py:func:`ast.literal_eval` function is pretty safe in that it cannot
-evaluate all of Python, but also pretty limited.  While both
-``numexpr`` and ``sympy`` are interesting projects, they also actually
-use :py:func:`eval` internally, and are not at all safe against its
-exploits.  Each of the respective developer groups have been aware of
-the problem for many years.
+evaluate all of Python, but also pretty limited.  The ``simpleeval``
+module offers a little more functionality than
+:py:func:`ast.literal_eval`, but much less that Asteval.  ``numexpr``
+and ``sympy`` are each interesting projects, but they also actually
+use :py:func:`eval` internally, and so are exposed to all of its
+problems. the developer groups for these two projects have been aware
+of the problem of relying on :py:func:`ast.literal_eval` for many
+years.
 
 
 Prohibited Python statements and attributes
