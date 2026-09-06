@@ -931,6 +931,7 @@ class Interpreter:
                         htype = __builtins__.get(hnd.type.id, None)
                     if htype is None or isinstance(e_type(), htype):
                         self.error = []
+                        self._interrupt = None
                         if hnd.name is not None:
                             self.symtable[hnd.name] = e_value
                         for tline in hnd.body:
