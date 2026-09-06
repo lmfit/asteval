@@ -1060,6 +1060,65 @@ def test_tryelsefinally(nested):
     isvalue(interp, "ok", False)
     isvalue(interp, "clean", True)
 
+    interp(textwrap.dedent("""
+         i = 0
+         y = 0
+         while i == 0:
+             try:
+                 x = missing_variable
+             except Exception:
+                 i = -1
+             # after exception handled
+             y = 1
+    """))
+    isvalue(interp, "i", -1)
+    isvalue(interp, "y", 1)
+
+
+    interp(textwrap.dedent("""
+        after_val = 0
+        if after_val < 1:    
+            x, y = 10, 0
+            out, ran_else, ran_finally = 0, False, False
+            try:
+                out = x/y
+            except ZeroDivisionError:
+                out = -1
+            else:
+                ran_else = True
+            finally:
+                ran_finally = True
+            after_val = 2
+    """))
+
+    isvalue(interp, "out", -1)
+    isvalue(interp, "ran_else", False)
+    isvalue(interp, "ran_finally", True)
+    isvalue(interp, "after_val", 2)
+
+    interp(textwrap.dedent("""
+        after_val = 0
+        if after_val < 1:
+            x, y = 10, 5
+            out, ran_else, ran_finally = 0, False, False
+            try:
+                out = x/y
+            except ZeroDivisionError:
+                out = -1
+            else:
+                ran_else = True
+            finally:
+                ran_finally = True
+            after_val = 3
+    """))
+    isnear(interp, "out", 2.0)
+    isvalue(interp, "ran_else", True)
+    isvalue(interp, "ran_finally", True)
+    isvalue(interp, "after_val", 3)
+
+
+
+
 @pytest.mark.parametrize("nested", [False, True])
 def test_function1(nested):
     """test function definition and running"""
