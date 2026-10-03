@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Safe(ish) evaluation of minimal Python code using Python's ast module.
 
@@ -38,9 +37,9 @@ functions that are considered unsafe are missing ('eval', 'exec', and
 'getattr' for example) are missing.
 """
 import ast
-import sys
 import copy
 import inspect
+import sys
 import time
 from sys import exc_info, stderr, stdout
 
@@ -51,10 +50,10 @@ from .astutils import (numpy, ExceptionHolder, ReturnedNone, Empty,
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
              'binop', 'boolop', 'break', 'call', 'compare',
              'constant', 'continue', 'delete', 'dict', 'dictcomp',
-             'excepthandler', 'expr', 'extslice', 'for',
+             'excepthandler', 'expr', 'for',
              'functiondef', 'if', 'ifexp', 'import', 'importfrom',
-             'index', 'interrupt', 'lambda', 'list', 'listcomp',
-             'module', 'name', 'pass', 'raise', 'repr', 'return',
+             'interrupt', 'lambda', 'list', 'listcomp',
+             'module', 'name', 'pass', 'raise',  'return',
              'set', 'setcomp', 'slice', 'subscript', 'try', 'tuple',
              'unaryop', 'while', 'with', 'formattedvalue',
              'joinedstr']
@@ -333,9 +332,9 @@ class Interpreter:
         error = [self.error[0]]
         for err in self.error[1:]:
             lerr = error[-1]
-            if err.exc != lerr.exc or err.expr != lerr.expr or err.msg !=  lerr.msg:
-                if isinstance(err.msg, str) and len(err.msg) > 0:
-                    error.append(err)
+            if ((err.exc != lerr.exc or err.expr != lerr.expr or err.msg !=  lerr.msg) and
+                (isinstance(err.msg, str) and len(err.msg) > 0)):
+                error.append(err)
         self.error = error
 
     def __call__(self, expr, **kw):
@@ -448,10 +447,6 @@ class Interpreter:
                     alias = sym
                 self.symtable[alias] = getattr(thismod, sym)
 
-    def on_index(self, node):
-        """Index."""
-        return self.run(node.value)  # ('value',)
-
     def on_return(self, node):  # ('value',)
         """Return statement: look for None, return special sentinel."""
         if self._calldepth == 0:
@@ -460,10 +455,6 @@ class Interpreter:
         if self.retval is None:
             self.retval = ReturnedNone
         self._interrupt = node
-
-    def on_repr(self, node):
-        """Repr."""
-        return repr(self.run(node.value))  # ('value',)
 
     def on_module(self, node):    # ():('body',)
         """Module def."""
@@ -512,7 +503,7 @@ class Interpreter:
 
     def on_set(self, node):    # ('elts')
         """Set."""
-        return set([self.run(k) for k in node.elts])
+        return {self.run(k) for k in node.elts}
 
     def on_dict(self, node):    # ('keys', 'values')
         """Dictionary."""
@@ -616,18 +607,10 @@ class Interpreter:
 
     def on_augassign(self, node):    # ('target', 'op', 'value')
         """Augmented assign."""
-        line_info = {
-            'lineno': node.lineno,
-            'col_offset': node.col_offset,
-            'end_lineno': node.end_lineno,
-            'end_col_offset': node.end_col_offset
-        }
-        return self.on_assign(ast.Assign(targets=[node.target],
-                                         value=ast.BinOp(left=node.target,
-                                                         op=node.op,
-                                                         right=node.value,
-                                                         **line_info),
-                                         **line_info))
+        return self.node_assign(node.target,
+                                op2func(node.op)(self.run(node.target),
+                                                 self.run(node.value)))
+
 
     def on_slice(self, node):    # ():('lower', 'upper', 'step')
         """Simple slice."""
@@ -635,9 +618,6 @@ class Interpreter:
                      self.run(node.upper),
                      self.run(node.step))
 
-    def on_extslice(self, node):    # ():('dims',)
-        """Extended slice."""
-        return tuple([self.run(tnode) for tnode in node.dims])
 
     def on_subscript(self, node): # ('value', 'slice', 'ctx')
         """Subscript handling"""
