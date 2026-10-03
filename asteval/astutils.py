@@ -222,12 +222,9 @@ def is_hashable(obj):
 
 def safe_pow(base, exp):
     """safe version of pow"""
-    if isinstance(exp, numbers.Number):
-        if exp > MAX_EXPONENT:
-            raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
-    elif numpy is not None and isinstance(exp, numpy.ndarray):
-        if numpy.nanmax(exp) > MAX_EXPONENT:
-            raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
+    if ((isinstance(exp, numbers.Number) and exp > MAX_EXPONENT) or
+        (numpy is not None and isinstance(exp, numpy.ndarray) and (numpy.nanmax(exp) > MAX_EXPONENT))):
+        raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
     return base ** exp
 
 
@@ -247,12 +244,9 @@ def safe_add(arg1, arg2):
 
 def safe_lshift(arg1, arg2):
     """safe version of lshift"""
-    if isinstance(arg2, numbers.Number):
-        if arg2 > MAX_SHIFT:
-            raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
-    elif numpy is not None and isinstance(arg2, numpy.ndarray):
-        if numpy.nanmax(arg2) > MAX_SHIFT:
-            raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
+    if ((isinstance(arg2, numbers.Number) and (arg2 > MAX_SHIFT)) or
+        (numpy is not None and isinstance(arg2, numpy.ndarray) and (numpy.nanmax(arg2) > MAX_SHIFT))):
+        raise RuntimeError(f"Invalid left shift, max left shift is {MAX_SHIFT}")
     return arg1 << arg2
 
 
@@ -303,7 +297,7 @@ def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
             if unsafe:
                 break
     if unsafe:
-        msg = f"no safe attribute '{attr}' for {repr(obj)}"
+        msg = f"no safe attribute '{attr}' for {obj!r}"
         raise_exc(node, exc=AttributeError, msg=msg)
     else:
         return getattr(obj, attr, None)
@@ -440,9 +434,8 @@ class NameFinder(ast.NodeVisitor):
 
     def generic_visit(self, node):
         """TODO: docstring in public method."""
-        if node.__class__.__name__ == 'Name':
-            if node.id not in self.names:
-                self.names.append(node.id)
+        if (node.__class__.__name__ == 'Name' and node.id not in self.names):
+            self.names.append(node.id)
         ast.NodeVisitor.generic_visit(self, node)
 
 
@@ -521,7 +514,7 @@ class Group(dict):
         for key, val in self.items():
             html.append(f"""
 <tr><td>{key}</td><td><i>{type(val).__name__}</i></td>
-    <td>{repr(val):.75s}</td>
+    <td>{val!r:.75s}</td>
 </tr>""")
         html.append("</table>")
         return '\n'.join(html)
@@ -747,12 +740,12 @@ class Procedure:
             try:
                 out = aeval.run(node, lineno=node.lineno,
                                           with_raise=True)
-            except Exception as exc:
+            except Exception:
                 aeval.symtable = save_symtable
                 aeval.code_text.pop()
                 aeval._calldepth -= 1
                 aeval._interrupt = None
-                raise exc
+                raise
 
             if self.__is_lambda__:
                 retval = out
