@@ -1077,7 +1077,7 @@ def test_tryelsefinally(nested):
 
     interp(textwrap.dedent("""
         after_val = 0
-        if after_val < 1:    
+        if after_val < 1:
             x, y = 10, 0
             out, ran_else, ran_finally = 0, False, False
             try:
@@ -1853,6 +1853,26 @@ def test_naming_exceptions(nested):
     out = read_stdout(interp)
     assert 'unsupported operand' in out
     assert len(interp.error) == 0
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_augassign(nested):
+    """test augassin """
+    interp = make_interpreter(nested_symtable=nested)
+
+    interp(textwrap.dedent("""
+    x = 15
+    x += 3
+
+    y = 6.6
+    y /= sqrt(4)
+
+    t = 3.1
+    t *= 8
+    """))
+    isnear(interp, "x", 18)
+    isnear(interp, "y", 3.30)
+    isnear(interp, "t", 24.8)
+
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_augassign_lineno(nested):
