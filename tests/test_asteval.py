@@ -480,6 +480,10 @@ def test_print(nested):
     check_output(interp, 'a = 1.201\n', True)
     interp("print('{0:s} = {1:.2f}'.format('a', 1.2012345))")
     check_output(interp, 'a = 1.20\n', True)
+    interp("print('a', 'b', 'c', sep='-')")
+    assert check_output(interp, 'a-b-c', True)
+    interp("print('a', 'b', end='!!!')")
+    assert check_output(interp, 'a b!!!', True)
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_repr(nested):
