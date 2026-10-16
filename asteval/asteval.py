@@ -715,7 +715,7 @@ class Interpreter:
             flush = kws.pop('flush', True)
             fileh = kws.pop('file', self.writer)
             sep = kws.pop('sep', ' ')
-            end = kws.pop('sep', '\n')
+            end = kws.pop('end', '\n')
             print(*out, file=fileh, sep=sep, end=end)
             if flush:
                 fileh.flush()
