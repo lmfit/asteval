@@ -1574,6 +1574,29 @@ def test_custom_symtable(nested):
 
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_procedure_symtable(nested):
+    """calling a procedure must not modify the caller's symbol table"""
+    sym_table = make_symbol_table(nested=nested)
+    aeval = Interpreter(symtable=sym_table, nested_symtable=nested)
+    aeval(textwrap.dedent("""
+        def f(x):
+            xx_local = 1
+            return xx_local + x
+        """))
+    aeval("out = f(41)")
+    isvalue(aeval, 'out', 42)
+
+    # the table object held by the caller is unchanged, and remains
+    # the table used by the interpreter
+    assert aeval.symtable is sym_table
+    assert 'xx_local' not in sym_table
+    assert sym_table['out'] == 42
+
+    # local symbols are not visible outside the procedure
+    aeval("xx_local", show_errors=False)
+    check_error(aeval, 'NameError')
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_numpy_renames_in_custom_symtable(nested):
     """test that numpy renamed functions are in symtable"""
     if HAS_NUMPY:

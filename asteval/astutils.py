@@ -723,7 +723,12 @@ class Procedure:
             save_symtable = aeval.symtable
             aeval.symtable = symlocals
         else:
-            save_symtable = aeval.symtable.copy()
+            # keep the original table object unchanged: local symbols
+            # and assignments made in the procedure are discarded on
+            # return, and the table held by the caller must not be
+            # modified in place
+            save_symtable = aeval.symtable
+            aeval.symtable = dict(aeval.symtable)
             aeval.symtable.update(symlocals)
 
         aeval.retval = None
