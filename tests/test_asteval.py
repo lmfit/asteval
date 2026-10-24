@@ -104,6 +104,22 @@ def test_dict_index(nested):
     istrue(interp, "a_dict['d'] == 4")
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_dict_unpack(nested):
+    """dictionary unpacking in dict literals"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp("d = {'a': 1, 'b': 2}")
+    for expr, expected in (("e = {**d}", {'a': 1, 'b': 2}),
+                           ("e = {**d, 'b': 3}", {'a': 1, 'b': 3}),
+                           ("e = {'b': 3, **d}", {'a': 1, 'b': 2}),
+                           ("e = {'c': 3, **{'a': 1}, **d}",
+                            {'a': 1, 'b': 2, 'c': 3})):
+        interp(expr)
+        isvalue(interp, 'e', expected)
+
+    interp("e = {**5}", show_errors=False)
+    check_error(interp, 'TypeError')
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_dict_set_index(nested):
     """dictionary indexing"""
     interp = make_interpreter(nested_symtable=nested)

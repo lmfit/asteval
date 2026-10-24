@@ -507,8 +507,13 @@ class Interpreter:
 
     def on_dict(self, node):    # ('keys', 'values')
         """Dictionary."""
-        return {self.run(k): self.run(v) for k, v in
-                zip(node.keys, node.values)}
+        out = {}
+        for k, v in zip(node.keys, node.values):
+            if k is None:  # 'value' holds a mapping to unpack: {**expr}
+                out.update(self.run(v))
+            else:
+                out[self.run(k)] = self.run(v)
+        return out
 
     def on_constant(self, node):   # ('value', 'kind')
         """Return constant value."""
