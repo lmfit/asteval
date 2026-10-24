@@ -717,7 +717,7 @@ class Interpreter:
             sep = kws.pop('sep', ' ')
             end = kws.pop('end', '\n')
             print(*out, file=fileh, sep=sep, end=end)
-            if flush:
+            if flush and hasattr(fileh, 'flush'):
                 fileh.flush()
 
     def on_if(self, node):    # ('test', 'body', 'orelse')
