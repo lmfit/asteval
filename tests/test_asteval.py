@@ -1711,6 +1711,30 @@ def test_pow(nested):
     assert 2**-2 == interp("2**-2")
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_mult_pow_limits(nested):
+    """resource limits for '*' and '**' hold in either argument order"""
+    interp = make_interpreter(nested_symtable=nested)
+    assert interp("'ab' * 3") == 'ababab'
+    assert interp("3 * 'ab'") == 'ababab'
+    assert interp("b'ab' * 3") == b'ababab'
+    assert interp("[0] * 3") == [0, 0, 0]
+    assert interp("(0,) * 3") == (0, 0, 0)
+    if HAS_NUMPY:
+        assert_allclose(interp("arange(4) * 2"), np.arange(4) * 2)
+
+    for expr in ("'ab' * 10**7", "10**7 * 'ab'", "b'ab' * 10**7",
+                 "10**7 * b'ab'", "[0] * 10**7", "(0,) * 10**7"):
+        interp(expr, show_errors=False)
+        check_error(interp, 'RuntimeError', 'length')
+
+    # repeated powers of a large integer cannot grow without bound
+    interp("x = 10**5000", show_errors=False)
+    assert len(interp.error) == 0
+    interp("y = x ** 1000", show_errors=False)
+    check_error(interp, 'RuntimeError', 'integer')
+    assert interp("2 ** 100") == 2**100
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_stringio(nested):
     """ test using stringio for output/errors """
     out = StringIO()

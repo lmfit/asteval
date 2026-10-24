@@ -47,6 +47,7 @@ from _string import formatter_field_name_split
 
 MAX_EXPONENT = 10000
 MAX_STR_LEN = 2 << 17  # 256KiB
+MAX_INT_BITS = 2 << 20  # 2MiB, for repeated integer powers
 MAX_SHIFT = 1000
 MAX_OPEN_BUFFER = 2 << 17
 
@@ -225,13 +226,21 @@ def safe_pow(base, exp):
     if ((isinstance(exp, numbers.Number) and exp > MAX_EXPONENT) or
         (numpy is not None and isinstance(exp, numpy.ndarray) and (numpy.nanmax(exp) > MAX_EXPONENT))):
         raise RuntimeError(f"Invalid exponent, max exponent is {MAX_EXPONENT}")
+    # large integer results can be reached by repeated powers of a
+    # moderately sized integer, so limit the size of the final value
+    if (isinstance(base, int) and isinstance(exp, int) and abs(base) > 1):
+        if abs(base).bit_length() * abs(exp) > MAX_INT_BITS:
+            raise RuntimeError(f"Invalid result, max integer size is {MAX_INT_BITS} bits")
     return base ** exp
 
 
 def safe_mult(arg1, arg2):
-    """safe version of multiply"""
-    if isinstance(arg1, str) and isinstance(arg2, int) and len(arg1) * arg2 > MAX_STR_LEN:
-        raise RuntimeError(f"String length exceeded, max string length is {MAX_STR_LEN}")
+    """safe version of multiply, in either argument order, and
+    for the sequence types str, bytes, bytearray, list, and tuple"""
+    for arg, count in ((arg1, arg2), (arg2, arg1)):
+        if (isinstance(arg, (str, bytes, bytearray, list, tuple)) and
+                isinstance(count, numbers.Integral) and len(arg) * count > MAX_STR_LEN):
+            raise RuntimeError(f"Sequence length exceeded, max length is {MAX_STR_LEN}")
     return arg1 * arg2
 
 
