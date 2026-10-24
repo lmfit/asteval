@@ -488,8 +488,7 @@ class Interpreter:
     def on_assert(self, node):    # ('test', 'msg')
         """Assert statement."""
         if not self.run(node.test):
-            msg = node.msg.value if node.msg else ""
-            # msg = node.msg.s if node.msg else ""
+            msg = self.run(node.msg) if node.msg is not None else ""
             self.raise_exception(node, exc=AssertionError, msg=msg)
         return True
 

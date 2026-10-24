@@ -389,6 +389,12 @@ def test_assert(nested):
     check_error(interp, 'AssertionError')
     interp('assert n==7, "no match"')
     check_error(interp, 'AssertionError', 'no match')
+    # the assert message may be any expression, not just a constant
+    interp('assert n==7, f"expected 7, got {n}"')
+    check_error(interp, 'AssertionError', 'expected 7, got 6')
+    interp('val = "no match here"')
+    interp('assert n==7, val')
+    check_error(interp, 'AssertionError', 'no match here')
 
 @pytest.mark.parametrize("nested", [False, True])
 def test_for(nested):
