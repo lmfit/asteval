@@ -1781,6 +1781,57 @@ def test_delete_slice(nested):
         interp.run("del g.dlist[4:7]")
         assert interp("g.dlist") == [1, 3, 5, 7, 15, 17, 19, 21]
 
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_delete_attribute(nested):
+    """test that 'del obj.attr' deletes the attribute"""
+    obj = SimpleNamespace()
+    sym_table = make_symbol_table(nested=nested, obj=obj)
+    interp = Interpreter(symtable=sym_table)
+
+    interp("obj.x = 5")
+    assert getattr(obj, 'x') == 5
+    interp("del obj.x")
+    assert len(interp.error) == 0
+    assert not hasattr(obj, 'x')
+
+    # deleting a missing attribute raises AttributeError, not KeyError
+    interp("del obj.y", show_errors=False)
+    check_error(interp, 'AttributeError')
+
+    # deleting an unsafe attribute is forbidden
+    interp("del obj.__dict__", show_errors=False)
+    check_error(interp, 'AttributeError',
+                'cannot delete unsafe attribute __dict__')
+    assert isinstance(obj.__dict__, dict)
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_delete_missing_name(nested):
+    """deleting an undefined name raises NameError with a clear message"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp("del not_a_defined_name", show_errors=False)
+    check_error(interp, 'NameError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_delete_readonly_symbol(nested):
+    """deleting a read-only symbol is forbidden"""
+    interp = make_interpreter(nested_symtable=nested,
+                              builtins_readonly=True)
+    interp("del len", show_errors=False)
+    check_error(interp, 'NameError')
+    assert callable(interp.symtable.get('len'))
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_delete_nested_subscript(nested):
+    """test 'del container[i][j]'"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp.run("grid = [[1, 2, 3], [4, 5, 6]]")
+    interp.run("del grid[0][2]")
+    assert interp("grid") == [[1, 2], [4, 5, 6]]
+
 @pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_procedure_access(nested):
     """

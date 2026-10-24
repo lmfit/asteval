@@ -309,6 +309,13 @@ def safe_setattr(obj, attr, val, raise_exc, node):
         raise_exc(node, exc=AttributeError, msg=msg)
     setattr(obj, attr, val)
 
+def safe_delattr(obj, attr, raise_exc, node):
+    """safe version of delattr"""
+    if attr in UNSAFE_ATTRS or (attr.startswith('__') and attr.endswith('__')):
+        msg = f"cannot delete unsafe attribute {attr}"
+        raise_exc(node, exc=AttributeError, msg=msg)
+    delattr(obj, attr)
+
 class SafeFormatter(Formatter):
     def __init__(self, raise_exc, node):
         self.raise_exc = raise_exc

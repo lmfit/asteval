@@ -45,7 +45,8 @@ from sys import exc_info, stderr, stdout
 
 from .astutils import (numpy, ExceptionHolder, ReturnedNone, Empty,
                        make_symbol_table, op2func, safe_getattr, safe_setattr,
-                       safe_format, valid_symbol_name, is_hashable, Procedure)
+                       safe_delattr, safe_format, valid_symbol_name,
+                       is_hashable, Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
              'binop', 'boolop', 'break', 'call', 'compare',
@@ -594,7 +595,7 @@ class Interpreter:
 
         sym = self.run(node.value)
         if ctx == ast.Del:
-            return delattr(sym, node.attr)
+            return safe_delattr(sym, node.attr, self.raise_exception, node)
         return safe_getattr(sym, node.attr, self.raise_exception, node,
                             allow_unsafe_modules=self.allow_unsafe_modules)
 
@@ -631,46 +632,31 @@ class Interpreter:
 
     def on_delete(self, node):    # ('targets',)
         """Delete statement."""
-        print('on delete, ', node)
         for tnode in node.targets:
             if tnode.ctx.__class__ != ast.Del:
                 break
-            children = []
-            while tnode.__class__ == ast.Attribute:
-                children.append(tnode.attr)
-                tnode = tnode.value
-            if (tnode.__class__ == ast.Name and
-                tnode.id not in self.readonly_symbols):
-                children.append(tnode.id)
-                children.reverse()
-                self.symtable.pop('.'.join(children))
+            if tnode.__class__ == ast.Name:
+                if tnode.id in self.readonly_symbols:
+                    errmsg = f"cannot delete read-only symbol {tnode.id}"
+                    self.raise_exception(tnode, exc=NameError, msg=errmsg)
+                if tnode.id not in self.symtable:
+                    errmsg = f"name '{tnode.id}' is not defined"
+                    self.raise_exception(tnode, exc=NameError, msg=errmsg)
+                self.symtable.pop(tnode.id)
+
+            elif tnode.__class__ == ast.Attribute:
+                sym = self.run(tnode.value)
+                safe_delattr(sym, tnode.attr, self.raise_exception, tnode)
+
             elif tnode.__class__ == ast.Subscript:
                 nslice = self.run(tnode.slice)
-                children = []
-                tnode = tnode.value
-                while tnode.__class__ == ast.Attribute:
-                    children.append(tnode.attr)
-                    tnode = tnode.value
-                if (tnode.__class__ == ast.Name and
-                    tnode.id not in self.readonly_symbols):
-                    children.append(tnode.id)
-                    children.reverse()
-                    sname = '.'.join(children)
-                    val = self.run(sname)
-                    # del val[nslice]
-                    if is_hashable(nslice) or isinstance(nslice, slice):
-                        del val[nslice]
-                    else:
-                        errmsg = f"unhashable type {type(nslice)}"
-                        self.raise_exception(node.slice, exc=TypeError,
-                                             msg=errmsg)
-                    if len(children) == 1:
-                        self.symtable[sname] = val
-                    else:
-                        child = self.symtable[children[0]]
-                        for cname in children[1:-1]:
-                            child = child[cname]
-                        setattr(child, children[-1], val)
+                sym = self.run(tnode.value)
+                if is_hashable(nslice) or isinstance(nslice, slice):
+                    del sym[nslice]
+                else:
+                    errmsg = f"unhashable type {type(nslice)}"
+                    self.raise_exception(tnode.slice, exc=TypeError,
+                                         msg=errmsg)
 
     def on_unaryop(self, node):    # ('op', 'operand')
         """Unary operator."""
