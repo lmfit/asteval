@@ -913,6 +913,11 @@ class Interpreter:
                         self.error = []
                         self._interrupt = None
                         if hnd.name is not None:
+                            if (not valid_symbol_name(hnd.name) or
+                                    hnd.name in self.readonly_symbols):
+                                errmsg = f"invalid exception name (reserved word?) {hnd.name}"
+                                self.raise_exception(hnd, exc=NameError,
+                                                      msg=errmsg)
                             self.symtable[hnd.name] = e_value
                         for tline in hnd.body:
                             self.run(tline)

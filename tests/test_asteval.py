@@ -1858,6 +1858,27 @@ def test_naming_exceptions(nested):
     assert 'unsupported operand' in out
     assert len(interp.error) == 0
 
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_naming_exceptions_readonly(nested):
+    """an 'except ... as name' clause must not overwrite read-only symbols"""
+    interp = make_interpreter(nested_symtable=nested,
+                              builtins_readonly=True)
+    interp("len = 42", show_errors=False)
+    check_error(interp, 'NameError')
+
+    interp(textwrap.dedent("""
+         try:
+            1/0
+         except Exception as len:
+            pass
+         """), show_errors=False)
+    check_error(interp, 'NameError')
+    # the builtin must survive untouched:
+    assert callable(interp.symtable.get('len'))
+    assert interp("len([1, 2, 3])") == 3
+
+
 @pytest.mark.parametrize("nested", [False, True])
 def test_augassign(nested):
     """test augassin """
