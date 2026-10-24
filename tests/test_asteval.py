@@ -1038,6 +1038,133 @@ def test_tryexcept(nested):
     isvalue(interp, 'x', 15)
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_tryexcept_raise_statement(nested):
+    """a 'raise' statement must be catchable by its own except clause"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                raise ValueError('boom')
+            except ValueError as err:
+                out = 'caught: ' + str(err)
+            """))
+    isvalue(interp, 'out', 'caught: boom')
+
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                raise Exception()
+            except Exception:
+                out = 'handled'
+            """))
+    isvalue(interp, 'out', 'handled')
+
+    # raised errors must not be caught by a non-matching handler
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                raise ValueError('boom')
+            except KeyError:
+                out = 'wrong-handler'
+            """), show_errors=False)
+    isvalue(interp, 'out', 'no-handler')
+    check_error(interp, 'ValueError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_tryexcept_assert(nested):
+    """a failing assert must be catchable as AssertionError"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                assert 1 == 2, 'no luck'
+            except AssertionError as err:
+                out = 'caught: ' + str(err)
+            """))
+    isvalue(interp, 'out', 'caught: no luck')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_tryexcept_tuple_types(nested):
+    """test except with a tuple of exception types"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                x = 1/0
+            except (ZeroDivisionError, ValueError):
+                out = 'handled'
+            """))
+    isvalue(interp, 'out', 'handled')
+
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                x = int('a')
+            except (ZeroDivisionError, ValueError):
+                out = 'handled'
+            """))
+    isvalue(interp, 'out', 'handled')
+
+    # a non-matching tuple must not catch the exception
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                x = 1 + 'a'
+            except (ZeroDivisionError, ValueError):
+                out = 'handled'
+            """), show_errors=False)
+    isvalue(interp, 'out', 'no-handler')
+    check_error(interp, 'TypeError')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_tryexcept_user_exception(nested):
+    """except clauses can name user-supplied exception classes"""
+    class MyError(Exception):
+        pass
+
+    sym_table = make_symbol_table(MyError=MyError, nested=nested)
+    interp = Interpreter(symtable=sym_table)
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                out = 1/0
+            except MyError:
+                out = 'wrong-handler'
+            except ZeroDivisionError:
+                out = 'right-handler'
+            """))
+    isvalue(interp, 'out', 'right-handler')
+
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                raise MyError()
+            except MyError:
+                out = 'handled'
+            """))
+    isvalue(interp, 'out', 'handled')
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_tryexcept_unknown_name_not_catchall(nested):
+    """an unknown exception name must not silently catch everything"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp(textwrap.dedent("""
+            out = 'no-handler'
+            try:
+                undefined_variable_xyz
+            except NotARealExceptionName:
+                out = 'caught-everything'
+            """), show_errors=False)
+    # the NameError must not be swallowed by the unrelated handler
+    check_error(interp, 'NameError')
+    isvalue(interp, 'out', 'no-handler')
+
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_tryelsefinally(nested):
     interp = make_interpreter(nested_symtable=nested)
     interp(textwrap.dedent("""

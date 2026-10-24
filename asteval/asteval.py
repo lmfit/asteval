@@ -43,9 +43,10 @@ import sys
 import time
 from sys import exc_info, stderr, stdout
 
-from .astutils import (numpy, ExceptionHolder, ReturnedNone, Empty,
-                       make_symbol_table, op2func, safe_getattr, safe_setattr,
-                       safe_format, valid_symbol_name, is_hashable, Procedure)
+from .astutils import (numpy, builtins, ExceptionHolder, ReturnedNone,
+                       Empty, make_symbol_table, op2func, safe_getattr,
+                       safe_setattr, safe_format, valid_symbol_name,
+                       is_hashable, Procedure)
 
 ALL_NODES = ['arg', 'assert', 'assign', 'attribute', 'augassign',
              'binop', 'boolop', 'break', 'call', 'compare',
@@ -905,11 +906,38 @@ class Interpreter:
             no_errors = no_errors and len(self.error) == 0
             if len(self.error) > 0:
                 e_type, e_value, _ = self.error[-1].exc_info
+                if e_type is None:
+                    # errors recorded outside an active exception context
+                    # (for example from 'assert' or a readonly-assignment
+                    # error) do not carry exc_info: fall back to the
+                    # exception class and message recorded on the holder
+                    _err = self.error[-1]
+                    e_type = _err.exc if _err.exc is not None else Exception
+                    try:
+                        e_value = e_type(_err.msg)
+                    except Exception:
+                        e_value = None
                 for hnd in node.handlers:
-                    htype = None
+                    htypes = None    # None means "bare except: catch all"
                     if hnd.type is not None:
-                        htype = __builtins__.get(hnd.type.id, None)
-                    if htype is None or isinstance(e_type(), htype):
+                        htypes = []
+                        tnodes = (hnd.type.elts if isinstance(hnd.type, ast.Tuple)
+                                  else [hnd.type])
+                        for tnode in tnodes:
+                            htype = None
+                            if isinstance(tnode, ast.Name):
+                                htype = self.symtable.get(tnode.id)
+                                if not (isinstance(htype, type) and
+                                        issubclass(htype, BaseException)):
+                                    htype = builtins.get(tnode.id, None)
+                            else:
+                                # dotted or otherwise complex exception types
+                                htype = self.run(tnode)
+                            if (isinstance(htype, type) and
+                                    issubclass(htype, BaseException)):
+                                htypes.append(htype)
+                    if htypes is None or (htypes and
+                                          issubclass(e_type, tuple(htypes))):
                         self.error = []
                         self._interrupt = None
                         if hnd.name is not None:
@@ -940,7 +968,13 @@ class Interpreter:
             msg = f"{msg:s}: {msg2:s}"
         # Prevent KeyboardInterrupt, SystemExit, GeneratorExit from escaping the sandbox
         if issubclass(out.__class__, Exception):
-            self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
+            # raise the instance so that the ExceptionHolder below is created
+            # with a real exception context, otherwise 'except SomeError'
+            # handlers cannot match a raised error:
+            try:
+                raise out
+            except Exception:
+                self.raise_exception(None, exc=out.__class__, msg=msg, expr='')
         else:
             self.raise_exception(node, exc=RuntimeError, msg=f"{NORAISE} {out.__name__}")
 
