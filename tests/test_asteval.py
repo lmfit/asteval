@@ -1817,6 +1817,33 @@ def test_unsafe_format_string_access(nested):
     assert etype == 'AttributeError'
 
 @pytest.mark.parametrize("nested", [False, True])
+def test_safe_getattr_single_lookup(nested):
+    """attribute access must trigger __getattr__/properties once, not once per blocked module"""
+    class Counting:
+        nfetch = 0
+
+        def __getattr__(self, name):
+            Counting.nfetch += 1
+            return 7
+
+    obj = Counting()
+    sym_table = make_symbol_table(nested=nested, obj=obj)
+    interp = Interpreter(symtable=sym_table)
+    interp("out = obj.attr")
+    assert Counting.nfetch == 1
+    isvalue(interp, 'out', 7)
+
+
+@pytest.mark.parametrize("nested", [False, True])
+def test_safe_getattr_missing_attr(nested):
+    """missing attributes give a consistent AttributeError"""
+    interp = make_interpreter(nested_symtable=nested)
+    interp("out = int.attr_that_does_not_exist", show_errors=False)
+    check_error(interp, 'AttributeError')
+    assert interp.symtable.get('out') is None
+
+
+@pytest.mark.parametrize("nested", [False, True])
 def test_unsafe_attr_dtypes(nested):
     """
     addressing https://github.com/lmfit/asteval/security/advisories/GHSA-3wwr-3g9f-9gc7

@@ -291,16 +291,24 @@ def safe_getattr(obj, attr, raise_exc, node, allow_unsafe_modules=False):
             unsafe = (isinstance(obj, dtype) or obj is dtype) and attr in attrlist
             if unsafe:
                 break
-    if not unsafe and not allow_unsafe_modules:
-        for mod in UNSAFE_MODULES:
-            unsafe = obj is mod or getattr(obj, attr) is mod
-            if unsafe:
-                break
     if unsafe:
         msg = f"no safe attribute '{attr}' for {obj!r}"
         raise_exc(node, exc=AttributeError, msg=msg)
-    else:
-        return getattr(obj, attr, None)
+
+    # look up the attribute exactly once, so that the side effects of
+    # __getattr__ or property getters are not triggered repeatedly:
+    try:
+        val = getattr(obj, attr)
+    except AttributeError:
+        msg = f"{obj!r} has no attribute '{attr}'"
+        raise_exc(node, exc=AttributeError, msg=msg)
+
+    if not allow_unsafe_modules:
+        for mod in UNSAFE_MODULES:
+            if obj is mod or val is mod:
+                msg = f"no safe attribute '{attr}' for {obj!r}"
+                raise_exc(node, exc=AttributeError, msg=msg)
+    return val
 
 def safe_setattr(obj, attr, val, raise_exc, node):
     """safe version of setattr"""
