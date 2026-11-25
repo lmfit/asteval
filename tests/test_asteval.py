@@ -225,7 +225,7 @@ def test_ndarray_index(nested):
         assert interp("a_ndarray[4]") == 20
 
 @pytest.mark.parametrize("nested", [False, True])
-def test_ndarrayslice(nested):
+    interp("xlist = list(range(12))")
     """array slicing"""
     interp = make_interpreter(nested_symtable=nested)
     interp("xlist = list(range(12))")
