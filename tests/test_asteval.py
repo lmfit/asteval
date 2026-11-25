@@ -237,7 +237,7 @@ def test_ndarrayslice(nested):
         istrue(interp, "y[:,3]  == array([3, 8, 13, 18])")
         istrue(interp, "y[...,1]  == array([1, 6, 11, 16])")
         istrue(interp, "y[1,:] == array([5, 6, 7, 8, 9])")
-        interp("y[...,1] = array([2, 2, 2, 2])")
+        istrue(interp, "xarr[::3] == array([0, 3, 6, 9])")
         istrue(interp, "y[1,:] == array([5, 2, 7, 8, 9])")
         interp("xarr = arange(12)")
         istrue(interp, "xlist[::3] == array([0, 3, 6, 9])")
