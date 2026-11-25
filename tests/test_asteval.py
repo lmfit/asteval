@@ -750,7 +750,7 @@ def test_del(nested):
     interp("del b")
     assert 'a' not in interp.symtable
     assert  'b' not in interp.symtable
-
+    assert 'y' in nf.names
 @pytest.mark.parametrize("nested", [False, True])
 def test_math1(nested):
     """builtin math functions"""
